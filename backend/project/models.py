@@ -34,6 +34,26 @@ class User(UserMixin, db.Model):
     user = User.query.filter_by(email = email).first()
     return user
 
+class Chat(UserMixin, db.Model):
+  __tablename__ = 'chat'
+  id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+  label = db.Column(db.String(100), nullable=False)
+  description = db.Column(db.String(100))
+  model = db.Column(db.String(150))
+  conversation = db.Column(db.String(150))
+  access = db.Column(db.Integer)
+  creativity = db.Column(db.Float)
+  behavior = db.Column(db.String(150))
+  behaviormodel = db.Column(db.String(150))
+  
+
+  def __repr__(self):
+    return f'Chat {self.label}'   
+
+  @staticmethod
+  def get_chat(label, description):
+    return Chat.query.filter_by(label=label, description=description).first()
+
 class OAuth(OAuthConsumerMixin, db.Model):
   __table_args__ = (db.UniqueConstraint("provider", "provider_user_id"),)
   provider_user_id = db.Column(db.String(256), nullable = False)

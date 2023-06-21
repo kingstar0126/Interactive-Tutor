@@ -1,22 +1,15 @@
-import { Routes, Route } from "react-router-dom";
-import Home from "./Pages/Home";
-import Login from "./Pages/Login";
-import Register from "./Pages/Register";
-import Forgetpassword from "./Pages/Forgetpassword";
-import Changepassword from "./Pages/Changepassword";
+import { useRoutes } from "react-router-dom";
+import AppRoutes from "./routes";
+import { Provider } from "react-redux";
+import { store } from "./redux/store";
 import "./App.css";
 
 function App() {
+  const pages = useRoutes(AppRoutes);
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="register" element={<Register />} />
-        <Route path="resetpassword" element={<Forgetpassword />} />
-        <Route path="changepassword" element={<Changepassword />} />
-      </Routes>
-    </>
+    <Provider className="App" store={store}>
+      {pages}
+    </Provider>
   );
 }
 

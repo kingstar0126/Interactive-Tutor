@@ -2,7 +2,9 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import Header from "../Layout/Header";
 import { SERVER_URL } from "../config/constant";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import toast, { Toaster } from "react-hot-toast";
 
 const Register = () => {
   const {
@@ -12,15 +14,24 @@ const Register = () => {
     handleSubmit,
   } = useForm();
 
+  const notification = (type, message) => {
+    // To do in here
+    if (type === "error") {
+      toast.error(message);
+    }
+  };
+  const navigate = useNavigate();
   const onSubmit = async (data) => {
     axios.post(`${SERVER_URL}/api/signup`, data).then((res) => {
-      console.log(res);
+      console.log(res.data);
+      if (res.data.success) navigate("/login");
+      else notification("error", res.data.message);
     });
-    console.log(data);
   };
   return (
     <React.Fragment>
       <Header />
+      <Toaster />
       <div className="relative flex flex-col justify-center min-h-screen overflow-hidden">
         <div className="w-full p-6 m-auto bg-[--site-main-color3] rounded-md shadow-xl shadow-rose-600/40 ring-2 ring-[--site-main-Login1] lg:max-w-xl">
           <h1 className="text-3xl font-semibold text-center text-[--site-main-Login] underline uppercase">

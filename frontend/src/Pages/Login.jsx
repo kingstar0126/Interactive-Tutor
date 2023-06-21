@@ -1,29 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Header from "../Layout/Header";
-import { SERVER_URL } from "../config/constant";
-import axios from "axios";
-import { Alert, Button } from "@material-tailwind/react";
+import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { getUser } from "../redux/actions/userAction";
+import { Toaster } from "react-hot-toast";
 
 const Login = () => {
-  const [status, Setstatus] = useState(0);
+  const statedata = useSelector((state) => state.user.user);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [status, Setstatus] = useState(1);
   const {
     register,
     formState: { errors },
     handleSubmit,
   } = useForm();
 
+  useEffect(() => {
+    if (statedata && statedata !== "undefined") {
+      Setstatus(0);
+    }
+  }, [statedata]);
+
+  useEffect(() => {
+    if (status === 0) {
+      navigate("/chatbot/chat");
+      Setstatus(1);
+    }
+  }, [status]);
   const onSubmit = async (data) => {
-    axios.post(`${SERVER_URL}/api/login`, data).then((res) => {
-      console.log(res);
-      if (!res.data.success) Setstatus(1);
-      else Setstatus(0);
-    });
-    console.log(data);
+    getUser(dispatch, data);
   };
   return (
     <React.Fragment>
       <Header />
+      <Toaster />
       <div className="relative flex flex-col justify-center min-h-screen overflow-hidden">
         <div className="w-full p-6 m-auto bg-[--site-main-color3] rounded-md shadow-xl shadow-rose-600/40 ring-2 ring-[--site-main-Login1] lg:max-w-xl">
           <h1 className="text-3xl font-semibold text-center text-[--site-main-Login] underline uppercase">
@@ -118,7 +130,7 @@ const Login = () => {
             </a>
           </p>
         </div>
-        {status === 1 && <Button>Button</Button>}
+        {status === 1 && <div></div>}
       </div>
     </React.Fragment>
   );

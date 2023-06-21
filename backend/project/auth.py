@@ -28,11 +28,16 @@ def login_post():
   if not user or not check_password_hash(user.password, password):
     return jsonify({
         'success': False,
+        'code': 401,
         'message': 'Please check your login details and try again.',
     })
   login_user(user, remember=remember)
-
-  return jsonify({'success': True})
+  response = {
+    'success': True, 
+    'code': 200,
+    'data': user.username
+  }
+  return jsonify(response)
 
 def send_email(user):
   token = user.get_reset_token()

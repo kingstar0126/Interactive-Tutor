@@ -1,7 +1,6 @@
 import Header from "../Layout/Header";
 import Footer from "../Layout/Footer";
 import { MdDone } from "react-icons/md";
-import Card from "../Components/CardItem";
 import AccordionComponent from "../Components/Accordion";
 import StripeCard from "../Components/StripeCard";
 import Switch from "../Components/Switch";
