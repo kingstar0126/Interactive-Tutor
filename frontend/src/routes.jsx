@@ -6,6 +6,10 @@ import Changepassword from "./Pages/Changepassword";
 import Layout from "./Layout/Layout";
 import Chat from "./Components/Chat";
 import Subscription from "./Components/Subscription";
+import ChatTable from "./Components/ChatTable";
+import NewChat from "./Components/NewChat";
+import TrainData from "./Components/TrainData";
+import ChatHistory from "./Components/Chathistory";
 
 const AppRoutes = [
   {
@@ -15,6 +19,20 @@ const AppRoutes = [
       {
         path: "chat",
         element: <Chat />,
+        children: [
+          {
+            path: "newchat",
+            element: <NewChat />,
+          },
+          {
+            path: "train",
+            element: <TrainData />,
+          },
+          {
+            path: "history",
+            element: <ChatHistory />,
+          },
+        ],
       },
       {
         path: "subscription",

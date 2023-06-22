@@ -1,11 +1,13 @@
 import { BsFillChatLeftTextFill, BsPlus } from "react-icons/bs";
 import { useState, useEffect } from "react";
 import Chatmodal from "./Chatmodal";
+import ChatmodalTrain from "./ChatmodalTrain";
 import ChatTable from "./ChatTable";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { webAPI } from "../utils/constants";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 
 const Chat = () => {
   const notification = (type, message) => {
@@ -20,8 +22,14 @@ const Chat = () => {
   const [chat, SetChat] = useState([]);
   const user = useSelector((state) => state.user.user);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTrainModalOpen, SetIsTrainModalOpen] = useState(false);
+  let location = useLocation();
+
   const showModal = () => {
     setIsModalOpen(true);
+  };
+  const showTrainModal = () => {
+    SetIsTrainModalOpen(true);
   };
   const handleOk = (data) => {
     axios.post(webAPI.addchat, data).then((res) => {
@@ -32,9 +40,11 @@ const Chat = () => {
       }
     });
     setIsModalOpen(false);
+    SetIsTrainModalOpen(false);
   };
   const handleCancel = () => {
     setIsModalOpen(false);
+    SetIsTrainModalOpen(false);
   };
 
   useEffect(() => {
@@ -49,22 +59,22 @@ const Chat = () => {
   return (
     <div className="p-4 ml-5 mr-10">
       <Toaster />
-      <div className="flex justify-between w-full p-2">
-        <div className="flex items-center justify-center gap-2 font-semibold text-[20px]">
-          <BsFillChatLeftTextFill />
+      <div className="flex items-center justify-between w-full p-5 bg-[--site-card-icon-color] rounded-full">
+        <div className="flex items-center justify-center gap-2 font-semibold text-[20px] text-white">
+          <BsFillChatLeftTextFill className="fill-[--site-logo-text-color]" />
           Chats
         </div>
-        <div className="flex items-center justify-center gap-5">
-          <div className="bg-[--site-main-color9] rounded-full py-[1px] px-[5px] items-center justify-center text-[10px] text-[--site-main-color3]">
+        <div className="flex h-[20px] gap-5">
+          <div className="bg-[--site-logo-text-color] font-bold rounded-full items-center justify-center text-[10px] text-[--site-card-icon-color] px-[10px] py-[3px]">
             Active subscription: Free
           </div>
-          <div className="bg-[--site-main-color7] rounded-full py-[1px] px-[5px] items-center justify-center text-[10px] text-[--site-main-color3]">
+          <div className="bg-[--site-logo-text-color] font-bold rounded-full items-center justify-center text-[10px] text-[--site-card-icon-color] px-[10px] py-[3px]">
             30 queries available for this month
           </div>
         </div>
       </div>
       <div className="flex flex-col w-full">
-        <div className="flex flex-col items-start justify-center w-full gap-3 p-5 bg-white rounded-2xl">
+        <div className="flex flex-col items-start justify-center w-full gap-3 p-5 bg-[--site-card-icon-color] text-white mt-[10px] rounded-2xl">
           <p className="text-[20px] font-semibold">Hello, {user}!</p>
           <p className="text-[14px]">
             Welcome to here! To get started, the first step is to create a
@@ -110,21 +120,46 @@ const Chat = () => {
             experience for your users.
           </p>
         </div>
-        <div className="flex justify-end w-full py-2 ">
-          <button
-            type="button"
-            onClick={showModal}
-            className="text-white bg-[#4285F4] hover:bg-[#4285F4]/90 focus:ring-4 focus:outline-none focus:ring-[#4285F4]/50 font-medium rounded-xl text-sm px-2 py-1 text-center inline-flex items-center dark:focus:ring-[#4285F4]/55"
-          >
-            <BsPlus className="w-[30px] h-[30px] text-xl pointer-events-none" />
-            Add chat
-          </button>
-        </div>
-        <div>
-          <ChatTable chat={chat} handledelete={getChats} />
-        </div>
+        {location.pathname === "/chatbot/chat" ? (
+          <div>
+            <div className="flex justify-end w-full py-2 ">
+              <button
+                type="button"
+                onClick={showModal}
+                className="text-[--site-logo-text-color] bg-[--site-card-icon-color] hover:bg-[--site-card-icon-color]/90 focus:ring-4 focus:outline-none focus:ring-[--site-card-icon-color]/50 font-medium rounded-xl text-sm px-2 py-1 text-center inline-flex items-center dark:focus:ring-[--site-card-icon-color]/55"
+              >
+                <BsPlus className="w-[30px] h-[30px] text-xl pointer-events-none" />
+                Add chat
+              </button>
+
+              {/* <button
+                type="button"
+                onClick={showTrainModal}
+                className="text-white bg-[--site-card-icon-color] hover:bg-[--site-card-icon-color]/90 focus:ring-4 focus:outline-none focus:ring-[--site-card-icon-color]/50 font-medium rounded-xl text-sm px-2 py-1 text-center inline-flex items-center dark:focus:ring-[--site-card-icon-color]/55"
+              >
+                <BsPlus className="w-[30px] h-[30px] text-xl pointer-events-none" />
+                Add chat
+              </button> */}
+            </div>
+            <div className="w-full h-[500px] bg-[--site-main-color3] rounded-xl">
+              <ChatTable
+                chat={chat}
+                handledelete={getChats}
+                handleupdate={getChats}
+              />
+            </div>
+          </div>
+        ) : (
+          <Outlet />
+        )}
+
         <Chatmodal
           open={isModalOpen}
+          handleOk={handleOk}
+          handleCancel={handleCancel}
+        />
+        <ChatmodalTrain
+          open={isTrainModalOpen}
           handleOk={handleOk}
           handleCancel={handleCancel}
         />

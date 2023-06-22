@@ -1,6 +1,6 @@
 const Footer = () => {
   return (
-    <div className="flex flex-col items-center justify-center p-5">
+    <div className="flex flex-col items-center justify-center p-5 text-white">
       <p className="contanier flex items-center justify-center text-[12px]">
         © 2023. All rights reserved. Crafted with care ❤️ by AI Developer.
       </p>

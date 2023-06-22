@@ -1,94 +1,140 @@
 import { Link, useLocation } from "react-router-dom";
-import { useEffect } from "react";
+import Logo from "../assets/logo.png";
 
 const Header = () => {
   let location = useLocation();
 
-  useEffect(() => {
-    console.log(location);
-  }, [location]);
-
   return (
-    <div className="w-full h-[45px] drop-shadow-xl flex justify-center fixed top-0 z-50 bg-white/70 backdrop-blur-sm">
+    <div className="w-full h-[129px] py-2 flex bg-[--site-main-color-home] font-logo">
       {location.pathname === "/" && (
-        <div className="w-5/6 h-[45px] flex items-center justify-between py-1">
+        <div className="flex items-center justify-between w-full px-16">
           {/* Logo */}
-          <div className="w-1/5">
+          <div className="flex">
             <a href="/">
-              <img
-                src="https://insertchatgpt.com/wp-content/uploads/2023/03/cropped-logo.png.webp"
-                className="w-[40px] h-[40px] "
-                alt="logo"
-              />
+              <img src={Logo} className="w-[99px] h-full " alt="logo" />
             </a>
+            <span className="flex flex-col h-[93px] w-[123px] font-logo py-2 justify-center">
+              <span className="h-[54px] mt-2 text-[23px] font-semibold text-white leading-8">
+                Interactive Tutor
+              </span>
+              <span className="text-[19px] font-thin text-[--site-logo-text-color]">
+                powered by ai
+              </span>
+            </span>
           </div>
           {/* Navbar */}
-          <div className="flex items-center justify-end py-1 pr-[50px] w-3/5 gap-6 xl:gap-8">
+          <div className="flex justify-center gap-6 px-5 bg-white rounded-full">
             <Link
-              className="p-5 font-medium text-black font-default"
+              className="p-5 font-medium text-black font-logo"
               to="#features"
             >
               Features
             </Link>
             <Link
-              className="p-5 font-medium text-black font-default"
+              className="p-5 font-medium text-black font-logo"
               to="#pricing"
             >
               Pricing
             </Link>
-          </div>
-          <div className="flex items-center w-1/5 py-1">
             <Link
-              className="px-5 font-medium text-black font-default"
+              className="px-5 w-full flex items-center my-3 font-semibold text-black font-logo text-[18px] border-[3px] rounded-full border-[--site-logo-text-color]"
               to="/login"
             >
-              Login
+              LOGIN
             </Link>
-            <div className="px-5 py-[5px] rounded-lg font-medium text-white font-default bg-[--site-main-color4]">
-              <Link to="/register">Register</Link>
+            <div className="px-5 flex items-center my-3 whitespace-nowrap text-[18px] rounded-full font-semibold text-black font-logo bg-[--site-logo-text-color]">
+              <Link to="/register">Sign-up</Link>
             </div>
           </div>
         </div>
       )}
       {location.pathname === "/login" && (
-        <div className="h-[45px] bg-[--site-main-color3] flex items-center justify-between">
+        <div className="flex items-center justify-between w-full px-16">
           {/* Logo */}
-          <div>
+          <div className="flex">
             <a href="/">
-              <img
-                src="https://insertchatgpt.com/wp-content/uploads/2023/03/cropped-logo.png.webp"
-                className="w-[40px] h-[40px] "
-                alt="logo"
-              />
+              <img src={Logo} className="w-[99px] h-full " alt="logo" />
             </a>
+            <span className="flex flex-col h-[93px] w-[123px] font-logo py-2 justify-center">
+              <span className="h-[54px] mt-2 text-[23px] font-semibold text-white leading-8">
+                Interactive Tutor
+              </span>
+              <span className="text-[19px] font-thin text-[--site-logo-text-color]">
+                powered by ai
+              </span>
+            </span>
+          </div>
+          {/* Navbar */}
+          <div className="flex justify-center gap-6 px-5 bg-white rounded-full">
+            <Link
+              className="px-5 w-full flex items-center my-3 font-semibold text-black font-logo text-[18px] border-[3px] rounded-full border-[--site-logo-text-color]"
+              to="/login"
+            >
+              LOGIN
+            </Link>
+            <div className="px-5 flex items-center my-3 whitespace-nowrap text-[18px] rounded-full font-semibold text-black font-logo bg-[--site-logo-text-color]">
+              <Link to="/register">Sign-up</Link>
+            </div>
           </div>
         </div>
       )}{" "}
       {location.pathname === "/register" && (
-        <div className="h-[45px] bg-[--site-main-color3] flex items-center justify-between">
+        <div className="flex items-center justify-between w-full px-16">
           {/* Logo */}
-          <div>
+          <div className="flex">
             <a href="/">
-              <img
-                src="https://insertchatgpt.com/wp-content/uploads/2023/03/cropped-logo.png.webp"
-                className="w-[40px] h-[40px] "
-                alt="logo"
-              />
+              <img src={Logo} className="w-[99px] h-full " alt="logo" />
             </a>
+            <span className="flex flex-col h-[93px] w-[123px] font-logo py-2 justify-center">
+              <span className="h-[54px] mt-2 text-[23px] font-semibold text-white leading-8">
+                Interactive Tutor
+              </span>
+              <span className="text-[19px] font-thin text-[--site-logo-text-color]">
+                powered by ai
+              </span>
+            </span>
+          </div>
+          {/* Navbar */}
+          <div className="flex justify-center gap-6 px-5 bg-white rounded-full">
+            <Link
+              className="px-5 w-full flex items-center my-3 font-semibold text-black font-logo text-[18px] border-[3px] rounded-full border-[--site-logo-text-color]"
+              to="/login"
+            >
+              LOGIN
+            </Link>
+            <div className="px-5 flex items-center my-3 whitespace-nowrap text-[18px] rounded-full font-semibold text-black font-logo bg-[--site-logo-text-color]">
+              <Link to="/register">Sign-up</Link>
+            </div>
           </div>
         </div>
       )}{" "}
       {location.pathname === "/resetpassword" && (
-        <div className="h-[45px] bg-[--site-main-color3] flex items-center justify-between">
+        <div className="flex items-center justify-between w-full px-16">
           {/* Logo */}
-          <div>
+          <div className="flex">
             <a href="/">
-              <img
-                src="https://insertchatgpt.com/wp-content/uploads/2023/03/cropped-logo.png.webp"
-                className="w-[40px] h-[40px] "
-                alt="logo"
-              />
+              <img src={Logo} className="w-[99px] h-full " alt="logo" />
             </a>
+            <span className="flex flex-col h-[93px] w-[123px] font-logo py-2 justify-center">
+              <span className="h-[54px] mt-2 text-[23px] font-semibold text-white leading-8">
+                Interactive Tutor
+              </span>
+              <span className="text-[19px] font-thin text-[--site-logo-text-color]">
+                powered by ai
+              </span>
+            </span>
+          </div>
+          {/* Navbar */}
+          <div className="flex justify-center gap-6 px-5 bg-white rounded-full">
+            <Link
+              className="px-5 w-full flex items-center my-3 font-semibold text-black font-logo text-[18px] border-[3px] rounded-full border-[--site-logo-text-color]"
+              to="/login"
+            >
+              LOGIN
+            </Link>
+            <div className="px-5 flex items-center my-3 whitespace-nowrap text-[18px] rounded-full font-semibold text-black font-logo bg-[--site-logo-text-color]">
+              <Link to="/register">Sign-up</Link>
+            </div>
           </div>
         </div>
       )}

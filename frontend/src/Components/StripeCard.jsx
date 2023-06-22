@@ -44,8 +44,8 @@ const StripeCard = (props) => {
           </div>
         </div>
         <div className="container flex flex-col items-center justify-center mt-5">
-          <button className="text-white rounded-full bg-[--site-main-color4] p-1">
-            <span className="px-[14px] h-[24px]">Get Started</span>
+          <button className="text-black rounded-full bg-[--site-logo-text-color] p-1">
+            <span className="px-[14px] font-medium h-[24px]">Get Started</span>
           </button>
           <span className="mt-5 text-[12px] flex">No Hidden feeds🎉</span>
         </div>

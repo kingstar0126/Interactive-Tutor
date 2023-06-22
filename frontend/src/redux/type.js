@@ -5,3 +5,4 @@ export const SET_HOMEPAGE_SECTION = "SET_HOMEPAGE_SECTION";
 export const SET_THEME = "SET_THEME";
 export const SET_USER = "SET_USER";
 export const ADD_CHAT = "ADD_CHAT";
+export const GET_CHAT = "GET_CHAT";

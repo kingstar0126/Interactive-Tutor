@@ -5,6 +5,7 @@ module.exports = {
     extend: {},
     fontFamily: {
       default: ["poppins, sans-serif"],
+      logo: ["raleway,sans-serif"],
     },
   },
   plugins: [],

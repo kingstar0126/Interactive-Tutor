@@ -15,16 +15,16 @@ export default function AccordionComponent(props) {
 
   return (
     <Fragment>
-      <Accordion open={open === 1} className="p-5 border rounded-lg">
-        <AccordionHeader onClick={() => handleOpen(1)}>
+      <Accordion open={open === 1} className="p-5 bg-white rounded-xl">
+        <AccordionHeader onClick={() => handleOpen(1)} className="border-white">
           <div className="w-4/5">
             <p>{props.title}</p>
           </div>
           <div className="flex items-center justify-center w-1/5">
             {open === 0 ? (
-              <MdOutlineAddCircle className="fill-[--site-main-color5] w-5 h-5 pointer-events-none" />
+              <MdOutlineAddCircle className="fill-[--site-card-icon-color] w-5 h-5 pointer-events-none" />
             ) : (
-              <MdOutlineRemoveCircle className="fill-[--site-main-color5] w-5 h-5 pointer-events-none" />
+              <MdOutlineRemoveCircle className="fill-[--site-card-icon-color] w-5 h-5 pointer-events-none" />
             )}
           </div>
         </AccordionHeader>

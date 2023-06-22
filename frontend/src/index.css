@@ -17,24 +17,29 @@ code {
 }
 
 :root {
+  --site-main-color-home: #153144;
   --site-main-color1: #c1ff72;
   --site-main-color2: #153144;
-  --site-main-color3: #fffffe;
-  --site-main-color4: #27058d;
-  --site-main-color5: #634bee;
+  --site-main-color3: #fafafa;
+  --site-main-color4: #c1ff72;
+  --site-main-color5: #c1ff72;
   --site-main-color6: #4a5168;
-  --site-main-color7: #00da8f;
+  --site-main-color7: #c1ff72;
   --site-main-color8: #f0f0ea;
-  --site-main-color9: #0398e2;
+  --site-main-color9: #153144;
   --site-main-color10: #ccccc1;
-  --site-main-Login: #27058d;
-  --site-main-Login-border-focus: #9273c9;
-  --site-main-Login1: #634bee;
+  --site-main-Login: #153144;
+  --site-main-Login-border-focus: #153144;
+  --site-main-Login1: #153144;
   --site-main-Login-Text: #424242;
   --site-main-form-error: #ff1122;
   --site-main-form-error1: #c40d19;
   --site-main-form-success: #21d338;
   --site-main-form-success1: #129106;
-  --site-main-Table-Text: #424242;
-  --site-main-Table-Text_Dark: #2e2b2b;
+  --site-main-Table-Text: #ffffff;
+  --site-main-Table-Text_Dark: #ffffff;
+  --site-file-upload: #7a31e0;
+  --site-file-upload-hover: #c1ff72;
+  --site-logo-text-color: #c1ff72;
+  --site-card-icon-color: #153144;
 }

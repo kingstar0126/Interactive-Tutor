@@ -15,10 +15,10 @@ const Forgetpassword = () => {
   };
 
   return (
-    <React.Fragment>
+    <div className="bg-[--site-main-color-home] h-screen font-logo">
       <Header />
-      <div className="relative flex flex-col justify-center min-h-screen overflow-hidden">
-        <div className="w-full p-6 m-auto bg-[--site-main-color3] rounded-md shadow-xl shadow-rose-600/40 ring-2 ring-[--site-main-Login1] lg:max-w-xl">
+      <div className="mt-[100px]">
+        <div className="w-full p-6 m-auto bg-[--site-main-color3] rounded-md lg:max-w-xl">
           <h1 className="text-3xl font-semibold text-center text-[--site-main-Login] underline uppercase">
             Password reset
           </h1>
@@ -60,14 +60,14 @@ const Forgetpassword = () => {
             Don't have an account?{" "}
             <a
               href="/register"
-              className="font-medium text-[--site-main-Login1] hover:underline"
+              className="font-bold text-[--site-main-Login1] hover:underline"
             >
               Register
             </a>
           </p>
         </div>
       </div>
-    </React.Fragment>
+    </div>
   );
 };
 

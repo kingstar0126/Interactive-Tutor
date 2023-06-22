@@ -7,71 +7,71 @@ import Switch from "../Components/Switch";
 
 const Home = () => {
   return (
-    <div className="bg-[--site-main-img]">
+    <div className="bg-[--site-main-color-home] font-logo">
       <Header />
 
       {/* Hero Section */}
-      <div className="mt-[70px] py-[30px]">
+      <div className="pt-[100px] py-[30px]">
         <div className="flex flex-col items-center justify-center w-full gap-4">
           <div className="container flex flex-col items-center justify-center leading-tight">
-            <p className="text-black text-[45px] font-semibold items-center justify-center">
+            <p className="text-white text-[45px] font-semibold items-center justify-center">
               Create Your Own AI Chatbot Using
             </p>
-            <p className="text-black text-[45px] font-semibold items-center justify-center">
-              <span className="text-[--site-main-color4] underline underline-offset-8">
+            <p className="text-white text-[45px] font-semibold items-center justify-center">
+              <span className="text-[--site-logo-text-color] underline underline-offset-8">
                 Your Data And Branding
               </span>
               {"  "}That You Can{" "}
             </p>
-            <p className="text-black text-[45px] font-semibold items-center justify-center">
+            <p className="text-white text-[45px] font-semibold items-center justify-center">
               Embed Everywhere
             </p>
           </div>
           <div className="container flex flex-col items-center justify-center gap-5 leading-tight">
-            <span className="pt-10 py-7 text-[--site-main-color5] text-[16px] font-semibold items-center justify">
+            <span className="pt-10 py-7 text-[--site-logo-text-color] text-[16px] font-semibold items-center justify">
               BUILD YOUR GPT CHATBOT WITH NO CODING USING EXISTING DATA FROM
               DOCUMENTS, WEBSITES, AND VIDEOS 🚀
             </span>
-            <span className="text-[--site-main-color6] text-[17px] font-semibold items-center justify">
+            <span className="text-white text-[17px] font-semibold items-center justify">
               Upload your documents or add links, and voila! Integrate your
               trained chatbot to your website as a window or as a bubble for
               instant
             </span>
-            <span className="text-[--site-main-color6] text-[17px] font-semibold items-center justify">
+            <span className="text-white text-[17px] font-semibold items-center justify">
               engagement with your users.
             </span>
 
             <div className="flex flex-col pt-7">
-              <button className="text-white rounded-xl p-2 bg-[--site-main-color4] hover:scale-105 active:bg-[--site-main-color5]">
-                <span className="h-[24px] px-3">
+              <button className="text-black rounded-xl p-2 bg-[--site-logo-text-color] hover:scale-105 active:bg-[--site-main-color5]">
+                <span className="h-[24px] font-medium px-3">
                   Build Your GPT & Bard Bot Now - For free
                 </span>
               </button>
-              <span className="flex items-center justify-center text-[12px] font-default py-3">
+              <span className="flex items-center justify-center text-[12px] font-default py-3 text-white">
                 Free, no CC required!
               </span>
             </div>
-            <div className="container flex items-center justify-center pt-5">
+            <div className="container flex items-center justify-center pt-5 text-white">
               <div className="flex items-center justify-center mr-4">
-                <div className="bg-[--site-main-color5] rounded-full text-white p-1 m-2 w-[20px] h-[20px] items-center justify-center flex">
+                <div className="bg-[--site-main-color5] rounded-full text-black p-1 m-2 w-[20px] h-[20px] items-center justify-center flex">
                   <MdDone className="pointer-events-none" />
                 </div>
                 GPT & Bard
               </div>
               <div className="flex items-center justify-center mr-4">
-                <div className="bg-[--site-main-color5] rounded-full text-white p-1 m-2 w-[20px] h-[20px] items-center justify-center flex">
+                <div className="bg-[--site-main-color5] rounded-full text-black p-1 m-2 w-[20px] h-[20px] items-center justify-center flex">
                   <MdDone className="pointer-events-none" />
                 </div>
                 Access Chat History
               </div>
               <div className="flex items-center justify-center mr-4">
-                <div className="bg-[--site-main-color5] rounded-full text-white p-1 m-2 w-[20px] h-[20px] items-center justify-center flex">
+                <div className="bg-[--site-main-color5] rounded-full text-black p-1 m-2 w-[20px] h-[20px] items-center justify-center flex">
                   <MdDone className="pointer-events-none" />
                 </div>
                 No Credit Card Required
               </div>
               <div className="flex items-center justify-center mr-4">
-                <div className="bg-[--site-main-color5] rounded-full text-white p-1 m-2 w-[20px] h-[20px] items-center justify-center flex">
+                <div className="bg-[--site-main-color5] rounded-full text-black p-1 m-2 w-[20px] h-[20px] items-center justify-center flex">
                   <MdDone className="pointer-events-none" />
                 </div>
                 No Engagement
@@ -83,13 +83,13 @@ const Home = () => {
 
       {/* Features */}
       <div className="my-[30px] py-[30px] flex flex-col items-center w-full">
-        <div className="container flex items-center justify-center text-[36px] font-semibold">
+        <div className="container flex items-center justify-center text-[36px] font-semibold text-white">
           A Preview Of Our
-          <span className="mx-2 text-[--site-main-color4] underline">
+          <span className="mx-2 text-[--site-logo-text-color] underline">
             {" "}
             Amazing{" "}
           </span>
-          Features ✨
+          Features
         </div>
         <div className="container flex flex-col gap-5 m-5">
           <div className="container flex items-start justify-center gap-5">
@@ -137,15 +137,15 @@ const Home = () => {
 
       {/* Prices */}
       <div className="my-[30px] py-[30px] flex flex-col items-center w-full">
-        <div className="container flex items-center justify-center text-[36px] font-semibold">
+        <div className="container flex items-center text-white justify-center text-[36px] font-semibold">
           Choose The Best,
-          <span className="mx-2 text-[--site-main-color4] underline">
+          <span className="mx-2 text-[--site-logo-text-color] underline">
             {" "}
             Affordable & Transparent{" "}
           </span>
           Pricing 💸
         </div>
-        <div className="container flex flex-col items-center justify-center gap-5 p-5 flex-color">
+        <div className="container flex flex-col items-center justify-center gap-5 p-5 text-white flex-color">
           <div className="container flex items-center justify-center gap-3">
             Annually
             <Switch />

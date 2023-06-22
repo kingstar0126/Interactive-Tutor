@@ -4,32 +4,31 @@ import {
   BsFillChatLeftTextFill,
   BsFillCreditCard2FrontFill,
 } from "react-icons/bs";
+import Logo from "../assets/logo.png";
 
 const Sidebar = () => {
   return (
     <div className="flex flex-col items-center justify-center">
       <div className="container flex items-center justify-center w-1/3 p-1 mt-5">
         <Link to="chat">
-          <img
-            src="https://insertchatgpt.com/wp-content/uploads/2023/03/cropped-logo.png.webp"
-            className="w-[50px] h-[50px] min-w-[50px]"
-            alt="logo"
-          />
+          <a href="/">
+            <img src={Logo} className="w-[99px] h-full " alt="logo" />
+          </a>
         </Link>
       </div>
       <div className="flex flex-col items-start justify-center py-5 mt-5">
-        <Link to="chat" className="w-full">
+        <Link to="chat" className="w-full text-white">
           <ListItem className="p-2">
             <ListItemPrefix>
-              <BsFillChatLeftTextFill className="w-5 h-5" />
+              <BsFillChatLeftTextFill className="w-5 h-5 fill-[--site-logo-text-color]" />
             </ListItemPrefix>
             Chats
           </ListItem>
         </Link>
-        <Link to="subscription" className="w-full">
+        <Link to="subscription" className="w-full text-white">
           <ListItem className="p-2">
             <ListItemPrefix>
-              <BsFillCreditCard2FrontFill className="w-5 h-5" />
+              <BsFillCreditCard2FrontFill className="w-5 h-5 fill-[--site-logo-text-color]" />
             </ListItemPrefix>
             Subscriptions
           </ListItem>

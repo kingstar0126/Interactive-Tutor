@@ -57,16 +57,7 @@ const Chatmodal = (props) => {
       SetBehaviormodel(props.chat["behaviormodel"]);
       SetBehavior(props.chat["behavior"]);
     }
-  }, [props.open]);
-
-  useEffect(() => {
-    // console.log(props.chat);
-    if (props.chat && props.chat.label)
-      if (props.chat && props.chat.length !== undefined) {
-        // console.log("-------:::::::", props.chat);
-        // console.log(props.chat);
-      }
-  }, [props.chat]);
+  }, [props.open, props.chat]);
 
   const onOK = () => {
     if (!props.chat) {
@@ -124,12 +115,12 @@ const Chatmodal = (props) => {
     : "hidden";
   return (
     <div className={showHideClassname}>
-      <div className="relative w-3/5 p-5 mx-auto bg-white border rounded-md shadow-lg top-10">
+      <div className="relative w-3/5 p-5 mx-auto bg-[--site-card-icon-color] text-white rounded-md shadow-lg top-10">
         <div className="mt-3 text-center divide-y">
-          <h3 className="text-lg font-medium leading-6 text-gray-900">Chat</h3>
+          <h3 className="text-lg font-medium leading-6">Chat</h3>
           <div className="py-3 mt-2 px-7">
             <div className="flex flex-col items-start py-2">
-              <label className="mb-1 text-sm font-semibold text-black">
+              <label className="mb-1 text-sm font-semibold">
                 Label (Private)
               </label>
               <input
@@ -140,7 +131,7 @@ const Chatmodal = (props) => {
                   SetLabel(e.target.value);
                 }}
                 placeholder="Chatbot name"
-                className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] h-10 border rounded-lg hover:border-[--site-main-color5]"
+                className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] h-10 border rounded-lg hover:border-[--site-main-color5] text-[--site-card-icon-color]"
               />
               <p className="text-sm text-[--site-main-color5]">
                 The label is used to identify your chatbot. It's private and
@@ -154,7 +145,7 @@ const Chatmodal = (props) => {
             </div>
 
             <div className="flex flex-col items-start py-2">
-              <label className="mb-1 text-sm font-semibold text-black">
+              <label className="mb-1 text-sm font-semibold ">
                 Description (Private)
               </label>
               <input
@@ -165,7 +156,7 @@ const Chatmodal = (props) => {
                   SetChatdescription(e.target.value);
                 }}
                 placeholder="This is my general assistant"
-                className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] h-10 border rounded-lg hover:border-[--site-main-color5]"
+                className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] h-10 border rounded-lg hover:border-[--site-main-color5] text-[--site-card-icon-color]"
               />
               <p className="text-sm text-[--site-main-color5]">
                 The description is used to identify your chatbot. It's private
@@ -180,21 +171,24 @@ const Chatmodal = (props) => {
                   icon={<Icon id={1} open={open} />}
                   className="p-5 border rounded-lg"
                 >
-                  <AccordionHeader onClick={() => handleOpen(1)}>
+                  <AccordionHeader
+                    onClick={() => handleOpen(1)}
+                    className="border-[--site-card-icon-color]"
+                  >
                     <div className="flex items-start w-4/5">
                       <p className="text-[16px] font-normal">Models (LLMs)</p>
                     </div>
                   </AccordionHeader>
                   <AccordionBody className="p-2 border-t">
                     <div className="flex flex-col items-start py-2">
-                      <label className="mb-1 text-sm font-semibold text-black">
+                      <label className="mb-1 text-sm font-semibold">
                         Model
                       </label>
                       <select
                         name="chatdescription"
                         value={chatmodel}
                         onChange={(e) => SetChatmodel(e.target.value)}
-                        className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] h-10 border rounded-lg hover:border-[--site-main-color5]"
+                        className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] h-10 border rounded-lg hover:border-[--site-main-color5] text-[--site-card-icon-color]"
                       >
                         <option value="1" className="py-1">
                           GPT 3.5 | 4K context
@@ -220,7 +214,10 @@ const Chatmodal = (props) => {
                   icon={<Icon id={2} open={open} />}
                   className="p-5 border rounded-lg"
                 >
-                  <AccordionHeader onClick={() => handleOpen(2)}>
+                  <AccordionHeader
+                    onClick={() => handleOpen(2)}
+                    className="border-[--site-card-icon-color]"
+                  >
                     <div className="flex items-start w-4/5">
                       <p className="text-[16px] font-normal">
                         Conversation Starter
@@ -229,7 +226,7 @@ const Chatmodal = (props) => {
                   </AccordionHeader>
                   <AccordionBody className="p-2 border-t">
                     <div className="flex flex-col items-start py-2">
-                      <label className="mb-1 text-sm font-semibold text-black">
+                      <label className="mb-1 text-sm font-semibold ">
                         Welcome message
                       </label>
                       <textarea
@@ -241,7 +238,7 @@ const Chatmodal = (props) => {
                           SetConversation(e.target.value);
                         }}
                         placeholder="Hello friends! How can I help you today?"
-                        className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5]"
+                        className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5] text-[--site-card-icon-color]"
                       ></textarea>
                       <p className="text-sm text-[--site-main-color5]">
                         The description is used to identify your chatbot. It's
@@ -257,14 +254,17 @@ const Chatmodal = (props) => {
                   icon={<Icon id={3} open={open} />}
                   className="p-5 border rounded-lg"
                 >
-                  <AccordionHeader onClick={() => handleOpen(3)}>
+                  <AccordionHeader
+                    onClick={() => handleOpen(3)}
+                    className="border-[--site-card-icon-color]"
+                  >
                     <div className="flex items-start w-4/5">
                       <p className="text-[16px] font-normal">Access control</p>
                     </div>
                   </AccordionHeader>
                   <AccordionBody className="p-2 border-t">
                     <div className="flex flex-col items-start py-2">
-                      <label className="mb-1 text-sm font-semibold text-black">
+                      <label className="mb-1 text-sm font-semibold">
                         PIN protection
                       </label>
                       <div className="flex flex-row gap-2">
@@ -280,7 +280,7 @@ const Chatmodal = (props) => {
                           }}
                           validate="0123456789"
                           onComplete={handleComplete}
-                          className="mb-1 w-[40px] h-[40px] focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5]"
+                          className="mb-1 w-[40px] h-[40px] focus:border-none focus:ring-opacity-40 text-[--site-card-icon-color] focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5]"
                         />
                       </div>
                       {validate && (
@@ -288,7 +288,7 @@ const Chatmodal = (props) => {
                           The PIN must be number
                         </span>
                       )}
-                      <p className="text-sm text-[--site-main-color5]">
+                      <p className="text-sm text-[--site-main-color5] text-start">
                         Utilizing a PIN will enhance the security of your
                         chatbot URL by adding an additional layer of protection,
                         ensuring that only authorized users with the correct PIN
@@ -306,7 +306,10 @@ const Chatmodal = (props) => {
                   icon={<Icon id={4} open={open} />}
                   className="p-5 border rounded-lg"
                 >
-                  <AccordionHeader onClick={() => handleOpen(4)}>
+                  <AccordionHeader
+                    onClick={() => handleOpen(4)}
+                    className="border-[--site-card-icon-color]"
+                  >
                     <div className="flex items-start w-4/5">
                       <p className="text-[16px] font-normal">
                         Advanced settings - Behavior configuration
@@ -315,11 +318,11 @@ const Chatmodal = (props) => {
                   </AccordionHeader>
                   <AccordionBody className="p-2 border-t">
                     <div className="flex flex-col items-start py-2">
-                      <label className="mb-1 text-sm font-semibold text-black">
+                      <label className="mb-1 text-sm font-semibold">
                         Context behavior (Required)
                       </label>
                       <Select
-                        className="w-full mb-1"
+                        className="w-full mb-1 text-[--site-card-icon-color]"
                         onChange={(e) => {
                           console.log(e);
                           SetBehaviormodel(e.label);
@@ -361,7 +364,7 @@ const Chatmodal = (props) => {
                       </p>
                     </div>
                     <div className="flex flex-col items-start py-2">
-                      <label className="mb-1 text-sm font-semibold text-black">
+                      <label className="mb-1 text-sm font-semibold ">
                         Behavior prompt
                       </label>
                       <textarea
@@ -373,7 +376,7 @@ const Chatmodal = (props) => {
                           SetBehavior(e.target.value);
                         }}
                         placeholder="You are a helpful assistant"
-                        className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5]"
+                        className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5] text-[--site-card-icon-color]"
                       ></textarea>
                       <p className="text-sm text-[--site-main-color5] text-start">
                         The behavior prompt overrides our default behavior of
@@ -384,7 +387,7 @@ const Chatmodal = (props) => {
                       </p>
                     </div>
                     <div className="flex flex-col items-start py-2">
-                      <label className="mb-1 text-sm font-semibold text-black">
+                      <label className="mb-1 text-sm font-semibold">
                         Creativity ({Creativity}) - Recommended value : 0.3
                       </label>
                       <input
@@ -414,14 +417,14 @@ const Chatmodal = (props) => {
           <div className="flex items-center justify-between px-4 py-3">
             <button
               onClick={props.handleCancel}
-              className="w-auto px-4 py-2 text-base font-medium text-black border bg-[--site-main-color3] rounded-md shadow-sm hover:bg-[--site-main-color8] focus:outline-none focus:ring-2 focus:ring-green-300"
+              className="w-auto px-4 py-2 text-base text-[--site-card-icon-color] font-semibold border bg-[--site-main-color3] rounded-md shadow-sm hover:scale-[105%] focus:outline-none focus:ring-2 focus:ring-green-300"
             >
               cancel
             </button>
             {label && (
               <button
                 onClick={onOK}
-                className="w-auto px-4 py-2 text-base font-medium text-white bg-[--site-main-form-success1] border rounded-md shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300"
+                className="w-auto px-4 py-2 text-[--site-card-icon-color] bg-[--site-logo-text-color] border rounded-md shadow-sm hover:scale-[105%] focus:outline-none focus:ring-2 focus:ring-green-300 font-semibold"
               >
                 confirm
               </button>
@@ -430,7 +433,7 @@ const Chatmodal = (props) => {
               <button
                 disabled
                 onClick={onOK}
-                className="w-auto px-4 py-2 text-base font-medium text-white bg-green-500 border rounded-md shadow-sm disabled:opacity-75"
+                className="w-auto px-4 py-2 disabled:text-[--site-card-icon-color] font-medium text-white bg-[--site-logo-text-color] border rounded-md shadow-sm disabled:opacity-75"
               >
                 confirm
               </button>

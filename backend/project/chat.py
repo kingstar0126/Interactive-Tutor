@@ -1,13 +1,15 @@
 from flask import Blueprint, jsonify, request
 from .models import Chat
 from . import db
+from rich import print, pretty
+
+pretty.install()
 
 chat = Blueprint('chat', __name__)
 
 
 @chat.route('/api/addchat', methods=['POST'])
 def add_chat():
-    print(request.json)
     label = request.json['label']
     description = request.json['chatdescription']
     model = request.json['chatmodel']
@@ -17,7 +19,7 @@ def add_chat():
     behavior = request.json['behavior']
     behaviormodel = request.json['behaviormodel']
 
-    chat = Chat.query.filter_by(label=label, description=description).first()
+    chat = Chat.query.filter_by(label=label).first()
 
     if chat:
         return jsonify({

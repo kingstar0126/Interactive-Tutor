@@ -33,12 +33,12 @@ const Login = () => {
     getUser(dispatch, data);
   };
   return (
-    <React.Fragment>
+    <div className="bg-[--site-main-color-home] h-screen font-logo">
       <Header />
       <Toaster />
-      <div className="relative flex flex-col justify-center min-h-screen overflow-hidden">
-        <div className="w-full p-6 m-auto bg-[--site-main-color3] rounded-md shadow-xl shadow-rose-600/40 ring-2 ring-[--site-main-Login1] lg:max-w-xl">
-          <h1 className="text-3xl font-semibold text-center text-[--site-main-Login] underline uppercase">
+      <div className="mt-[100px]">
+        <div className="w-full p-6 m-auto bg-[--site-main-color3] rounded-md ring-2 ring-[--site-main-Login1] lg:max-w-xl">
+          <h1 className="text-3xl font-semibold text-center text-[--site-main-Login1] underline uppercase">
             Login
           </h1>
           <form className="mt-6" onSubmit={handleSubmit(onSubmit)}>
@@ -97,13 +97,13 @@ const Login = () => {
             <div className="flex flex-row justify-between">
               <a
                 href="/changepassword"
-                className="text-xs text-[--site-main-Login1] hover:underline justify-end"
+                className="text-xs text-[--site-card-icon-color] hover:underline justify-end"
               >
                 Change passwrod
               </a>
               <a
                 href="/resetpassword"
-                className="text-xs text-[--site-main-Login1] hover:underline"
+                className="text-xs text-[--site-card-icon-color] hover:underline"
               >
                 Forget Password?
               </a>
@@ -124,7 +124,7 @@ const Login = () => {
             Don't have an account?{" "}
             <a
               href="/register"
-              className="font-medium text-[--site-main-Login1] hover:underline"
+              className="font-bold text-[--site-main-Login1] hover:underline"
             >
               Register
             </a>
@@ -132,7 +132,7 @@ const Login = () => {
         </div>
         {status === 1 && <div></div>}
       </div>
-    </React.Fragment>
+    </div>
   );
 };
 
