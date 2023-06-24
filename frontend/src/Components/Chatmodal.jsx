@@ -34,7 +34,7 @@ const Chatmodal = (props) => {
       SetChatdescription("");
       SetChatmodel("GPT 3.5 | 4K context");
       setOpen(0);
-      SetConversation("");
+      SetConversation("Hello friends! How can I help you today?");
       SetValidate(false);
       SetCreativity(0.3);
       SetAccess(0);
@@ -43,7 +43,7 @@ const Chatmodal = (props) => {
     when appropriate.(The chatbot will search the
     training data for a response and provide an answer
     only if a matching response is found.)`);
-      SetBehavior("");
+      SetBehavior("You are a helpful assistant");
     }
     if (props.chat && props.chat.label) {
       SetLabel(props.chat["label"]);
@@ -280,7 +280,7 @@ const Chatmodal = (props) => {
                           }}
                           validate="0123456789"
                           onComplete={handleComplete}
-                          className="mb-1 w-[40px] h-[40px] focus:border-none focus:ring-opacity-40 text-[--site-card-icon-color] focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5]"
+                          className="mb-1 w-[40px] h-[40px] focus:border-none focus:ring-opacity-40 text-[--site-card-icon-color] focus:outline-none p-[15px] focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5]"
                         />
                       </div>
                       {validate && (

@@ -3,10 +3,15 @@ import toast, { Toaster } from "react-hot-toast";
 import { webAPI } from "../utils/constants";
 import Chatmodal from "./Chatmodal";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { getchat } from "../redux/actions/chatAction";
+
+import { useNavigate } from "react-router-dom";
 
 const ChatTable = (props) => {
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const dispatch = useDispatch();
   const [currentchat, SetCurrentchat] = useState({});
 
   const showModal = () => {
@@ -17,8 +22,6 @@ const ChatTable = (props) => {
       if (!res.data.success) notification("error", res.data.message);
       else {
         notification("success", res.data.message);
-
-        props.updatechat();
       }
     });
     setIsModalOpen(false);
@@ -27,6 +30,10 @@ const ChatTable = (props) => {
     setIsModalOpen(false);
   };
 
+  const GetCurrentchat = (data) => {
+    getchat(dispatch, data);
+    navigate("newchat");
+  };
   const notification = (type, message) => {
     // To do in here
     if (type === "error") {
@@ -80,7 +87,10 @@ const ChatTable = (props) => {
                 <td className="px-6 py-4">{data["behavior"]}</td>
                 <td className="flex items-center justify-center gap-2 px-6 py-4">
                   <div className="flex gap-2">
-                    <span className="w-[60px] text-[--site-card-icon-color] text-center hover:bg-[--site-main-form-success] hover:text-[--site-card-icon-color] p-2 border rounded-xl active:bg-[--site-main-form-success1] select-none active:text-[--site-card-icon-color] border-[--site-main-form-success]">
+                    <span
+                      onClick={() => GetCurrentchat(data)}
+                      className="w-[60px] text-[--site-card-icon-color] text-center hover:bg-[--site-main-form-success] hover:text-[--site-card-icon-color] p-2 border rounded-xl active:bg-[--site-main-form-success1] select-none active:text-[--site-card-icon-color] border-[--site-main-form-success]"
+                    >
                       Open
                     </span>
                     <span

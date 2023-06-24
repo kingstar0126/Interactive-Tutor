@@ -5,8 +5,15 @@ import {
   BsFillCreditCard2FrontFill,
 } from "react-icons/bs";
 import Logo from "../assets/logo.png";
+import { useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setlocation } from "../redux/actions/locationAction";
 
 const Sidebar = () => {
+  let location = useLocation();
+  const dispatch = useDispatch();
+  setlocation(dispatch, location.pathname);
+
   return (
     <div className="flex flex-col items-center justify-center">
       <div className="container flex items-center justify-center w-1/3 p-1 mt-5">

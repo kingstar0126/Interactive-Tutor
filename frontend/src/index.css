@@ -38,8 +38,11 @@ code {
   --site-main-form-success1: #129106;
   --site-main-Table-Text: #ffffff;
   --site-main-Table-Text_Dark: #ffffff;
-  --site-file-upload: #7a31e0;
+  --site-file-upload: #c1ff72;
   --site-file-upload-hover: #c1ff72;
   --site-logo-text-color: #c1ff72;
+  --site-success-text-color: #21e60f;
+  --site-warning-text-color: #eeea06;
+  --site-error-text-color: #f80707;
   --site-card-icon-color: #153144;
 }

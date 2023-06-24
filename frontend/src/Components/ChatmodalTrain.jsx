@@ -1,30 +1,63 @@
 import { useState, useEffect } from "react";
 import Select from "react-select";
+import { webAPI } from "../utils/constants";
+import axios from "axios";
 
 const ChatmodalTrain = (props) => {
   const [type, SetType] = useState("1");
   const [label, SetLabel] = useState("");
   const [url, Seturl] = useState("");
+  const [file, setFile] = useState("");
+  const [text, setText] = useState("");
 
-  const onOK = () => {};
+  const onOK = () => {
+    let data;
+    if (type === "1") {
+      data = url;
+      axios
+        .post(webAPI.sendurl, data)
+        .then((res) => console.log(res.data.data))
+        .catch((error) => console.log(error));
+    } else if (type === "2") {
+      data = new FormData();
+      data.append("file", file);
+      axios
+        .post(webAPI.sendfile, data)
+        .then((res) => console.log(res.data.data))
+        .catch((err) => console.log(err));
+    } else {
+      data = text;
+      axios
+        .post(webAPI.sendtext, data)
+        .then((res) => console.log(res.data.data))
+        .catch((err) => console.log(err));
+    }
+    /////
+
+    props.handleOk();
+  };
+
+  const handleFileChange = (e) => {
+    if (e.target.files) {
+      setFile(e.target.files[0]);
+    }
+  };
 
   const showHideClassname = props.open
     ? "fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto"
     : "hidden";
   return (
     <div className={showHideClassname}>
-      <div className="relative w-3/5 h-full p-5 mx-auto rounded-md shadow-lg top-10">
+      <div className="relative w-3/5 h-auto text-white p-5 mx-auto rounded-md shadow-lg top-10 bg-[--site-card-icon-color]">
         <div className="mt-3 divide-y text-start">
-          <h3 className="text-lg font-medium leading-6 text-gray-900">
-            Add provider
-          </h3>
+          <h3 className="text-lg font-medium leading-6">Add provider</h3>
           <div className="py-3 mt-2 px-7">
             <div className="flex flex-col items-start py-2">
-              <label className="mb-1 text-sm font-semibold text-black">
+              <label className="mb-1 text-sm font-semibold">
                 Context behavior (Required)
               </label>
               <Select
-                className="w-full mb-1"
+                className="w-full mb-1 text-[--site-card-icon-color]"
                 onChange={(e) => {
                   SetType(e.value);
                 }}
@@ -53,7 +86,7 @@ const ChatmodalTrain = (props) => {
               </p>
             </div>
             <div className="flex flex-col items-start py-2">
-              <label className="mb-1 text-sm font-semibold text-black">
+              <label className="mb-1 text-sm font-semibold">
                 Label (Private)
               </label>
               <input
@@ -64,7 +97,7 @@ const ChatmodalTrain = (props) => {
                   SetLabel(e.target.value);
                 }}
                 placeholder="Chatbot name"
-                className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] h-10 border rounded-lg hover:border-[--site-main-color5]"
+                className="mb-1 text-[--site-card-icon-color] w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] h-10 border rounded-lg hover:border-[--site-main-color5]"
               />
               <p className="text-sm text-[--site-main-color5]">
                 The label is used to identify your provider. It's private and
@@ -76,10 +109,10 @@ const ChatmodalTrain = (props) => {
                 </p>
               )}
             </div>
-            <div className="p-5 border border-black rounded-lg">
+            <div className="p-5 border rounded-lg">
               {type === "1" && (
                 <div className="flex flex-col items-start py-2">
-                  <label className="mb-1 text-sm font-semibold text-black">
+                  <label className="mb-1 text-sm font-semibold">
                     URL (Required)
                   </label>
                   <input
@@ -90,7 +123,7 @@ const ChatmodalTrain = (props) => {
                       Seturl(e.target.value);
                     }}
                     placeholder="https://example.com"
-                    className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] h-10 border rounded-lg hover:border-[--site-main-color5]"
+                    className="mb-1 text-[--site-card-icon-color] w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] h-10 border rounded-lg hover:border-[--site-main-color5]"
                   />
                   {!label && (
                     <p className="text-[12px] text-[--site-main-form-error]">
@@ -101,15 +134,17 @@ const ChatmodalTrain = (props) => {
               )}
               {type === "2" && (
                 <div className="flex flex-col items-start py-2">
-                  <label className="mb-1 text-sm font-semibold text-black">
+                  <label className="mb-1 text-sm font-semibold">
                     Add file(s) (Required)
                   </label>
                   <input
                     type="file"
                     name="label"
-                    accept=".pdf,.csv,.docx"
+                    onChange={handleFileChange}
+                    accept=".pdf,.csv,.docx, .srt, .epub, .txt,
+                    .md, .json, .jsonl"
                     max="100000000"
-                    className="block w-full text-sm border rounded-full text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-[--site-file-upload] hover:file:bg-[--site-file-upload] hover:file:text-white"
+                    className="block w-full text-sm border rounded-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[--site-file-upload] file:text-[--site-card-icon-color] hover:file:bg-[--site-main-color3] hover:file:text-[--site-card-icon-color] hover:file:scale-110"
                   />
                   <p className="text-sm text-[--site-main-color5] text-start">
                     Accepted formats : .pdf, .csv, .docx, .srt, .epub, .txt,
@@ -119,14 +154,15 @@ const ChatmodalTrain = (props) => {
               )}
               {type === "3" && (
                 <div className="flex flex-col items-start py-2">
-                  <label className="mb-1 text-sm font-semibold text-black">
+                  <label className="mb-1 text-sm font-semibold">
                     Text (Required)
                   </label>
                   <textarea
                     type="text"
                     cols={50}
                     rows={5}
-                    className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5]"
+                    onChange={(e) => setText(e.target.value)}
+                    className="mb-1 w-full text-[--site-card-icon-color] focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5]"
                   />
                 </div>
               )}

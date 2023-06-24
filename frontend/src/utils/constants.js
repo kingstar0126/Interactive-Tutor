@@ -9,4 +9,13 @@ export const webAPI = {
   getchats: SERVER_URL + "/api/getchats",
   updatechat: SERVER_URL + "/api/updatechat",
   deletechat: SERVER_URL + "/api/deletechat",
+  start_message: SERVER_URL + "/api/createmessage",
+  sendchat: SERVER_URL + "/api/sendchat",
+  get_message: SERVER_URL + "/api/getchatmessage",
+
+  //THis is the send traindata to server
+
+  sendurl: SERVER_URL + "/api/data/sendurl",
+  sendfile: SERVER_URL + "/api/data/sendfile",
+  sendtext: SERVER_URL + "/api/data/sendtext",
 };

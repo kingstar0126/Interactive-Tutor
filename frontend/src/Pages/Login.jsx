@@ -28,7 +28,7 @@ const Login = () => {
       navigate("/chatbot/chat");
       Setstatus(1);
     }
-  }, [status]);
+  }, [status, navigate]);
   const onSubmit = async (data) => {
     getUser(dispatch, data);
   };

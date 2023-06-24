@@ -56,8 +56,8 @@ def create_app():
     app.register_blueprint(chat_blueprint)
 
     # # Register blueprints for chatmessage routes
-    # from .message import message as message_blueprint
-    # message_blueprint.db = db
-    # app.register_blueprint(message_blueprint)
+    from .message import message as message_blueprint
+    message_blueprint.db = db
+    app.register_blueprint(message_blueprint)
 
     return app

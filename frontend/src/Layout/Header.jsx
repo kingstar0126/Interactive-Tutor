@@ -1,8 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setlocation } from "../redux/actions/locationAction";
 import Logo from "../assets/logo.png";
 
 const Header = () => {
   let location = useLocation();
+  const dispatch = useDispatch();
+  setlocation(dispatch, location.pathname);
 
   return (
     <div className="w-full h-[129px] py-2 flex bg-[--site-main-color-home] font-logo">
@@ -24,18 +28,15 @@ const Header = () => {
           </div>
           {/* Navbar */}
           <div className="flex justify-center gap-6 px-5 bg-white rounded-full">
-            <Link
+            <a
               className="p-5 font-medium text-black font-logo"
-              to="#features"
+              href="#features"
             >
               Features
-            </Link>
-            <Link
-              className="p-5 font-medium text-black font-logo"
-              to="#pricing"
-            >
+            </a>
+            <a className="p-5 font-medium text-black font-logo" href="#pricing">
               Pricing
-            </Link>
+            </a>
             <Link
               className="px-5 w-full flex items-center my-3 font-semibold text-black font-logo text-[18px] border-[3px] rounded-full border-[--site-logo-text-color]"
               to="/login"

@@ -10,7 +10,7 @@ export const getUser = (dispatch, data) => {
       console.log(res);
       if (res.status === 200)
         if (res.data.success)
-          dispatch({ type: SET_USER, payload: res.data.data });
+          dispatch({ type: SET_USER, payload: JSON.stringify(res.data.data) });
         else notification("error", res.data.message);
       else notification("error", stringConstant.FAILED_GET_DATA);
     })

@@ -42,6 +42,7 @@ class User(UserMixin, db.Model):
 class Chat(UserMixin, db.Model):
     __tablename__ = 'chat'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, nullable=False)
     label = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(100))
     model = db.Column(db.String(150))
@@ -67,6 +68,8 @@ class Message(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     chat_id = db.Column(db.Integer, nullable=False)
     message = db.Column(db.JSON)
+    behavior = db.Column(db.String(150))
+    creativity = db.Column(db.Float)
     create_date = db.Column(db.Date, default=datetime.utcnow)
     update_date = db.Column(
         db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)

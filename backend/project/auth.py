@@ -38,10 +38,14 @@ def login_post():
             'message': 'Please check your login details and try again.',
         })
     login_user(user, remember=remember)
+    new_user = {
+        'id': user.id,
+        'username': user.username
+    }
     response = {
         'success': True,
         'code': 200,
-        'data': user.username
+        'data': new_user
     }
     return jsonify(response)
 

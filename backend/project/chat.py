@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from .models import Chat
+from .models import Chat, Message
 from . import db
 from rich import print, pretty
 
@@ -10,6 +10,7 @@ chat = Blueprint('chat', __name__)
 
 @chat.route('/api/addchat', methods=['POST'])
 def add_chat():
+    user_id = request.json['user_id']
     label = request.json['label']
     description = request.json['chatdescription']
     model = request.json['chatmodel']
@@ -27,7 +28,7 @@ def add_chat():
             'code': 401,
             'message': 'A chart with the same name already exists. Please change the Name and description',
         })
-    new_chat = Chat(label=label, description=description, model=model, conversation=conversation,
+    new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
                     access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel)
     db.session.add(new_chat)
     db.session.commit()
@@ -84,10 +85,10 @@ def update_chat():
     return jsonify(response)
 
 
-@chat.route('/api/getchats', methods=['GET'])
+@chat.route('/api/getchats', methods=['POST'])
 def get_chats():
-    chats = Chat.query.all()
-
+    user_id = request.json['user_id']
+    chats = Chat.query.filter_by(user_id=user_id).all()
     response = []
     for chat in chats:
         print(chat.id)
@@ -116,6 +117,7 @@ def get_chats():
 @chat.route('/api/deletechat/<int:id>', methods=['DELETE'])
 def delete_chat(id):
     if chat := Chat.query.filter_by(id=id).first():
+        Message.query.filter_by(chat_id=id).delete()
         db.session.delete(chat)
         db.session.commit()
 

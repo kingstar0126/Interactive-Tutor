@@ -82,7 +82,10 @@ const Home = () => {
       </div>
 
       {/* Features */}
-      <div className="my-[30px] py-[30px] flex flex-col items-center w-full">
+      <div
+        id="features"
+        className="my-[30px] py-[30px] flex flex-col items-center w-full"
+      >
         <div className="container flex items-center justify-center text-[36px] font-semibold text-white">
           A Preview Of Our
           <span className="mx-2 text-[--site-logo-text-color] underline">
@@ -136,7 +139,10 @@ const Home = () => {
       </div>
 
       {/* Prices */}
-      <div className="my-[30px] py-[30px] flex flex-col items-center w-full">
+      <div
+        id="pricing"
+        className="my-[30px] py-[30px] flex flex-col items-center w-full"
+      >
         <div className="container flex items-center text-white justify-center text-[36px] font-semibold">
           Choose The Best,
           <span className="mx-2 text-[--site-logo-text-color] underline">

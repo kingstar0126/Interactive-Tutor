@@ -1,15 +1,15 @@
 import { BsFillChatLeftTextFill, BsPlus } from "react-icons/bs";
 import { useState, useEffect } from "react";
 import Chatmodal from "./Chatmodal";
-import ChatmodalTrain from "./ChatmodalTrain";
 import ChatTable from "./ChatTable";
 import { useSelector } from "react-redux";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { webAPI } from "../utils/constants";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 
 const Chat = () => {
+  const location = useLocation();
   const notification = (type, message) => {
     // To do in here
     if (type === "error") {
@@ -20,18 +20,16 @@ const Chat = () => {
     }
   };
   const [chat, SetChat] = useState([]);
-  const user = useSelector((state) => state.user.user);
+  const user = JSON.parse(useSelector((state) => state.user.user));
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isTrainModalOpen, SetIsTrainModalOpen] = useState(false);
-  let location = useLocation();
 
   const showModal = () => {
     setIsModalOpen(true);
   };
-  const showTrainModal = () => {
-    SetIsTrainModalOpen(true);
-  };
+
   const handleOk = (data) => {
+    data["user_id"] = user.id;
+    console.log(data, "--------------------------------------");
     axios.post(webAPI.addchat, data).then((res) => {
       if (!res.data.success) notification("error", res.data.message);
       else {
@@ -40,18 +38,20 @@ const Chat = () => {
       }
     });
     setIsModalOpen(false);
-    SetIsTrainModalOpen(false);
   };
   const handleCancel = () => {
     setIsModalOpen(false);
-    SetIsTrainModalOpen(false);
   };
 
   useEffect(() => {
     getChats();
   }, []);
   const getChats = () => {
-    axios.get(webAPI.getchats).then((res) => {
+    let data = {
+      user_id: user.id,
+    };
+    console.log(data);
+    axios.post(webAPI.getchats, data).then((res) => {
       SetChat(res.data.data);
     });
   };
@@ -75,7 +75,7 @@ const Chat = () => {
       </div>
       <div className="flex flex-col w-full">
         <div className="flex flex-col items-start justify-center w-full gap-3 p-5 bg-[--site-card-icon-color] text-white mt-[10px] rounded-2xl">
-          <p className="text-[20px] font-semibold">Hello, {user}!</p>
+          <p className="text-[20px] font-semibold">Hello, {user.username}!</p>
           <p className="text-[14px]">
             Welcome to here! To get started, the first step is to create a
             widget, which can be either a chatbot (chats) or a toolbot (tools).
@@ -131,15 +131,6 @@ const Chat = () => {
                 <BsPlus className="w-[30px] h-[30px] text-xl pointer-events-none" />
                 Add chat
               </button>
-
-              {/* <button
-                type="button"
-                onClick={showTrainModal}
-                className="text-white bg-[--site-card-icon-color] hover:bg-[--site-card-icon-color]/90 focus:ring-4 focus:outline-none focus:ring-[--site-card-icon-color]/50 font-medium rounded-xl text-sm px-2 py-1 text-center inline-flex items-center dark:focus:ring-[--site-card-icon-color]/55"
-              >
-                <BsPlus className="w-[30px] h-[30px] text-xl pointer-events-none" />
-                Add chat
-              </button> */}
             </div>
             <div className="w-full h-[500px] bg-[--site-main-color3] rounded-xl">
               <ChatTable
@@ -150,16 +141,13 @@ const Chat = () => {
             </div>
           </div>
         ) : (
-          <Outlet />
+          <div className="p-5 w-full mt-5 border-2 border-[--site-card-icon-color] bg-[--site-main-color3] rounded-2xl">
+            <Outlet />
+          </div>
         )}
 
         <Chatmodal
           open={isModalOpen}
-          handleOk={handleOk}
-          handleCancel={handleCancel}
-        />
-        <ChatmodalTrain
-          open={isTrainModalOpen}
           handleOk={handleOk}
           handleCancel={handleCancel}
         />
