@@ -3,6 +3,7 @@ from . import db
 from flask_login import UserMixin
 from flask_dance.consumer.storage.sqla import OAuthConsumerMixin
 import jwt
+import uuid
 from time import time
 from datetime import datetime
 
@@ -51,9 +52,11 @@ class Chat(UserMixin, db.Model):
     creativity = db.Column(db.Float)
     behavior = db.Column(db.String(150))
     behaviormodel = db.Column(db.String(150))
+    train = db.Column(db.JSON)
     create_date = db.Column(db.Date, default=datetime.utcnow)
     update_date = db.Column(
         db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
+    uuid = db.Column(db.UUID(as_uuid=True), unique=True, default=uuid.uuid4)
 
     def __repr__(self):
         return f'Chat {self.label}'
@@ -73,6 +76,7 @@ class Message(UserMixin, db.Model):
     create_date = db.Column(db.Date, default=datetime.utcnow)
     update_date = db.Column(
         db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
+    uuid = db.Column(db.UUID(as_uuid=True), unique=True, default=uuid.uuid4)
 
     def __repr__(self):
         return f'message {self.id}'
@@ -80,6 +84,20 @@ class Message(UserMixin, db.Model):
     @staticmethod
     def get_message(chat_id):
         return Message.query.filter_by(chat_id=chat_id).first()
+
+
+class Train(UserMixin, db.Model):
+    __tablename__ = 'traindata'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    label = db.Column(db.String(150))
+    type = db.Column(db.String(150))
+    status = db.Column(db.String(150))
+    create_date = db.Column(db.Date, default=datetime.utcnow)
+    update_date = db.Column(
+        db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f'train {self.id}'
 
 
 class OAuth(OAuthConsumerMixin, db.Model):

@@ -1,200 +1,113 @@
-import { CircleStackIcon } from "@heroicons/react/24/solid";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ChatmodalTrain from "./ChatmodalTrain";
-import {
-  Card,
-  CardHeader,
-  Typography,
-  Button,
-  CardBody,
-  Chip,
-  CardFooter,
-} from "@material-tailwind/react";
+import { CircleStackIcon } from "@heroicons/react/24/solid";
+import { webAPI } from "../utils/constants";
+import axios from "axios";
+import { useSelector } from "react-redux";
 
-const TABLE_HEAD = ["Label", "Type", "Status", "action"];
-
-const TABLE_ROWS = [
-  {
-    img: "",
-    name: "John Michael",
-    email: "john@creative-tim.com",
-    job: "Manager",
-    org: "Organization",
-    status: true,
-  },
-  {
-    img: "",
-    name: "Alexa Liras",
-    email: "alexa@creative-tim.com",
-    job: "Programator",
-    org: "Developer",
-    status: false,
-  },
-  {
-    img: "",
-    name: "Laurent Perrier",
-    email: "laurent@creative-tim.com",
-    job: "Executive",
-    org: "Projects",
-    status: false,
-  },
-  {
-    img: "",
-    name: "Michael Levi",
-    email: "michael@creative-tim.com",
-    job: "Programator",
-    org: "Developer",
-    status: true,
-  },
-  {
-    img: "",
-    name: "Richard Gran",
-    email: "richard@creative-tim.com",
-    job: "Manager",
-    org: "Executive",
-    status: false,
-  },
-];
-
-export default function Example() {
+export default function TraindataTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [tableData, setTableData] = useState([]);
+  const [reload, setReload] = useState(true);
+  const chat = JSON.parse(useSelector((state) => state.chat.chat));
 
+  useEffect(() => {
+    console.log("Hello, THis is the trindata history", webAPI.gettraindatas);
+
+    get_traindata();
+  }, []);
+
+  const get_traindata = () => {
+    let uuid = chat.uuid;
+    let chatbot = { uuid };
+    axios
+      .post(webAPI.gettraindatas, chatbot)
+      .then((res) => setTableData(res.data))
+      .catch((error) => console.log(error));
+    setReload(!reload);
+  };
   const showModal = () => {
     setIsModalOpen(true);
   };
 
   const handleOk = (data) => {
+    get_traindata();
     setIsModalOpen(false);
   };
   const handleCancel = () => {
     setIsModalOpen(false);
   };
 
-  return (
-    <div className="h-full w-full">
-      <Card>
-        <CardHeader floated={false} shadow={false} className="rounded-none">
-          <div className="mb-8 flex items-center justify-end">
-            <div className="flex shrink-0 flex-col gap-2 sm:flex-row bg-[--site-card-icon-color] rounded-xl mr-5">
-              <Button
-                className="flex items-center gap-3"
-                color="blue"
-                onClick={showModal}
-                size="sm"
-              >
-                <CircleStackIcon
-                  strokeWidth={2}
-                  className="h-4 w-4 pointer-events-none"
-                />{" "}
-                Add member
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-        <CardBody className="px-0 w-full h-full">
-          <table className="mt-4 w-full min-w-max table-auto text-left">
-            <thead>
-              <tr>
-                {TABLE_HEAD.map((head) => (
-                  <th key={head} className="p-4 border-b-[1px]">
-                    <Typography
-                      variant="small"
-                      color="blue-gray"
-                      className="font-bold leading-none opacity-70 text-center"
-                    >
-                      {head}
-                    </Typography>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {TABLE_ROWS.map(({ name, job, org, status }, index) => {
-                const isLast = index === TABLE_ROWS.length - 1;
-                const classes = isLast
-                  ? "p-4"
-                  : "p-4 border-b border-blue-gray-50";
+  const deleteTrain = (data) => {
+    let uuid = chat.uuid;
+    let traindata = { uuid: uuid, id: data.id };
 
-                return (
-                  <tr key={name} className="text-center">
-                    <td className={classes}>
-                      <div className="flex flex-col">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal"
-                        >
-                          {name}
-                        </Typography>
-                      </div>
-                    </td>
-                    <td className={classes}>
-                      <div className="flex flex-col">
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal"
-                        >
-                          {job}
-                        </Typography>
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal opacity-70"
-                        >
-                          {org}
-                        </Typography>
-                      </div>
-                    </td>
-                    <td className={classes}>
-                      <div className="w-full flex justify-center">
-                        {status === true && (
-                          <Chip
-                            className="text-center w-2/5 bg-[--site-success-text-color]"
-                            value={status ? "online" : "offline"}
-                          />
-                        )}
-                        {status === false && (
-                          <Chip
-                            className="text-center w-2/5 bg-[--site-warning-text-color]"
-                            value={status ? "online" : "offline"}
-                          />
-                        )}
-                      </div>
-                    </td>
-                    <td className={classes}>
-                      <div className="flex gap-2 w-full justify-center">
-                        <span
-                          onClick={() => {}}
-                          className="w-1/3 text-[--site-card-icon-color] text-center text-[14px] bg-[--site-logo-text-color] hover:border-[--site-card-icon-color] border rounded-full active:bg-[--site-main-color4] select-none active:text-white"
-                        >
-                          Edit
-                        </span>
-                        <span className="text-[--site-card-icon-color] w-1/3 text-[14px] text-center hover:bg-[--site-main-form-error] border-[--site-main-form-error] hover:text-white border rounded-full active:bg-[--site-main-form-error1] select-none active:text-white">
-                          Delete
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </CardBody>
-        <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
-          <Typography variant="small" color="blue-gray" className="font-normal">
-            Page 1 of 10
-          </Typography>
-          <div className="flex gap-2">
-            <Button variant="outlined" color="blue-gray" size="sm">
-              Previous
-            </Button>
-            <Button variant="outlined" color="blue-gray" size="sm">
-              Next
-            </Button>
-          </div>
-        </CardFooter>
-      </Card>
+    axios
+      .post(webAPI.deletetrain, traindata)
+      .then((res) => get_traindata())
+      .catch((err) => console.log(err));
+  };
+
+  return (
+    <div className="flex flex-col w-full h-full gap-5 p-5">
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={showModal}
+          className="text-[--site-card-icon-color] bg-[--site-logo-text-color] hover:bg-[--site-card-icon-color]/90 focus:ring-4 focus:outline-none focus:ring-[--site-card-icon-color]/50 font-medium rounded-xl text-sm px-2 py-1 text-center inline-flex items-center dark:focus:ring-[--site-card-icon-color]/55"
+        >
+          <CircleStackIcon className="w-[30px] h-[30px] text-xl pointer-events-none" />
+          Add chat
+        </button>
+      </div>
+      <table className="bg-[--site-card-icon-color] text-sm text-left text-[--site-main-Table-Text] flex flex-col w-full">
+        <thead className="text-xs text-[--site-main-Table-Tex] flex w-full uppercase dark:bg-[--site-main-Table-Tex] dark:text-[--site-main-Table-Text_Dark]">
+          <tr className="flex items-center justify-center w-full text-center">
+            <th className="w-2/5 px-6 py-3">Label</th>
+            <th className="w-1/5 px-6 py-3">type</th>
+            <th className="w-1/5 px-6 py-3">status</th>
+            <th className="w-1/5 px-6 py-3">Action</th>
+          </tr>
+        </thead>
+
+        <tbody className="flex flex-col w-full h-full text-center">
+          {tableData.map((data, index) => {
+            return (
+              <tr
+                className="bg-[--site-main-color3] text-[--site-card-icon-color] border-[1px] border-[--site-card-icon-color] flex items-center justify-center w-full"
+                key={index}
+              >
+                <th
+                  scope="row"
+                  className="px-6 w-2/5 py-4 font-bold text-[--site-card-icon-color] whitespace-nowrap flex items-center justify-center"
+                >
+                  <span className="flex items-center justify-center w-full text-center whitespace-normal">
+                    {data["label"]}
+                  </span>
+                </th>
+                <td className="w-1/5 px-6 py-4">{data["type"]}</td>
+                <td className="flex items-center justify-center w-1/5 px-6 py-4">
+                  <div className="bg-[--site-success-text-color] rounded-full w-1/2">
+                    {"trained"}
+                  </div>
+                </td>
+                <td className="flex items-center justify-center w-1/5 gap-2 px-6 py-4">
+                  <div className="flex gap-2">
+                    <span
+                      onClick={() => {
+                        deleteTrain(data);
+                      }}
+                      className="text-[--site-card-icon-color] w-[60px] text-center hover:bg-[--site-main-form-error] border-[--site-main-form-error] hover:text-white p-2 border rounded-xl active:bg-[--site-main-form-error1] select-none active:text-white"
+                    >
+                      Delete
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
       <ChatmodalTrain
         open={isModalOpen}
         handleOk={handleOk}

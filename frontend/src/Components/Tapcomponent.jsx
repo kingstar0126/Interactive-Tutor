@@ -8,7 +8,7 @@ import {
 } from "@material-tailwind/react";
 import NewChat from "./NewChat";
 import Branding from "./Branding";
-import TrainData from "./TrainData";
+import TraindataTable from "./TrainData";
 import History from "./History";
 
 export default function Example() {
@@ -27,7 +27,7 @@ export default function Example() {
     {
       label: "Training Data",
       value: "training Data",
-      desc: <TrainData />,
+      desc: <TraindataTable />,
     },
     {
       label: "Conversation Explorer",
@@ -70,7 +70,7 @@ export default function Example() {
           <TabPanel
             key={value}
             value={value}
-            className="flex items-center justify-center bg-[--site-card-icon-color] rounded-xl min-h-[800px]"
+            className="flex justify-center bg-[--site-card-icon-color] rounded-xl min-h-[800px]"
           >
             {desc}
           </TabPanel>

@@ -60,4 +60,9 @@ def create_app():
     message_blueprint.db = db
     app.register_blueprint(message_blueprint)
 
+    # # Register blueprints for traindata routes
+    from .train import train as train_blueprint
+    train_blueprint.db = db
+    app.register_blueprint(train_blueprint)
+
     return app

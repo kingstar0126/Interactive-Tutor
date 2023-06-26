@@ -1,11 +1,43 @@
 from flask import Blueprint, jsonify, request
-from .models import Chat, Message
+from .models import Chat, Message, Train
 from . import db
 from rich import print, pretty
+import json
+import pinecone
+import openai
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
+PINECONE_ENV = os.getenv('PINECONE_ENV')
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
+pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
+openai.openai_api_key = OPENAI_API_KEY
 
 pretty.install()
 
 chat = Blueprint('chat', __name__)
+
+
+def delete_vectore(source):
+    index = pinecone.Index(PINECONE_INDEX_NAME)
+    return index.delete(
+        filter={
+            "source": {source},
+        }
+    )
+
+# def create_index(uuid):
+#     name = f"{uuid}"
+#     pinecone.create_index(name, dimension=1536)
+
+
+# def delete_index(uuid):
+#     name = f"{uuid}"
+#     pinecone.delete_index(name)
 
 
 @chat.route('/api/addchat', methods=['POST'])
@@ -19,19 +51,20 @@ def add_chat():
     creativity = request.json['Creativity']
     behavior = request.json['behavior']
     behaviormodel = request.json['behaviormodel']
+    train = json.dumps([])
 
-    chat = Chat.query.filter_by(label=label).first()
-
-    if chat:
+    if chat := Chat.query.filter_by(label=label).first():
         return jsonify({
             'success': False,
             'code': 401,
             'message': 'A chart with the same name already exists. Please change the Name and description',
         })
     new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
-                    access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel)
+                    access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train)
     db.session.add(new_chat)
     db.session.commit()
+    # Create index in the pinecone
+
     response = {
         'success': True,
         'code': 200,
@@ -101,7 +134,9 @@ def get_chats():
             'access': chat.access,
             'creativity': chat.creativity,
             'behavior': chat.behavior,
-            'behaviormodel': chat.behaviormodel
+            'behaviormodel': chat.behaviormodel,
+            'uuid': chat.uuid,
+            'train': json.loads(chat.train)
         }
         response.append(chat_data)
 
@@ -118,6 +153,13 @@ def get_chats():
 def delete_chat(id):
     if chat := Chat.query.filter_by(id=id).first():
         Message.query.filter_by(chat_id=id).delete()
+        train_ids = json.loads(chat.train)
+        # delete index in the pinecone
+
+        for id in train_ids:
+            source = Train.query.filter_by(id=id).first().label
+            delete_vectore(source)
+            Train.query.filter_by(id=id).delete()
         db.session.delete(chat)
         db.session.commit()
 

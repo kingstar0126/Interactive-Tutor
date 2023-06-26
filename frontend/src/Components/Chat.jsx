@@ -29,7 +29,6 @@ const Chat = () => {
 
   const handleOk = (data) => {
     data["user_id"] = user.id;
-    console.log(data, "--------------------------------------");
     axios.post(webAPI.addchat, data).then((res) => {
       if (!res.data.success) notification("error", res.data.message);
       else {

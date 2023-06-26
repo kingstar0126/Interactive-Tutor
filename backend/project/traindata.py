@@ -24,19 +24,40 @@ pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
 openai.openai_api_key = OPENAI_API_KEY
 
 
-loader = TextLoader('data.txt')
-documents = loader.load()
+def text_spliter(text):
+    text_splitter = CharacterTextSplitter(chunk_size=400, chunk_overlap=20)
+    docs = text_splitter.split_documents(text)
+    print(docs)
 
-text_splitter = CharacterTextSplitter(chunk_size=400, chunk_overlap=20)
 
-docs = text_splitter.split_documents(documents)
+# loader = TextLoader('data.txt')
+# documents = loader.load()
+# print(documents)
+# text_splitter = CharacterTextSplitter(chunk_size=400, chunk_overlap=20)
 
-for i, data in enumerate(docs):
-    print("\nID -> ", i)
-    print("\nData -> ", data, '\n')
-# Setting up embeddings provider
-embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
+# docs = text_splitter.split_documents(documents)
 
-# Generate embeddings using OpenAI and store them in the Pinecone index
-docsearch = Pinecone.from_documents(
-    docs, embeddings, index_name=PINECONE_INDEX_NAME)
+# for i, data in enumerate(docs):
+#     print("\nID -> ", i)
+#     print("\nData -> ", data, '\n')
+
+# print(docs)
+# # Setting up embeddings provider
+
+# embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
+
+# # Generate embeddings using OpenAI and store them in the Pinecone index
+# docsearch = Pinecone.from_documents(
+#     docs, embeddings, index_name=PINECONE_INDEX_NAME)
+
+
+# embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
+# index = pinecone.Index(PINECONE_INDEX_NAME)
+
+
+# res = index.delete(
+#     filter={
+#         "source": 'data.txt',
+#     }
+# )
+# print(res)

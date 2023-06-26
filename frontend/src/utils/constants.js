@@ -18,4 +18,6 @@ export const webAPI = {
   sendurl: SERVER_URL + "/api/data/sendurl",
   sendfile: SERVER_URL + "/api/data/sendfile",
   sendtext: SERVER_URL + "/api/data/sendtext",
+  gettraindatas: SERVER_URL + "/api/data/gettraindatas",
+  deletetrain: SERVER_URL + "/api/data/deletetrain",
 };

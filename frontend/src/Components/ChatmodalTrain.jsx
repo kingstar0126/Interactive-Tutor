@@ -1,7 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Select from "react-select";
 import { webAPI } from "../utils/constants";
 import axios from "axios";
+import { useSelector } from "react-redux";
+import toast, { Toaster } from "react-hot-toast";
 
 const ChatmodalTrain = (props) => {
   const [type, SetType] = useState("1");
@@ -9,32 +11,58 @@ const ChatmodalTrain = (props) => {
   const [url, Seturl] = useState("");
   const [file, setFile] = useState("");
   const [text, setText] = useState("");
+  const chat = JSON.parse(useSelector((state) => state.chat.chat));
+  const notification = (type, message) => {
+    // To do in here
+    if (type === "error") {
+      toast.error(message);
+    }
+    if (type === "success") {
+      toast.success(message);
+    }
+  };
+
+  const urlPatternValidation = (url) => {
+    const regex = new RegExp(
+      "^(https?://)([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?"
+    );
+    return regex.test(url);
+  };
 
   const onOK = () => {
-    let data;
+    let chatbot = chat.uuid;
     if (type === "1") {
-      data = url;
-      axios
-        .post(webAPI.sendurl, data)
-        .then((res) => console.log(res.data.data))
-        .catch((error) => console.log(error));
+      if (urlPatternValidation(url)) {
+        let data;
+        data = { url, chatbot };
+        axios
+          .post(webAPI.sendurl, data)
+          .then((res) => props.handleOk(res.data.data))
+          .catch((error) => console.log(error));
+      } else notification("error", "Invalued URL");
     } else if (type === "2") {
-      data = new FormData();
-      data.append("file", file);
+      let data = new FormData();
+      let chatbot = chat.uuid;
+      const config = {
+        headers: {
+          "content-type": "multipart/form-data",
+        },
+      };
+      const filename = file.name.replaceAll(" ", "");
+      data.append("file", file, filename);
+      data.append("chatbot", chatbot);
       axios
-        .post(webAPI.sendfile, data)
-        .then((res) => console.log(res.data.data))
+        .post(webAPI.sendfile, data, config)
+        .then((res) => props.handleOk(res.data.data))
         .catch((err) => console.log(err));
     } else {
-      data = text;
+      let data;
+      data = { text, chatbot };
       axios
         .post(webAPI.sendtext, data)
-        .then((res) => console.log(res.data.data))
+        .then((res) => props.handleOk(res.data.data))
         .catch((err) => console.log(err));
     }
-    /////
-
-    props.handleOk();
   };
 
   const handleFileChange = (e) => {
@@ -142,13 +170,13 @@ const ChatmodalTrain = (props) => {
                     name="label"
                     onChange={handleFileChange}
                     accept=".pdf,.csv,.docx, .srt, .epub, .txt,
-                    .md, .json, .jsonl"
+                    .md, .json"
                     max="100000000"
                     className="block w-full text-sm border rounded-full text-white file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[--site-file-upload] file:text-[--site-card-icon-color] hover:file:bg-[--site-main-color3] hover:file:text-[--site-card-icon-color] hover:file:scale-110"
                   />
                   <p className="text-sm text-[--site-main-color5] text-start">
                     Accepted formats : .pdf, .csv, .docx, .srt, .epub, .txt,
-                    .md, .json, .jsonl - Max file size: 100MB
+                    .md, .json, - Max file size: 100MB
                   </p>
                 </div>
               )}

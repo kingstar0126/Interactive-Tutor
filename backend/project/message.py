@@ -27,15 +27,17 @@ def init_message():
     db.session.add(new_message)
     db.session.commit()
     response = {'success': True, 'code': 200,
-                'message': "Successfuly created", 'data': new_message.id}
+                'message': "Successfuly created", 'data': new_message.uuid}
     return jsonify(response)
 
 
 @message.route('/api/sendchat', methods=['POST'])
 def send_message():
-    id = request.json['id']
+    print(request.json)
+    uuid = request.json['id']
     query = request.json['_message']
-    current_message = Message.query.filter_by(id=id).first()
+    current_message = Message.query.filter_by(uuid=uuid).first()
+    print(current_message)
     temp = current_message.creativity
     history = json.loads(current_message.message)
     behavior = current_message.behavior
@@ -61,11 +63,11 @@ def send_message():
 
 @message.route('/api/getchatmessage', methods=['POST'])
 def get_message():
-    id = request.json['id']
+    uuid = request.json['id']
     print("HIHIHI---------------------------", request.json)
-    current_message = Message.query.filter_by(id=id).first()
+    current_message = Message.query.filter_by(uuid=uuid).first()
     response = {
-        'id': current_message.id,
+        'uuid': current_message.uuid,
         'message': json.loads(current_message.message),
         'update_date': current_message.update_date.strftime('%Y-%m-%d %H:%M:%S.%f')
     }
