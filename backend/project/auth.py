@@ -49,7 +49,8 @@ def login_post():
     login_user(user, remember=remember)
     new_user = {
         'id': user.id,
-        'username': user.username
+        'username': user.username,
+        'role': user.role
     }
     response = {
         'success': True,
@@ -116,12 +117,12 @@ def signup_post():
     username = request.json['username']
     email = request.json['email']
     password = request.json['password']
-
+    role = 0
     user = User.query.filter_by(email=email).first()
 
     if user:
         return jsonify({'message': 'Email address already exists', 'success': False})
-    new_user = User(username=username, email=email,
+    new_user = User(username=username, email=email, role=role,
                     password=generate_password_hash(password, method='sha256'))
 
     db.session.add(new_user)

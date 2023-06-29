@@ -25,4 +25,14 @@ export const webAPI = {
     sendtext: SERVER_URL + "/api/data/sendtext",
     gettraindatas: SERVER_URL + "/api/data/gettraindatas",
     deletetrain: SERVER_URL + "/api/data/deletetrain",
+
+    //stripe route
+
+    create_product: SERVER_URL + "/api/create/product", // user_id
+    get_products: SERVER_URL + "/api/getproducts",
+    update_product: SERVER_URL + "/api/update/product", //user_id, product_id
+    delete_product: SERVER_URL + "/api/delete/product", //user_id, product_id
+    delete_all_product: SERVER_URL + "/api/delete/all_products", //user_id
+
+    create_checkout: SERVER_URL + "/api/create/checkout/session", //subscriptionPlanId
 };

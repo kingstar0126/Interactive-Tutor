@@ -12,59 +12,59 @@ import Chatbubble from "./Components/Chatbubble";
 import Notfound from "./Pages/Notfound";
 
 const AppRoutes = [
-  {
-    path: "/chatbot",
-    element: <Layout />,
-    children: [
-      {
-        path: "chat",
-        element: <Chat />,
+    {
+        path: "/chatbot",
+        element: <Layout />,
         children: [
-          {
-            path: "newchat",
-            element: <Tapcomponent />,
-          },
+            {
+                path: "chat",
+                element: <Chat />,
+                children: [
+                    {
+                        path: "newchat",
+                        element: <Tapcomponent />,
+                    },
+                ],
+            },
+            {
+                path: "subscription",
+                element: <Subscription />,
+            },
         ],
-      },
-      {
-        path: "subscription",
-        element: <Subscription />,
-      },
-    ],
-  },
-  {
-    path: "/",
-    children: [
-      {
+    },
+    {
         path: "/",
-        element: <Home />,
-      },
-      {
-        path: "/login",
-        element: <Login />,
-      },
-      {
-        path: "/register",
-        element: <Register />,
-      },
-      {
-        path: "/resetpassword",
-        element: <Forgetpassword />,
-      },
-      {
-        path: "/changepassword",
-        element: <Changepassword />,
-      },
-      {
-        path: "/chat/embedding/:id",
-        element: <NewChat />,
-      },
-    ],
-  },
-  {
-    path: "*",
-    element: <Notfound />,
-  },
+        children: [
+            {
+                path: "/",
+                element: <Home />,
+            },
+            {
+                path: "/login",
+                element: <Login />,
+            },
+            {
+                path: "/register",
+                element: <Register />,
+            },
+            {
+                path: "/resetpassword",
+                element: <Forgetpassword />,
+            },
+            {
+                path: "/changepassword",
+                element: <Changepassword />,
+            },
+            {
+                path: "/chat/embedding/:id",
+                element: <NewChat />,
+            },
+        ],
+    },
+    {
+        path: "*",
+        element: <Notfound />,
+    },
 ];
 
 export default AppRoutes;

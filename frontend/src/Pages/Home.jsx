@@ -4,6 +4,7 @@ import { MdDone } from "react-icons/md";
 import AccordionComponent from "../Components/Accordion";
 import StripeCard from "../Components/StripeCard";
 import Switch from "../Components/Switch";
+import Subscription from "../Components/Subscription";
 
 const Home = () => {
     const change_text = (toggle) => {};

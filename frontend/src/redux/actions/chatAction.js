@@ -27,7 +27,6 @@ export const setchatbot = (dispatch, data) => {
         .then((res) => {
             if (res.status === 200) {
                 dispatch({ type: SET_CHATBOT, payload: res.data.data });
-                window.location.reload();
             } else notification("error", stringConstant.FAILED_GET_DATA);
         })
         .catch((err) => console.log(err));

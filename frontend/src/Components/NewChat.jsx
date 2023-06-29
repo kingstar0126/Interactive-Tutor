@@ -65,11 +65,11 @@ const NewChat = () => {
                 chatbot_start.current.classList.remove("hidden");
                 window_chat.current.classList.add("hidden");
             }
-        } else if (chat) {
+        } else if (previous_location === current_location && chat) {
             console.log("The load chatbot!!!");
             let id = chatbot;
             axios
-                .post(webAPI.getchat, { id: chat.id })
+                .post(webAPI.getchat, { id: id })
                 .then((res) => {
                     console.log(res.data);
                     if (res.data.code === 200) {

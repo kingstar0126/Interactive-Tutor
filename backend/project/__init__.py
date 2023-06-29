@@ -66,8 +66,8 @@ def create_app():
     app.register_blueprint(train_blueprint)
 
     # Register blueprints for stripe routes
-    from .stripe import stripe as stripe_blueprint
-    stripe_blueprint.db = db
-    app.register_blueprint(stripe_blueprint)
+    from .stripe import payment as payment_blueprint
+    payment_blueprint.db = db
+    app.register_blueprint(payment_blueprint)
 
     return app
