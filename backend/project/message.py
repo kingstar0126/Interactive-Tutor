@@ -5,7 +5,7 @@ from rich import print, pretty
 import datetime
 import time
 import json
-from .generate_response import generate_message
+from .generate_response import generate_message, generate_AI_message, generate_Bubble_message
 pretty.install()
 
 message = Blueprint('message', __name__)
@@ -36,15 +36,25 @@ def send_message():
     print(request.json)
     uuid = request.json['id']
     query = request.json['_message']
+    behaviormodel = request.json['behaviormodel']
+    print(behaviormodel)
     current_message = Message.query.filter_by(uuid=uuid).first()
     print(current_message)
     temp = current_message.creativity
     history = json.loads(current_message.message)
-    behavior = current_message.behavior
-    start_time = time.time()
-    response, chat_history, token = generate_message(
-        query, history, behavior, temp)
-    end_time = time.time()
+    behavior = ""
+    if behaviormodel == "Behave like the default ChatGPT":
+        behavior = current_message.behavior
+        start_time = time.time()
+        response, chat_history, token = generate_AI_message(
+            query, history, behavior, temp)
+        end_time = time.time()
+    else:
+        behavior = current_message.behavior + "\n" + behaviormodel
+        start_time = time.time()
+        response, chat_history, token = generate_message(
+            query, history, behavior, temp)
+        end_time = time.time()
     wall_time = end_time - start_time
     print("This is the response data->", chat_history, token, wall_time)
 
@@ -59,6 +69,18 @@ def send_message():
         'data': response
     }
     return jsonify(_response)
+
+
+@message.route('/api/sendchatbubble', methods=['POST'])
+def send_chat_bubble():
+    print(request.json)
+    message = request.json['_message']
+    data = {
+        'success': True,
+        'code': 200,
+        'data': generate_Bubble_message(message)
+    }
+    return jsonify(data)
 
 
 @message.route('/api/getchatmessage', methods=['POST'])
@@ -76,5 +98,42 @@ def get_message():
         'code': 200,
         'message': 'Your messageBot created successfully!!!',
         'data': response
+    }
+    return jsonify(_response)
+
+
+@message.route('/api/getmessages', methods=['POST'])
+def get_messages():
+    chat_id = request.json['id']
+    print("HIHIHI---------------------------", request.json)
+    current_messages = Message.query.filter_by(chat_id=chat_id).all()
+    response = []
+    for _message in current_messages:
+        message_data = {
+            'uuid': _message.uuid,
+            'message': json.loads(_message.message),
+            'update_data': _message.update_date.strftime('%Y-%m-%d %H:%M:%S.%f')
+        }
+        response.append(message_data)
+
+    _response = {
+        'success': True,
+        'code': 200,
+        'message': 'Your messageBot created successfully!!!',
+        'data': response
+    }
+    return jsonify(_response)
+
+
+@message.route('/api/deletemessage', methods=['POST'])
+def delete_message():
+    uuid = request.json['id']
+    print("HIHIHI---------------------------", request.json)
+    Message.query.filter_by(uuid=uuid).delete()
+    db.session.commit()
+    _response = {
+        'success': True,
+        'code': 200,
+        'message': 'Your messageBot created successfully!!!'
     }
     return jsonify(_response)

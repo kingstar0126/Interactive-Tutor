@@ -7,6 +7,9 @@ import Layout from "./Layout/Layout";
 import Chat from "./Components/Chat";
 import Subscription from "./Components/Subscription";
 import Tapcomponent from "./Components/Tapcomponent";
+import NewChat from "./Components/NewChat";
+import Chatbubble from "./Components/Chatbubble";
+import Notfound from "./Pages/Notfound";
 
 const AppRoutes = [
   {
@@ -52,7 +55,15 @@ const AppRoutes = [
         path: "/changepassword",
         element: <Changepassword />,
       },
+      {
+        path: "/chat/embedding/:id",
+        element: <NewChat />,
+      },
     ],
+  },
+  {
+    path: "*",
+    element: <Notfound />,
   },
 ];
 

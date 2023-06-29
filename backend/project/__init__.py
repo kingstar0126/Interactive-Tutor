@@ -17,7 +17,7 @@ db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
-    CORS(app, resources={r"/api/*": {"origins": "*"}})
+    CORS(app)
     app.config['SECRET_KEY'] = 'key-goes-here'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://chatbot:1@localhost/chatbot'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -36,7 +36,7 @@ def create_app():
     jwt.init_app(app)
     mail.init_app(app)
 
-    from .models import User, OAuth
+    from .models import User
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -64,5 +64,10 @@ def create_app():
     from .train import train as train_blueprint
     train_blueprint.db = db
     app.register_blueprint(train_blueprint)
+
+    # Register blueprints for stripe routes
+    from .stripe import stripe as stripe_blueprint
+    stripe_blueprint.db = db
+    app.register_blueprint(stripe_blueprint)
 
     return app

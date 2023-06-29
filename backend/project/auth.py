@@ -23,11 +23,20 @@ def generate_password(length=12):
 auth = Blueprint('auth', __name__)
 
 
-@auth.route('/api/login', methods=['POST'])
+@auth.route('/api/login',  methods=['POST', 'OPTIONS'])
 def login_post():
+    if request.method == 'OPTIONS':  # check for OPTIONS method
+        headers = {
+            'Access-Control-Allow-Origin': '*',  # Required for cors access
+            'Access-Control-Allow-Methods': 'POST',  # Required for cors access
+            'Access-Control-Allow-Headers': 'content-type',  # Required for cors access
+        }
+        return '', 200, headers
+
+    print(request.json)
     email = request.json['email']
     password = request.json['password']
-    remember = True
+    remember = False
 
     user = User.query.filter_by(email=email).first()
 

@@ -57,11 +57,11 @@ export default function TraindataTable() {
           className="text-[--site-card-icon-color] bg-[--site-logo-text-color] hover:bg-[--site-card-icon-color]/90 focus:ring-4 focus:outline-none focus:ring-[--site-card-icon-color]/50 font-medium rounded-xl text-sm px-2 py-1 text-center inline-flex items-center dark:focus:ring-[--site-card-icon-color]/55"
         >
           <CircleStackIcon className="w-[30px] h-[30px] text-xl pointer-events-none" />
-          Add chat
+          Add Data
         </button>
       </div>
       <table className="bg-[--site-card-icon-color] text-sm text-left text-[--site-main-Table-Text] flex flex-col w-full">
-        <thead className="text-xs text-[--site-main-Table-Tex] flex w-full uppercase dark:bg-[--site-main-Table-Tex] dark:text-[--site-main-Table-Text_Dark]">
+        <thead className="text-xs rounded-tl-xl rounded-tr-xl flex w-full uppercase text-[--site-card-icon-color] bg-[--site-logo-text-color]">
           <tr className="flex items-center justify-center w-full text-center">
             <th className="w-2/5 px-6 py-3">Label</th>
             <th className="w-1/5 px-6 py-3">type</th>

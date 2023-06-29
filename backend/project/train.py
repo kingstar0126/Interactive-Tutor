@@ -37,9 +37,10 @@ train = Blueprint('train', __name__)
 
 def delete_vectore(source):
     index = pinecone.Index(PINECONE_INDEX_NAME)
+    print("\n\n", source)
     return index.delete(
         filter={
-            "source": {source},
+            "source": f"{source}",
         }
     )
 
@@ -192,8 +193,8 @@ def create_train_url():
     trainid = create_train(url, 'url', True)
 
     result = text_to_docs(data, url)
-    create_vector(result)
-
+    # create_vector(result)
+    print(result)
     if (trainid == False):
         return jsonify({
             'success': False,
@@ -249,7 +250,8 @@ def create_train_file():
         output = parse_epub(file)
     print(output)
     result = text_to_docs(output, file.filename)
-    create_vector(result)
+    print(result)
+    # create_vector(result)
     trainid = create_train(file.filename, 'file', True)
 
     if (trainid == False):

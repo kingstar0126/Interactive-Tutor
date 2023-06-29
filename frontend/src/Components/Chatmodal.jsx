@@ -329,30 +329,23 @@ const Chatmodal = (props) => {
                         }}
                         defaultValue={{
                           value: "1",
-                          label: `Utilize contextual information from the training
-                        data, and if necessary, respond with 'I don't know'
-                        when appropriate.(The chatbot will search the
-                        training data for a response and provide an answer
-                        only if a matching response is found.)`,
+                          label:
+                            "Utilize contextual information from the Training data, and if there isn't suitable data say 'I don't know'",
                         }}
                         options={[
                           {
                             value: "1",
-                            label: `Utilize contextual information from the training
-                        data, and if necessary, respond with 'I don't know'
-                        when appropriate.(The chatbot will search the
-                        training data for a response and provide an answer
-                        only if a matching response is found.)`,
+                            label:
+                              "Utilize contextual information from the training data, and if necessary, respond with 'I don't know' when appropriate.",
                           },
                           {
                             value: "2",
-                            label: `Utilize contextual information from the training data and refrain from using the phrase 'I don't know'.
-                          (The chatbot will search the training data for a response, and if an exact match is not found, it will generate a response based on ChatGPT knowledge.)`,
+                            label:
+                              "Utilize contextual information from the training data and refrain from using the phrase 'I don't know'",
                           },
                           {
                             value: "3",
-                            label: `Behave like the default ChatGPT
-                          (The chatbot will disregard the training data and respond similarly to the public ChatGPT, without taking into account any specific context from the training data.)`,
+                            label: `Behave like the default ChatGPT`,
                           },
                         ]}
                       />

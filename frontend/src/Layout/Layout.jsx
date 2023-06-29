@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
+import Chatbubble from "../Components/Chatbubble";
 
 const Layout = () => {
   return (
@@ -9,6 +10,9 @@ const Layout = () => {
       </div>
       <div className="items-center justify-center w-screen bg-[--site-main-color3]">
         <Outlet />
+      </div>
+      <div className="z-50">
+        <Chatbubble />
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ from flask_login import UserMixin
 from flask_dance.consumer.storage.sqla import OAuthConsumerMixin
 import jwt
 import uuid
+from sqlalchemy.dialects.postgresql import UUID
 from time import time
 from datetime import datetime
 
@@ -53,10 +54,22 @@ class Chat(UserMixin, db.Model):
     behavior = db.Column(db.String(150))
     behaviormodel = db.Column(db.String(150))
     train = db.Column(db.JSON)
+    chat_logo = db.Column(db.JSON)
+    chat_title = db.Column(db.JSON)
+    chat_description = db.Column(db.JSON)
+    chat_copyright = db.Column(db.JSON)
+    chat_1_logo = db.Column(db.JSON)
+    chat_1_description = db.Column(db.JSON)
+    chat_2_logo = db.Column(db.JSON)
+    chat_2_description = db.Column(db.JSON)
+    chat_3_logo = db.Column(db.JSON)
+    chat_3_description = db.Column(db.JSON)
+    chat_button = db.Column(db.JSON)
+    bubble = db.Column(db.JSON)
     create_date = db.Column(db.Date, default=datetime.utcnow)
     update_date = db.Column(
         db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
-    uuid = db.Column(db.UUID(as_uuid=True), unique=True, default=uuid.uuid4)
+    uuid = db.Column(UUID(as_uuid=True), unique=True, default=uuid.uuid4)
 
     def __repr__(self):
         return f'Chat {self.label}'
@@ -76,7 +89,7 @@ class Message(UserMixin, db.Model):
     create_date = db.Column(db.Date, default=datetime.utcnow)
     update_date = db.Column(
         db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
-    uuid = db.Column(db.UUID(as_uuid=True), unique=True, default=uuid.uuid4)
+    uuid = db.Column(UUID(as_uuid=True), unique=True, default=uuid.uuid4)
 
     def __repr__(self):
         return f'message {self.id}'

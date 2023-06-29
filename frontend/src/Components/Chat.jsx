@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { webAPI } from "../utils/constants";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, Link } from "react-router-dom";
 
 const Chat = () => {
   const location = useLocation();
@@ -144,7 +144,6 @@ const Chat = () => {
             <Outlet />
           </div>
         )}
-
         <Chatmodal
           open={isModalOpen}
           handleOk={handleOk}
