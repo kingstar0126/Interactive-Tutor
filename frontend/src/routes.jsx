@@ -1,4 +1,3 @@
-import Home from "./Pages/Home";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
 import Forgetpassword from "./Pages/Forgetpassword";
@@ -37,10 +36,6 @@ const AppRoutes = [
         children: [
             {
                 path: "/",
-                element: <Home />,
-            },
-            {
-                path: "/login",
                 element: <Login />,
             },
             {
