@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { getUser } from "../redux/actions/userAction";
 import { Toaster } from "react-hot-toast";
+import { Link } from "react-router-dom";
 
 const Login = () => {
     const statedata = useSelector((state) => state.user.user);
@@ -97,18 +98,18 @@ const Login = () => {
                             )}
                         </div>
                         <div className="flex flex-row justify-between">
-                            <a
-                                href="/changepassword"
+                            <Link
+                                to="/changepassword"
                                 className="text-xs text-[--site-card-icon-color] hover:underline justify-end"
                             >
                                 Change passwrod
-                            </a>
-                            <a
-                                href="/resetpassword"
+                            </Link>
+                            <Link
+                                to="/resetpassword"
                                 className="text-xs text-[--site-card-icon-color] hover:underline"
                             >
                                 Forget Password?
-                            </a>
+                            </Link>
                         </div>
 
                         <div className="mt-6">
@@ -124,12 +125,12 @@ const Login = () => {
                     <p className="mt-8 text-xs font-light text-center text-[--site-main-Login-Text]">
                         {" "}
                         Don't have an account?{" "}
-                        <a
-                            href="/register"
+                        <Link
+                            to="/register"
                             className="font-bold text-[--site-main-Login1] hover:underline"
                         >
                             Register
-                        </a>
+                        </Link>
                     </p>
                 </div>
                 {status === 1 && <div></div>}

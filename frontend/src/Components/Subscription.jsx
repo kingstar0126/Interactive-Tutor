@@ -122,7 +122,7 @@ const Subscription = () => {
                 handleEditOk={handleEditOk}
             />
             {user.role && user.role === 1 ? (
-                <div className="flex w-full items-start justify-start gap-5">
+                <div className="flex items-start justify-start w-full gap-5">
                     <button
                         onClick={handleCreateProduct}
                         className="bg-[--site-card-icon-color] text-[--site-main-color3] p-2 rounded-xl mb-5"
@@ -136,7 +136,7 @@ const Subscription = () => {
                         Delete all Products
                     </button>
                 </div>
-            ): null}
+            ) : null}
             {subscriptions && subscriptions.length !== 0 && (
                 <div className="bg-[--site-card-icon-color] gap-5 w-full h-full rounded-xl flex justify-center items-center container p-10 border border-[--site-card-icon-color]">
                     {subscriptions.map((item, index) => {
@@ -147,7 +147,7 @@ const Subscription = () => {
                             >
                                 <div
                                     name="title"
-                                    className="h-1/5 flex flex-col p-2 justify-center items-center"
+                                    className="flex flex-col items-center justify-center p-2 h-1/5"
                                 >
                                     <span className="text-[35px] font-medium">
                                         {item.product.name}
@@ -162,23 +162,24 @@ const Subscription = () => {
                                 </div>
                                 <div
                                     name="body"
-                                    className="h-3/5 w-full flex flex-col justify-start items-start gap-5 pl-5"
+                                    className="flex flex-col items-start justify-start w-full gap-5 pl-5 h-3/5"
                                 >
-                                    {item.product.description
-                                        .split("\n")
-                                        .map((item, index) => {
-                                            return (
-                                                <div
-                                                    className="flex gap-3"
-                                                    key={index}
-                                                >
-                                                    <MdCloudDone className="fill-[--site-card-icon-color] w-5 h-5 pointer-events-none" />
-                                                    {item}
-                                                </div>
-                                            );
-                                        })}
+                                    {item.product.description &&
+                                        item.product.description
+                                            .split("\n")
+                                            .map((item, index) => {
+                                                return (
+                                                    <div
+                                                        className="flex gap-3"
+                                                        key={index}
+                                                    >
+                                                        <MdCloudDone className="fill-[--site-card-icon-color] w-5 h-5 pointer-events-none" />
+                                                        {item}
+                                                    </div>
+                                                );
+                                            })}
                                 </div>
-                                <div className="h-1/5 w-full items-center justify-center flex gap-3">
+                                <div className="flex items-center justify-center w-full gap-3 h-1/5">
                                     <button
                                         name="button"
                                         onClick={() =>
@@ -201,7 +202,7 @@ const Subscription = () => {
                                         >
                                             Edit
                                         </button>
-                                    ): null}
+                                    ) : null}
                                     {user.role && user.role === 1 ? (
                                         <button
                                             name="button"
@@ -214,7 +215,7 @@ const Subscription = () => {
                                         >
                                             Delete
                                         </button>
-                                    ): null}
+                                    ) : null}
                                 </div>
                             </div>
                         );

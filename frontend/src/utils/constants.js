@@ -4,6 +4,8 @@ export const stringConstant = {
 };
 
 export const webAPI = {
+    forget: SERVER_URL + "/api/reset",
+    changepassword: SERVER_URL + "/api/change",
     login: SERVER_URL + "/api/login",
     addchat: SERVER_URL + "/api/addchat",
     getchat: SERVER_URL + "/api/getchat",

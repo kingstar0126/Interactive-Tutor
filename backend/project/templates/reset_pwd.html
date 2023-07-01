@@ -1,11 +1,54 @@
 {% block content %}
+<style>
+    body {
+        background-image: url("beautiful-background.jpg");
+        background-size: cover;
+        background-position: center;
+        font-family: "Arial", sans-serif;
+    }
 
-<h2>Hi{{ username }}!</h2>
-<p>Your password is changed <h3>{{password}}</h3></p>
+    .container {
+        width: 80%;
+        margin: auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
 
-<p>
-  <strong>Please note:</strong> if you don't act within 5 minutes, you will have
-  to <i>submit a new request</i>.
-</p>
+    h2 {
+        color: #333;
+        margin-bottom: 10px;
+    }
 
+    .password-change {
+        font-size: 18px;
+        margin-bottom: 20px;
+    }
+
+    h3 {
+        color: #333;
+        font-weight: bold;
+    }
+
+    .note {
+        color: #777;
+        font-size: 14px;
+        margin-top: 30px;
+    }
+
+    i {
+        font-style: italic;
+    }
+</style>
+
+<div class="container">
+    <h2>Hello, {{ username }}!</h2>
+    <p class="password-change">Your password has been successfully changed to:</p>
+    <h3>{{ password }}</h3>
+    <p class="note">
+        <strong>Please take note:</strong> If you do not take any action within the next 5 minutes, you will need to <i>submit a new password change request</i>.
+    </p>
+</div>
 {% endblock %}
