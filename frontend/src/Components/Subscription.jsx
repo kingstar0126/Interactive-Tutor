@@ -121,7 +121,7 @@ const Subscription = () => {
                 handleCancel={handleCancel}
                 handleEditOk={handleEditOk}
             />
-            {user.role && user.role === 1 && (
+            {user.role && user.role === 1 ? (
                 <div className="flex w-full items-start justify-start gap-5">
                     <button
                         onClick={handleCreateProduct}
@@ -136,7 +136,7 @@ const Subscription = () => {
                         Delete all Products
                     </button>
                 </div>
-            )}
+            ): null}
             {subscriptions && subscriptions.length !== 0 && (
                 <div className="bg-[--site-card-icon-color] gap-5 w-full h-full rounded-xl flex justify-center items-center container p-10 border border-[--site-card-icon-color]">
                     {subscriptions.map((item, index) => {
@@ -190,7 +190,7 @@ const Subscription = () => {
                                     >
                                         CheckOut
                                     </button>
-                                    {user.role && user.role === 1 && (
+                                    {user.role && user.role === 1 ? (
                                         <button
                                             name="button"
                                             onClick={() => {
@@ -201,8 +201,8 @@ const Subscription = () => {
                                         >
                                             Edit
                                         </button>
-                                    )}
-                                    {user.role && user.role === 1 && (
+                                    ): null}
+                                    {user.role && user.role === 1 ? (
                                         <button
                                             name="button"
                                             onClick={() =>
@@ -214,7 +214,7 @@ const Subscription = () => {
                                         >
                                             Delete
                                         </button>
-                                    )}
+                                    ): null}
                                 </div>
                             </div>
                         );

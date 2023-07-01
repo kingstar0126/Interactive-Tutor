@@ -23,7 +23,7 @@ PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
 pretty.install()
 
 
-def generate_message(query, history, behavior, temp):
+def generate_message(query, history, behavior, temp, trains=[]):
     load_dotenv()
 
     template = """ {behavior}
@@ -64,10 +64,11 @@ def generate_message(query, history, behavior, temp):
         index_name=PINECONE_INDEX_NAME, embedding=embeddings)
 
     docs = docsearch.similarity_search_with_score(query=query, k=2)
-    print(docs)
     examples = ""
     for doc, _ in docs:
-        examples += doc.page_content + '\n'
+        for source in trains:
+            if doc.metadata['source'] == source:
+                examples += doc.page_content + '\n'
 
     with get_openai_callback() as cb:
 

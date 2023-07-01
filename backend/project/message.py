@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from .models import Message
+from .models import Message, Train
 from . import db
 from rich import print, pretty
 import datetime
@@ -37,7 +37,12 @@ def send_message():
     uuid = request.json['id']
     query = request.json['_message']
     behaviormodel = request.json['behaviormodel']
-    print(behaviormodel)
+    train = request.json['train']
+    print(train)
+    trains = []
+    for source_id in train:
+        source = Train.query.filter_by(id=source_id).first()
+        trains.append(source.label)
     current_message = Message.query.filter_by(uuid=uuid).first()
     print(current_message)
     temp = current_message.creativity
@@ -53,7 +58,7 @@ def send_message():
         behavior = current_message.behavior + "\n" + behaviormodel
         start_time = time.time()
         response, chat_history, token = generate_message(
-            query, history, behavior, temp)
+            query, history, behavior, temp, trains)
         end_time = time.time()
     wall_time = end_time - start_time
     print("This is the response data->", chat_history, token, wall_time)
@@ -119,7 +124,7 @@ def get_messages():
     _response = {
         'success': True,
         'code': 200,
-        'message': 'Your messageBot created successfully!!!',
+        'message': 'Your messageBot selected successfully!!!',
         'data': response
     }
     return jsonify(_response)

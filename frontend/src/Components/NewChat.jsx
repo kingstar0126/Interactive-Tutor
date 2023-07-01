@@ -272,8 +272,9 @@ const NewChat = () => {
 
     const sendMessage = (id, _message) => {
         let behaviormodel = chat.behaviormodel;
+        let train = chat.train
         axios
-            .post(webAPI.sendchat, { id, _message, behaviormodel })
+            .post(webAPI.sendchat, { id, _message, behaviormodel, train })
             .then((res) => {
                 if (!res.data.success) console.log("error", res.data.message);
                 else {

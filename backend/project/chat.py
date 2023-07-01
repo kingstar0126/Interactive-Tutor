@@ -179,37 +179,40 @@ def update_chat():
 
 @chat.route('/api/getchats', methods=['POST'])
 def get_chats():
+    
     user_id = request.json['user_id']
     chats = Chat.query.filter_by(user_id=user_id).all()
+
     response = []
-    for chat in chats:
-        print(chat.id)
-        chat_data = {
-            'id': chat.id,
-            'label': chat.label,
-            'description': chat.description,
-            'model': chat.model,
-            'conversation': chat.conversation,
-            'access': chat.access,
-            'creativity': chat.creativity,
-            'behavior': chat.behavior,
-            'behaviormodel': chat.behaviormodel,
-            'uuid': chat.uuid,
-            'train': json.loads(chat.train),
-            'chat_logo': json.loads(chat.chat_logo),
-            'chat_title': json.loads(chat.chat_title),
-            'chat_description': json.loads(chat.chat_description),
-            'chat_copyright': json.loads(chat.chat_copyright),
-            # 'chat_1_logo': json.loads(chat.chat_1_logo),
-            # 'chat_1_description': json.loads(chat.chat_1_description),
-            # 'chat_2_logo': json.loads(chat.chat_2_logo),
-            # 'chat_2_description': json.loads(chat.chat_2_description),
-            # 'chat_3_logo': json.loads(chat.chat_3_logo),
-            # 'chat_3_description': json.loads(chat.chat_3_description),
-            'chat_button': json.loads(chat.chat_button),
-            'bubble': json.loads(chat.bubble),
-        }
-        response.append(chat_data)
+    if chats:
+        for chat in chats:
+            print(chat.id)
+            chat_data = {
+                'id': chat.id,
+                'label': chat.label,
+                'description': chat.description,
+                'model': chat.model,
+                'conversation': chat.conversation,
+                'access': chat.access,
+                'creativity': chat.creativity,
+                'behavior': chat.behavior,
+                'behaviormodel': chat.behaviormodel,
+                'uuid': chat.uuid,
+                'train': json.loads(chat.train),
+                'chat_logo': json.loads(chat.chat_logo),
+                'chat_title': json.loads(chat.chat_title),
+                'chat_description': json.loads(chat.chat_description),
+                'chat_copyright': json.loads(chat.chat_copyright),
+                # 'chat_1_logo': json.loads(chat.chat_1_logo),
+                # 'chat_1_description': json.loads(chat.chat_1_description),
+                # 'chat_2_logo': json.loads(chat.chat_2_logo),
+                # 'chat_2_description': json.loads(chat.chat_2_description),
+                # 'chat_3_logo': json.loads(chat.chat_3_logo),
+                # 'chat_3_description': json.loads(chat.chat_3_description),
+                'chat_button': json.loads(chat.chat_button),
+                'bubble': json.loads(chat.bubble),
+            }
+            response.append(chat_data)
 
     data = {
         'success': True,
@@ -301,7 +304,7 @@ def get_bubble(widgetID):
         # 'chat_3_description': json.loads(chat.chat_3_description),
         'chat_button': json.loads(chat.chat_button),
         'bubble': json.loads(chat.bubble),
-        'embed_url': 'http://192.168.103.63:3000/chat/embedding/',
+        'embed_url': 'http://3.11.9.37/chat/embedding/',
     }
 
     data = {

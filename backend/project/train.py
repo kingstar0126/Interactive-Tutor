@@ -176,6 +176,26 @@ def insert_train_chat(chatbot, train_id):
     traindata.append(train_id)
     current_chat.train = json.dumps(traindata)
     db.session.commit()
+    chat_data = {
+        'id': current_chat.id,
+        'label': current_chat.label,
+        'description': current_chat.description,
+        'model': current_chat.model,
+        'conversation': current_chat.conversation,
+        'access': current_chat.access,
+        'creativity': current_chat.creativity,
+        'behavior': current_chat.behavior,
+        'behaviormodel': current_chat.behaviormodel,
+        'uuid': current_chat.uuid,
+        'train': json.loads(current_chat.train),
+        'chat_logo': json.loads(current_chat.chat_logo),
+        'chat_title': json.loads(current_chat.chat_title),
+        'chat_description': json.loads(current_chat.chat_description),
+        'chat_copyright': json.loads(current_chat.chat_copyright),
+        'chat_button': json.loads(current_chat.chat_button),
+        'bubble': json.loads(current_chat.bubble),
+    }
+    return chat_data
 
 
 @train.route('/api/data/sendurl', methods=['POST'])
@@ -193,7 +213,7 @@ def create_train_url():
     trainid = create_train(url, 'url', True)
 
     result = text_to_docs(data, url)
-    # create_vector(result)
+    create_vector(result)
     print(result)
     if (trainid == False):
         return jsonify({
@@ -201,11 +221,11 @@ def create_train_url():
             'code': 405,
             'message': 'Training data already exist.',
         })
-    insert_train_chat(chatbot, trainid)
+    chat = insert_train_chat(chatbot, trainid)
     return jsonify({
         'success': True,
         'code': 200,
-        'data': trainid,
+        'data': chat,
         'message': "create train successfully",
     })
 
@@ -223,11 +243,12 @@ def create_train_text():
             'code': 405,
             'message': 'Training data already exist.',
         })
-    insert_train_chat(chatbot, trainid)
+    chat = insert_train_chat(chatbot, trainid)
+    
     return jsonify({
         'success': True,
         'code': 200,
-        'data': trainid,
+        'data': chat,
         'message': "create train successfully",
     })
 
@@ -237,7 +258,7 @@ def create_train_file():
 
     file = request.files['file']
     chatbot = request.form.get('chatbot')
-
+    print("\n\nThis is the file name ->", file, chatbot)
     if (file.filename.split('.')[-1] == 'pdf'):
         output = parse_pdf(file)
     elif (file.filename.split('.')[-1] == 'csv'):
@@ -251,7 +272,7 @@ def create_train_file():
     print(output)
     result = text_to_docs(output, file.filename)
     print(result)
-    # create_vector(result)
+    create_vector(result)
     trainid = create_train(file.filename, 'file', True)
 
     if (trainid == False):
@@ -260,11 +281,12 @@ def create_train_file():
             'code': 401,
             'message': 'Training data already exist.',
         })
-    insert_train_chat(chatbot, trainid)
+    chat = insert_train_chat(chatbot, trainid)
+    print(chat)
     return jsonify({
         'success': True,
         'code': 200,
-        'data': trainid,
+        'data': chat,
         'message': "create train successfully",
     })
 
@@ -299,9 +321,29 @@ def delete_traindatas():
     delete_vectore(source)
     Train.query.filter_by(id=id).delete()
     db.session.commit()
+    chat_data = {
+        'id': chat.id,
+        'label': chat.label,
+        'description': chat.description,
+        'model': chat.model,
+        'conversation': chat.conversation,
+        'access': chat.access,
+        'creativity': chat.creativity,
+        'behavior': chat.behavior,
+        'behaviormodel': chat.behaviormodel,
+        'uuid': chat.uuid,
+        'train': json.loads(chat.train),
+        'chat_logo': json.loads(chat.chat_logo),
+        'chat_title': json.loads(chat.chat_title),
+        'chat_description': json.loads(chat.chat_description),
+        'chat_copyright': json.loads(chat.chat_copyright),
+        'chat_button': json.loads(chat.chat_button),
+        'bubble': json.loads(chat.bubble),
+    }
     data = {
         'code': 200,
         'message': "Succesfullu delete",
+        'data': chat_data,
         'success': True
     }
     return jsonify(data)

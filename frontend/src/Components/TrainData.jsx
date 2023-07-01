@@ -3,13 +3,15 @@ import ChatmodalTrain from "./ChatmodalTrain";
 import { CircleStackIcon } from "@heroicons/react/24/solid";
 import { webAPI } from "../utils/constants";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import {getchat} from '../redux/actions/chatAction'
 
 export default function TraindataTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tableData, setTableData] = useState([]);
   const [reload, setReload] = useState(true);
   const chat = JSON.parse(useSelector((state) => state.chat.chat));
+  const dispatch = useDispatch();
 
   useEffect(() => {
     console.log("Hello, THis is the trindata history", webAPI.gettraindatas);
@@ -22,7 +24,7 @@ export default function TraindataTable() {
     let chatbot = { uuid };
     axios
       .post(webAPI.gettraindatas, chatbot)
-      .then((res) => setTableData(res.data))
+      .then((res) => {setTableData(res.data)})
       .catch((error) => console.log(error));
     setReload(!reload);
   };
@@ -32,6 +34,7 @@ export default function TraindataTable() {
 
   const handleOk = (data) => {
     get_traindata();
+    getchat(dispatch, data)
     setIsModalOpen(false);
   };
   const handleCancel = () => {
@@ -44,7 +47,7 @@ export default function TraindataTable() {
 
     axios
       .post(webAPI.deletetrain, traindata)
-      .then((res) => get_traindata())
+      .then((res) => {get_traindata(); getchat(dispatch, res.data.data)})
       .catch((err) => console.log(err));
   };
 

@@ -18,6 +18,7 @@ export const addchat = (dispatch, data) => {
 };
 
 export const getchat = (dispatch, data) => {
+    console.log(data)
     dispatch({ type: GET_CHAT, payload: JSON.stringify(data) });
 };
 
