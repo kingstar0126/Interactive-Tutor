@@ -144,7 +144,7 @@ def delete_all_products():
 def create_checkout_session():
 
     subscription_plan_id = request.json['subscriptionPlanId']
-    print(subscription_plan_id)
+    print("\n\n->", subscription_plan_id)
     # Validate and process the subscription plan ID if needed
 
     # Additional logic to determine the price, success URL, and cancel URL based on the selected plan
@@ -156,8 +156,8 @@ def create_checkout_session():
             'quantity': 1,
         }],
         mode='subscription',
-        success_url="http://localhost:3000/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url='http://localhost:3000/chatbot/subscription',
+        success_url="http://3.11.9.37/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url='http://3.11.9.37/chatbot/subscription',
     )
     print(session)
 

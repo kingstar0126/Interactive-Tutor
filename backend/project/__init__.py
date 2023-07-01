@@ -21,11 +21,11 @@ def create_app():
     app.config['SECRET_KEY'] = 'key-goes-here'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/postgres'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['MAIL_SERVER'] = 'popstar0982.com'
+    app.config['MAIL_SERVER'] = 'smtp.office365.com'
     app.config['MAIL_PORT'] = 587
     app.config['MAIL_USE_TLS'] = True
-    app.config['MAIL_USERNAME'] = 'username@gmail.com'
-    app.config['MAIL_PASSWORD'] = "password"
+    app.config['MAIL_USERNAME'] = 'popstar0982@outlook.com'
+    app.config['MAIL_PASSWORD'] = 'QWE@#$asd234'
 
     db.init_app(app)
 

@@ -61,26 +61,28 @@ def login_post():
 
 
 def send_email(user):
-    token = user.get_reset_token()
+    token = User.get_reset_token(user)
 
-    msg = Message()
-    msg.subject = "Login System: Password Reset Request"
-    msg.sender = 'chatbot@gmail.com'
-    msg.recipients = [user.email]
+    msg = Message('Interactive', sender='popstar0982@outlook.com',
+                  recipients=[user.email])
     password = generate_password()
     msg.html = render_template(
-        'reset_pwd.html', user=user, password=password, token=token)
+        'reset_pwd.html', user=user.username, password=password, token=token)
 
     mail.send(msg)
+    return password
 
 
 @auth.route('/api/reset', methods=['POST'])
 def reset():
+    print(request.json)
     email = request.json['email']
     user = User.verify_email(email)
-
+    print(user)
     if user:
-        send_email(user)
+        password = send_email(user)
+        user.password = generate_password_hash(password, method='sha256')
+        db.session.commit()
         data = {
             'message': 'An email has been sent with instructions to reset your password.', 'success': True}
     return jsonify(data)
@@ -88,8 +90,9 @@ def reset():
 
 @auth.route('/api/change', methods=['POST'])
 def changepassword():
+    print(request.json)
     email = request.json['email']
-    current_password = request.json['old_password']
+    current_password = request.json['old password']
     password = request.json['password']
 
     user = User.query.filter_by(email=email).first()
