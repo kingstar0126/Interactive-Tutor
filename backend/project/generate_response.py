@@ -62,8 +62,8 @@ def generate_message(query, history, behavior, temp, trains=[]):
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
     docsearch = Pinecone.from_existing_index(
         index_name=PINECONE_INDEX_NAME, embedding=embeddings)
-
-    docs = docsearch.similarity_search_with_score(query=query, k=2)
+    print(docsearch, "\n\n")
+    docs = docsearch.similarity_search_with_score(query=query, k=5)
     examples = ""
     for doc, _ in docs:
         for source in trains:
