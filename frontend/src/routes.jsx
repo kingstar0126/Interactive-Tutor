@@ -9,6 +9,7 @@ import Tapcomponent from "./Components/Tapcomponent";
 import NewChat from "./Components/NewChat";
 import Chatbubble from "./Components/Chatbubble";
 import Notfound from "./Pages/Notfound";
+import Manager from "./Components/Manager";
 
 const AppRoutes = [
     {
@@ -28,6 +29,10 @@ const AppRoutes = [
             {
                 path: "subscription",
                 element: <Subscription />,
+            },
+            {
+                path: "manager",
+                element: <Manager />,
             },
         ],
     },
