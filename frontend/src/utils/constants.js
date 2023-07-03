@@ -19,7 +19,7 @@ export const webAPI = {
     send_branding: SERVER_URL + "/api/sendbrandingdata",
     get_messages: SERVER_URL + "/api/getmessages",
     delete_message: SERVER_URL + "/api/deletemessage",
-
+    get_all_messages: SERVER_URL + "/api/getallmessages",
     //THis is the send traindata to server
 
     sendurl: SERVER_URL + "/api/data/sendurl",
