@@ -1,4 +1,3 @@
-import Home from "./Pages/Home";
 import Login from "./Pages/Login";
 import Register from "./Pages/Register";
 import Forgetpassword from "./Pages/Forgetpassword";
@@ -10,6 +9,7 @@ import Tapcomponent from "./Components/Tapcomponent";
 import NewChat from "./Components/NewChat";
 import Chatbubble from "./Components/Chatbubble";
 import Notfound from "./Pages/Notfound";
+import Manager from "./Components/Manager";
 
 const AppRoutes = [
     {
@@ -30,6 +30,10 @@ const AppRoutes = [
                 path: "subscription",
                 element: <Subscription />,
             },
+            {
+                path: "manager",
+                element: <Manager />,
+            },
         ],
     },
     {
@@ -37,10 +41,6 @@ const AppRoutes = [
         children: [
             {
                 path: "/",
-                element: <Home />,
-            },
-            {
-                path: "/login",
                 element: <Login />,
             },
             {
