@@ -8,7 +8,7 @@ import { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
 
 const Login = () => {
-    const statedata = useSelector((state) => state.user.user);
+    const statedata = JSON.parse(useSelector((state) => state.user.user));
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [status, Setstatus] = useState(1);
@@ -19,7 +19,7 @@ const Login = () => {
     } = useForm();
 
     useEffect(() => {
-        if (statedata && statedata !== "undefined") {
+        if (statedata && statedata.username) {
             Setstatus(0);
         }
     }, [statedata]);
@@ -29,7 +29,7 @@ const Login = () => {
             navigate("/chatbot/chat");
             Setstatus(1);
         }
-    }, [status, navigate]);
+    }, [status]);
     const onSubmit = async (data) => {
         getUser(dispatch, data);
     };
