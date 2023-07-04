@@ -10,6 +10,9 @@ import NewChat from "./Components/NewChat";
 import Chatbubble from "./Components/Chatbubble";
 import Notfound from "./Pages/Notfound";
 import Manager from "./Components/Manager";
+import ManageAccount from "./Components/ManageAccount";
+import SubscriptionForm from "./Components/StripeCard";
+import Report from "./Components/Report";
 
 const AppRoutes = [
     {
@@ -28,11 +31,19 @@ const AppRoutes = [
             },
             {
                 path: "subscription",
-                element: <Subscription />,
+                element: <SubscriptionForm />,
             },
             {
                 path: "manager",
                 element: <Manager />,
+            },
+            {
+                path: "account",
+                element: <ManageAccount />,
+            },
+            {
+                path: "report",
+                element: <Report />,
             },
         ],
     },
@@ -41,6 +52,10 @@ const AppRoutes = [
         children: [
             {
                 path: "/",
+                element: <Login />,
+            },
+            {
+                path: "/login",
                 element: <Login />,
             },
             {

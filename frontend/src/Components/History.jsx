@@ -24,20 +24,20 @@ const History = (props) => {
         setMessage(history[index].message);
     };
 
-    const handleDelete = (index) => {
-        console.log(index);
-        if (history[index].uuid !== chatbot) {
+    const handleDelete = (item, index) => {
+        if (item.uuid !== chatbot) {
             axios
-                .post(webAPI.delete_message, { id: history[index].uuid })
+                .post(webAPI.delete_message, { id: item.uuid })
                 .then((res) => {
                     console.log(res.data.message);
-                    history.splice(index, 1);
+                    const new_history = history;
+                    setHistory(new_history.splice(index, 1));
                 })
                 .catch((err) => console.error(err));
         }
     };
     return (
-        <div className="flex h-full w-full">
+        <div className="flex w-full h-full">
             <div className="flex flex-col  w-1/3 h-screen p-2 border-r-[1px] border-[--site-main-color3]">
                 <Scrollbar>
                     {history.map((item, index) => {
@@ -61,7 +61,9 @@ const History = (props) => {
                                         {item.uuid.toString().slice(0, 23)}
                                     </span>
                                     <AiFillDelete
-                                        onClick={() => handleDelete(index)}
+                                        onClick={() =>
+                                            handleDelete(item, index)
+                                        }
                                     />
                                 </div>
                             </div>
