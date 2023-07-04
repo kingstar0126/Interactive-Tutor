@@ -15,6 +15,13 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(100))
     username = db.Column(db.String(150))
     role = db.Column(db.Integer)
+    subscription_id = db.Column(db.Integer)
+    customer_id = db.Column(db.String(250))
+    contact = db.Column(db.Integer)
+    state = db.Column(db.String(255))
+    city = db.Column(db.String(255))
+    country = db.Column(db.String(255))
+    status = db.Column(db.Integer)
     create_date = db.Column(db.Date, default=datetime.utcnow)
     update_date = db.Column(
         db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)

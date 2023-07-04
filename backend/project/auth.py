@@ -9,8 +9,15 @@ import os
 import string
 import secrets
 from rich import print, pretty
+from sqlalchemy import exc
+import stripe
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 pretty.install()
+stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
 
 def generate_password(length=12):
@@ -23,7 +30,7 @@ def generate_password(length=12):
 auth = Blueprint('auth', __name__)
 
 
-@auth.route('/api/login',  methods=['POST', 'OPTIONS'])
+@auth.route('/api/login',  methods=['POST', 'OPTIONS', 'GET'])
 def login_post():
     if request.method == 'OPTIONS':  # check for OPTIONS method
         headers = {
@@ -36,7 +43,6 @@ def login_post():
     print(request.json)
     email = request.json['email']
     password = request.json['password']
-    remember = False
 
     user = User.query.filter_by(email=email).first()
 
@@ -46,7 +52,13 @@ def login_post():
             'code': 401,
             'message': 'Please check your login details and try again.',
         })
-    login_user(user, remember=remember)
+    print(user.status)
+    if user.status != 0:
+        return jsonify({
+            'success': False,
+            'code': 401,
+            'message': 'You are blocked.',
+        })
     new_user = {
         'id': user.id,
         'username': user.username,
@@ -85,7 +97,7 @@ def reset():
         db.session.commit()
         data = {
             'message': 'An email has been sent with instructions to reset your password.', 'success': True}
-    return jsonify(data)
+        return jsonify(data)
 
 
 @auth.route('/api/change', methods=['POST'])
@@ -120,12 +132,38 @@ def signup_post():
     username = request.json['username']
     email = request.json['email']
     password = request.json['password']
+    phone = request.json['phone']
     role = 0
+    status = 0
     user = User.query.filter_by(email=email).first()
 
     if user:
         return jsonify({'message': 'Email address already exists', 'success': False})
-    new_user = User(username=username, email=email, role=role,
+
+    customer = stripe.Customer.create(name=username, email=email, phone=phone)
+    print(customer)
+    new_user = User(username=username, status=status, contact=phone, email=email, role=role, customer_id=customer.id,
+                    password=generate_password_hash(password, method='sha256'))
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({'success': True})
+
+
+@auth.route('/api/adduseraccount', methods=['POST'])
+def add_user_account():
+    username = request.json['username']
+    email = request.json['email']
+    password = request.json['password']
+    subscriotion = request.json['subscription']
+    role = 0
+    status = 0
+    user = User.query.filter_by(email=email).first()
+
+    if user:
+        return jsonify({'message': 'Email address already exists', 'success': False})
+
+    new_user = User(username=username, status=status, email=email, role=role,
                     password=generate_password_hash(password, method='sha256'))
 
     db.session.add(new_user)
@@ -134,8 +172,102 @@ def signup_post():
     return jsonify({'success': True})
 
 
-@auth.route('/api/logout')
-@login_required
-def logout():
-    logout_user()
-    return jsonify({'success': True})
+@auth.route('/api/getaccount', methods=['POST'])
+def get_useraccount():
+    id = request.json['id']
+    print(id, "This is the getaccount")
+    user = User.query.filter_by(id=id).first()
+    new_user = {
+        'username': user.username,
+        'email': user.email,
+        'contact': user.contact,
+        'state': user.state,
+        'city': user.city,
+        'country': user.country
+    }
+    return jsonify({'success': True, 'data': new_user, 'code': 200})
+
+
+@auth.route('/api/getallaccounts', methods=['POST'])
+def get_all_useraccount():
+    id = request.json['id']
+    user = User.query.filter_by(id=id).first()
+    if user.role != 1:
+        return jsonify({
+            'success': False,
+            'code': 405,
+            'message': "You have not permission"
+        })
+    current_users = []
+    users = User.query.all()
+    for current_user in users:
+        if current_user.id == id:
+            continue
+
+        new_user = {
+            'id': current_user.id,
+            'username': current_user.username,
+            'email': current_user.email,
+            'contact': current_user.contact,
+            'state': current_user.state,
+            'city': current_user.city,
+            'country': current_user.country,
+            'status': current_user.status
+        }
+        current_users.append(new_user)
+    return jsonify({'success': True, 'data': current_users, 'code': 200})
+
+
+@auth.route('/api/changeaccountstatus', methods=['POST'])
+def change_account_status():
+    print(request.json)
+    id = request.json['id']
+    status = request.json['status']
+
+    user = User.query.filter_by(id=id).first()
+    if user:
+        user.status = status
+        db.session.commit()
+        return jsonify({'success': True, 'code': 200, 'message': 'Updated successfully'})
+    else:
+        return jsonify({'success': False, 'code': 404, 'message': 'User not found'})
+
+
+@auth.route('/api/deleteaccount', methods=['POST'])
+def delete_account():
+    id = request.json['id']
+    try:
+        user = User.query.get(id)
+        if user:
+            db.session.delete(user)
+            db.session.commit()
+            return jsonify({'success': True, 'code': 200, 'message': 'Deleted successfully'})
+        else:
+            return jsonify({'success': False, 'code': 404, 'message': 'User not found'})
+    except exc.SQLAlchemyError as e:
+        # Handle any potential database errors
+        return jsonify({'success': False, 'code': 500, 'message': 'An error occurred while deleting the user'})
+
+
+@auth.route('/api/changeaccount', methods=['POST'])
+def change_useraccount():
+    print(request.json)
+
+    id = request.json['id']
+    username = request.json['username']
+    email = request.json['email']
+    contact = request.json['phone']
+    state = request.json['state']
+    city = request.json['city']
+    country = request.json['country']
+
+    user = User.query.filter_by(id=id).first()
+    user.username = username
+    user.email = email
+    user.contact = contact
+    user.state = state
+    user.city = city
+    user.country = country
+    db.session.commit()
+
+    return jsonify({'success': True, 'code': 200})

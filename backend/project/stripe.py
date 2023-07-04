@@ -14,7 +14,38 @@ stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 payment = Blueprint('payment', __name__)
 
 
+@payment.route('/api/create-customer', methods=['POST'])
+def create_customer():
+    print(request.json)
+    email = request.json['email']
+    payment_method = request.json['paymentMethod']
+    subscription = request.json['subscription']
+    state = request.json['state']
+    city = request.json['city']
+    country = request.json['country']
+    product_id = ''
+    if subscription == 'Starter':
+        product_id = os.getenv('STRIPE_STARTER_PRODUCT_ID')
+    elif subscription == 'Standard':
+        product_id = os.getenv('STRIPE_STANDARD_PRODUCT_ID')
+    elif subscription == 'Pro':
+        product_id = os.getenv('STRIPE_PRO_PRODUCT_ID')
+
+    print("\n\nThis is the production ID -> ", payment_method)
+    # Create a customer
+    # paymentmethod = stripe.PaymentMethod.create(
+    #     type='card',
+    #     card=payment_method
+    # )
+    print("\n\nThis is the customer -> ", 'customer')
+    # Create a subscription for the customer
+
+    print("\n\nThis is the subscription ->", subscription)
+    return jsonify({'success': True}), 200
+
 # This is the create product
+
+
 @payment.route('/api/create/product', methods=['POST'])
 def create_product():  # sourcery skip: avoid-builtin-shadow
     req_data = request.json
