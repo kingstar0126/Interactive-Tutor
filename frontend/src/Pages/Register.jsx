@@ -6,6 +6,9 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
+import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+import { useState } from "react";
 
 const Register = () => {
     const {
@@ -22,12 +25,18 @@ const Register = () => {
         }
     };
     const navigate = useNavigate();
+
+    const [phone, setPhone] = useState("");
+
     const onSubmit = async (data) => {
-        axios.post(`${SERVER_URL}/api/signup`, data).then((res) => {
-            console.log(res.data);
-            if (res.data.success) navigate("/");
-            else notification("error", res.data.message);
-        });
+        if (phone && isValidPhoneNumber(phone)) {
+            data["phone"] = phone;
+            axios.post(`${SERVER_URL}/api/signup`, data).then((res) => {
+                console.log(res.data);
+                if (res.data.success) navigate("/");
+                else notification("error", res.data.message);
+            });
+        }
     };
     return (
         <div className="bg-[--site-main-color-home] h-screen font-logo">
@@ -62,7 +71,7 @@ const Register = () => {
                             />
                             {errors.username && (
                                 <p className="text-xs italic text-red-500">
-                                    {errors.name.message}
+                                    {errors.username.message}
                                 </p>
                             )}
                             <label
@@ -89,6 +98,22 @@ const Register = () => {
                                     {errors.email.message}
                                 </p>
                             )}
+                            <label
+                                htmlFor="contact"
+                                className="block text-sm font-semibold text-[--site-main-Login-Text]"
+                            >
+                                Contact
+                            </label>
+                            <PhoneInput
+                                international
+                                value={phone}
+                                countryCallingCodeEditable={false}
+                                defaultCountry="GB"
+                                className="block w-full px-4 py-2 mt-2 text-[--site-main-Login] bg-[--site-main-color3] border rounded-md focus:border-[--site-main-Login-border-focus] focus:ring-[--site-main-Login-border-focus] focus:outline-none focus:ring focus:ring-opacity-40"
+                                onChange={(e) => {
+                                    setPhone(e);
+                                }}
+                            />
                         </div>
                         <div className="mb-2">
                             <label

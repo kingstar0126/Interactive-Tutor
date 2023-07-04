@@ -17,12 +17,7 @@ const Forgetpassword = () => {
         axios
             .post(webAPI.forget, data)
             .then((res) => notification("success", res.data.message))
-            .catch((err) =>
-                notification(
-                    "error",
-                    "Failed to reset password. Please try again!!!"
-                )
-            );
+            .catch((err) => notification("error", "Your address doesn't exit"));
     };
     const notification = (type, message) => {
         // To do in here
@@ -81,10 +76,10 @@ const Forgetpassword = () => {
                         {" "}
                         Don't have an account?{" "}
                         <Link
-                            to="/register"
+                            to="/"
                             className="font-bold text-[--site-main-Login1] hover:underline"
                         >
-                            Register
+                            Login
                         </Link>
                     </p>
                 </div>

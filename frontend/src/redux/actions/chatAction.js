@@ -4,6 +4,7 @@ import { ADD_CHAT } from "../type";
 import { GET_CHAT } from "../type";
 import { SET_CHATBOT } from "../type";
 import { GET_CHATBOT } from "../type";
+
 import axios from "axios";
 
 export const addchat = (dispatch, data) => {
@@ -18,7 +19,7 @@ export const addchat = (dispatch, data) => {
 };
 
 export const getchat = (dispatch, data) => {
-    console.log(data)
+    console.log(data);
     dispatch({ type: GET_CHAT, payload: JSON.stringify(data) });
 };
 
