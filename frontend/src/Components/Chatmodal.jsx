@@ -188,7 +188,7 @@ const Chatmodal = (props) => {
                                     </AccordionHeader>
                                     <AccordionBody className="p-2 border-t">
                                         <div className="flex flex-col items-start py-2">
-                                            <label className="mb-1 text-sm font-semibold">
+                                            <label className="mb-1 text-sm font-semibold text-[--site-main-color3]">
                                                 Model
                                             </label>
                                             <select
@@ -246,7 +246,7 @@ const Chatmodal = (props) => {
                                     </AccordionHeader>
                                     <AccordionBody className="p-2 border-t">
                                         <div className="flex flex-col items-start py-2">
-                                            <label className="mb-1 text-sm font-semibold ">
+                                            <label className="mb-1 text-sm font-semibold text-[--site-main-color3]">
                                                 Welcome message
                                             </label>
                                             <textarea
@@ -290,7 +290,7 @@ const Chatmodal = (props) => {
                                     </AccordionHeader>
                                     <AccordionBody className="p-2 border-t">
                                         <div className="flex flex-col items-start py-2">
-                                            <label className="mb-1 text-sm font-semibold">
+                                            <label className="mb-1 text-sm font-semibold text-[--site-main-color3]">
                                                 PIN protection
                                             </label>
                                             <div className="flex flex-row gap-2">
@@ -347,7 +347,7 @@ const Chatmodal = (props) => {
                                             </p>
                                         </div>
                                     </AccordionHeader>
-                                    <AccordionBody className="p-2 border-t">
+                                    <AccordionBody className="p-2 border-t text-[--site-main-color3]">
                                         <div className="flex flex-col items-start py-2">
                                             <label className="mb-1 text-sm font-semibold">
                                                 Context behavior (Required)

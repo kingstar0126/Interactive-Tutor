@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "@stripe/react-stripe-js": "^2.1.1",
-    "react-loading": "^2.0.3"
-  }
-}
