@@ -4,7 +4,6 @@ import { MdDone } from "react-icons/md";
 import AccordionComponent from "../Components/Accordion";
 import StripeCard from "../Components/StripeCard";
 import Switch from "../Components/Switch";
-import Subscription from "../Components/Subscription";
 
 const Home = () => {
     const change_text = (toggle) => {};
@@ -18,7 +17,7 @@ const Home = () => {
                 <div className="flex flex-col items-center justify-center w-full gap-4">
                     <div className="container flex flex-col items-center justify-center leading-tight">
                         <p className="text-white text-[45px] font-semibold items-center justify-center">
-                            Create Your Own AI Chatbot Using
+                            Create Your Own AI AI Tutor Using
                         </p>
                         <p className="text-white text-[45px] font-semibold items-center justify-center">
                             <span className="text-[--site-logo-text-color] underline underline-offset-8">
@@ -32,12 +31,13 @@ const Home = () => {
                     </div>
                     <div className="container flex flex-col items-center justify-center gap-5 leading-tight">
                         <span className="pt-10 py-7 text-[--site-logo-text-color] text-[16px] font-semibold items-center justify">
-                            BUILD YOUR GPT CHATBOT WITH NO CODING USING EXISTING
-                            DATA FROM DOCUMENTS, WEBSITES, AND VIDEOS 🚀
+                            BUILD YOUR GPT AI TUTOR WITH NO CODING USING
+                            EXISTING DATA FROM DOCUMENTS, WEBSITES, AND VIDEOS
+                            🚀
                         </span>
                         <span className="text-white text-[17px] font-semibold items-center justify">
                             Upload your documents or add links, and voila!
-                            Integrate your trained chatbot to your website as a
+                            Integrate your trained AI Tutor to your website as a
                             window or as a bubble for instant
                         </span>
                         <span className="text-white text-[17px] font-semibold items-center justify">

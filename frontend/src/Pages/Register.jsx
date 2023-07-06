@@ -59,6 +59,7 @@ const Register = () => {
                                 type="text"
                                 name="username"
                                 className="block w-full px-4 py-2 mt-2 mb-2 text-[--site-main-Login] bg-[--site-main-color3] border rounded-md focus:border-[--site-main-Login-border-focus] focus:ring-[--site-main-Login-border-focus] focus:outline-none focus:ring focus:ring-opacity-40"
+                                required
                                 placeholder="Please input your full name"
                                 {...register("username", {
                                     required: "Username is required.",
@@ -84,6 +85,7 @@ const Register = () => {
                                 type="email"
                                 name="email"
                                 className="block w-full px-4 py-2 mt-2 text-[--site-main-Login] bg-[--site-main-color3] border rounded-md focus:border-[--site-main-Login-border-focus] focus:ring-[--site-main-Login-border-focus] focus:outline-none focus:ring focus:ring-opacity-40"
+                                required
                                 placeholder="Please input your email address"
                                 {...register("email", {
                                     required: "Email is required",

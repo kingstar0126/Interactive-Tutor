@@ -23,7 +23,7 @@ const Chatmodal = (props) => {
     const [behaviormodel, SetBehaviormodel] =
         useState(`Utilize contextual information from the training
   data, and if necessary, respond with 'I don't know'
-  when appropriate.(The chatbot will search the
+  when appropriate.(The AI Tutor will search the
   training data for a response and provide an answer
   only if a matching response is found.)`);
     const [behavior, SetBehavior] = useState("You are a helpful assistant");
@@ -40,7 +40,7 @@ const Chatmodal = (props) => {
             SetAccess(0);
             SetBehaviormodel(`Utilize contextual information from the training
     data, and if necessary, respond with 'I don't know'
-    when appropriate.(The chatbot will search the
+    when appropriate.(The AI Tutor will search the
     training data for a response and provide an answer
     only if a matching response is found.)`);
             SetBehavior("You are a helpful assistant");
@@ -138,8 +138,8 @@ const Chatmodal = (props) => {
                                 className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] h-10 border rounded-lg hover:border-[--site-main-color5] text-[--site-card-icon-color]"
                             />
                             <p className="text-sm text-[--site-main-color5]">
-                                The label is used to identify your chatbot. It's
-                                private and exclusively visible to you.
+                                The label is used to identify your AI Tutor.
+                                It's private and exclusively visible to you.
                             </p>
                             {!label && (
                                 <p className="text-[12px] text-[--site-main-form-error]">
@@ -163,8 +163,8 @@ const Chatmodal = (props) => {
                                 className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] h-10 border rounded-lg hover:border-[--site-main-color5] text-[--site-card-icon-color]"
                             />
                             <p className="text-sm text-[--site-main-color5]">
-                                The description is used to identify your
-                                chatbot. It's private and exclusively visible to
+                                The description is used to identify your AI
+                                Tutor. It's private and exclusively visible to
                                 you.
                             </p>
                         </div>
@@ -220,7 +220,7 @@ const Chatmodal = (props) => {
                                             </select>
                                             <p className="text-sm text-[--site-main-color5]">
                                                 The description is used to
-                                                identify your chatbot. It's
+                                                identify your AI Tutor. It's
                                                 private and exclusively visible
                                                 to you.
                                             </p>
@@ -264,7 +264,7 @@ const Chatmodal = (props) => {
                                             ></textarea>
                                             <p className="text-sm text-[--site-main-color5]">
                                                 The description is used to
-                                                identify your chatbot. It's
+                                                identify your AI Tutor. It's
                                                 private and exclusively visible
                                                 to you.
                                             </p>
@@ -316,7 +316,7 @@ const Chatmodal = (props) => {
                                             )}
                                             <p className="text-sm text-[--site-main-color5] text-start">
                                                 Utilizing a PIN will enhance the
-                                                security of your chatbot URL by
+                                                security of your AI Tutor URL by
                                                 adding an additional layer of
                                                 protection, ensuring that only
                                                 authorized users with the
@@ -382,9 +382,9 @@ const Chatmodal = (props) => {
                                                 how the training data you
                                                 provide will be utilized. It
                                                 specifies the way in which the
-                                                chatbot understands and responds
-                                                to user inputs based on the
-                                                given context.
+                                                AI Tutor understands and
+                                                responds to user inputs based on
+                                                the given context.
                                             </p>
                                         </div>
                                         <div className="flex flex-col items-start py-2">
@@ -407,7 +407,7 @@ const Chatmodal = (props) => {
                                                 our default behavior of 'You are
                                                 a helpful assistant' to provide
                                                 a more customized experience,
-                                                allowing your chatbot to act in
+                                                allowing your AI Tutor to act in
                                                 a manner that aligns with your
                                                 specific requirements and
                                                 preferences.

@@ -271,13 +271,14 @@ const NewChat = () => {
     };
 
     const sendMessage = (id, _message) => {
-        let behaviormodel = chat.behaviormodel;
-        let train = chat.train
+        let { behaviormodel, train } = chat;
+
         axios
             .post(webAPI.sendchat, { id, _message, behaviormodel, train })
             .then((res) => {
-                if (!res.data.success) console.log("error", res.data.message);
-                else {
+                if (!res.data.success) {
+                    console.log("error", res.data.message);
+                } else {
                     console.log(res.data.data);
                     receiveMessage(res.data.data);
                 }
@@ -356,6 +357,7 @@ const NewChat = () => {
                                     href={chat.chat_button.button1_url}
                                     ref={chatbot_button1}
                                     target="_blank"
+                                    rel="noreferrer"
                                 >
                                     {chat.chat_button.button1_text}
                                 </a>
@@ -363,6 +365,7 @@ const NewChat = () => {
                                     ref={chatbot_button2}
                                     href={chat.chat_button.button2_url}
                                     target="_blank"
+                                    rel="noreferrer"
                                 >
                                     {chat.chat_button.button2_text}
                                 </a>
@@ -370,6 +373,7 @@ const NewChat = () => {
                                     ref={chatbot_button3}
                                     href={chat.chat_button.button3_url}
                                     target="_blank"
+                                    rel="noreferrer"
                                 >
                                     {chat.chat_button.button3_text}
                                 </a>

@@ -18,7 +18,7 @@ const NotFound = () => {
                 to="/"
                 className="px-6 py-4 rounded-md bg-[--site-logo-text-color] text-[--site-card-icon-color] hover:bg-[--site-success-text-color] hover:text-[--site-logo-text-color] transition-colors ease-in-out duration-300"
             >
-                Go back home
+                Go back Login
             </Link>
         </div>
     );

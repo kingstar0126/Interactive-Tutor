@@ -11,7 +11,6 @@ import Chatbubble from "./Components/Chatbubble";
 import Notfound from "./Pages/Notfound";
 import Manager from "./Components/Manager";
 import ManageAccount from "./Components/ManageAccount";
-import SubscriptionForm from "./Components/StripeCard";
 import Report from "./Components/Report";
 
 const AppRoutes = [
@@ -31,7 +30,7 @@ const AppRoutes = [
             },
             {
                 path: "subscription",
-                element: <SubscriptionForm />,
+                element: <Subscription />,
             },
             {
                 path: "manager",
