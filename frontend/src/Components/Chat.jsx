@@ -62,7 +62,7 @@ const Chat = () => {
     }, [isOpen]);
 
     useEffect(() => {
-        if (user.role === 0) {
+        if (user.role === undefined || user.role === 0) {
             navigate("/chatbot/subscription");
         } else {
             getChats();
