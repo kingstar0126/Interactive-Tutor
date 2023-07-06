@@ -1,8 +1,8 @@
 import { SET_USER } from "../type";
-import { CHANGE_USER } from "../type";
+import { CHANGE_USER, GET_USER_ACCOUNT } from "../type";
 
 const initialState = {
-    user: localStorage.getItem("user") ? localStorage.getItem("user") : null,
+    user: localStorage.getItem("user") || null,
 };
 
 const userReducer = (state = initialState, action) => {
@@ -16,6 +16,12 @@ const userReducer = (state = initialState, action) => {
                 user: localStorage.getItem("user"),
             };
         case CHANGE_USER:
+            localStorage.setItem("user", payload);
+            return {
+                ...state,
+                user: localStorage.getItem("user"),
+            };
+        case GET_USER_ACCOUNT:
             localStorage.setItem("user", payload);
             return {
                 ...state,

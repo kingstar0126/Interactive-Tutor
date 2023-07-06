@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {SERVER_URL} from "../config/constant"
+import { SERVER_URL } from "../config/constant";
 
 const Embedded = (props) => {
     const [chatwindow, setChatwindow] = useState("");
@@ -13,10 +13,10 @@ const Embedded = (props) => {
 
     useEffect(() => {
         setChatwindow(
-            `<iframe style="border: 0" frameborder="0" scrolling="no" height="100%" width="100%" src="http://${SERVER_URL}/chat/embedding/${props.data.uuid}"></iframe>`
+            `<iframe style="border: 0" frameborder="0" scrolling="no" height="100%" width="100%" src="${SERVER_URL}/chat/embedding/${props.data.uuid}"></iframe>`
         );
         setBubble(
-            `<script type="text/javascript">window.$icg=[];window.ICG_WIDGET_ID="${props.data.uuid}";(function(){d=document;s=d.createElement("script");s.src="http://${SERVER_URL}/widget/bubble.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>`
+            `<script type="text/javascript">window.$icg=[];window.ICG_WIDGET_ID="${props.data.uuid}";(function(){d=document;s=d.createElement("script");s.src="${SERVER_URL}/widget/bubble.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>`
         );
     }, []);
 

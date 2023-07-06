@@ -44,8 +44,9 @@ export default function Example() {
     };
     const handleUpdateOk = (data) => {
         axios.post(webAPI.updatechat, data).then((res) => {
-            if (!res.data.success) notification("error", res.data.message);
-            else {
+            if (!res.data.success) {
+                notification("error", res.data.message);
+            } else {
                 notification("success", res.data.message);
                 getchat(dispatch, data);
                 setchatbot(dispatch, data);
@@ -79,7 +80,7 @@ export default function Example() {
             .post(webAPI.get_messages, { id: chat.id })
             .then((res) => {
                 console.log(res);
-                var messages = [];
+                let messages = [];
                 res.data.data.map(
                     (item) => item.message.length > 0 && messages.push(item)
                 );

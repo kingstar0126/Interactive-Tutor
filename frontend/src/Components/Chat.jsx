@@ -1,4 +1,9 @@
-import { BsFillChatLeftTextFill, BsPlus, BsSunFill } from "react-icons/bs";
+import {
+    BsFillChatLeftTextFill,
+    BsPlus,
+    BsFillCaretUpSquareFill,
+    BsFillCaretDownSquareFill,
+} from "react-icons/bs";
 import { useState, useEffect } from "react";
 import Chatmodal from "./Chatmodal";
 import ChatTable from "./ChatTable";
@@ -6,10 +11,12 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { webAPI } from "../utils/constants";
-import { Outlet, useLocation, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 
 const Chat = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const notification = (type, message) => {
         // To do in here
         if (type === "error") {
@@ -31,8 +38,9 @@ const Chat = () => {
     const handleOk = (data) => {
         data["user_id"] = user.id;
         axios.post(webAPI.addchat, data).then((res) => {
-            if (!res.data.success) notification("error", res.data.message);
-            else {
+            if (!res.data.success) {
+                notification("error", res.data.message);
+            } else {
                 notification("success", res.data.message);
                 getChats();
             }
@@ -44,15 +52,21 @@ const Chat = () => {
     };
 
     useEffect(() => {
-        if (isOpen)
+        if (isOpen) {
             setShowDescription(
                 "flex flex-col items-start justify-center w-full gap-3 p-5 bg-[--site-card-icon-color] text-white mt-[10px] rounded-2xl"
             );
-        else setShowDescription("hidden");
+        } else {
+            setShowDescription("hidden");
+        }
     }, [isOpen]);
 
     useEffect(() => {
-        getChats();
+        if (user.role === undefined || user.role === 0) {
+            navigate("/chatbot/subscription");
+        } else {
+            getChats();
+        }
     }, []);
     const getChats = () => {
         let data = {
@@ -73,10 +87,17 @@ const Chat = () => {
                     Chats
                 </div>
                 <button className="flex h-[20px] items-center justify-center">
-                    <BsSunFill
-                        onClick={() => setIsOpen(!isOpen)}
-                        className="fill-[--site-logo-text-color] w-10 h-10 hover:scale-105"
-                    />
+                    {isOpen ? (
+                        <BsFillCaretUpSquareFill
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="fill-[--site-logo-text-color] w-5 h-5 hover:scale-105"
+                        />
+                    ) : (
+                        <BsFillCaretDownSquareFill
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="fill-[--site-logo-text-color] w-5 h-5 hover:scale-105"
+                        />
+                    )}
                 </button>
             </div>
             <div className="flex flex-col w-full">
@@ -86,11 +107,10 @@ const Chat = () => {
                     </p>
                     <p className="text-[14px]">
                         Welcome to here! To get started, the first step is to
-                        create a widget, which can be either a chatbot (chats)
-                        or a toolbot (tools). Once you've created your first
-                        widget, you'll be redirected to the details page, where
-                        you'll have access to multiple tabs for customization
-                        and management.
+                        create a widget, which can be either a AI Tutor (chats).
+                        Once you've created your first widget, you'll be
+                        redirected to the details page, where you'll have access
+                        to multiple tabs for customization and management.
                     </p>
                     <p className="text-[14px]">
                         Let's take a closer look at each tab:

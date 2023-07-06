@@ -271,17 +271,19 @@ const NewChat = () => {
     };
 
     const sendMessage = (id, _message) => {
-        let behaviormodel = chat.behaviormodel;
-        let train = chat.train
+        let { behaviormodel, train } = chat;
+
         axios
             .post(webAPI.sendchat, { id, _message, behaviormodel, train })
             .then((res) => {
-                if (!res.data.success) console.log("error", res.data.message);
-                else {
+                if (!res.data.success) {
+                    console.log("error", res.data.message);
+                } else {
                     console.log(res.data.data);
                     receiveMessage(res.data.data);
                 }
-            });
+            })
+            .catch((err) => console.error(err));
     };
 
     const receiveMessage = (message) => {
@@ -297,7 +299,7 @@ const NewChat = () => {
             {chat && (
                 <div className="w-full h-screen">
                     <div
-                        className="flex flex-col py-5 w-full items-center justify-center"
+                        className="flex flex-col items-center justify-center w-full py-5"
                         ref={checkpinRef}
                     >
                         {
@@ -336,7 +338,7 @@ const NewChat = () => {
                         className="bg-[--site-card-icon-color] w-full px-10 h-full p-5 flex flex-col items-center justify-center"
                     >
                         <div
-                            className="flex flex-col justify-center items-center gap-5 h-full"
+                            className="flex flex-col items-center justify-center h-full gap-5"
                             ref={chatbot_start}
                         >
                             <img
@@ -351,11 +353,12 @@ const NewChat = () => {
                                 {chat.chat_description.description}
                             </span>
 
-                            <div className="h-full w-3/5 flex items-end mb-5 p-2 gap-5 justify-center">
+                            <div className="flex items-end justify-center w-3/5 h-full gap-5 p-2 mb-5">
                                 <a
                                     href={chat.chat_button.button1_url}
                                     ref={chatbot_button1}
                                     target="_blank"
+                                    rel="noreferrer"
                                 >
                                     {chat.chat_button.button1_text}
                                 </a>
@@ -363,6 +366,7 @@ const NewChat = () => {
                                     ref={chatbot_button2}
                                     href={chat.chat_button.button2_url}
                                     target="_blank"
+                                    rel="noreferrer"
                                 >
                                     {chat.chat_button.button2_text}
                                 </a>
@@ -370,6 +374,7 @@ const NewChat = () => {
                                     ref={chatbot_button3}
                                     href={chat.chat_button.button3_url}
                                     target="_blank"
+                                    rel="noreferrer"
                                 >
                                     {chat.chat_button.button3_text}
                                 </a>

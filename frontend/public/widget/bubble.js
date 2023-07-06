@@ -98,9 +98,8 @@
     // Execution
     const querystring = getQueryString();
     const urlParams = getUrlParams(querystring);
-    const API_URL = window.API_URL
-        ? window.API_URL
-        : "http://3.11.9.37";
+    const API_URL = window.API_URL ? window.API_URL : "http://3.11.9.37";
+
     const WIDGET_ID = window.ICG_WIDGET_ID
         ? window.ICG_WIDGET_ID
         : urlParams && urlParams.widget_id
