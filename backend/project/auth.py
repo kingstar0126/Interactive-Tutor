@@ -46,7 +46,13 @@ def login_post():
 
     user = User.query.filter_by(email=email).first()
 
-    if not user or not check_password_hash(user.password, password):
+    if not user:
+        return jsonify({
+            'success': False,
+            'code': 401,
+            'message': "Your information does not exist. Please register your information.",
+        })
+    if not check_password_hash(user.password, password):
         return jsonify({
             'success': False,
             'code': 401,
@@ -178,11 +184,13 @@ def get_useraccount():
     print(id, "This is the getaccount")
     user = User.query.filter_by(id=id).first()
     new_user = {
+        'id': user.id,
         'username': user.username,
         'email': user.email,
         'contact': user.contact,
         'state': user.state,
         'city': user.city,
+        'role': user.role,
         'country': user.country
     }
     return jsonify({'success': True, 'data': new_user, 'code': 200})

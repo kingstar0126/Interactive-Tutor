@@ -100,7 +100,7 @@
     const urlParams = getUrlParams(querystring);
     const API_URL = window.API_URL
         ? window.API_URL
-        : "http://192.168.103.63:5000";
+        : "http://3.11.9.37";
     const WIDGET_ID = window.ICG_WIDGET_ID
         ? window.ICG_WIDGET_ID
         : urlParams && urlParams.widget_id

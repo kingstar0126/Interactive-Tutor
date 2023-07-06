@@ -1,6 +1,7 @@
+from flask import request
 from flask import Blueprint, jsonify, request
 from . import db
-from .models import User
+from .models import User, Production
 import stripe
 from rich import print, pretty
 import json
@@ -17,30 +18,67 @@ payment = Blueprint('payment', __name__)
 @payment.route('/api/create-customer', methods=['POST'])
 def create_customer():
     print(request.json)
-    email = request.json['email']
+    id = request.json['id']
+    city = request.json['city']
+    state = request.json['state']
+    country = request.json['country']
     payment_method = request.json['paymentMethod']
     subscription = request.json['subscription']
-    state = request.json['state']
-    city = request.json['city']
-    country = request.json['country']
+
     product_id = ''
     if subscription == 'Starter':
         product_id = os.getenv('STRIPE_STARTER_PRODUCT_ID')
+        role = 2
     elif subscription == 'Standard':
         product_id = os.getenv('STRIPE_STANDARD_PRODUCT_ID')
+        role = 3
     elif subscription == 'Pro':
         product_id = os.getenv('STRIPE_PRO_PRODUCT_ID')
+        role = 4
 
-    print("\n\nThis is the production ID -> ", payment_method)
-    # Create a customer
-    # paymentmethod = stripe.PaymentMethod.create(
-    #     type='card',
-    #     card=payment_method
-    # )
-    print("\n\nThis is the customer -> ", 'customer')
-    # Create a subscription for the customer
+    user = User.query.filter_by(id=id).first()
 
-    print("\n\nThis is the subscription ->", subscription)
+    if user.subscription_id:
+        return jsonify({
+            'success': False,
+            'message': 'Customer had already subscription.',
+            'code': 405
+        })
+    customer = stripe.Customer.retrieve(
+        user.customer_id
+    )
+
+    _payment_method = stripe.PaymentMethod.attach(
+        payment_method.get('id'),
+        customer=customer.id
+    )
+
+    # Update the billing details for the PaymentMethod
+    stripe.PaymentMethod.modify(
+        _payment_method.id,
+        billing_details={
+            'address': {
+                'city': city,
+                'country': country,
+                'state': state
+            }
+        }
+    )
+
+    subscription = stripe.Subscription.create(
+        customer=user.customer_id,
+        items=[
+            {"price": product_id}
+        ],
+        trial_period_days=14,
+        payment_settings={"save_default_payment_method": "on_subscription"},
+        trial_settings={"end_behavior": {"missing_payment_method": "pause"}},
+    )
+    print("THis is the customer", subscription)
+    user.subscription_id = subscription.id
+    user.role = role
+    db.session.commit()
+
     return jsonify({'success': True}), 200
 
 # This is the create product
@@ -173,12 +211,10 @@ def delete_all_products():
 # This is the checkout for the product
 @payment.route('/api/create/checkout/session', methods=['POST'])
 def create_checkout_session():
-
+    id = request.json['id']
     subscription_plan_id = request.json['subscriptionPlanId']
-    print("\n\n->", subscription_plan_id)
-    # Validate and process the subscription plan ID if needed
 
-    # Additional logic to determine the price, success URL, and cancel URL based on the selected plan
+    user = User.query.filter_by(id=id).first()
 
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
@@ -186,10 +222,82 @@ def create_checkout_session():
             'price': subscription_plan_id,
             'quantity': 1,
         }],
+        subscription_data={
+            "trial_settings": {"end_behavior": {"missing_payment_method": "cancel"}},
+            "trial_period_days": 14,
+        },
+        payment_method_collection='always',
         mode='subscription',
         success_url="http://3.11.9.37/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
         cancel_url='http://3.11.9.37/chatbot/subscription',
+        customer=user.customer_id
     )
     print(session)
+    return jsonify({'sessionId': session['id'], 'key': os.getenv('STRIPE_PUBLISHABLE_KEY')})
 
+
+@payment.route('/api/stripe/webhooks', methods=['POST'])
+def stripe_webhook():
+    payload = json.loads(request.get_data(as_text=True))
+    # print(payload)
+    # Handle the checkout.session.completed event
+    if payload["type"] == "checkout.session.completed":
+        print("Payment was successful.")
+        # TODO: run some custom code here
+        print(payload)
+        customer_id = payload["data"]["object"]["customer"]
+        subscription_id = payload["data"]["object"]["subscription"]
+
+        price_id = stripe.Subscription.retrieve(
+            subscription_id)['items']['data'][0]['price']['id']
+
+        user = User.query.filter_by(customer_id=customer_id).first()
+        user.subscription_id = subscription_id
+        user.role = Production.query.filter_by(price_id=price_id).first().role
+        db.session.commit()
+
+    elif payload["type"] == "customer.subscription.deleted":
+        print("\n\n", "Deleted the subscription")
+        customer_id = payload["data"]["object"]["customer"]
+        subscription_id = payload["data"]["object"]["subscription"]
+        stripe.Subscription.cancel(
+            subscription_id
+        )
+        user = User.query.filter_by(customer_id=customer_id).first()
+        user.subscription_id = ''
+        db.session.commit()
+    return jsonify(message="Success"), 200
+
+
+@payment.route('/api/cancel/subscription', methods=['POST'])
+def cancel_subscription():
+    id = request.json['id']
+    user = User.query.filter_by(id=id).first()
+    subscription = stripe.Subscription.list(
+        customer=user.customer_id, status='active').data[0]
+
+
+@payment.route('/api/update/subscription', methods=['POST'])
+def update_subscription():
+    id = request.json['id']
+    user = User.query.filter_by(id=id).first()
+    subscriptionPlanId = request.json['subscriptionPlanId']
+    stripe.Subscription.cancel(user.subscription_id)
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=[{
+            'price': subscriptionPlanId,
+            'quantity': 1,
+        }],
+        subscription_data={
+            "trial_settings": {"end_behavior": {"missing_payment_method": "cancel"}},
+            "trial_period_days": 14,
+        },
+        payment_method_collection='always',
+        mode='subscription',
+        success_url="http://3.11.9.37/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url='http://3.11.9.37/chatbot/subscription',
+        customer=user.customer_id
+    )
+    print(session)
     return jsonify({'sessionId': session['id'], 'key': os.getenv('STRIPE_PUBLISHABLE_KEY')})

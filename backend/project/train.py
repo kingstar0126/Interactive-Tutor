@@ -121,7 +121,7 @@ def text_to_docs(text: str, filename: str) -> List[Document]:
 
     # Split pages into chunks
     doc_chunks = []
-
+    ct = 0
     for i, doc in enumerate(page_docs):
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=400,
@@ -131,7 +131,7 @@ def text_to_docs(text: str, filename: str) -> List[Document]:
         if doc.page_content == "":
             continue
         chunks = text_splitter.split_text(doc.page_content)
-
+        ct += len(doc.page_content.split())
         for i, chunk in enumerate(chunks):
             doc = Document(
                 page_content=chunk, metadata={
@@ -140,7 +140,7 @@ def text_to_docs(text: str, filename: str) -> List[Document]:
             # Add sources a metadata
             doc.metadata["source"] = f"{filename}"
             doc_chunks.append(doc)
-    return doc_chunks
+    return doc_chunks, ct
 
 
 def web_scraping(url):
@@ -212,9 +212,10 @@ def create_train_url():
 
     trainid = create_train(url, 'url', True)
 
-    result = text_to_docs(data, url)
+    result, ct = text_to_docs(data, url)
+    print(ct)
     create_vector(result)
-    print(result)
+
     if (trainid == False):
         return jsonify({
             'success': False,
@@ -244,7 +245,7 @@ def create_train_text():
             'message': 'Training data already exist.',
         })
     chat = insert_train_chat(chatbot, trainid)
-    
+
     return jsonify({
         'success': True,
         'code': 200,
@@ -298,6 +299,7 @@ def get_traindatas():
     chat = Chat.query.filter_by(uuid=uuid).first()
     train_ids = json.loads(chat.train)
     print(train_ids)
+
     data = []
     for id in train_ids:
         train_data = Train.query.filter_by(id=id).first()

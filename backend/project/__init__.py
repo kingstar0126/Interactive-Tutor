@@ -70,4 +70,8 @@ def create_app():
     payment_blueprint.db = db
     app.register_blueprint(payment_blueprint)
 
+    from .production import product as product_blueprint
+    product_blueprint.db = db
+    app.register_blueprint(product_blueprint)
+
     return app

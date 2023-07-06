@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from .models import Chat, Message, Train
+from .models import Chat, Message, Train, User
 from . import db
 from rich import print, pretty
 import json
@@ -65,6 +65,30 @@ def add_chat():
     chat_button = json.dumps({})
     bubble = json.dumps({})
 
+    user = User.query.filter_by(id=user_id).first()
+    ct = Chat.query.filter_by(user_id=user_id).count() + 1
+
+    if user.role == 2:
+        if ct > 1:
+            return jsonify({
+                'success': False,
+                'code': 401,
+                'message': "You can no longer create AI Tutors.",
+            })
+    elif user.role == 3:
+        if ct > 3:
+            return jsonify({
+                'success': False,
+                'code': 401,
+                'message': "You can no longer create AI Tutors.",
+            })
+    elif user.role == 4:
+        if ct > 10:
+            return jsonify({
+                'success': False,
+                'code': 401,
+                'message': "You can no longer create AI Tutors.",
+            })
     if chat := Chat.query.filter_by(label=label).first():
         return jsonify({
             'success': False,
@@ -168,7 +192,7 @@ def update_chat():
 
 @chat.route('/api/getchats', methods=['POST'])
 def get_chats():
-    
+
     user_id = request.json['user_id']
     chats = Chat.query.filter_by(user_id=user_id).all()
 
@@ -313,6 +337,7 @@ def delete_chat(id):
 
     return jsonify(response)
 
+
 @chat.route('/api/getreportdata', methods=['POST'])
 def get_report_data():
     id = request.json['id']
@@ -327,4 +352,4 @@ def get_report_data():
             print(data)
         messages.append(data)
     print(message)
-    return jsonify({'success': True, 'data': messages})                                   
+    return jsonify({'success': True, 'data': messages})
