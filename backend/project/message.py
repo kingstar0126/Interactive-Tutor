@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from .models import Message, Train
+from .models import Message, Train, User
 from . import db
 from rich import print, pretty
 import datetime
@@ -142,3 +142,34 @@ def delete_message():
         'message': 'Your messageBot created successfully!!!'
     }
     return jsonify(_response)
+
+
+@message.route('/api/getallmessages', methods=['POST'])
+def get_all_messages():
+    role = request.json['role']
+    id = request.json['id']
+    user = User.query.filter_by(id=id).first()
+    if user.role == 2:
+        print("HIHIHI---------------------------", request.json)
+        current_messages = Message.query.filter_by(chat_id=chat_id).all()
+        response = []
+        for _message in current_messages:
+            message_data = {
+                'uuid': _message.uuid,
+                'message': json.loads(_message.message),
+                'update_data': _message.update_date.strftime('%Y-%m-%d %H:%M:%S.%f')
+            }
+            response.append(message_data)
+
+        _response = {
+            'success': True,
+            'code': 200,
+            'message': 'Your messageBot selected successfully!!!',
+            'data': response
+        }
+        return jsonify(_response)
+    return jsonify({
+        'success': False,
+        'code': 401,
+        'message': 'You have not permission'
+    })
