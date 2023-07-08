@@ -2,7 +2,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { webAPI } from "../utils/constants";
 import Select from "react-select";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const Adduser = (props) => {
     const [username, setUsername] = useState("");

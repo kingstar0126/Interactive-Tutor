@@ -7,12 +7,14 @@ import {
 import { useState, useEffect } from "react";
 import Chatmodal from "./Chatmodal";
 import ChatTable from "./ChatTable";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { webAPI } from "../utils/constants";
 import { useNavigate } from "react-router-dom";
 import { Outlet, useLocation } from "react-router-dom";
+import { getUserState } from "../redux/actions/userAction";
+import { setquery } from "../redux/actions/queryAction";
 
 const Chat = () => {
     const location = useLocation();
@@ -28,9 +30,13 @@ const Chat = () => {
     };
     const [chat, SetChat] = useState([]);
     const user = JSON.parse(useSelector((state) => state.user.user));
+    const query = useSelector((state) => state.query.query);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isOpen, setIsOpen] = useState(true);
+    const [trial, setTrial] = useState(0);
     const [showDescription, setShowDescription] = useState("block");
+    const dispatch = useDispatch();
+
     const showModal = () => {
         setIsModalOpen(true);
     };
@@ -62,7 +68,12 @@ const Chat = () => {
     }, [isOpen]);
 
     useEffect(() => {
-        if (user.role === undefined || user.role === 0) {
+        getUserState(dispatch, { id: user.id });
+        setquery(dispatch, user.query);
+        if (user.role === 5) {
+            setTrial(user.days);
+            getChats();
+        } else if (user.role === undefined || user.role === 0) {
             navigate("/chatbot/subscription");
         } else {
             getChats();
@@ -72,8 +83,9 @@ const Chat = () => {
         let data = {
             user_id: user.id,
         };
-        console.log(data);
+
         axios.post(webAPI.getchats, data).then((res) => {
+            console.log(res);
             SetChat(res.data.data);
         });
     };
@@ -86,19 +98,38 @@ const Chat = () => {
                     <BsFillChatLeftTextFill className="fill-[--site-logo-text-color]" />
                     Chats
                 </div>
-                <button className="flex h-[20px] items-center justify-center">
-                    {isOpen ? (
-                        <BsFillCaretUpSquareFill
-                            onClick={() => setIsOpen(!isOpen)}
-                            className="fill-[--site-logo-text-color] w-5 h-5 hover:scale-105"
-                        />
-                    ) : (
-                        <BsFillCaretDownSquareFill
-                            onClick={() => setIsOpen(!isOpen)}
-                            className="fill-[--site-logo-text-color] w-5 h-5 hover:scale-105"
-                        />
+
+                <div className="flex h-[20px] items-center justify-center">
+                    {query && (
+                        <p className="bg-[--site-logo-text-color] mr-4 px-2 rounded-xl flex gap-2 items-center justify-center">
+                            Queries
+                            <span className="text-[--site-error-text-color] font-bold">
+                                {query}
+                            </span>
+                        </p>
                     )}
-                </button>
+                    {trial > 0 && (
+                        <p className="bg-[--site-logo-text-color] mr-4 px-2 rounded-xl flex gap-2 items-center justify-center">
+                            Free trial
+                            <span className="text-[--site-error-text-color] font-bold">
+                                {trial}
+                            </span>
+                        </p>
+                    )}
+                    <button>
+                        {isOpen ? (
+                            <BsFillCaretUpSquareFill
+                                onClick={() => setIsOpen(!isOpen)}
+                                className="fill-[--site-logo-text-color] w-5 h-5 hover:scale-105"
+                            />
+                        ) : (
+                            <BsFillCaretDownSquareFill
+                                onClick={() => setIsOpen(!isOpen)}
+                                className="fill-[--site-logo-text-color] w-5 h-5 hover:scale-105"
+                            />
+                        )}
+                    </button>
+                </div>
             </div>
             <div className="flex flex-col w-full">
                 <div className={showDescription}>

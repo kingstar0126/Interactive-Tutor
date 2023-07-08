@@ -4,6 +4,7 @@
     "private": true,
     "dependencies": {
         "@material-tailwind/react": "^2.0.3",
+        "@ramonak/react-progress-bar": "^5.0.3",
         "@reduxjs/toolkit": "^1.9.5",
         "@stripe/react-stripe-js": "^2.1.1",
         "@stripe/stripe-js": "^1.54.1",
