@@ -1,15 +1,24 @@
-import { BsFillChatLeftTextFill, BsPlus, BsSunFill } from "react-icons/bs";
+import {
+    BsFillChatLeftTextFill,
+    BsPlus,
+    BsFillCaretUpSquareFill,
+    BsFillCaretDownSquareFill,
+} from "react-icons/bs";
 import { useState, useEffect } from "react";
 import Chatmodal from "./Chatmodal";
 import ChatTable from "./ChatTable";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { webAPI } from "../utils/constants";
-import { Outlet, useLocation, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
+import { getUserState } from "../redux/actions/userAction";
+import { setquery } from "../redux/actions/queryAction";
 
 const Chat = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const notification = (type, message) => {
         // To do in here
         if (type === "error") {
@@ -21,9 +30,13 @@ const Chat = () => {
     };
     const [chat, SetChat] = useState([]);
     const user = JSON.parse(useSelector((state) => state.user.user));
+    const query = useSelector((state) => state.query.query);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isOpen, setIsOpen] = useState(true);
+    const [trial, setTrial] = useState(0);
     const [showDescription, setShowDescription] = useState("block");
+    const dispatch = useDispatch();
+
     const showModal = () => {
         setIsModalOpen(true);
     };
@@ -31,8 +44,9 @@ const Chat = () => {
     const handleOk = (data) => {
         data["user_id"] = user.id;
         axios.post(webAPI.addchat, data).then((res) => {
-            if (!res.data.success) notification("error", res.data.message);
-            else {
+            if (!res.data.success) {
+                notification("error", res.data.message);
+            } else {
                 notification("success", res.data.message);
                 getChats();
             }
@@ -44,22 +58,34 @@ const Chat = () => {
     };
 
     useEffect(() => {
-        if (isOpen)
+        if (isOpen) {
             setShowDescription(
                 "flex flex-col items-start justify-center w-full gap-3 p-5 bg-[--site-card-icon-color] text-white mt-[10px] rounded-2xl"
             );
-        else setShowDescription("hidden");
+        } else {
+            setShowDescription("hidden");
+        }
     }, [isOpen]);
 
     useEffect(() => {
-        getChats();
+        getUserState(dispatch, { id: user.id });
+        setquery(dispatch, user.query);
+        if (user.role === 5) {
+            setTrial(user.days);
+            getChats();
+        } else if (user.role === undefined || user.role === 0) {
+            navigate("/chatbot/subscription");
+        } else {
+            getChats();
+        }
     }, []);
     const getChats = () => {
         let data = {
             user_id: user.id,
         };
-        console.log(data);
+
         axios.post(webAPI.getchats, data).then((res) => {
+            console.log(res);
             SetChat(res.data.data);
         });
     };
@@ -72,12 +98,38 @@ const Chat = () => {
                     <BsFillChatLeftTextFill className="fill-[--site-logo-text-color]" />
                     Chats
                 </div>
-                <button className="flex h-[20px] items-center justify-center">
-                    <BsSunFill
-                        onClick={() => setIsOpen(!isOpen)}
-                        className="fill-[--site-logo-text-color] w-10 h-10 hover:scale-105"
-                    />
-                </button>
+
+                <div className="flex h-[20px] items-center justify-center">
+                    {query && (
+                        <p className="bg-[--site-logo-text-color] mr-4 px-2 rounded-xl flex gap-2 items-center justify-center">
+                            Queries
+                            <span className="text-[--site-error-text-color] font-bold">
+                                {query}
+                            </span>
+                        </p>
+                    )}
+                    {trial > 0 && (
+                        <p className="bg-[--site-logo-text-color] mr-4 px-2 rounded-xl flex gap-2 items-center justify-center">
+                            Free trial
+                            <span className="text-[--site-error-text-color] font-bold">
+                                {trial}
+                            </span>
+                        </p>
+                    )}
+                    <button>
+                        {isOpen ? (
+                            <BsFillCaretUpSquareFill
+                                onClick={() => setIsOpen(!isOpen)}
+                                className="fill-[--site-logo-text-color] w-5 h-5 hover:scale-105"
+                            />
+                        ) : (
+                            <BsFillCaretDownSquareFill
+                                onClick={() => setIsOpen(!isOpen)}
+                                className="fill-[--site-logo-text-color] w-5 h-5 hover:scale-105"
+                            />
+                        )}
+                    </button>
+                </div>
             </div>
             <div className="flex flex-col w-full">
                 <div className={showDescription}>
@@ -86,11 +138,10 @@ const Chat = () => {
                     </p>
                     <p className="text-[14px]">
                         Welcome to here! To get started, the first step is to
-                        create a widget, which can be either a chatbot (chats)
-                        or a toolbot (tools). Once you've created your first
-                        widget, you'll be redirected to the details page, where
-                        you'll have access to multiple tabs for customization
-                        and management.
+                        create a widget, which can be either a AI Tutor (chats).
+                        Once you've created your first widget, you'll be
+                        redirected to the details page, where you'll have access
+                        to multiple tabs for customization and management.
                     </p>
                     <p className="text-[14px]">
                         Let's take a closer look at each tab:

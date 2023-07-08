@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Select from "react-select";
 import { webAPI } from "../utils/constants";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
+import ReactLoading from "react-loading";
 
 const ChatmodalTrain = (props) => {
     const [type, SetType] = useState("1");
@@ -11,6 +12,9 @@ const ChatmodalTrain = (props) => {
     const [url, Seturl] = useState("");
     const [file, setFile] = useState("");
     const [text, setText] = useState("");
+    const [progress, setProgress] = useState(0);
+    const [isloading, setIsloading] = useState(false);
+    const [isurlloading, setIsurlloading] = useState(false);
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
     const notification = (type, message) => {
         // To do in here
@@ -33,28 +37,58 @@ const ChatmodalTrain = (props) => {
         let chatbot = chat.uuid;
         if (type === "1") {
             if (urlPatternValidation(url)) {
+                setIsurlloading(true);
                 let data;
                 data = { url, chatbot };
                 axios
                     .post(webAPI.sendurl, data)
-                    .then((res) => props.handleOk(res.data.data))
-                    .catch((error) => console.log(error));
-            } else notification("error", "Invalued URL");
+                    .then((res) => {
+                        props.handleOk(res.data.data);
+                        setIsurlloading(false);
+                    })
+                    .catch((error) => {
+                        console.log(error);
+                        setIsurlloading(false);
+                    });
+            } else {
+                notification("error", "Invalued URL");
+            }
         } else if (type === "2") {
-            let data = new FormData();
-            let chatbot = chat.uuid;
-            const config = {
-                headers: {
-                    "content-type": "multipart/form-data",
-                },
-            };
-            const filename = file.name.replaceAll(" ", "");
-            data.append("file", file, filename);
-            data.append("chatbot", chatbot);
-            axios
-                .post(webAPI.sendfile, data, config)
-                .then((res) => props.handleOk(res.data.data))
-                .catch((err) => console.log(err));
+            if (file && file.name) {
+                let data = new FormData();
+                let chatbot = chat.uuid;
+                const filename = file.name.replaceAll(" ", "");
+                data.append("file", file, filename);
+                data.append("chatbot", chatbot);
+                const config = {
+                    onUploadProgress: (progressEvent) => {
+                        const progress = Math.round(
+                            (progressEvent.loaded / progressEvent.total) * 100
+                        );
+                        setProgress(progress);
+                    },
+                };
+                console.log(file, filename, chatbot);
+                axios
+                    .post(webAPI.sendfile, data, config)
+                    .then((res) => {
+                        console.log(res);
+                        setIsloading(false);
+                        if (!res.data.success) {
+                            notification("error", res.data.message);
+                            props.handleCancel();
+                        } else {
+                            notification("success", res.data.message);
+                            props.handleOk(res.data.data);
+                        }
+                        props.handleOk(res.data.data);
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                        notification("error", "Failed Uploading File");
+                        setIsloading(false);
+                    });
+            }
         } else {
             let data;
             data = { text, chatbot };
@@ -70,6 +104,19 @@ const ChatmodalTrain = (props) => {
             setFile(e.target.files[0]);
         }
     };
+
+    useEffect(() => {
+        setProgress(0);
+        SetLabel("");
+        Seturl("");
+        setText("");
+    }, [props.open]);
+
+    useEffect(() => {
+        if (progress === 100) {
+            setIsloading(true);
+        }
+    }, [progress]);
 
     const showHideClassname = props.open
         ? "fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto"
@@ -160,6 +207,20 @@ const ChatmodalTrain = (props) => {
                                             URL is required.
                                         </p>
                                     )}
+                                    {isurlloading && (
+                                        <div className="flex flex-col items-center justify-center w-full p-2">
+                                            <ReactLoading
+                                                type="spin"
+                                                color="#c1ff72"
+                                                height={40}
+                                                width={40}
+                                                delay={15}
+                                            ></ReactLoading>
+                                            <span>
+                                                Embedding training data...
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                             {type === "2" && (
@@ -170,7 +231,7 @@ const ChatmodalTrain = (props) => {
                                     <input
                                         type="file"
                                         name="label"
-                                        onChange={handleFileChange}
+                                        onChange={(e) => handleFileChange(e)}
                                         accept=".pdf,.csv,.docx, .srt, .epub, .txt,
                     .md, .json"
                                         max="100000000"
@@ -181,6 +242,45 @@ const ChatmodalTrain = (props) => {
                                         .srt, .epub, .txt, .md, .json, - Max
                                         file size: 100MB
                                     </p>
+                                    {progress > 0 && (
+                                        <div className="flex flex-col w-full">
+                                            <div className="flex flex-col items-center justify-between w-full mb-2">
+                                                <div className="flex w-full">
+                                                    <span
+                                                        style={{
+                                                            width: `${progress}%`,
+                                                        }}
+                                                        className="flex justify-end text-xs font-semibold text-pink-600"
+                                                    >
+                                                        {progress}
+                                                        <span>%</span>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="flex w-full h-2 mb-4 overflow-hidden text-xs bg-pink-200 rounded">
+                                                <div
+                                                    style={{
+                                                        width: `${progress}%`,
+                                                    }}
+                                                    className="flex flex-col justify-center text-center text-white bg-[--site-logo-text-color] w-full shadow-none whitespace-nowrap"
+                                                ></div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {isloading && (
+                                        <div className="flex flex-col items-center justify-center w-full">
+                                            <ReactLoading
+                                                type="spin"
+                                                color="#c1ff72"
+                                                height={40}
+                                                width={40}
+                                                delay={15}
+                                            ></ReactLoading>
+                                            <span>
+                                                Embedding training data...
+                                            </span>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                             {type === "3" && (

@@ -53,18 +53,19 @@ const ManageAccount = () => {
                         const new_user = user;
                         new_user.email = email;
                         new_user.username = username;
+                        console.log("The user has been updated");
                         changeuser(dispatch, new_user);
                     }
                 })
                 .catch((err) => console.error(err));
         }
     };
+
     useEffect(() => {
         axios
             .post(webAPI.getuser, { id: user.id })
             .then((res) => {
                 console.log(res.data.data);
-
                 setUsername(res.data.data.username);
                 setEmail(res.data.data.email);
                 setPhone(res.data.data.contact);
@@ -143,7 +144,7 @@ const ManageAccount = () => {
                                 Address
                             </span>
                             <Autocomplete
-                                defaultValue={state}
+                                defaultValue={city}
                                 className="w-3/5 rounded-lg p-2 focus:ring-[--site-logo-text-color] focus:outline-none focus:ring focus:ring-opacity-40"
                                 apiKey={GOOGLE_MAP_API}
                                 onPlaceSelected={(place) => {
@@ -159,17 +160,17 @@ const ManageAccount = () => {
                                             "administrative_area_level_1"
                                         ) {
                                             // State
-                                            _state = component.long_name;
+                                            _state = component.short_name;
                                         }
 
                                         if (componentType === "country") {
                                             // Country
-                                            _country = component.long_name;
+                                            _country = component.short_name;
                                         }
 
                                         if (componentType === "locality") {
                                             // City
-                                            _city = component.long_name;
+                                            _city = component.short_name;
                                         }
                                     }
 

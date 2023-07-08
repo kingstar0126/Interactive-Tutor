@@ -6,41 +6,63 @@ import {
 } from "@material-tailwind/react";
 import { PinField } from "react-pin-field";
 import Select from "react-select";
+import { useSelector } from "react-redux";
 
 const Chatmodal = (props) => {
     const [label, SetLabel] = useState("");
+    const user = JSON.parse(useSelector((state) => state.user.user));
     const [chatdescription, SetChatdescription] = useState(
         "This is my general assistant"
     );
-    const [chatmodel, SetChatmodel] = useState("GPT 3.5 | 4K context");
+    const [chatmodel, SetChatmodel] = useState("0");
     const [open, setOpen] = useState(0);
     const [Conversation, SetConversation] = useState(
         "Hello friends! How can I help you today?"
     );
     const [validate, SetValidate] = useState(false);
+    const models = [
+        {
+            value: "1",
+            label: "GPT 3.5 | 4K context",
+        },
+        {
+            value: "2",
+            label: "GPT 3.5 | 16K context",
+        },
+        {
+            value: "3",
+            label: "GPT 4 | 4K context",
+        },
+    ];
+    const [gptmodel, SetGPTmodel] = useState(models);
     const [Creativity, SetCreativity] = useState(0.3);
-    const [access, SetAccess] = useState(0);
     const [behaviormodel, SetBehaviormodel] =
         useState(`Utilize contextual information from the training
   data, and if necessary, respond with 'I don't know'
-  when appropriate.(The chatbot will search the
+  when appropriate.(The AI Tutor will search the
   training data for a response and provide an answer
   only if a matching response is found.)`);
     const [behavior, SetBehavior] = useState("You are a helpful assistant");
 
     useEffect(() => {
+        if (user.role === 2 || user.role === 5) {
+            SetGPTmodel([models[0]]);
+        } else if (user.role === 3) {
+            SetGPTmodel(models.slice(0, 2));
+        } else if (user.role === 4) {
+            SetGPTmodel(models);
+        }
+
         if (!props.chat) {
             SetLabel("");
             SetChatdescription("");
-            SetChatmodel("GPT 3.5 | 4K context");
             setOpen(0);
             SetConversation("Hello friends! How can I help you today?");
             SetValidate(false);
             SetCreativity(0.3);
-            SetAccess(0);
             SetBehaviormodel(`Utilize contextual information from the training
     data, and if necessary, respond with 'I don't know'
-    when appropriate.(The chatbot will search the
+    when appropriate.(The AI Tutor will search the
     training data for a response and provide an answer
     only if a matching response is found.)`);
             SetBehavior("You are a helpful assistant");
@@ -48,12 +70,10 @@ const Chatmodal = (props) => {
         if (props.chat && props.chat.label) {
             SetLabel(props.chat["label"]);
             SetChatdescription(props.chat["description"]);
-            SetChatmodel(props.chat["model"]);
             setOpen(0);
             SetConversation(props.chat["conversation"]);
             SetValidate(false);
             SetCreativity(props.chat["creativity"]);
-            SetAccess(props.chat["access"]);
             SetBehaviormodel(props.chat["behaviormodel"]);
             SetBehavior(props.chat["behavior"]);
         }
@@ -66,7 +86,6 @@ const Chatmodal = (props) => {
                 chatdescription,
                 chatmodel,
                 Conversation,
-                access,
                 Creativity,
                 behaviormodel,
                 behavior,
@@ -78,15 +97,11 @@ const Chatmodal = (props) => {
             new_chat["description"] = chatdescription;
             new_chat["model"] = chatmodel;
             new_chat["conversation"] = Conversation;
-            new_chat["access"] = access;
             new_chat["creativity"] = Creativity;
             new_chat["behaviormodel"] = behaviormodel;
             new_chat["behavior"] = behavior;
             props.handleOk(new_chat);
         }
-    };
-    const handleComplete = (value) => {
-        SetAccess(value);
     };
 
     const handleOpen = (value) => {
@@ -138,8 +153,8 @@ const Chatmodal = (props) => {
                                 className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] h-10 border rounded-lg hover:border-[--site-main-color5] text-[--site-card-icon-color]"
                             />
                             <p className="text-sm text-[--site-main-color5]">
-                                The label is used to identify your chatbot. It's
-                                private and exclusively visible to you.
+                                The label is used to identify your AI Tutor.
+                                It's private and exclusively visible to you.
                             </p>
                             {!label && (
                                 <p className="text-[12px] text-[--site-main-form-error]">
@@ -163,8 +178,8 @@ const Chatmodal = (props) => {
                                 className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] h-10 border rounded-lg hover:border-[--site-main-color5] text-[--site-card-icon-color]"
                             />
                             <p className="text-sm text-[--site-main-color5]">
-                                The description is used to identify your
-                                chatbot. It's private and exclusively visible to
+                                The description is used to identify your AI
+                                Tutor. It's private and exclusively visible to
                                 you.
                             </p>
                         </div>
@@ -193,34 +208,28 @@ const Chatmodal = (props) => {
                                             </label>
                                             <select
                                                 name="chatdescription"
-                                                value={chatmodel}
-                                                onChange={(e) =>
-                                                    SetChatmodel(e.target.value)
-                                                }
+                                                onChange={(e) => {
+                                                    SetChatmodel(
+                                                        e.target.value
+                                                    );
+                                                }}
                                                 className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] h-10 border rounded-lg hover:border-[--site-main-color5] text-[--site-card-icon-color]"
                                             >
-                                                <option
-                                                    value="1"
-                                                    className="py-1"
-                                                >
-                                                    GPT 3.5 | 4K context
-                                                </option>
-                                                <option
-                                                    value="2"
-                                                    className="py-1"
-                                                >
-                                                    GPT 3.5 | 16K context
-                                                </option>
-                                                <option
-                                                    value="3"
-                                                    className="py-1"
-                                                >
-                                                    GPT 4 | 4K context
-                                                </option>
+                                                {gptmodel.map((item, index) => {
+                                                    return (
+                                                        <option
+                                                            key={index}
+                                                            value={item.value}
+                                                        >
+                                                            {item.label}
+                                                        </option>
+                                                    );
+                                                })}
                                             </select>
+
                                             <p className="text-sm text-[--site-main-color5]">
                                                 The description is used to
-                                                identify your chatbot. It's
+                                                identify your AI Tutor. It's
                                                 private and exclusively visible
                                                 to you.
                                             </p>
@@ -264,7 +273,7 @@ const Chatmodal = (props) => {
                                             ></textarea>
                                             <p className="text-sm text-[--site-main-color5]">
                                                 The description is used to
-                                                identify your chatbot. It's
+                                                identify your AI Tutor. It's
                                                 private and exclusively visible
                                                 to you.
                                             </p>
@@ -280,64 +289,6 @@ const Chatmodal = (props) => {
                                 >
                                     <AccordionHeader
                                         onClick={() => handleOpen(3)}
-                                        className="border-[--site-card-icon-color]"
-                                    >
-                                        <div className="flex items-start w-4/5">
-                                            <p className="text-[16px] font-normal">
-                                                Access control
-                                            </p>
-                                        </div>
-                                    </AccordionHeader>
-                                    <AccordionBody className="p-2 border-t">
-                                        <div className="flex flex-col items-start py-2">
-                                            <label className="mb-1 text-sm font-semibold text-[--site-main-color3]">
-                                                PIN protection
-                                            </label>
-                                            <div className="flex flex-row gap-2">
-                                                <PinField
-                                                    name="chatdescription"
-                                                    length={4}
-                                                    inputMode="numeric"
-                                                    onRejectKey={() => {
-                                                        SetValidate(true);
-                                                    }}
-                                                    onResolveKey={() => {
-                                                        SetValidate(false);
-                                                    }}
-                                                    validate="0123456789"
-                                                    onComplete={handleComplete}
-                                                    className="mb-1 w-[40px] h-[40px] focus:border-none focus:ring-opacity-40 text-[--site-card-icon-color] focus:outline-none p-[15px] focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5]"
-                                                />
-                                            </div>
-                                            {validate && (
-                                                <span className="text-[--site-main-form-error] text-[12px]">
-                                                    The PIN must be number
-                                                </span>
-                                            )}
-                                            <p className="text-sm text-[--site-main-color5] text-start">
-                                                Utilizing a PIN will enhance the
-                                                security of your chatbot URL by
-                                                adding an additional layer of
-                                                protection, ensuring that only
-                                                authorized users with the
-                                                correct PIN can access it. This
-                                                helps safeguard the information
-                                                and functionality provided by
-                                                the widget, offering an extra
-                                                level of control and privacy.
-                                            </p>
-                                        </div>
-                                    </AccordionBody>
-                                </Accordion>
-                            </div>
-                            <div>
-                                <Accordion
-                                    open={open === 4}
-                                    icon={<Icon id={4} open={open} />}
-                                    className="p-5 border rounded-lg"
-                                >
-                                    <AccordionHeader
-                                        onClick={() => handleOpen(4)}
                                         className="border-[--site-card-icon-color]"
                                     >
                                         <div className="flex items-start w-4/5">
@@ -382,9 +333,9 @@ const Chatmodal = (props) => {
                                                 how the training data you
                                                 provide will be utilized. It
                                                 specifies the way in which the
-                                                chatbot understands and responds
-                                                to user inputs based on the
-                                                given context.
+                                                AI Tutor understands and
+                                                responds to user inputs based on
+                                                the given context.
                                             </p>
                                         </div>
                                         <div className="flex flex-col items-start py-2">
@@ -407,7 +358,7 @@ const Chatmodal = (props) => {
                                                 our default behavior of 'You are
                                                 a helpful assistant' to provide
                                                 a more customized experience,
-                                                allowing your chatbot to act in
+                                                allowing your AI Tutor to act in
                                                 a manner that aligns with your
                                                 specific requirements and
                                                 preferences.

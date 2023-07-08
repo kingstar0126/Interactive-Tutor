@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from .models import Chat, Message, Train
+from .models import Chat, Message, Train, User, Organization
 from . import db
 from rich import print, pretty
 import json
@@ -8,6 +8,7 @@ import openai
 import os
 from datetime import datetime
 from dotenv import load_dotenv
+from .auth import generate_pin_password
 
 load_dotenv()
 
@@ -47,7 +48,7 @@ def add_chat():
     description = request.json['chatdescription']
     model = request.json['chatmodel']
     conversation = request.json['Conversation']
-    access = request.json['access']
+    access = generate_pin_password()
     creativity = request.json['Creativity']
     behavior = request.json['behavior']
     behaviormodel = request.json['behaviormodel']
@@ -65,7 +66,31 @@ def add_chat():
     chat_button = json.dumps({})
     bubble = json.dumps({})
 
-    if chat := Chat.query.filter_by(label=label).first():
+    user = db.session.query(User).filter_by(id=user_id).first()
+    ct = db.session.query(Chat).filter_by(user_id=user_id).count() + 1
+
+    if user.role == 2 or user.role == 5:
+        if ct > 1:
+            return jsonify({
+                'success': False,
+                'code': 401,
+                'message': "You can no longer create AI Tutors.",
+            })
+    elif user.role == 3:
+        if ct > 3:
+            return jsonify({
+                'success': False,
+                'code': 401,
+                'message': "You can no longer create AI Tutors.",
+            })
+    elif user.role == 4:
+        if ct > 10:
+            return jsonify({
+                'success': False,
+                'code': 401,
+                'message': "You can no longer create AI Tutors.",
+            })
+    if chat := db.session.query(Chat).filter_by(label=label).first():
         return jsonify({
             'success': False,
             'code': 401,
@@ -87,7 +112,6 @@ def add_chat():
 
 @chat.route('/api/sendbrandingdata', methods=['POST'])
 def update_brandingData():
-    print(request.json)
     id = request.json['id']
     chat_logo = request.json['chat_logo']
     chat_title = request.json['chat_title']
@@ -96,7 +120,7 @@ def update_brandingData():
     chat_button = request.json['chat_button']
     bubble = request.json['bubble']
 
-    chat = Chat.query.filter_by(id=id).first()
+    chat = db.session.query(Chat).filter_by(id=id).first()
     if chat is None:
         # If no such chat exists, return an error response
         response = {
@@ -128,12 +152,11 @@ def update_chat():
     description = request.json['description']
     model = request.json['model']
     conversation = request.json['conversation']
-    access = request.json['access']
     creativity = request.json['creativity']
     behavior = request.json['behavior']
     behaviormodel = request.json['behaviormodel']
 
-    chat = Chat.query.filter_by(id=id).first()
+    chat = db.session.query(Chat).filter_by(id=id).first()
 
     if chat is None:
         # If no such chat exists, return an error response
@@ -148,7 +171,6 @@ def update_chat():
         chat.description = description
         chat.model = model
         chat.conversation = conversation
-        chat.access = access
         chat.creativity = creativity
         chat.behavior = behavior
         chat.behaviormodel = behaviormodel
@@ -168,19 +190,22 @@ def update_chat():
 
 @chat.route('/api/getchats', methods=['POST'])
 def get_chats():
-    
+
     user_id = request.json['user_id']
-    chats = Chat.query.filter_by(user_id=user_id).all()
+    chats = db.session.query(Chat).filter_by(user_id=user_id).all()
 
     response = []
     if chats:
         for chat in chats:
-            print(chat.id)
+            user = db.session.query(User).filter_by(id=chat.user_id).first()
+            organization = db.session.query(Organization).filter_by(
+                email=user.email).first().uuid
             chat_data = {
                 'id': chat.id,
                 'label': chat.label,
                 'description': chat.description,
                 'model': chat.model,
+                'user_id': chat.user_id,
                 'conversation': chat.conversation,
                 'access': chat.access,
                 'creativity': chat.creativity,
@@ -194,6 +219,8 @@ def get_chats():
                 'chat_copyright': json.loads(chat.chat_copyright),
                 'chat_button': json.loads(chat.chat_button),
                 'bubble': json.loads(chat.bubble),
+                'organization': organization,
+                'role': user.role
             }
             response.append(chat_data)
 
@@ -208,21 +235,24 @@ def get_chats():
 
 @chat.route('/api/getchat', methods=['POST'])
 def get_chat():
-    print(request.json)
     uuid = request.json['id']
-    chat = Chat.query.filter_by(uuid=uuid).first()
+    chat = db.session.query(Chat).filter_by(uuid=uuid).first()
     if chat is None:
         return jsonify({
             'success': False,
             'code': 404,
             'message': 'The Data not excited'
         })
+    user = db.session.query(User).filter_by(id=chat.user_id).first()
+    organization = db.session.query(Organization).filter_by(
+        email=user.email).first().uuid
     chat_data = {
         'id': chat.id,
         'label': chat.label,
         'description': chat.description,
         'model': chat.model,
         'conversation': chat.conversation,
+        'user_id': chat.user_id,
         'access': chat.access,
         'creativity': chat.creativity,
         'behavior': chat.behavior,
@@ -235,6 +265,8 @@ def get_chat():
         'chat_copyright': json.loads(chat.chat_copyright),
         'chat_button': json.loads(chat.chat_button),
         'bubble': json.loads(chat.bubble),
+        'organization': organization,
+        'role': user.role
     }
 
     data = {
@@ -248,9 +280,7 @@ def get_chat():
 
 @chat.route('/api/getbubble/<string:widgetID>', methods=['GET'])
 def get_bubble(widgetID):
-    print("--------------")
-    print(widgetID)
-    chat = Chat.query.filter_by(uuid=widgetID).first()
+    chat = db.session.query(Chat).filter_by(uuid=widgetID).first()
     if chat is None:
         return jsonify({
             'success': False,
@@ -289,15 +319,15 @@ def get_bubble(widgetID):
 
 @chat.route('/api/deletechat/<int:id>', methods=['DELETE'])
 def delete_chat(id):
-    if chat := Chat.query.filter_by(id=id).first():
-        Message.query.filter_by(chat_id=id).delete()
+    if chat := db.session.query(Chat).filter_by(id=id).first():
+        db.session.query(Message).filter_by(chat_id=id).delete()
         train_ids = json.loads(chat.train)
         # delete index in the pinecone
 
         for id in train_ids:
-            source = Train.query.filter_by(id=id).first().label
+            source = db.session.query(Train).filter_by(id=id).first().label
             delete_vectore(source)
-            Train.query.filter_by(id=id).delete()
+            db.session.query(Train).filter_by(id=id).delete()
         db.session.delete(chat)
         db.session.commit()
 
@@ -313,18 +343,24 @@ def delete_chat(id):
 
     return jsonify(response)
 
+
 @chat.route('/api/getreportdata', methods=['POST'])
 def get_report_data():
     id = request.json['id']
-    chats = Chat.query.filter_by(user_id=id).all()
+    chats = db.session.query(Chat).filter_by(user_id=id).all()
     messages = []
     for chat in chats:
         data = []
-        message = Message.query.filter_by(chat_id=chat.id).all()
+        message = db.session.query(Message).filter_by(chat_id=chat.id).all()
         for msg in message:
-            print(msg.chat_id, msg.create_date,)
             data.append(msg.create_date.strftime("%Y-%m-%d").split('-')[2])
-            print(data)
         messages.append(data)
-    print(message)
-    return jsonify({'success': True, 'data': messages})                                   
+    return jsonify({'success': True, 'data': messages})
+
+
+@chat.route('/api/getaccess_ai_tutor', methods=['POST'])
+def get_access_AI_tutor():
+    email = request.json['email']
+    organization_id = db.session.query(
+        Organization).filter_by(email=email).first().uuid
+    return jsonify({'success': True, 'data': organization_id, 'code': 200})

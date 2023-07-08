@@ -4,6 +4,8 @@ export const stringConstant = {
 };
 
 export const webAPI = {
+    getuseraccount: SERVER_URL + "/api/getuseraccount",
+    register: SERVER_URL + "/api/signup",
     adduseraccount: SERVER_URL + "/api/adduseraccount",
     getuser: SERVER_URL + "/api/getaccount",
     getallusers: SERVER_URL + "/api/getallaccounts",
@@ -39,11 +41,16 @@ export const webAPI = {
     //stripe route
 
     create_product: SERVER_URL + "/api/create/product", // user_id
-    get_products: SERVER_URL + "/api/getproducts",
+    // get_products: SERVER_URL + "/api/getproducts",
+    get_all_products: SERVER_URL + "/api/getallproducts",
     update_product: SERVER_URL + "/api/update/product", //user_id, product_id
     delete_product: SERVER_URL + "/api/delete/product", //user_id, product_id
     delete_all_product: SERVER_URL + "/api/delete/all_products", //user_id
 
     create_checkout: SERVER_URL + "/api/create/checkout/session", //
     create_customer: SERVER_URL + "/api/create-customer",
+    updateSubscription: SERVER_URL + "/api/update/subscription",
+
+    getaccess_AI_Tutor: SERVER_URL + "/api/getaccess_ai_tutor", //chatbot uuid to get pin code and organization code
+    getquery: SERVER_URL + "/api/getquery",
 };

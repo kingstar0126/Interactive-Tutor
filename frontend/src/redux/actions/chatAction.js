@@ -28,6 +28,7 @@ export const setchatbot = (dispatch, data) => {
         .post(webAPI.start_message, data)
         .then((res) => {
             if (res.status === 200) {
+                console.log(res.data.data);
                 dispatch({ type: SET_CHATBOT, payload: res.data.data });
             } else notification("error", stringConstant.FAILED_GET_DATA);
         })

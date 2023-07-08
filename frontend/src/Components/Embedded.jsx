@@ -1,22 +1,27 @@
 import { useEffect, useRef, useState } from "react";
-import {SERVER_URL} from "../config/constant"
+import { SERVER_URL } from "../config/constant";
+import { useSelector } from "react-redux";
 
 const Embedded = (props) => {
     const [chatwindow, setChatwindow] = useState("");
+    const [chatURL, setChatURL] = useState("");
     const [bubble, setBubble] = useState("");
     const chatbot_window = useRef(null);
     const chatbot_bubble = useRef(null);
+    const chatbot_URL = useRef(null);
+    const chat = JSON.parse(useSelector((state) => state.chat.chat));
 
     const showHideClassname = props.open
         ? "fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto"
         : "hidden";
 
     useEffect(() => {
+        setChatURL(`${SERVER_URL}/chat/embedding/${props.data.uuid}`);
         setChatwindow(
-            `<iframe style="border: 0" frameborder="0" scrolling="no" height="100%" width="100%" src="http://${SERVER_URL}/chat/embedding/${props.data.uuid}"></iframe>`
+            `<iframe style="border: 0" frameborder="0" scrolling="no" height="100%" width="100%" src="${SERVER_URL}/chat/embedding/${props.data.uuid}"></iframe>`
         );
         setBubble(
-            `<script type="text/javascript">window.$icg=[];window.ICG_WIDGET_ID="${props.data.uuid}";(function(){d=document;s=d.createElement("script");s.src="http://${SERVER_URL}/widget/bubble.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>`
+            `<script type="text/javascript">window.$icg=[];window.ICG_WIDGET_ID="${props.data.uuid}";(function(){d=document;s=d.createElement("script");s.src="${SERVER_URL}/widget/bubble.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>`
         );
     }, []);
 
@@ -28,6 +33,42 @@ const Embedded = (props) => {
                         Add provider
                     </h3>
                     <div className="py-3 mt-5 px-7">
+                        <div className="flex flex-col items-center justify-center w-full my-5">
+                            <div
+                                name="Window embedding"
+                                className="border-[1px] items-start gap-5 justify-center border-[--site-main-color3] rounded-xl w-full p-5 flex flex-col"
+                            >
+                                <h3 className="border-b-[1px] border-[--site-main-color3] py-5 w-full">
+                                    Share AI Tutor with URL.
+                                </h3>
+                                <div className="flex flex-col w-full">
+                                    <span>
+                                        You can access in this AI Tutor with URL
+                                    </span>
+                                    <textarea
+                                        ref={chatbot_URL}
+                                        rows={4}
+                                        cols={40}
+                                        defaultValue={chatURL}
+                                        className="w-full rounded-xl text-[--site-card-icon-color] p-2"
+                                    />
+                                </div>
+                                <button
+                                    className="bg-[--site-logo-text-color] text-[--site-card-icon-color] p-2 rounded-xl"
+                                    onClick={() => {
+                                        chatbot_URL.current.select();
+                                        document.execCommand("copy");
+                                    }}
+                                >
+                                    Copy to clipboard
+                                </button>
+                            </div>
+                            <div
+                                name="bubble embedding"
+                                className="border-[1px] border-[--site-card-icon-color] p-2"
+                            ></div>
+                        </div>
+
                         <div className="flex flex-col items-center justify-center w-full my-5">
                             <div
                                 name="Window embedding"

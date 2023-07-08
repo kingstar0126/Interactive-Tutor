@@ -21,7 +21,7 @@ const Sidebar = () => {
     const navigate = useNavigate();
     setlocation(dispatch, location.pathname);
     const user = JSON.parse(useSelector((state) => state.user.user));
-
+    const chat = JSON.parse(useSelector((state) => state.chat.chat));
     const handleLogout = () => {
         changeuser(dispatch, null);
         navigate("/login");
@@ -78,6 +78,28 @@ const Sidebar = () => {
                     </ListItem>
                 </Link>
             </div>
+            {chat && (
+                <div className="flex flex-col items-start justify-center mt-[10] p-2 bg-[--site-warning-text-color] m-2 rounded-xl shadow-2xl">
+                    {chat.access && (
+                        <p>
+                            <span className="font-bold">PIN</span> code:
+                            <span className="text-[--site-error-text-color] font-semibold">
+                                {chat.access}
+                            </span>
+                        </p>
+                    )}
+                    {chat.organization && (
+                        <p>
+                            <span className="font-bold text-[14px]">
+                                Organization ID:{" "}
+                            </span>
+                            <span className="text-[--site-error-text-color] font-semibold">
+                                {chat.organization}
+                            </span>
+                        </p>
+                    )}
+                </div>
+            )}
             <div className="fixed bottom-10 left-10">
                 <div
                     className="flex items-center justify-center gap-2 hover:scale-110"

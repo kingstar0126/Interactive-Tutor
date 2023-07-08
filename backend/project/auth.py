@@ -1,9 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, logout_user, login_required
-from flask_mail import Mail, Message
-from flask_jwt_extended import jwt_required, create_access_token
-from .models import User, OAuth
+from flask_mail import Message
+from .models import User, Organization
 from . import db, mail
 import os
 import string
@@ -13,6 +11,7 @@ from sqlalchemy import exc
 import stripe
 import os
 from dotenv import load_dotenv
+from datetime import date
 
 load_dotenv()
 
@@ -27,6 +26,42 @@ def generate_password(length=12):
     return password
 
 
+def generate_pin_password(length=4):
+    """Generate a random password."""
+    alphabet = string.digits
+    password = ''.join(secrets.choice(alphabet) for _ in range(length))
+
+    if len(password) < length:
+        password += ''.join(secrets.choice(alphabet)
+                            for _ in range(length - len(password)))
+
+    return password
+
+
+def calculate_days(day, _date):
+    current_date = date.today()
+    delta = current_date - _date
+    days = day - delta.days
+    return days
+
+
+def compare_month():
+    today = date.today()
+    is_new_month = today.day == 1
+
+    if is_new_month:
+        users = db.session.query(User).all()
+        for user in users:
+            query = user.query
+            if user.role == 2:
+                user.query = query + 500
+            elif user.role == 3:
+                user.query = query + 3000
+            elif user.role == 4:
+                user.query = query + 10000
+            db.session.commit()
+
+
 auth = Blueprint('auth', __name__)
 
 
@@ -39,31 +74,106 @@ def login_post():
             'Access-Control-Allow-Headers': 'content-type',  # Required for cors access
         }
         return '', 200, headers
-
-    print(request.json)
     email = request.json['email']
     password = request.json['password']
+    user = db.session.query(User).filter_by(email=email).first()
 
-    user = User.query.filter_by(email=email).first()
-
-    if not user or not check_password_hash(user.password, password):
+    if not user:
         return jsonify({
             'success': False,
             'code': 401,
-            'message': 'Please check your login details and try again.',
+            'message': "Your information does not exist. Please register your information.",
         })
-    print(user.status)
+    if not check_password_hash(user.password, password):
+        return jsonify({
+            'success': False,
+            'code': 401,
+            'message': 'Your password is incorrect.',
+        })
+
     if user.status != 0:
         return jsonify({
             'success': False,
             'code': 401,
             'message': 'You are blocked.',
         })
-    new_user = {
-        'id': user.id,
-        'username': user.username,
-        'role': user.role
+    if user.role == 5:
+        days = calculate_days(14, user.create_date)
+        if days <= 0:
+            user.role = 0
+            db.session.commit()
+            new_user = {
+                'id': user.id,
+                'username': user.username,
+                'query': user.query,
+                'role': user.role,
+            }
+            response = {
+                'success': True,
+                'code': 200,
+                'data': new_user,
+                'message': 'Your free trial has ended.'
+            }
+            return jsonify(response)
+        new_user = {
+            'id': user.id,
+            'username': user.username,
+            'role': user.role,
+            'query': user.query,
+            'days': days
+        }
+    else:
+        new_user = {
+            'id': user.id,
+            'username': user.username,
+            'role': user.role,
+            'query': user.query
+        }
+    response = {
+        'success': True,
+        'code': 200,
+        'data': new_user
     }
+    return jsonify(response)
+
+
+@auth.route('/api/getuseraccount', methods=['POST'])
+def get_user_account():
+    id = request.json['id']
+    user = db.session.query(User).filter_by(id=id).first()
+    compare_month()
+    if user.role == 5:
+        days = calculate_days(14, user.create_date)
+        if days <= 0:
+            user.role = 0
+            db.session.commit()
+            new_user = {
+                'id': user.id,
+                'username': user.username,
+                'query': user.query,
+                'role': user.role,
+            }
+            response = {
+                'success': True,
+                'code': 200,
+                'data': new_user,
+                'message': 'Your free trial has ended.'
+            }
+            return jsonify(response)
+        new_user = {
+            'id': user.id,
+            'username': user.username,
+            'role': user.role,
+            'query': user.query,
+            'days': days
+        }
+    else:
+        new_user = {
+            'id': user.id,
+            'username': user.username,
+            'query': user.query,
+            'role': user.role
+        }
     response = {
         'success': True,
         'code': 200,
@@ -87,10 +197,8 @@ def send_email(user):
 
 @auth.route('/api/reset', methods=['POST'])
 def reset():
-    print(request.json)
     email = request.json['email']
     user = User.verify_email(email)
-    print(user)
     if user:
         password = send_email(user)
         user.password = generate_password_hash(password, method='sha256')
@@ -102,12 +210,11 @@ def reset():
 
 @auth.route('/api/change', methods=['POST'])
 def changepassword():
-    print(request.json)
     email = request.json['email']
     current_password = request.json['old password']
     password = request.json['password']
 
-    user = User.query.filter_by(email=email).first()
+    user = db.session.query(User).filter_by(email=email).first()
 
     if not user or not check_password_hash(user.password, current_password):
         return jsonify({
@@ -133,21 +240,29 @@ def signup_post():
     email = request.json['email']
     password = request.json['password']
     phone = request.json['phone']
-    role = 0
+    state = request.json['state']
+    city = request.json['city']
+    country = request.json['country']
+    organization = request.json['organization']
+    role = 5
     status = 0
-    user = User.query.filter_by(email=email).first()
+    query = 500
+    user = db.session.query(User).filter_by(email=email).first()
 
     if user:
         return jsonify({'message': 'Email address already exists', 'success': False})
 
     customer = stripe.Customer.create(name=username, email=email, phone=phone)
-    print(customer)
-    new_user = User(username=username, status=status, contact=phone, email=email, role=role, customer_id=customer.id,
+    new_user = User(username=username, query=query, status=status, contact=phone, email=email, role=role, customer_id=customer.id, state=state, city=city, country=country,
                     password=generate_password_hash(password, method='sha256'))
     db.session.add(new_user)
     db.session.commit()
+    new_organization = Organization(
+        organization=organization, email=email)
+    db.session.add(new_organization)
+    db.session.commit()
 
-    return jsonify({'success': True})
+    return jsonify({'success': True, 'message': 'Register successful'})
 
 
 @auth.route('/api/adduseraccount', methods=['POST'])
@@ -156,14 +271,15 @@ def add_user_account():
     email = request.json['email']
     password = request.json['password']
     subscriotion = request.json['subscription']
-    role = 0
+    role = 5
     status = 0
-    user = User.query.filter_by(email=email).first()
+    query = 500
+    user = db.session.query(User).filter_by(email=email).first()
 
     if user:
         return jsonify({'message': 'Email address already exists', 'success': False})
 
-    new_user = User(username=username, status=status, email=email, role=role,
+    new_user = User(username=username, query=query, status=status, email=email, role=role,
                     password=generate_password_hash(password, method='sha256'))
 
     db.session.add(new_user)
@@ -175,23 +291,64 @@ def add_user_account():
 @auth.route('/api/getaccount', methods=['POST'])
 def get_useraccount():
     id = request.json['id']
-    print(id, "This is the getaccount")
-    user = User.query.filter_by(id=id).first()
-    new_user = {
-        'username': user.username,
-        'email': user.email,
-        'contact': user.contact,
-        'state': user.state,
-        'city': user.city,
-        'country': user.country
-    }
-    return jsonify({'success': True, 'data': new_user, 'code': 200})
+    user = db.session.query(User).filter_by(id=id).first()
+    print(user.role)
+    if user.role == 5:
+        days = calculate_days(14, user.create_date)
+        if days <= 0:
+            user.role = 0
+            db.session.commit()
+            new_user = {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'contact': user.contact,
+                'state': user.state,
+                'city': user.city,
+                'role': user.role,
+                'query': user.query,
+                'country': user.country
+            }
+            response = {
+                'success': True,
+                'code': 200,
+                'data': new_user,
+                'message': 'Your free trial has ended.'
+            }
+            return jsonify(response)
+        else:
+            new_user = {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'contact': user.contact,
+                'state': user.state,
+                'city': user.city,
+                'query': user.query,
+                'role': user.role,
+                'country': user.country,
+                'days': days
+            }
+            return jsonify({'success': True, 'data': new_user, 'code': 200})
+    else:
+        new_user = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'contact': user.contact,
+            'state': user.state,
+            'city': user.city,
+            'role': user.role,
+            'query': user.query,
+            'country': user.country
+        }
+        return jsonify({'success': True, 'data': new_user, 'code': 200})
 
 
 @auth.route('/api/getallaccounts', methods=['POST'])
 def get_all_useraccount():
     id = request.json['id']
-    user = User.query.filter_by(id=id).first()
+    user = db.session.query(User).filter_by(id=id).first()
     if user.role != 1:
         return jsonify({
             'success': False,
@@ -199,7 +356,7 @@ def get_all_useraccount():
             'message': "You have not permission"
         })
     current_users = []
-    users = User.query.all()
+    users = db.session.query(User).all()
     for current_user in users:
         if current_user.id == id:
             continue
@@ -220,11 +377,10 @@ def get_all_useraccount():
 
 @auth.route('/api/changeaccountstatus', methods=['POST'])
 def change_account_status():
-    print(request.json)
     id = request.json['id']
     status = request.json['status']
 
-    user = User.query.filter_by(id=id).first()
+    user = db.session.query(User).filter_by(id=id).first()
     if user:
         user.status = status
         db.session.commit()
@@ -251,7 +407,6 @@ def delete_account():
 
 @auth.route('/api/changeaccount', methods=['POST'])
 def change_useraccount():
-    print(request.json)
 
     id = request.json['id']
     username = request.json['username']
@@ -261,7 +416,7 @@ def change_useraccount():
     city = request.json['city']
     country = request.json['country']
 
-    user = User.query.filter_by(id=id).first()
+    user = db.session.query(User).filter_by(id=id).first()
     user.username = username
     user.email = email
     user.contact = contact

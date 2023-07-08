@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
 import { BsPersonFillAdd } from "react-icons/bs";
-import Adduser from "./Adduser";
 import { BsDatabaseFillGear } from "react-icons/bs";
+import StripeCard from "./StripeCard";
 
 const Manager = () => {
     const [data, setData] = useState([]);
@@ -176,7 +176,7 @@ const Manager = () => {
                 </div>
             </div>
 
-            <Adduser
+            <StripeCard
                 open={isOpenModal}
                 handleOk={handleOk}
                 handleCancel={handleCancel}

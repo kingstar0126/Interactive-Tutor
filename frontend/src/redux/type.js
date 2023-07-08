@@ -10,3 +10,5 @@ export const SET_CHATBOT = "SET_CHATBOT";
 export const GET_CHAT = "GET_CHAT";
 export const SET_LOCATION = "SET_LOCATION";
 export const GET_CHATBOT = "GET_CHATBOT";
+export const GET_USER_ACCOUNT = "GET_USER_ACCOUNT";
+export const SET_QUERY = "SET_QUERY";
