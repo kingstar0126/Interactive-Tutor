@@ -5,6 +5,7 @@ import { webAPI } from "../utils/constants";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { getchat } from "../redux/actions/chatAction";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function TraindataTable() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,15 +14,22 @@ export default function TraindataTable() {
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
     const dispatch = useDispatch();
 
+    const notification = (type, message) => {
+        // To do in here
+        if (type === "error") {
+            toast.error(message);
+        }
+        if (type === "success") {
+            toast.success(message);
+        }
+    };
     useEffect(() => {
         get_traindata();
     }, []);
 
     const get_traindata = () => {
-        let { uuid } = chat;
-        let chatbot = { uuid };
         axios
-            .post(webAPI.gettraindatas, chatbot)
+            .post(webAPI.gettraindatas, { uuid: chat.uuid })
             .then((res) => {
                 console.log(res.data);
                 if (res.data) {
@@ -37,7 +45,10 @@ export default function TraindataTable() {
 
     const handleOk = (data) => {
         get_traindata();
-        getchat(dispatch, data);
+        if (data) {
+            getchat(dispatch, data);
+        }
+
         setIsModalOpen(false);
     };
     const handleCancel = () => {
@@ -59,6 +70,7 @@ export default function TraindataTable() {
 
     return (
         <div className="flex flex-col w-full h-full gap-5 p-5">
+            <Toaster />
             <div className="flex justify-end">
                 <button
                     type="button"

@@ -30,8 +30,9 @@ const History = (props) => {
                 .post(webAPI.delete_message, { id: item.uuid })
                 .then((res) => {
                     console.log(res.data.message);
-                    const new_history = history;
-                    setHistory(new_history.splice(index, 1));
+                    const new_history = [...history];
+                    new_history.splice(index, 1);
+                    setHistory(new_history);
                 })
                 .catch((err) => console.error(err));
         }
@@ -61,6 +62,7 @@ const History = (props) => {
                                         {item.uuid.toString().slice(0, 23)}
                                     </span>
                                     <AiFillDelete
+                                        className="active:fill-[--site-card-icon-color] fill-[--site-error-text-color]"
                                         onClick={() =>
                                             handleDelete(item, index)
                                         }

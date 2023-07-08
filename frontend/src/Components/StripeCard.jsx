@@ -9,6 +9,7 @@ import {
 } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import Select from "react-select";
+import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
 import { STRIPE_PUBLISH_KEY } from "../env";
 import toast from "react-hot-toast";
 import Autocomplete from "react-google-autocomplete";
@@ -27,6 +28,9 @@ const SubscriptionForm = (props) => {
     const [state, setState] = useState("");
     const [city, setCity] = useState("");
     const [country, setCountry] = useState("");
+    const [organization, setOrganization] = useState("");
+    const [passwrod, setPassword] = useState("");
+    const [phone, setPhone] = useState("");
     const user = JSON.parse(useSelector((state) => state.user.user));
 
     useEffect(() => {}, [props.open]);
@@ -47,23 +51,25 @@ const SubscriptionForm = (props) => {
         if (!name || !email) {
             notification("error", "Please input all fields");
         }
-        const { error, paymentMethod } = await stripe.createPaymentMethod({
-            type: "card",
-            card: elements.getElement(CardElement),
-            billing_details: {
-                name: name,
-                email: email,
-            },
-        });
+        // const { error, paymentMethod } = await stripe.createPaymentMethod({
+        //     type: "card",
+        //     card: elements.getElement(CardElement),
+        //     billing_details: {
+        //         name: name,
+        //         email: email,
+        //     },
+        // });
 
-        if (!error) {
+        // if (!error) {
+        if (phone && isValidPhoneNumber(phone)) {
             await axios
                 .post(webAPI.create_customer, {
                     id: user.id,
                     name,
                     email,
-                    paymentMethod,
-                    subscription,
+                    phone,
+                    organization,
+                    passwrod,
                     state,
                     city,
                     country,
@@ -105,7 +111,7 @@ const SubscriptionForm = (props) => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Email"
                 />
-                <Select
+                {/* <Select
                     className="w-full mb-1 text-[--site-card-icon-color] py-2 "
                     onChange={(e) => {
                         setSubscription(e.label);
@@ -128,12 +134,50 @@ const SubscriptionForm = (props) => {
                             label: "Pro",
                         },
                     ]}
-                />
-                <div className="flex-col items-center justify-center w-full rounded-xl">
+                /> */}
+                {/* <div className="flex-col items-center justify-center w-full rounded-xl">
                     <CardElement className="p-2 bg-[--site-main-color3] text-[--site-card-icon-color] font-bold" />
-                </div>
+                </div> */}
+                <PhoneInput
+                    international
+                    value={phone}
+                    countryCallingCodeEditable={false}
+                    defaultCountry="GB"
+                    className="block w-full px-4 py-2 mt-2 text-[--site-main-Login] bg-[--site-main-color3] border rounded-md focus:border-[--site-main-Login-border-focus] focus:ring-[--site-main-Login-border-focus] focus:outline-none focus:ring focus:ring-opacity-40"
+                    onChange={(e) => {
+                        setPhone(e);
+                    }}
+                />
+                <Select
+                    className="w-full mb-1 text-[--site-card-icon-color] mt-2"
+                    onChange={(e) => {
+                        setOrganization(e.label);
+                    }}
+                    defaultValue={{
+                        value: "1",
+                        label: "Schools",
+                    }}
+                    options={[
+                        {
+                            value: "1",
+                            label: "Schools",
+                        },
+                        {
+                            value: "2",
+                            label: "Universities",
+                        },
+                        {
+                            value: "3",
+                            label: "Clubs",
+                        },
+                        {
+                            value: "4",
+                            label: "Businesses",
+                        },
+                    ]}
+                />
                 <Autocomplete
-                    className="w-3/5 rounded-lg p-2 focus:ring-[--site-logo-text-color] focus:outline-none focus:ring focus:ring-opacity-40"
+                    className="w-3/5 rounded-lg p-2 focus:ring-[--site-logo-text-color] focus:outline-none focus:ring focus:ring-opacity-40 text-[--site-card-icon-color]"
                     apiKey={GOOGLE_MAP_API}
                     onPlaceSelected={(place) => {
                         const addressComponents = place.address_components;
@@ -164,19 +208,28 @@ const SubscriptionForm = (props) => {
                         setCity(_city);
                     }}
                 />
-                <div className="w-fll flex justify-between">
+                <div className="mb-2">
+                    <input
+                        type="password"
+                        name="password"
+                        className="block w-full px-4 py-2 mt-2 text-[--site-main-Login] bg-[--site-main-color3] border rounded-md focus:border-[--site-main-Login-border-focus] focus:ring-[--site-main-Login-border-focus] focus:outline-none focus:ring focus:ring-opacity-40"
+                        placeholder="********"
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                </div>
+                <div className="flex justify-between w-fll">
+                    <button
+                        onClick={props.handleCancel}
+                        className="bg-[--site-logo-text-color] p-2 rounded-xl text-[--site-card-icon-color] w-[100px]"
+                    >
+                        Cancel
+                    </button>
                     <button
                         type="submit"
                         onClick={(e) => handleSubmit(e)}
                         className="bg-[--site-logo-text-color] p-2 rounded-xl text-[--site-card-icon-color] w-[100px]"
                     >
                         Subscribe
-                    </button>
-                    <button
-                        onClick={props.handleCancel}
-                        className="bg-[--site-logo-text-color] p-2 rounded-xl text-[--site-card-icon-color] w-[100px]"
-                    >
-                        Cancel
                     </button>
                 </div>
             </div>
