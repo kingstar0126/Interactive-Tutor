@@ -15,6 +15,13 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(100))
     username = db.Column(db.String(150))
     role = db.Column(db.Integer)
+    subscription_id = db.Column(db.String(255))
+    customer_id = db.Column(db.String(250))
+    contact = db.Column(db.Integer)
+    state = db.Column(db.String(255))
+    city = db.Column(db.String(255))
+    country = db.Column(db.String(255))
+    status = db.Column(db.Integer)
     create_date = db.Column(db.Date, default=datetime.utcnow)
     update_date = db.Column(
         db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -112,6 +119,18 @@ class Train(UserMixin, db.Model):
 
     def __repr__(self):
         return f'train {self.id}'
+
+
+class Production(UserMixin, db.Model):
+    __tablename__ = 'production'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    price_id = db.Column(db.String(255))
+    name = db.Column(db.String(255))
+    description = db.Column(db.JSON)
+    role = db.Column(db.Integer)
+    create_date = db.Column(db.Date, default=datetime.utcnow)
+    update_date = db.Column(
+        db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
 class OAuth(OAuthConsumerMixin, db.Model):

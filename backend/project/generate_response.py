@@ -63,7 +63,7 @@ def generate_message(query, history, behavior, temp, trains=[]):
     docsearch = Pinecone.from_existing_index(
         index_name=PINECONE_INDEX_NAME, embedding=embeddings)
     print(docsearch, "\n\n")
-    docs = docsearch.similarity_search_with_score(query=query, k=5)
+    docs = docsearch.similarity_search_with_score(query=query, k=10)
     examples = ""
     for doc, _ in docs:
         for source in trains:

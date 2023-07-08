@@ -1,11 +1,12 @@
 from flask import Blueprint, jsonify, request
-from .models import Chat, Message, Train
+from .models import Chat, Message, Train, User
 from . import db
 from rich import print, pretty
 import json
 import pinecone
 import openai
 import os
+from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -64,6 +65,30 @@ def add_chat():
     chat_button = json.dumps({})
     bubble = json.dumps({})
 
+    user = User.query.filter_by(id=user_id).first()
+    ct = Chat.query.filter_by(user_id=user_id).count() + 1
+
+    if user.role == 2:
+        if ct > 1:
+            return jsonify({
+                'success': False,
+                'code': 401,
+                'message': "You can no longer create AI Tutors.",
+            })
+    elif user.role == 3:
+        if ct > 3:
+            return jsonify({
+                'success': False,
+                'code': 401,
+                'message': "You can no longer create AI Tutors.",
+            })
+    elif user.role == 4:
+        if ct > 10:
+            return jsonify({
+                'success': False,
+                'code': 401,
+                'message': "You can no longer create AI Tutors.",
+            })
     if chat := Chat.query.filter_by(label=label).first():
         return jsonify({
             'success': False,
@@ -92,12 +117,6 @@ def update_brandingData():
     chat_title = request.json['chat_title']
     chat_description = request.json['chat_description']
     chat_copyright = request.json['chat_copyright']
-    # chat_1_logo = request.json['chat_1_logo']
-    # chat_1_description = request.json['chat_1_description']
-    # chat_2_logo = request.json['chat_2_logo']
-    # chat_2_description = request.json['chat_2_description']
-    # chat_3_logo = request.json['chat_3_logo']
-    # chat_3_description = request.json['chat_3_description']
     chat_button = request.json['chat_button']
     bubble = request.json['bubble']
 
@@ -114,12 +133,6 @@ def update_brandingData():
         chat.chat_title = json.dumps(chat_title)
         chat.chat_description = json.dumps(chat_description)
         chat.chat_copyright = json.dumps(chat_copyright)
-        # chat.chat_1_logo = chat_1_logo
-        # chat.chat_1_description = chat_1_description
-        # chat.chat_2_logo = chat_2_logo
-        # chat.chat_2_description = chat_2_description
-        # chat.chat_3_logo = chat_3_logo
-        # chat.chat_3_description = chat_3_description
         chat.chat_button = json.dumps(chat_button)
         chat.bubble = json.dumps(bubble)
 
@@ -179,7 +192,7 @@ def update_chat():
 
 @chat.route('/api/getchats', methods=['POST'])
 def get_chats():
-    
+
     user_id = request.json['user_id']
     chats = Chat.query.filter_by(user_id=user_id).all()
 
@@ -203,12 +216,6 @@ def get_chats():
                 'chat_title': json.loads(chat.chat_title),
                 'chat_description': json.loads(chat.chat_description),
                 'chat_copyright': json.loads(chat.chat_copyright),
-                # 'chat_1_logo': json.loads(chat.chat_1_logo),
-                # 'chat_1_description': json.loads(chat.chat_1_description),
-                # 'chat_2_logo': json.loads(chat.chat_2_logo),
-                # 'chat_2_description': json.loads(chat.chat_2_description),
-                # 'chat_3_logo': json.loads(chat.chat_3_logo),
-                # 'chat_3_description': json.loads(chat.chat_3_description),
                 'chat_button': json.loads(chat.chat_button),
                 'bubble': json.loads(chat.bubble),
             }
@@ -250,12 +257,6 @@ def get_chat():
         'chat_title': json.loads(chat.chat_title),
         'chat_description': json.loads(chat.chat_description),
         'chat_copyright': json.loads(chat.chat_copyright),
-        # 'chat_1_logo': json.loads(chat.chat_1_logo),
-        # 'chat_1_description': json.loads(chat.chat_1_description),
-        # 'chat_2_logo': json.loads(chat.chat_2_logo),
-        # 'chat_2_description': json.loads(chat.chat_2_description),
-        # 'chat_3_logo': json.loads(chat.chat_3_logo),
-        # 'chat_3_description': json.loads(chat.chat_3_description),
         'chat_button': json.loads(chat.chat_button),
         'bubble': json.loads(chat.bubble),
     }
@@ -296,12 +297,6 @@ def get_bubble(widgetID):
         'chat_title': json.loads(chat.chat_title),
         'chat_description': json.loads(chat.chat_description),
         'chat_copyright': json.loads(chat.chat_copyright),
-        # 'chat_1_logo': json.loads(chat.chat_1_logo),
-        # 'chat_1_description': json.loads(chat.chat_1_description),
-        # 'chat_2_logo': json.loads(chat.chat_2_logo),
-        # 'chat_2_description': json.loads(chat.chat_2_description),
-        # 'chat_3_logo': json.loads(chat.chat_3_logo),
-        # 'chat_3_description': json.loads(chat.chat_3_description),
         'chat_button': json.loads(chat.chat_button),
         'bubble': json.loads(chat.bubble),
         'embed_url': 'http://3.11.9.37/chat/embedding/',
@@ -341,3 +336,20 @@ def delete_chat(id):
         }
 
     return jsonify(response)
+
+
+@chat.route('/api/getreportdata', methods=['POST'])
+def get_report_data():
+    id = request.json['id']
+    chats = Chat.query.filter_by(user_id=id).all()
+    messages = []
+    for chat in chats:
+        data = []
+        message = Message.query.filter_by(chat_id=chat.id).all()
+        for msg in message:
+            print(msg.chat_id, msg.create_date,)
+            data.append(msg.create_date.strftime("%Y-%m-%d").split('-')[2])
+            print(data)
+        messages.append(data)
+    print(message)
+    return jsonify({'success': True, 'data': messages})
