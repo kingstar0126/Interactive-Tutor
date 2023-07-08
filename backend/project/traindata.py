@@ -27,4 +27,3 @@ openai.openai_api_key = OPENAI_API_KEY
 def text_spliter(text):
     text_splitter = CharacterTextSplitter(chunk_size=400, chunk_overlap=20)
     docs = text_splitter.split_documents(text)
-    print(docs)

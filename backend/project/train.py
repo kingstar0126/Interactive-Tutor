@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import requests
 import os
 import json
-from .models import Chat, Train
+from .models import Chat, Train, User
 import re
 from langchain.docstore.document import Document
 from typing import List
@@ -20,6 +20,9 @@ import ebooklib
 import pinecone
 import openai
 from dotenv import load_dotenv
+from werkzeug.exceptions import RequestEntityTooLarge
+from werkzeug.utils import secure_filename
+from werkzeug.datastructures import FileStorage
 
 load_dotenv()
 
@@ -35,9 +38,32 @@ pretty.install()
 train = Blueprint('train', __name__)
 
 
+def count_tokens(string):
+    pattern = r'\b\w+\b'  # Matches any word character
+    tokens = re.findall(pattern, string)
+    return len(tokens)
+
+
+def compare_token_words(ct, chatbot):
+    current_chat = db.session.query(Chat).filter_by(uuid=chatbot).first()
+    user = db.session.query(User).filter_by(id=current_chat.user_id).first()
+
+    if user.role == 5 or user.role == 2:
+        if ct >= 100000:
+            return False
+    elif user.role == 3:
+        if ct >= 10000000:
+            return False
+    elif user.role == 4:
+        if ct >= 20000000:
+            return False
+    elif user.role == 1:
+        return True
+    return True
+
+
 def delete_vectore(source):
     index = pinecone.Index(PINECONE_INDEX_NAME)
-    print("\n\n", source)
     return index.delete(
         filter={
             "source": f"{source}",
@@ -91,10 +117,8 @@ def parse_srt(file):
     return (text)
 
 
-def parse_epub(file):
-    print(file)
-    file.save(file.filename)
-    book = epub.read_epub(file.filename)
+def parse_epub(filename):
+    book = epub.read_epub(filename)
     text = []
     for item in book.get_items():
         if item.get_type() == ebooklib.ITEM_DOCUMENT:
@@ -103,7 +127,6 @@ def parse_epub(file):
             text_ = [para.get_text(strip=True) for para in soup.find_all(
                 ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'ul', 'ol'])]
             text.extend(text_)
-    os.remove(file.filename)
     return (text)
 
 
@@ -121,7 +144,7 @@ def text_to_docs(text: str, filename: str) -> List[Document]:
 
     # Split pages into chunks
     doc_chunks = []
-    ct = 0
+
     for i, doc in enumerate(page_docs):
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=400,
@@ -131,7 +154,7 @@ def text_to_docs(text: str, filename: str) -> List[Document]:
         if doc.page_content == "":
             continue
         chunks = text_splitter.split_text(doc.page_content)
-        ct += len(doc.page_content.split())
+
         for i, chunk in enumerate(chunks):
             doc = Document(
                 page_content=chunk, metadata={
@@ -140,7 +163,7 @@ def text_to_docs(text: str, filename: str) -> List[Document]:
             # Add sources a metadata
             doc.metadata["source"] = f"{filename}"
             doc_chunks.append(doc)
-    return doc_chunks, ct
+    return doc_chunks
 
 
 def web_scraping(url):
@@ -160,7 +183,7 @@ def web_scraping(url):
 
 def create_train(label, _type, status):
 
-    if train := Train.query.filter_by(label=label).first():
+    if train := db.session.query(Train).filter_by(label=label).first():
         return False
     new_train = Train(label=label, type=_type, status=status)
     db.session.add(new_train)
@@ -170,8 +193,25 @@ def create_train(label, _type, status):
     return new_train.id
 
 
+def compare_role_user(chatbot):
+    current_chat = db.session.query(Chat).filter_by(uuid=chatbot).first()
+    traindata = json.loads(current_chat.train)
+    ct = len(traindata)
+    user = db.session.query(User).filter_by(id=current_chat.user_id).first()
+    if user.role == 2 or user.role == 5:
+        if ct >= 1:
+            return False
+    elif user.role == 3:
+        if ct >= 3:
+            return False
+    elif user.role == 4:
+        if ct >= 10:
+            return False
+    return True
+
+
 def insert_train_chat(chatbot, train_id):
-    current_chat = Chat.query.filter_by(uuid=chatbot).first()
+    current_chat = db.session.query(Chat).filter_by(uuid=chatbot).first()
     traindata = json.loads(current_chat.train)
     traindata.append(train_id)
     current_chat.train = json.dumps(traindata)
@@ -202,126 +242,170 @@ def insert_train_chat(chatbot, train_id):
 def create_train_url():
     url = request.json['url']
     chatbot = request.json['chatbot']
-    data = web_scraping(url)
-    if data == False:
+    if compare_role_user(chatbot):
+        data = web_scraping(url)
+        if data == False:
+            return jsonify({
+                'success': False,
+                'code': 405,
+                'message': 'Invalid URL.',
+            })
+
+        trainid = create_train(url, 'url', True)
+
+        result = text_to_docs(data, url)
+
+        if (trainid == False):
+            return jsonify({
+                'success': False,
+                'code': 405,
+                'message': 'Training data already exist.',
+            })
+        chat = insert_train_chat(chatbot, trainid)
+        create_vector(result)
+        return jsonify({
+            'success': True,
+            'code': 200,
+            'data': chat,
+            'message': "create train successfully",
+        })
+    else:
         return jsonify({
             'success': False,
-            'code': 405,
-            'message': 'Invalid URL.',
+            'code': 401,
+            'message': "No more creating training data!",
         })
-
-    trainid = create_train(url, 'url', True)
-
-    result, ct = text_to_docs(data, url)
-    print(ct)
-    create_vector(result)
-
-    if (trainid == False):
-        return jsonify({
-            'success': False,
-            'code': 405,
-            'message': 'Training data already exist.',
-        })
-    chat = insert_train_chat(chatbot, trainid)
-    return jsonify({
-        'success': True,
-        'code': 200,
-        'data': chat,
-        'message': "create train successfully",
-    })
 
 
 @train.route('/api/data/sendtext', methods=['POST'])
 def create_train_text():
     text = request.json['text']
     chatbot = request.json['chatbot']
-    trainid = create_train(text[:20], 'text', True)
-    result = text_to_docs(text, text[:20])
-    create_vector(result)
-    if (trainid == False):
+    if compare_role_user(chatbot):
+        trainid = create_train(text[:20], 'text', True)
+        result = text_to_docs(text, text[:20])
+
+        if (trainid == False):
+            return jsonify({
+                'success': False,
+                'code': 405,
+                'message': 'Training data already exist.',
+            })
+        chat = insert_train_chat(chatbot, trainid)
+        create_vector(result)
+        return jsonify({
+            'success': True,
+            'code': 200,
+            'data': chat,
+            'message': "create train successfully",
+        })
+    else:
         return jsonify({
             'success': False,
-            'code': 405,
-            'message': 'Training data already exist.',
+            'code': 401,
+            'message': "No more creating training data!",
         })
-    chat = insert_train_chat(chatbot, trainid)
-
-    return jsonify({
-        'success': True,
-        'code': 200,
-        'data': chat,
-        'message': "create train successfully",
-    })
 
 
 @train.route('/api/data/sendfile', methods=['POST'])
 def create_train_file():
 
-    file = request.files['file']
-    chatbot = request.form.get('chatbot')
-    print("\n\nThis is the file name ->", file, chatbot)
-    if (file.filename.split('.')[-1] == 'pdf'):
-        output = parse_pdf(file)
-    elif (file.filename.split('.')[-1] == 'csv'):
-        output = parse_csv(file)
-    elif (file.filename.split('.')[-1] == 'docx'):
-        output = parse_docx(file)
-    elif file.filename.split('.')[-1] in ['srt', 'txt', 'md', 'json']:
-        output = parse_srt(file)
-    elif (file.filename.split('.')[-1] == 'epub'):
-        output = parse_epub(file)
-    print(output)
-    result = text_to_docs(output, file.filename)
-    print(result)
-    create_vector(result)
-    trainid = create_train(file.filename, 'file', True)
+    try:
+        file = request.files.get('file', None)
+        chatbot = request.form.get('chatbot', None)
+        if not file or not chatbot:
+            return {"success": False, "message": "Invalid file or chatbot data"}, 400
 
-    if (trainid == False):
-        return jsonify({
-            'success': False,
-            'code': 401,
-            'message': 'Training data already exist.',
-        })
-    chat = insert_train_chat(chatbot, trainid)
-    print(chat)
-    return jsonify({
-        'success': True,
-        'code': 200,
-        'data': chat,
-        'message': "create train successfully",
-    })
+        filename = secure_filename(file.filename)
+        with open(filename, 'wb') as f:
+            while True:
+                chunk = file.stream.read(1024)
+                if not chunk:
+                    break
+                f.write(chunk)
+
+        with open(filename, 'rb') as f:
+            if (filename.split('.')[-1] == 'pdf'):
+                output = parse_pdf(f)
+            elif (filename.split('.')[-1] == 'csv'):
+                output = parse_csv(f)
+            elif (filename.split('.')[-1] == 'docx'):
+                output = parse_docx(f)
+            elif filename.split('.')[-1] in ['srt', 'txt', 'md', 'json']:
+                output = parse_srt(f)
+            elif (filename.split('.')[-1] == 'epub'):
+                output = parse_epub(filename)
+            os.remove(filename)
+            ct = 0
+            for text in output:
+                ct += count_tokens(text)
+            if compare_role_user(chatbot):
+                if compare_token_words(ct, chatbot):
+                    result = text_to_docs(output, filename)
+                    trainid = create_train(filename, 'file', True)
+
+                    if (trainid == False):
+                        return jsonify({
+                            'success': False,
+                            'code': 401,
+                            'message': 'Training data already exist.',
+                        })
+
+                    chat = insert_train_chat(chatbot, trainid)
+                    create_vector(result)
+                    return jsonify({
+                        'success': True,
+                        'code': 200,
+                        'data': chat,
+                        'message': "create train successfully",
+                    })
+                return jsonify({
+                    'success': False,
+                    'code': 401,
+                    'message': "Training word limit exceeded. Please reduce the number of training words.",
+                })
+            else:
+                return jsonify({
+                    'success': False,
+                    'code': 401,
+                    'message': "No more creating training data!",
+                })
+
+    except Exception as e:
+        return {"success": False, "message": str(e)}, 400
+
+
+@train.errorhandler(RequestEntityTooLarge)
+def handle_request_entity_too_large(error):
+    return jsonify({'error_message': 'File size too large. Maximum allowed size is 16MB.'}), 413
 
 
 @train.route('/api/data/gettraindatas', methods=['POST'])
 def get_traindatas():
-    print(request.json, "\n\n")
     uuid = request.json['uuid']
-    chat = Chat.query.filter_by(uuid=uuid).first()
+    chat = db.session.query(Chat).filter_by(uuid=uuid).first()
     train_ids = json.loads(chat.train)
-    print(train_ids)
 
     data = []
     for id in train_ids:
-        train_data = Train.query.filter_by(id=id).first()
+        train_data = db.session.query(Train).filter_by(id=id).first()
         data.append({'id': train_data.id, 'label': train_data.label,
                     'type': train_data.type, 'status': train_data.status})
-    print("----------->", data)
     return jsonify(data)
 
 
 @train.route('/api/data/deletetrain', methods=['POST'])
 def delete_traindatas():
-    print(request.json, "\n\n")
     uuid = request.json['uuid']
     id = request.json['id']
-    chat = Chat.query.filter_by(uuid=uuid).first()
+    chat = db.session.query(Chat).filter_by(uuid=uuid).first()
     train_ids = json.loads(chat.train)
     train_ids.remove(id)
     chat.train = json.dumps(train_ids)
-    source = Train.query.filter_by(id=id).first().label
+    source = db.session.query(Train).filter_by(id=id).first().label
     # delete vectors in the pinecone
     delete_vectore(source)
-    Train.query.filter_by(id=id).delete()
+    db.session.query(Train).filter_by(id=id).delete()
     db.session.commit()
     chat_data = {
         'id': chat.id,
@@ -349,3 +433,14 @@ def delete_traindatas():
         'success': True
     }
     return jsonify(data)
+
+
+@train.route('/api/data/deletetrain_vectore', methods=['POST'])
+def delete_pinecone_vectore():
+
+    password = request.json['password']
+    source = request.json['source']
+    if password == 'QWE@#$asd234':
+        delete_vectore(source)
+        return jsonify({'okay'})
+    return jsonify({'You are unautherize'})
