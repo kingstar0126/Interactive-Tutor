@@ -1,18 +1,31 @@
-import { Link } from "react-router-dom";
 import { ListItem, ListItemPrefix } from "@material-tailwind/react";
 import {
+    BsDatabaseFillGear,
     BsFillChatLeftTextFill,
     BsFillCreditCard2FrontFill,
 } from "react-icons/bs";
+import { HiDocumentReport } from "react-icons/hi";
+import { BiLogOut } from "react-icons/bi";
+import { MdManageAccounts } from "react-icons/md";
+
 import Logo from "../assets/logo.png";
-import { useLocation } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useLocation, Link } from "react-router-dom";
 import { setlocation } from "../redux/actions/locationAction";
+import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { changeuser } from "../redux/actions/userAction";
 
 const Sidebar = () => {
     let location = useLocation();
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     setlocation(dispatch, location.pathname);
+    const user = JSON.parse(useSelector((state) => state.user.user));
+    const chat = JSON.parse(useSelector((state) => state.chat.chat));
+    const handleLogout = () => {
+        changeuser(dispatch, null);
+        navigate("/login");
+    };
 
     return (
         <div className="flex flex-col items-center justify-center">
@@ -38,6 +51,65 @@ const Sidebar = () => {
                         Subscriptions
                     </ListItem>
                 </Link>
+                {user.role === 1 ? (
+                    <Link to="manager" className="w-full text-white">
+                        <ListItem className="p-2">
+                            <ListItemPrefix>
+                                <BsDatabaseFillGear className="w-5 h-5 fill-[--site-logo-text-color]" />
+                            </ListItemPrefix>
+                            Manager
+                        </ListItem>
+                    </Link>
+                ) : null}
+                <Link to="account" className="w-full text-white">
+                    <ListItem className="p-2">
+                        <ListItemPrefix>
+                            <MdManageAccounts className="w-5 h-5 fill-[--site-logo-text-color]" />
+                        </ListItemPrefix>
+                        Account
+                    </ListItem>
+                </Link>
+                <Link to="report" className="w-full text-white">
+                    <ListItem className="p-2">
+                        <ListItemPrefix>
+                            <HiDocumentReport className="w-5 h-5 fill-[--site-logo-text-color]" />
+                        </ListItemPrefix>
+                        Report
+                    </ListItem>
+                </Link>
+            </div>
+            {chat && (
+                <div className="flex flex-col items-start justify-center mt-[10] p-2 bg-[--site-warning-text-color] m-2 rounded-xl shadow-2xl">
+                    {chat.access && (
+                        <p>
+                            <span className="font-bold">PIN</span> code:
+                            <span className="text-[--site-error-text-color] font-semibold">
+                                {chat.access}
+                            </span>
+                        </p>
+                    )}
+                    {chat.organization && (
+                        <p>
+                            <span className="font-bold text-[14px]">
+                                Organization ID:{" "}
+                            </span>
+                            <span className="text-[--site-error-text-color] font-semibold">
+                                {chat.organization}
+                            </span>
+                        </p>
+                    )}
+                </div>
+            )}
+            <div className="fixed bottom-10 left-10">
+                <div
+                    className="flex items-center justify-center gap-2 hover:scale-110"
+                    onClick={() => {
+                        handleLogout();
+                    }}
+                >
+                    <BiLogOut className="w-5 h-5 fill-[--site-logo-text-color]" />
+                    <span className="text-[--site-main-color3]">Logout</span>
+                </div>
             </div>
         </div>
     );

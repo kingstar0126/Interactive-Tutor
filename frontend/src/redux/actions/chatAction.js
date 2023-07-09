@@ -4,6 +4,7 @@ import { ADD_CHAT } from "../type";
 import { GET_CHAT } from "../type";
 import { SET_CHATBOT } from "../type";
 import { GET_CHATBOT } from "../type";
+
 import axios from "axios";
 
 export const addchat = (dispatch, data) => {
@@ -18,7 +19,7 @@ export const addchat = (dispatch, data) => {
 };
 
 export const getchat = (dispatch, data) => {
-    console.log(data)
+    console.log(data);
     dispatch({ type: GET_CHAT, payload: JSON.stringify(data) });
 };
 
@@ -27,6 +28,7 @@ export const setchatbot = (dispatch, data) => {
         .post(webAPI.start_message, data)
         .then((res) => {
             if (res.status === 200) {
+                console.log(res.data.data);
                 dispatch({ type: SET_CHATBOT, payload: res.data.data });
             } else notification("error", stringConstant.FAILED_GET_DATA);
         })

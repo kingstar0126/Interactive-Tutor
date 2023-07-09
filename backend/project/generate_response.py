@@ -23,7 +23,7 @@ PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
 pretty.install()
 
 
-def generate_message(query, history, behavior, temp, trains=[]):
+def generate_message(query, history, behavior, temp, model, trains=[]):
     load_dotenv()
 
     template = """ {behavior}
@@ -49,10 +49,18 @@ def generate_message(query, history, behavior, temp, trains=[]):
         )
 
     langchain.llm_cache = GPTCache(init_gptcache)
-
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo",
-                     temperature=temp,
-                     openai_api_key=os.getenv('OPENAI_API_KEY'))
+    if model == "1":
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo-4k",
+                         temperature=temp,
+                         openai_api_key=os.getenv('OPENAI_API_KEY'))
+    elif model == "2":
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k",
+                         temperature=temp,
+                         openai_api_key=os.getenv('OPENAI_API_KEY'))
+    elif model == "3":
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo",
+                         temperature=temp,
+                         openai_api_key=os.getenv('OPENAI_API_KEY'))
 
     conversation = LLMChain(
         llm=llm,
@@ -62,8 +70,7 @@ def generate_message(query, history, behavior, temp, trains=[]):
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
     docsearch = Pinecone.from_existing_index(
         index_name=PINECONE_INDEX_NAME, embedding=embeddings)
-
-    docs = docsearch.similarity_search_with_score(query=query, k=2)
+    docs = docsearch.similarity_search_with_score(query=query, k=10)
     examples = ""
     for doc, _ in docs:
         for source in trains:
@@ -86,7 +93,7 @@ def generate_message(query, history, behavior, temp, trains=[]):
         return response, chat_history, token
 
 
-def generate_AI_message(query, history, behavior, temp):
+def generate_AI_message(query, history, behavior, temp, model):
     load_dotenv()
 
     template = """ {behavior}
@@ -111,9 +118,18 @@ def generate_AI_message(query, history, behavior, temp):
 
     langchain.llm_cache = GPTCache(init_gptcache)
 
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo",
-                     temperature=temp,
-                     openai_api_key=os.getenv('OPENAI_API_KEY'))
+    if model == "1":
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo-4k",
+                         temperature=temp,
+                         openai_api_key=os.getenv('OPENAI_API_KEY'))
+    elif model == "2":
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k",
+                         temperature=temp,
+                         openai_api_key=os.getenv('OPENAI_API_KEY'))
+    elif model == "3":
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo",
+                         temperature=temp,
+                         openai_api_key=os.getenv('OPENAI_API_KEY'))
 
     conversation = LLMChain(
         llm=llm,

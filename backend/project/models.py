@@ -15,6 +15,14 @@ class User(UserMixin, db.Model):
     password = db.Column(db.String(100))
     username = db.Column(db.String(150))
     role = db.Column(db.Integer)
+    subscription_id = db.Column(db.String(255))
+    customer_id = db.Column(db.String(250))
+    query = db.Column(db.Integer)
+    contact = db.Column(db.String(255))
+    state = db.Column(db.String(255))
+    city = db.Column(db.String(255))
+    country = db.Column(db.String(255))
+    status = db.Column(db.Integer)
     create_date = db.Column(db.Date, default=datetime.utcnow)
     update_date = db.Column(
         db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -100,6 +108,20 @@ class Message(UserMixin, db.Model):
         return Message.query.filter_by(chat_id=chat_id).first()
 
 
+class Organization(UserMixin, db.Model):
+    __tablename__ = 'organization'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email = db.Column(db.String(150))
+    organization = db.Column(db.String(150))
+    create_date = db.Column(db.Date, default=datetime.utcnow)
+    update_date = db.Column(
+        db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
+    uuid = db.Column(UUID(as_uuid=True), unique=True, default=uuid.uuid4)
+
+    def __repr__(self):
+        return f'message {self.id}'
+
+
 class Train(UserMixin, db.Model):
     __tablename__ = 'traindata'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -112,6 +134,18 @@ class Train(UserMixin, db.Model):
 
     def __repr__(self):
         return f'train {self.id}'
+
+
+class Production(UserMixin, db.Model):
+    __tablename__ = 'production'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    price_id = db.Column(db.String(255))
+    name = db.Column(db.String(255))
+    description = db.Column(db.JSON)
+    role = db.Column(db.Integer)
+    create_date = db.Column(db.Date, default=datetime.utcnow)
+    update_date = db.Column(
+        db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
 class OAuth(OAuthConsumerMixin, db.Model):

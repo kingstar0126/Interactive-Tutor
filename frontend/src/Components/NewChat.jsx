@@ -4,16 +4,19 @@ import chatsend from "../assets/chatgpt-send.svg";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
 import { useSelector, useDispatch } from "react-redux";
-import { Toaster } from "react-hot-toast";
 import { setchatbot, getchatbot, getchat } from "../redux/actions/chatAction";
 import { useNavigate } from "react-router-dom";
 import { Scrollbar } from "react-scrollbars-custom";
 import { CodeBlock, dracula } from "react-code-blocks";
+import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
+import { getUserState } from "../redux/actions/userAction";
+import { setquery } from "../redux/actions/queryAction";
 
 const NewChat = () => {
     const navigate = useNavigate();
     const [chathistory, setChathistory] = useState([]);
+    const [organization, setOrganization] = useState("");
     const previous_location = useSelector(
         (state) => state.location.previous_location
     );
@@ -42,10 +45,18 @@ const NewChat = () => {
     const chatbot = useSelector((state) => state.chat.chatbot);
     const chatId = useParams();
 
+    const notification = (type, message) => {
+        // To do in here
+        if (type === "error") {
+            toast.error(message);
+        }
+    };
+
     useEffect(() => {
         if (previous_location !== current_location && chat) {
             console.log("The new chatbot created!!!", chat);
             let new_chat = chat;
+            getUserState(dispatch, { id: chat.user_id });
             setchatbot(dispatch, new_chat);
             if (chat.access === 0) {
                 checkpinRef.current.classList.add("hidden");
@@ -120,16 +131,30 @@ const NewChat = () => {
             console.log(chatId);
             axios
                 .post(webAPI.getchat, chatId)
-                .then((res) => {
+                .then(async (res) => {
                     console.log(res.data);
                     if (res.data.code === 200) {
                         getchat(dispatch, res.data.data);
-                        setchatbot(dispatch, res.data.data);
-                    } else navigate(-1);
+                        await axios
+                            .post(webAPI.start_message, res.data.data)
+                            .then((res) => {
+                                if (res.status === 200) {
+                                    console.log(res.data.data);
+                                    localStorage.setItem(
+                                        "chatbot",
+                                        res.data.data
+                                    );
+                                }
+                            })
+                            .catch((err) => console.log(err));
+                        window.location.reload();
+                    } else {
+                        // navigate(-1);
+                    }
                 })
                 .catch((err) => {
                     console.log(err);
-                    navigate(-1);
+                    // navigate(-1);
                 });
         }
     }, []);
@@ -244,7 +269,7 @@ const NewChat = () => {
     const handleComplete = (value) => {
         console.log(typeof value, typeof chat.access);
 
-        if (chat.access != value) {
+        if (chat.access != value || chat.organization != organization) {
             SetError(true);
             pinFieldRef.current.forEach((input) => (input.value = ""));
             pinFieldRef.current[0].focus();
@@ -271,17 +296,26 @@ const NewChat = () => {
     };
 
     const sendMessage = (id, _message) => {
-        let behaviormodel = chat.behaviormodel;
-        let train = chat.train
+        let { behaviormodel, train, model } = chat;
+        console.log(model);
         axios
-            .post(webAPI.sendchat, { id, _message, behaviormodel, train })
+            .post(webAPI.sendchat, {
+                id,
+                _message,
+                behaviormodel,
+                train,
+                model,
+            })
             .then((res) => {
-                if (!res.data.success) console.log("error", res.data.message);
-                else {
+                if (!res.data.success) {
+                    notification("error", res.data.message);
+                } else {
                     console.log(res.data.data);
+                    setquery(dispatch, res.data.query);
                     receiveMessage(res.data.data);
                 }
-            });
+            })
+            .catch((err) => console.error(err));
     };
 
     const receiveMessage = (message) => {
@@ -297,32 +331,46 @@ const NewChat = () => {
             {chat && (
                 <div className="w-full h-screen">
                     <div
-                        className="flex flex-col py-5 w-full items-center justify-center"
+                        className="flex flex-col items-center justify-center w-full py-5"
                         ref={checkpinRef}
                     >
                         {
-                            <div className="flex gap-2">
-                                <PinField
-                                    ref={pinFieldRef}
-                                    name="chatdescription"
-                                    length={4}
-                                    type="password"
-                                    inputMode="numeric"
-                                    onRejectKey={() => {
-                                        SetValidate(true);
-                                    }}
-                                    onResolveKey={() => {
-                                        SetValidate(false);
-                                    }}
-                                    validate="0123456789"
-                                    onComplete={handleComplete}
-                                    className="mb-1 w-[40px] p-[15px] items-center justify-center h-[40px] focus:border-none focus:ring-opacity-40 text-[--site-card-icon-color] focus:outline-none focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5]"
-                                />
+                            <div className="flex flex-col w-2/5 gap-5">
+                                <div className="flex flex-col text-[--site-main-color3]">
+                                    <label>OrganizaitonID</label>
+                                    <input
+                                        type="text"
+                                        onChange={(e) =>
+                                            setOrganization(e.target.value)
+                                        }
+                                        className="block w-full px-4 py-2 mt-2 text-[--site-main-Login] bg-[--site-main-color3] border rounded-md focus:border-[--site-logo-text-color] focus:ring-[--site-logo-text-color] focus:outline-none focus:ring focus:ring-opacity-40"
+                                        placeholder="First, enter your Organization ID."
+                                    />
+                                </div>
+                                <div className="flex gap-2">
+                                    <PinField
+                                        ref={pinFieldRef}
+                                        name="chatdescription"
+                                        length={4}
+                                        type="password"
+                                        inputMode="numeric"
+                                        onRejectKey={() => {
+                                            SetValidate(true);
+                                        }}
+                                        onResolveKey={() => {
+                                            SetValidate(false);
+                                        }}
+                                        validate="0123456789"
+                                        onComplete={handleComplete}
+                                        className="mb-1 w-[40px] p-[15px] items-center justify-center h-[40px] focus:border-none focus:ring-opacity-40 text-[--site-card-icon-color] focus:outline-none focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5]"
+                                    />
+                                </div>
                             </div>
                         }
                         {error && (
                             <span className="text-[--site-main-form-error] text-[12px]">
-                                PIN is incorrect. Please try again!
+                                PIN or OrganizaitonID is incorrect. Please try
+                                again!
                             </span>
                         )}
                         {validate && (
@@ -336,7 +384,7 @@ const NewChat = () => {
                         className="bg-[--site-card-icon-color] w-full px-10 h-full p-5 flex flex-col items-center justify-center"
                     >
                         <div
-                            className="flex flex-col justify-center items-center gap-5 h-full"
+                            className="flex flex-col items-center justify-center h-full gap-5"
                             ref={chatbot_start}
                         >
                             <img
@@ -351,11 +399,12 @@ const NewChat = () => {
                                 {chat.chat_description.description}
                             </span>
 
-                            <div className="h-full w-3/5 flex items-end mb-5 p-2 gap-5 justify-center">
+                            <div className="flex items-end justify-center w-3/5 h-full gap-5 p-2 mb-5">
                                 <a
                                     href={chat.chat_button.button1_url}
                                     ref={chatbot_button1}
                                     target="_blank"
+                                    rel="noreferrer"
                                 >
                                     {chat.chat_button.button1_text}
                                 </a>
@@ -363,6 +412,7 @@ const NewChat = () => {
                                     ref={chatbot_button2}
                                     href={chat.chat_button.button2_url}
                                     target="_blank"
+                                    rel="noreferrer"
                                 >
                                     {chat.chat_button.button2_text}
                                 </a>
@@ -370,6 +420,7 @@ const NewChat = () => {
                                     ref={chatbot_button3}
                                     href={chat.chat_button.button3_url}
                                     target="_blank"
+                                    rel="noreferrer"
                                 >
                                     {chat.chat_button.button3_text}
                                 </a>
@@ -492,6 +543,14 @@ const NewChat = () => {
                                 />
                             </span>
                         </div>
+
+                        {chat && (chat.role === 2 || chat.role === 5) && (
+                            <div className="py-2">
+                                <span className="text-[--site-file-upload]">
+                                    Powered by Interactive-Tutor.com
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
