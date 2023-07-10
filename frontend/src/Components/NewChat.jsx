@@ -84,7 +84,11 @@ const NewChat = () => {
 
             axios.post(webAPI.get_message, { id }).then((res) => {
                 console.log(res.data);
-                setChathistory(res.data.data.message);
+                if (res.data.success === "true") {
+                    if (res.data.data.message) {
+                        setChathistory(res.data.data.message);
+                    }
+                }
             });
             if (chathistory.length === 0) {
                 console.log("hello, there");
@@ -267,6 +271,10 @@ const NewChat = () => {
 
     const sendMessage = (id, _message) => {
         let { behaviormodel, train, model } = chat;
+        if (!id || !_message) {
+            console.log("Error", id, _message);
+            return;
+        }
         axios
             .post(webAPI.sendchat, {
                 id,
