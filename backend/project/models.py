@@ -128,6 +128,7 @@ class Train(UserMixin, db.Model):
     label = db.Column(db.String(150))
     type = db.Column(db.String(150))
     status = db.Column(db.String(150))
+    chat = db.Column(db.String(250))
     create_date = db.Column(db.Date, default=datetime.utcnow)
     update_date = db.Column(
         db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
