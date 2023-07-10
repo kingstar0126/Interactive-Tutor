@@ -48,7 +48,7 @@ const Branding = () => {
     }, []);
 
     return (
-        <div className="flex flex-col w-full h-full gap-5 p-5 container">
+        <div className="container flex flex-col w-full h-full gap-5 p-5">
             <Toaster />
             <div className="flex justify-end">
                 <button
@@ -70,7 +70,7 @@ const Branding = () => {
                     </div>
                     <div
                         name="text"
-                        className="flex w-full gap-3 justify-center p-2"
+                        className="flex justify-center w-full gap-3 p-2"
                     >
                         <div className="w-1/3 border-[1px] border-[--site-card-icon-color] rounded-xl p-2">
                             <BrandingTextItem
@@ -100,7 +100,7 @@ const Branding = () => {
                     </div>
                     <div
                         name="text"
-                        className="flex w-full gap-3 justify-start p-2"
+                        className="flex justify-start w-full gap-3 p-2"
                     >
                         <div className="w-1/2 border-[1px] border-[--site-card-icon-color] rounded-xl p-2">
                             <BubbleItem
@@ -124,7 +124,7 @@ const Branding = () => {
                     </div>
                     <div
                         name="text"
-                        className="flex flex-col w-full gap-5 justify-start p-2"
+                        className="flex flex-col justify-start w-full gap-5 p-2"
                     >
                         <div className="border-[1px] border-[--site-card-icon-color] rounded-xl p-2">
                             <LogoBranding
@@ -132,7 +132,7 @@ const Branding = () => {
                                 data={current_chat.chat_logo}
                             />
                         </div>
-                        <div className="flex w-full gap-3 justify-start">
+                        <div className="flex justify-start w-full gap-3">
                             <div className="w-1/2 border-[1px] border-[--site-card-icon-color] rounded-xl p-2">
                                 <UserAvatarBranding
                                     title={"User avatar"}
@@ -156,7 +156,7 @@ const Branding = () => {
                     </div>
                     <div
                         name="text"
-                        className="flex w-full gap-5 justify-start p-2"
+                        className="flex justify-start w-full gap-5 p-2"
                     >
                         <div className="w-1/2 border-[1px] border-[--site-card-icon-color] rounded-xl p-2">
                             <UserMessage
@@ -180,7 +180,7 @@ const Branding = () => {
                     </div>
                     <div
                         name="text"
-                        className="flex w-full gap-5 justify-start p-2"
+                        className="flex justify-start w-full gap-5 p-2"
                     >
                         <div className="w-1/3 border-[1px] border-[--site-card-icon-color] rounded-xl p-2">
                             <ButtonBranding1

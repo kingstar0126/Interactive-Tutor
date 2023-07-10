@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { Outlet, useLocation } from "react-router-dom";
 import { getUserState } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
+import Speedometer from "./speedometter";
 
 const Chat = () => {
     const location = useLocation();
@@ -78,14 +79,14 @@ const Chat = () => {
         } else {
             getChats();
         }
-    }, []);
+    }, [location]);
     const getChats = () => {
         let data = {
             user_id: user.id,
         };
 
         axios.post(webAPI.getchats, data).then((res) => {
-            console.log(res);
+            console.log("This is the getChat", res);
             SetChat(res.data.data);
         });
     };
@@ -109,12 +110,14 @@ const Chat = () => {
                         </p>
                     )}
                     {trial > 0 && (
-                        <p className="bg-[--site-logo-text-color] mr-4 px-2 rounded-xl flex gap-2 items-center justify-center">
-                            Free trial
-                            <span className="text-[--site-error-text-color] font-bold">
-                                {trial}
-                            </span>
-                        </p>
+                        <div className="flex">
+                            <p className="bg-[--site-logo-text-color] mr-4 px-2 rounded-xl flex gap-2 items-center justify-center">
+                                Free trial
+                                <span className="text-[--site-error-text-color] font-bold">
+                                    {trial}
+                                </span>
+                            </p>
+                        </div>
                     )}
                     <button>
                         {isOpen ? (

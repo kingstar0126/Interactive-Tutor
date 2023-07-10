@@ -110,11 +110,10 @@ def parse_docx(file):
 
 
 def parse_srt(file):
-    lines = file.readlines()
+    lines = file.read().decode("utf-8")
     text = []
-    for line in lines:
-        text.append(line)
-    return (text)
+    text.append(lines)
+    return text
 
 
 def parse_epub(filename):
@@ -130,7 +129,7 @@ def parse_epub(filename):
     return (text)
 
 
-def text_to_docs(text: str, filename: str) -> List[Document]:
+def text_to_docs(text: str, filename: str, chat: str) -> List[Document]:
     """Converts a string or list of strings to a list of Documents
     with metadata."""
     if isinstance(text, str):
@@ -162,6 +161,7 @@ def text_to_docs(text: str, filename: str) -> List[Document]:
             )
             # Add sources a metadata
             doc.metadata["source"] = f"{filename}"
+            doc.metadata["chat"] = f"{chat}"
             doc_chunks.append(doc)
     return doc_chunks
 
@@ -181,11 +181,11 @@ def web_scraping(url):
     return text
 
 
-def create_train(label, _type, status):
+def create_train(label, _type, status, chat):
 
-    if train := db.session.query(Train).filter_by(label=label).first():
+    if train := db.session.query(Train).filter_by(label=label, chat=chat).first():
         return False
-    new_train = Train(label=label, type=_type, status=status)
+    new_train = Train(label=label, type=_type, status=status, chat=chat)
     db.session.add(new_train)
     db.session.flush()
     db.session.commit()
@@ -251,9 +251,9 @@ def create_train_url():
                 'message': 'Invalid URL.',
             })
 
-        trainid = create_train(url, 'url', True)
+        trainid = create_train(url, 'url', True, chatbot)
 
-        result = text_to_docs(data, url)
+        result = text_to_docs(data, url, chatbot)
 
         if (trainid == False):
             return jsonify({
@@ -261,8 +261,8 @@ def create_train_url():
                 'code': 405,
                 'message': 'Training data already exist.',
             })
-        chat = insert_train_chat(chatbot, trainid)
         create_vector(result)
+        chat = insert_train_chat(chatbot, trainid)
         return jsonify({
             'success': True,
             'code': 200,
@@ -282,8 +282,8 @@ def create_train_text():
     text = request.json['text']
     chatbot = request.json['chatbot']
     if compare_role_user(chatbot):
-        trainid = create_train(text[:20], 'text', True)
-        result = text_to_docs(text, text[:20])
+        trainid = create_train(text[:20], 'text', True, chatbot)
+        result = text_to_docs(text, text[:20], chatbot)
 
         if (trainid == False):
             return jsonify({
@@ -291,8 +291,8 @@ def create_train_text():
                 'code': 405,
                 'message': 'Training data already exist.',
             })
-        chat = insert_train_chat(chatbot, trainid)
         create_vector(result)
+        chat = insert_train_chat(chatbot, trainid)
         return jsonify({
             'success': True,
             'code': 200,
@@ -336,13 +336,14 @@ def create_train_file():
             elif (filename.split('.')[-1] == 'epub'):
                 output = parse_epub(filename)
             os.remove(filename)
+
             ct = 0
             for text in output:
                 ct += count_tokens(text)
             if compare_role_user(chatbot):
                 if compare_token_words(ct, chatbot):
-                    result = text_to_docs(output, filename)
-                    trainid = create_train(filename, 'file', True)
+                    result = text_to_docs(output, filename, chatbot)
+                    trainid = create_train(filename, 'file', True, chatbot)
 
                     if (trainid == False):
                         return jsonify({
@@ -350,9 +351,9 @@ def create_train_file():
                             'code': 401,
                             'message': 'Training data already exist.',
                         })
+                    create_vector(result)
 
                     chat = insert_train_chat(chatbot, trainid)
-                    create_vector(result)
                     return jsonify({
                         'success': True,
                         'code': 200,
@@ -442,5 +443,5 @@ def delete_pinecone_vectore():
     source = request.json['source']
     if password == 'QWE@#$asd234':
         delete_vectore(source)
-        return jsonify({'okay'})
-    return jsonify({'You are unautherize'})
+        return jsonify({'data': 'okay'})
+    return jsonify({'data': 'You are unautherize'})

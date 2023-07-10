@@ -19,8 +19,9 @@ const ChatTable = (props) => {
     };
     const handleOk = (data) => {
         axios.post(webAPI.updatechat, data).then((res) => {
-            if (!res.data.success) notification("error", res.data.message);
-            else {
+            if (!res.data.success) {
+                notification("error", res.data.message);
+            } else {
                 notification("success", res.data.message);
             }
         });
@@ -31,7 +32,6 @@ const ChatTable = (props) => {
     };
 
     const GetCurrentchat = (data) => {
-        console.log(data);
         getchat(dispatch, data);
         navigate("newchat");
     };
@@ -63,7 +63,7 @@ const ChatTable = (props) => {
                 <thead className="text-xs text-[--site-main-Table-Tex] uppercase dark:bg-[--site-main-Table-Tex] dark:text-[--site-main-Table-Text_Dark]">
                     <tr className="w-full">
                         <th className="w-1/5 px-6 py-3">Label</th>
-                        <th className="w-1/5 px-6 py-3">Description</th>
+                        <th className="w-1/5 px-6 py-3">PIN</th>
                         <th className="w-1/5 px-6 py-3">Welcome message</th>
                         <th className="w-1/5 px-6 py-3">Behavior prompt</th>
                         <th className="w-1/5 px-6 py-3 text-center">Action</th>
@@ -83,9 +83,7 @@ const ChatTable = (props) => {
                                 >
                                     {data["label"]}
                                 </th>
-                                <td className="px-6 py-4">
-                                    {data["description"]}
-                                </td>
+                                <td className="px-6 py-4">{data["access"]}</td>
                                 <td className="px-6 py-4">
                                     {data["conversation"]}
                                 </td>

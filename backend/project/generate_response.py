@@ -1,6 +1,5 @@
 from langchain.callbacks import get_openai_callback
 from langchain.chat_models import ChatOpenAI
-from rich import print, pretty
 from gptcache import Cache
 from gptcache.manager.factory import manager_factory
 from gptcache.processor.pre import get_prompt
@@ -20,37 +19,37 @@ PINECONE_ENV = os.getenv('PINECONE_ENV')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
 
-pretty.install()
+
+def get_hashed_name(name):
+    return hashlib.sha256(name.encode()).hexdigest()
 
 
-def generate_message(query, history, behavior, temp, model, trains=[]):
+def init_gptcache(cache_obj: Cache, llm: str):
+    hashed_llm = get_hashed_name(llm)
+    cache_obj.init(
+        pre_embedding_func=get_prompt,
+        data_manager=manager_factory(
+            manager="map", data_dir=f"map_cache_{hashed_llm}"),
+    )
+
+
+def generate_message(query, history, behavior, temp, model, chat, trains=[]):
     load_dotenv()
 
     template = """ {behavior}
 
     Training data: {examples}
 
-    {history}
+    Chathistory: {history}
     Human: {human_input}
     Assistant:"""
 
     prompt = PromptTemplate(
         input_variables=["history", "examples", "human_input", "behavior"], template=template)
 
-    def get_hashed_name(name):
-        return hashlib.sha256(name.encode()).hexdigest()
-
-    def init_gptcache(cache_obj: Cache, llm: str):
-        hashed_llm = get_hashed_name(llm)
-        cache_obj.init(
-            pre_embedding_func=get_prompt,
-            data_manager=manager_factory(
-                manager="map", data_dir=f"map_cache_{hashed_llm}"),
-        )
-
     langchain.llm_cache = GPTCache(init_gptcache)
     if model == "1":
-        llm = ChatOpenAI(model_name="gpt-3.5-turbo-4k",
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo",
                          temperature=temp,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "2":
@@ -71,10 +70,11 @@ def generate_message(query, history, behavior, temp, model, trains=[]):
     docsearch = Pinecone.from_existing_index(
         index_name=PINECONE_INDEX_NAME, embedding=embeddings)
     docs = docsearch.similarity_search_with_score(query=query, k=10)
+
     examples = ""
     for doc, _ in docs:
         for source in trains:
-            if doc.metadata['source'] == source:
+            if doc.metadata['source'] == source and doc.metadata['chat'] == str(chat):
                 examples += doc.page_content + '\n'
 
     with get_openai_callback() as cb:

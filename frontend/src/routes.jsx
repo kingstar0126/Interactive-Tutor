@@ -12,6 +12,7 @@ import Notfound from "./Pages/Notfound";
 import Manager from "./Components/Manager";
 import ManageAccount from "./Components/ManageAccount";
 import Report from "./Components/Report";
+import AccessChatbot from "./Pages/AccessChatbot";
 
 const AppRoutes = [
     {
@@ -68,6 +69,16 @@ const AppRoutes = [
             {
                 path: "/changepassword",
                 element: <Changepassword />,
+            },
+            {
+                path: "/chatbot/share/url",
+                element: <AccessChatbot />,
+                children: [
+                    {
+                        path: "newchat",
+                        element: <NewChat />,
+                    },
+                ],
             },
             {
                 path: "/chat/embedding/:id",
