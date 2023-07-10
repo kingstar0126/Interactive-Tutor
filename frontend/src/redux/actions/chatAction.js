@@ -19,7 +19,6 @@ export const addchat = (dispatch, data) => {
 };
 
 export const getchat = (dispatch, data) => {
-    console.log(data);
     dispatch({ type: GET_CHAT, payload: JSON.stringify(data) });
 };
 
@@ -27,8 +26,8 @@ export const setchatbot = (dispatch, data) => {
     axios
         .post(webAPI.start_message, data)
         .then((res) => {
+            console.log(res);
             if (res.status === 200) {
-                console.log(res.data.data);
                 dispatch({ type: SET_CHATBOT, payload: res.data.data });
             } else notification("error", stringConstant.FAILED_GET_DATA);
         })

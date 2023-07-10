@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import PinField from "react-pin-field";
 import chatsend from "../assets/chatgpt-send.svg";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
@@ -16,7 +15,7 @@ import { setquery } from "../redux/actions/queryAction";
 const NewChat = () => {
     const navigate = useNavigate();
     const [chathistory, setChathistory] = useState([]);
-    const [organization, setOrganization] = useState("");
+
     const previous_location = useSelector(
         (state) => state.location.previous_location
     );
@@ -24,8 +23,6 @@ const NewChat = () => {
         (state) => state.location.current_location
     );
     const dispatch = useDispatch();
-    const pinFieldRef = useRef(null);
-    const checkpinRef = useRef(null);
     const chatbot_logo = useRef(null);
     const chatbot_start = useRef(null);
     const chatbot_title = useRef(null);
@@ -38,8 +35,7 @@ const NewChat = () => {
     const ai_background = useRef(null);
     const newchat = useRef(null);
     const messagesEndRef = useRef(null);
-    const [validate, SetValidate] = useState(false);
-    const [error, SetError] = useState(false);
+
     const [message, setMessage] = useState("");
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
     const chatbot = useSelector((state) => state.chat.chatbot);
@@ -58,13 +54,6 @@ const NewChat = () => {
             let new_chat = chat;
             getUserState(dispatch, { id: chat.user_id });
             setchatbot(dispatch, new_chat);
-            if (chat.access === 0) {
-                checkpinRef.current.classList.add("hidden");
-                newchat.current.classList.remove("hidden");
-            } else {
-                checkpinRef.current.classList.remove("hidden");
-                newchat.current.classList.add("hidden");
-            }
             if (new_chat.conversation !== "") {
                 setChathistory([
                     ...chathistory,
@@ -94,15 +83,9 @@ const NewChat = () => {
                 });
 
             axios.post(webAPI.get_message, { id }).then((res) => {
+                console.log(res.data);
                 setChathistory(res.data.data.message);
             });
-            if (chat.access === 0) {
-                checkpinRef.current.classList.add("hidden");
-                newchat.current.classList.remove("hidden");
-            } else {
-                checkpinRef.current.classList.remove("hidden");
-                newchat.current.classList.add("hidden");
-            }
             if (chathistory.length === 0) {
                 console.log("hello, there");
                 chatbot_start.current.classList.remove("hidden");
@@ -266,19 +249,6 @@ const NewChat = () => {
         }
     }, [chathistory]);
 
-    const handleComplete = (value) => {
-        console.log(typeof value, typeof chat.access);
-
-        if (chat.access != value || chat.organization != organization) {
-            SetError(true);
-            pinFieldRef.current.forEach((input) => (input.value = ""));
-            pinFieldRef.current[0].focus();
-        } else {
-            checkpinRef.current.classList.add("hidden");
-            newchat.current.classList.remove("hidden");
-        }
-    };
-
     const handleSubmit = (event) => {
         if (event.keyCode === 13) {
             let id = chatbot;
@@ -297,7 +267,6 @@ const NewChat = () => {
 
     const sendMessage = (id, _message) => {
         let { behaviormodel, train, model } = chat;
-        console.log(model);
         axios
             .post(webAPI.sendchat, {
                 id,
@@ -310,7 +279,6 @@ const NewChat = () => {
                 if (!res.data.success) {
                     notification("error", res.data.message);
                 } else {
-                    console.log(res.data.data);
                     setquery(dispatch, res.data.query);
                     receiveMessage(res.data.data);
                 }
@@ -330,55 +298,6 @@ const NewChat = () => {
             <Toaster />
             {chat && (
                 <div className="w-full h-screen">
-                    <div
-                        className="flex flex-col items-center justify-center w-full py-5"
-                        ref={checkpinRef}
-                    >
-                        {
-                            <div className="flex flex-col w-2/5 gap-5">
-                                <div className="flex flex-col text-[--site-main-color3]">
-                                    <label>OrganizaitonID</label>
-                                    <input
-                                        type="text"
-                                        onChange={(e) =>
-                                            setOrganization(e.target.value)
-                                        }
-                                        className="block w-full px-4 py-2 mt-2 text-[--site-main-Login] bg-[--site-main-color3] border rounded-md focus:border-[--site-logo-text-color] focus:ring-[--site-logo-text-color] focus:outline-none focus:ring focus:ring-opacity-40"
-                                        placeholder="First, enter your Organization ID."
-                                    />
-                                </div>
-                                <div className="flex gap-2">
-                                    <PinField
-                                        ref={pinFieldRef}
-                                        name="chatdescription"
-                                        length={4}
-                                        type="password"
-                                        inputMode="numeric"
-                                        onRejectKey={() => {
-                                            SetValidate(true);
-                                        }}
-                                        onResolveKey={() => {
-                                            SetValidate(false);
-                                        }}
-                                        validate="0123456789"
-                                        onComplete={handleComplete}
-                                        className="mb-1 w-[40px] p-[15px] items-center justify-center h-[40px] focus:border-none focus:ring-opacity-40 text-[--site-card-icon-color] focus:outline-none focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5]"
-                                    />
-                                </div>
-                            </div>
-                        }
-                        {error && (
-                            <span className="text-[--site-main-form-error] text-[12px]">
-                                PIN or OrganizaitonID is incorrect. Please try
-                                again!
-                            </span>
-                        )}
-                        {validate && (
-                            <span className="text-[--site-main-form-error] text-[12px]">
-                                The PIN must be number
-                            </span>
-                        )}
-                    </div>
                     <div
                         ref={newchat}
                         className="bg-[--site-card-icon-color] w-full px-10 h-full p-5 flex flex-col items-center justify-center"

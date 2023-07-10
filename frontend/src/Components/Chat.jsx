@@ -78,14 +78,14 @@ const Chat = () => {
         } else {
             getChats();
         }
-    }, []);
+    }, [location]);
     const getChats = () => {
         let data = {
             user_id: user.id,
         };
 
         axios.post(webAPI.getchats, data).then((res) => {
-            console.log(res);
+            console.log("This is the getChat", res);
             SetChat(res.data.data);
         });
     };
