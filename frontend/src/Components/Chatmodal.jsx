@@ -14,7 +14,7 @@ const Chatmodal = (props) => {
     const [chatdescription, SetChatdescription] = useState(
         "This is my general assistant"
     );
-    const [chatmodel, SetChatmodel] = useState("0");
+    const [chatmodel, SetChatmodel] = useState("1");
     const [open, setOpen] = useState(0);
     const [Conversation, SetConversation] = useState(
         "Hello friends! How can I help you today?"

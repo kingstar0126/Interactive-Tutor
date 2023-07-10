@@ -14,12 +14,17 @@ import { setlocation } from "../redux/actions/locationAction";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { changeuser } from "../redux/actions/userAction";
+import { useEffect } from "react";
 
 const Sidebar = () => {
     let location = useLocation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    setlocation(dispatch, location.pathname);
+    useEffect(() => {
+        if (location) {
+            setlocation(dispatch, location.pathname);
+        }
+    }, []);
     const user = JSON.parse(useSelector((state) => state.user.user));
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
     const handleLogout = () => {
@@ -78,16 +83,8 @@ const Sidebar = () => {
                     </ListItem>
                 </Link>
             </div>
-            {chat && (
+            {chat && chat.organization && (
                 <div className="flex flex-col items-start justify-center mt-[10] p-2 bg-[--site-warning-text-color] m-2 rounded-xl shadow-2xl">
-                    {chat.access && (
-                        <p>
-                            <span className="font-bold">PIN</span> code:
-                            <span className="text-[--site-error-text-color] font-semibold">
-                                {chat.access}
-                            </span>
-                        </p>
-                    )}
                     {chat.organization && (
                         <p>
                             <span className="font-bold text-[14px]">
