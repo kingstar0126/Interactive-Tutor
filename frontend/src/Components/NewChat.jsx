@@ -325,33 +325,6 @@ const NewChat = () => {
                             <span ref={chatbot_description}>
                                 {chat.chat_description.description}
                             </span>
-
-                            <div className="flex items-end justify-center w-3/5 h-full gap-5 p-2 mb-5">
-                                <a
-                                    href={chat.chat_button.button1_url}
-                                    ref={chatbot_button1}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    {chat.chat_button.button1_text}
-                                </a>
-                                <a
-                                    ref={chatbot_button2}
-                                    href={chat.chat_button.button2_url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    {chat.chat_button.button2_text}
-                                </a>
-                                <a
-                                    ref={chatbot_button3}
-                                    href={chat.chat_button.button3_url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    {chat.chat_button.button3_text}
-                                </a>
-                            </div>
                         </div>
 
                         <div
@@ -451,6 +424,33 @@ const NewChat = () => {
                                     ) : null;
                                 })}
                             </Scrollbar>
+                        </div>
+
+                        <div className="flex items-end justify-center w-3/5 gap-5 p-2 mb-5">
+                            <a
+                                href={chat.chat_button.button1_url}
+                                ref={chatbot_button1}
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                {chat.chat_button.button1_text}
+                            </a>
+                            <a
+                                ref={chatbot_button2}
+                                href={chat.chat_button.button2_url}
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                {chat.chat_button.button2_text}
+                            </a>
+                            <a
+                                ref={chatbot_button3}
+                                href={chat.chat_button.button3_url}
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                {chat.chat_button.button3_text}
+                            </a>
                         </div>
 
                         <div className="flex w-2/3 divide-x-2">

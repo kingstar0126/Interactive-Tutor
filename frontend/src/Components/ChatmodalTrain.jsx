@@ -61,6 +61,7 @@ const ChatmodalTrain = (props) => {
                 data.append("file", file, filename);
                 data.append("chatbot", chatbot);
                 const config = {
+                    timeout: 600000,
                     onUploadProgress: (progressEvent) => {
                         const progress = Math.round(
                             (progressEvent.loaded / progressEvent.total) * 100

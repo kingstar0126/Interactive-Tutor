@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { Outlet, useLocation } from "react-router-dom";
 import { getUserState } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
-import Speedometer from "./speedometter";
+import ReactSpeedometer from "react-d3-speedometer";
 
 const Chat = () => {
     const location = useLocation();
