@@ -48,7 +48,8 @@ def send_message():
     trains = []
     for source_id in train:
         source = db.session.query(Train).filter_by(id=source_id).first()
-        trains.append(source.label)
+        if source is not None:
+            trains.append(source.label)
     current_message = db.session.query(Message).filter_by(uuid=uuid).first()
     chat = db.session.query(Chat).filter_by(id=current_message.chat_id).first()
 

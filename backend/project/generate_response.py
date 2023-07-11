@@ -69,7 +69,7 @@ def generate_message(query, history, behavior, temp, model, chat, trains=[]):
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
     docsearch = Pinecone.from_existing_index(
         index_name=PINECONE_INDEX_NAME, embedding=embeddings)
-    docs = docsearch.similarity_search_with_score(query=query, k=10)
+    docs = docsearch.similarity_search_with_score(query=query, k=5)
 
     examples = ""
     for doc, _ in docs:
@@ -119,7 +119,7 @@ def generate_AI_message(query, history, behavior, temp, model):
     langchain.llm_cache = GPTCache(init_gptcache)
 
     if model == "1":
-        llm = ChatOpenAI(model_name="gpt-3.5-turbo-4k",
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo",
                          temperature=temp,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "2":

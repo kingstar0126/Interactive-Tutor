@@ -11,12 +11,12 @@ from datetime import datetime
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(100))
-    username = db.Column(db.String(150))
+    email = db.Column(db.String(255), unique=True)
+    password = db.Column(db.String(255))
+    username = db.Column(db.String(255))
     role = db.Column(db.Integer)
     subscription_id = db.Column(db.String(255))
-    customer_id = db.Column(db.String(250))
+    customer_id = db.Column(db.String(255))
     query = db.Column(db.Integer)
     contact = db.Column(db.String(255))
     state = db.Column(db.String(255))
@@ -54,14 +54,14 @@ class Chat(UserMixin, db.Model):
     __tablename__ = 'chat'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, nullable=False)
-    label = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.String(100))
-    model = db.Column(db.String(150))
-    conversation = db.Column(db.String(150))
+    label = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.String(255))
+    model = db.Column(db.String(255))
+    conversation = db.Column(db.String(255))
     access = db.Column(db.Integer)
     creativity = db.Column(db.Float)
-    behavior = db.Column(db.String(150))
-    behaviormodel = db.Column(db.String(150))
+    behavior = db.Column(db.String(255))
+    behaviormodel = db.Column(db.String(255))
     train = db.Column(db.JSON)
     chat_logo = db.Column(db.JSON)
     chat_title = db.Column(db.JSON)
@@ -93,7 +93,7 @@ class Message(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     chat_id = db.Column(db.Integer, nullable=False)
     message = db.Column(db.JSON)
-    behavior = db.Column(db.String(150))
+    behavior = db.Column(db.String(255))
     creativity = db.Column(db.Float)
     create_date = db.Column(db.Date, default=datetime.utcnow)
     update_date = db.Column(
@@ -111,8 +111,8 @@ class Message(UserMixin, db.Model):
 class Organization(UserMixin, db.Model):
     __tablename__ = 'organization'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    email = db.Column(db.String(150))
-    organization = db.Column(db.String(150))
+    email = db.Column(db.String(255))
+    organization = db.Column(db.String(255))
     create_date = db.Column(db.Date, default=datetime.utcnow)
     update_date = db.Column(
         db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -125,10 +125,10 @@ class Organization(UserMixin, db.Model):
 class Train(UserMixin, db.Model):
     __tablename__ = 'traindata'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    label = db.Column(db.String(150))
-    type = db.Column(db.String(150))
-    status = db.Column(db.String(150))
-    chat = db.Column(db.String(250))
+    label = db.Column(db.String(255))
+    type = db.Column(db.String(255))
+    status = db.Column(db.String(255))
+    chat = db.Column(db.String(255))
     create_date = db.Column(db.Date, default=datetime.utcnow)
     update_date = db.Column(
         db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -151,7 +151,7 @@ class Production(UserMixin, db.Model):
 
 class OAuth(OAuthConsumerMixin, db.Model):
     __table_args__ = (db.UniqueConstraint("provider", "provider_user_id"),)
-    provider_user_id = db.Column(db.String(256), nullable=False)
-    provider_user_login = db.Column(db.String(256))
+    provider_user_id = db.Column(db.String(255), nullable=False)
+    provider_user_login = db.Column(db.String(255))
     user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
     user = db.relationship(User)

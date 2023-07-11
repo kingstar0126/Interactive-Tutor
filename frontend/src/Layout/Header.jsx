@@ -109,7 +109,7 @@ const Header = () => {
                 </div>
             )}
             {location.pathname === "/chatbot/share/url" && (
-                <div className="flex items-center justify-between w-full px-16">
+                <div className="flex items-center justify-center w-full px-16">
                     {/* Logo */}
                     <div className="flex">
                         <Link to="/">
@@ -129,17 +129,6 @@ const Header = () => {
                         </span>
                     </div>
                     {/* Navbar */}
-                    <div className="flex justify-center gap-6 px-5 bg-white rounded-full">
-                        <Link
-                            className="px-5 w-full flex items-center my-3 font-semibold text-black font-logo text-[18px] border-[3px] rounded-full border-[--site-logo-text-color]"
-                            to="/"
-                        >
-                            LOGIN
-                        </Link>
-                        <div className="px-5 flex items-center my-3 whitespace-nowrap text-[18px] rounded-full font-semibold text-black font-logo bg-[--site-logo-text-color]">
-                            <Link to="/register">Sign-up</Link>
-                        </div>
-                    </div>
                 </div>
             )}
         </div>
