@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, send_file
 from .models import Chat, Message, Train, User, Organization
 from . import db
 from rich import print, pretty
@@ -6,9 +6,10 @@ import json
 import pinecone
 import openai
 import os
-from datetime import datetime
+import uuid
 from dotenv import load_dotenv
 from .auth import generate_pin_password
+from werkzeug.utils import secure_filename
 
 load_dotenv()
 
@@ -40,6 +41,14 @@ def delete_vectore(source):
 # def delete_index(uuid):
 #     name = f"{uuid}"
 #     pinecone.delete_index(name)
+
+def is_valid_uuid(value):
+    try:
+        uuid.UUID(value)
+        return True
+    except ValueError:
+        return False
+
 
 @chat.route('/api/addchat', methods=['POST'])
 def add_chat():
@@ -108,6 +117,32 @@ def add_chat():
         'message': 'Your ChatBot created successfully!!!'
     }
     return jsonify(response)
+
+
+@chat.route('/api/imageupload', methods=['POST'])
+def upload_image():
+    try:
+        file = request.files.get('file', None)
+        if not file:
+            return {"success": False, "message": "Invalid file"}, 400
+
+        filename = str(uuid.uuid4()) + secure_filename(file.filename)
+        filepath = os.path.join("project/image", filename)
+        with open(filepath, 'wb') as f:
+            while True:
+                chunk = file.stream.read(1024)
+                if not chunk:
+                    break
+                f.write(chunk)
+        return jsonify({'success': True, 'data': f"/api/imageupload/{filename}", 'code': 200})
+    except Exception as e:
+        return {"success": False, "message": str(e)}, 400
+
+
+@chat.route('/api/imageupload/<image_id>', methods=['GET'])
+def view_image(image_id):
+    image_folder = f'image/{image_id}'
+    return send_file(image_folder, mimetype='image/jpeg')
 
 
 @chat.route('/api/sendbrandingdata', methods=['POST'])
@@ -233,19 +268,29 @@ def get_chats():
     return jsonify(data)
 
 
-@chat.route('/api/getchat', methods=['POST'])
-def get_chat():
-    uuid = request.json['id']
-    chat = db.session.query(Chat).filter_by(uuid=uuid).first()
-    if chat is None:
-        return jsonify({
-            'success': False,
-            'code': 404,
-            'message': 'The Data not excited'
-        })
-    user = db.session.query(User).filter_by(id=chat.user_id).first()
-    organization = db.session.query(Organization).filter_by(
-        email=user.email).first().uuid
+@chat.route('/api/getchatwithpin', methods=['POST'])
+def get_chat_with_pin_organization():
+    json_data = request.get_json()
+    if not json_data:
+        return jsonify({'success': False, 'code': 404, 'message': 'No data'})
+
+    organization = json_data['organization']
+    pin = json_data['pin']
+
+    if not is_valid_uuid(organization):
+        return jsonify({'success': False, 'code': 404, 'message': 'Your organization ID is incorrect.'})
+
+    user = db.session.query(User).join(Organization, Organization.email == User.email).filter(
+        Organization.uuid == organization).first()
+
+    if not user:
+        return jsonify({'success': False, 'code': 404, 'message': 'Organization does not exist.'})
+
+    chat = db.session.query(Chat).join(User, User.id == Chat.user_id).join(
+        Organization, Organization.email == User.email).filter(Organization.uuid == organization).first()
+    if pin != str(chat.access):
+        return jsonify({'success': False, 'code': 404, 'message': 'Your PIN is incorrect'})
+
     chat_data = {
         'id': chat.id,
         'label': chat.label,
@@ -265,7 +310,6 @@ def get_chat():
         'chat_copyright': json.loads(chat.chat_copyright),
         'chat_button': json.loads(chat.chat_button),
         'bubble': json.loads(chat.bubble),
-        'organization': organization,
         'role': user.role
     }
 
@@ -276,6 +320,55 @@ def get_chat():
     }
 
     return jsonify(data)
+
+
+@chat.route('/api/getchat', methods=['POST'])
+def get_chat():
+    json_data = request.get_json()
+    if json_data:
+        uuid = request.json['id']
+        chat = db.session.query(Chat).filter_by(uuid=uuid).first()
+        if chat is None:
+            return jsonify({
+                'success': False,
+                'code': 404,
+                'message': 'The Data not excited'
+            })
+        user = db.session.query(User).filter_by(id=chat.user_id).first()
+        organization = db.session.query(Organization).filter_by(
+            email=user.email).first().uuid
+        chat_data = {
+            'id': chat.id,
+            'label': chat.label,
+            'description': chat.description,
+            'model': chat.model,
+            'conversation': chat.conversation,
+            'user_id': chat.user_id,
+            'access': chat.access,
+            'creativity': chat.creativity,
+            'behavior': chat.behavior,
+            'behaviormodel': chat.behaviormodel,
+            'uuid': chat.uuid,
+            'train': json.loads(chat.train),
+            'chat_logo': json.loads(chat.chat_logo),
+            'chat_title': json.loads(chat.chat_title),
+            'chat_description': json.loads(chat.chat_description),
+            'chat_copyright': json.loads(chat.chat_copyright),
+            'chat_button': json.loads(chat.chat_button),
+            'bubble': json.loads(chat.bubble),
+            'organization': organization,
+            'role': user.role
+        }
+
+        data = {
+            'success': True,
+            'code': 200,
+            'data': chat_data
+        }
+
+        return jsonify(data)
+    else:
+        return jsonify({"'success": False, "code": 404, "message": "No data"})
 
 
 @chat.route('/api/getbubble/<string:widgetID>', methods=['GET'])

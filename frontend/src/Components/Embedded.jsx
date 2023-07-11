@@ -16,7 +16,7 @@ const Embedded = (props) => {
         : "hidden";
 
     useEffect(() => {
-        setChatURL(`${SERVER_URL}/chat/embedding/${props.data.uuid}`);
+        setChatURL(`${SERVER_URL}/chatbot/share/url`);
         setChatwindow(
             `<iframe style="border: 0" frameborder="0" scrolling="no" height="100%" width="100%" src="${SERVER_URL}/chat/embedding/${props.data.uuid}"></iframe>`
         );

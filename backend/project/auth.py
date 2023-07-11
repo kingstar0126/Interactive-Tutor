@@ -26,7 +26,7 @@ def generate_password(length=12):
     return password
 
 
-def generate_pin_password(length=4):
+def generate_pin_password(length=6):
     """Generate a random password."""
     alphabet = string.digits
     password = ''.join(secrets.choice(alphabet) for _ in range(length))
@@ -239,11 +239,6 @@ def signup_post():
     username = request.json['username']
     email = request.json['email']
     password = request.json['password']
-    phone = request.json['phone']
-    state = request.json['state']
-    city = request.json['city']
-    country = request.json['country']
-    organization = request.json['organization']
     role = 5
     status = 0
     query = 500
@@ -252,13 +247,12 @@ def signup_post():
     if user:
         return jsonify({'message': 'Email address already exists', 'success': False})
 
-    customer = stripe.Customer.create(name=username, email=email, phone=phone)
-    new_user = User(username=username, query=query, status=status, contact=phone, email=email, role=role, customer_id=customer.id, state=state, city=city, country=country,
+    customer = stripe.Customer.create(name=username, email=email)
+    new_user = User(username=username, query=query, status=status, email=email, role=role, customer_id=customer.id,
                     password=generate_password_hash(password, method='sha256'))
     db.session.add(new_user)
     db.session.commit()
-    new_organization = Organization(
-        organization=organization, email=email)
+    new_organization = Organization(email=email)
     db.session.add(new_organization)
     db.session.commit()
 
@@ -292,7 +286,6 @@ def add_user_account():
 def get_useraccount():
     id = request.json['id']
     user = db.session.query(User).filter_by(id=id).first()
-    print(user.role)
     if user.role == 5:
         days = calculate_days(14, user.create_date)
         if days <= 0:

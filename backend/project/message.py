@@ -48,8 +48,10 @@ def send_message():
     trains = []
     for source_id in train:
         source = db.session.query(Train).filter_by(id=source_id).first()
-        trains.append(source.label)
+        if source is not None:
+            trains.append(source.label)
     current_message = db.session.query(Message).filter_by(uuid=uuid).first()
+    chat = db.session.query(Chat).filter_by(id=current_message.chat_id).first()
 
     user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
         Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
@@ -72,7 +74,7 @@ def send_message():
     else:
         behavior = current_message.behavior + "\n" + behaviormodel
         response, chat_history, token = generate_message(
-            query, history, behavior, temp, model, trains)
+            query, history, behavior, temp, model, chat.uuid, trains)
     current_message.message = json.dumps(chat_history)
     current_message.update_date = datetime.datetime.now()
 
