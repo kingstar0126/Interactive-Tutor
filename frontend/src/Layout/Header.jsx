@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import Logo from "../assets/logo.png";
+import { SERVER_URL } from "../config/constant";
 
 const Header = () => {
     let location = useLocation();
@@ -12,7 +13,7 @@ const Header = () => {
                     <div className="flex">
                         <a href="/">
                             <img
-                                src={Logo}
+                                src={`${SERVER_URL}${Logo}`}
                                 className="w-[99px] h-full "
                                 alt="logo"
                             />
@@ -46,7 +47,7 @@ const Header = () => {
                     <div className="flex">
                         <Link to="/">
                             <img
-                                src={Logo}
+                                src={`${SERVER_URL}${Logo}`}
                                 className="w-[99px] h-full "
                                 alt="logo"
                             />
@@ -80,7 +81,7 @@ const Header = () => {
                     <div className="flex">
                         <Link to="/">
                             <img
-                                src={Logo}
+                                src={`${SERVER_URL}${Logo}`}
                                 className="w-[99px] h-full "
                                 alt="logo"
                             />
@@ -109,12 +110,12 @@ const Header = () => {
                 </div>
             )}
             {location.pathname === "/chatbot/share/url" && (
-                <div className="flex items-center justify-between w-full px-16">
+                <div className="flex items-center justify-center w-full px-16">
                     {/* Logo */}
                     <div className="flex">
                         <Link to="/">
                             <img
-                                src={Logo}
+                                src={`${SERVER_URL}${Logo}`}
                                 className="w-[99px] h-full "
                                 alt="logo"
                             />
@@ -127,18 +128,6 @@ const Header = () => {
                                 powered by ai
                             </span>
                         </span>
-                    </div>
-                    {/* Navbar */}
-                    <div className="flex justify-center gap-6 px-5 bg-white rounded-full">
-                        <Link
-                            className="px-5 w-full flex items-center my-3 font-semibold text-black font-logo text-[18px] border-[3px] rounded-full border-[--site-logo-text-color]"
-                            to="/"
-                        >
-                            LOGIN
-                        </Link>
-                        <div className="px-5 flex items-center my-3 whitespace-nowrap text-[18px] rounded-full font-semibold text-black font-logo bg-[--site-logo-text-color]">
-                            <Link to="/register">Sign-up</Link>
-                        </div>
                     </div>
                 </div>
             )}

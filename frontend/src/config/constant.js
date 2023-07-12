@@ -1,1 +1,1 @@
-export const SERVER_URL = "http://3.11.9.37";
+export const SERVER_URL = "https://app.interactive-tutor.com"

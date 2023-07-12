@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { Outlet, useLocation } from "react-router-dom";
 import { getUserState } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
-import Speedometer from "./speedometter";
+import ReactSpeedometer from "react-d3-speedometer";
 
 const Chat = () => {
     const location = useLocation();
@@ -100,26 +100,55 @@ const Chat = () => {
                     Chats
                 </div>
 
-                <div className="flex h-[20px] items-center justify-center">
+                <div className="flex items-end justify-end">
                     {query && (
-                        <p className="bg-[--site-logo-text-color] mr-4 px-2 rounded-xl flex gap-2 items-center justify-center">
-                            Queries
+                        <p className="bg-[--site-logo-text-color] p-2 m-2 rounded-md gap-2 items-center justify-center h-full flex">
                             <span className="text-[--site-error-text-color] font-bold">
                                 {query}
+                            </span>
+                            <span className="text-[--site-main-color3]">
+                                Queries
                             </span>
                         </p>
                     )}
                     {trial > 0 && (
-                        <div className="flex">
-                            <p className="bg-[--site-logo-text-color] mr-4 px-2 rounded-xl flex gap-2 items-center justify-center">
-                                Free trial
-                                <span className="text-[--site-error-text-color] font-bold">
-                                    {trial}
+                        <div className="flex items-center justify-center">
+                            <p className="flex flex-col">
+                                <span className="text-[--site-main-color3]">
+                                    <span className="text-[--site-error-text-color]">
+                                        {trial}
+                                    </span>{" "}
+                                    of dyas remainig
+                                </span>
+                                <span className="text-[--site-main-color3] pl-2">
+                                    {" "}
+                                    free trial
                                 </span>
                             </p>
+                            <div>
+                                <ReactSpeedometer
+                                    maxSegmentLabels={0}
+                                    segments={4}
+                                    width={100}
+                                    height={58}
+                                    ringWidth={10}
+                                    value={trial}
+                                    needleColor="black"
+                                    needleHeightRatio={0.5}
+                                    maxValue={14}
+                                    startColor={"#f5da42"}
+                                    endColor={"#ff0000"}
+                                />
+                            </div>
                         </div>
                     )}
-                    <button>
+                    <button
+                        onClick={() => navigate("/chatbot/subscription")}
+                        className="mb-2 p-2 rounded-md bg-[--site-logo-text-color] text-[--site-main-color3]"
+                    >
+                        Upgrade
+                    </button>
+                    <button className="p-2 mb-2">
                         {isOpen ? (
                             <BsFillCaretUpSquareFill
                                 onClick={() => setIsOpen(!isOpen)}

@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setchatbot, getchatbot, getchat } from "../redux/actions/chatAction";
 import { useNavigate } from "react-router-dom";
 import { Scrollbar } from "react-scrollbars-custom";
-import { CodeBlock, dracula } from "react-code-blocks";
+import { dracula, CopyBlock } from "react-code-blocks";
 import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { getUserState } from "../redux/actions/userAction";
@@ -25,6 +25,7 @@ const NewChat = () => {
     const dispatch = useDispatch();
     const chatbot_logo = useRef(null);
     const chatbot_start = useRef(null);
+    const chatbot_copyright = useRef(null);
     const chatbot_title = useRef(null);
     const window_chat = useRef(null);
     const chatbot_button1 = useRef(null);
@@ -183,6 +184,15 @@ const NewChat = () => {
             chatbot_description.current.style["font-size"] =
                 chat.chat_description.size;
 
+            if (!chat.chat_copyright.status) {
+                chatbot_copyright.current.style.display = "block";
+            } else {
+                chatbot_copyright.current.style.display = "none";
+            }
+            chatbot_copyright.current.style.color = chat.chat_copyright.color;
+            chatbot_copyright.current.style["font-size"] =
+                chat.chat_copyright.size;
+
             if (!chat.chat_button.button1_status) {
                 chatbot_button1.current.style.display = "block";
             } else {
@@ -325,38 +335,11 @@ const NewChat = () => {
                             <span ref={chatbot_description}>
                                 {chat.chat_description.description}
                             </span>
-
-                            <div className="flex items-end justify-center w-3/5 h-full gap-5 p-2 mb-5">
-                                <a
-                                    href={chat.chat_button.button1_url}
-                                    ref={chatbot_button1}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    {chat.chat_button.button1_text}
-                                </a>
-                                <a
-                                    ref={chatbot_button2}
-                                    href={chat.chat_button.button2_url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    {chat.chat_button.button2_text}
-                                </a>
-                                <a
-                                    ref={chatbot_button3}
-                                    href={chat.chat_button.button3_url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                >
-                                    {chat.chat_button.button3_text}
-                                </a>
-                            </div>
                         </div>
 
                         <div
                             ref={window_chat}
-                            className="w-full h-full"
+                            className="w-full h-3/5"
                             name="main_scroll"
                         >
                             <Scrollbar
@@ -421,7 +404,7 @@ const NewChat = () => {
                                                                 );
                                                             } else {
                                                                 return (
-                                                                    <CodeBlock
+                                                                    <CopyBlock
                                                                         key={
                                                                             index
                                                                         }
@@ -453,6 +436,32 @@ const NewChat = () => {
                             </Scrollbar>
                         </div>
 
+                        <div className="flex items-end justify-center w-3/5 gap-5 p-2 mb-5">
+                            <a
+                                href={chat.chat_button.button1_url}
+                                ref={chatbot_button1}
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                {chat.chat_button.button1_text}
+                            </a>
+                            <a
+                                ref={chatbot_button2}
+                                href={chat.chat_button.button2_url}
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                {chat.chat_button.button2_text}
+                            </a>
+                            <a
+                                ref={chatbot_button3}
+                                href={chat.chat_button.button3_url}
+                                target="_blank"
+                                rel="noreferrer"
+                            >
+                                {chat.chat_button.button3_text}
+                            </a>
+                        </div>
                         <div className="flex w-2/3 divide-x-2">
                             <input
                                 type="text"
@@ -471,13 +480,14 @@ const NewChat = () => {
                             </span>
                         </div>
 
-                        {chat && (chat.role === 2 || chat.role === 5) && (
-                            <div className="py-2">
-                                <span className="text-[--site-file-upload]">
-                                    Powered by Interactive-Tutor.com
-                                </span>
-                            </div>
-                        )}
+                        <div className="py-2">
+                            <span
+                                ref={chatbot_copyright}
+                                className="text-[--site-file-upload]"
+                            >
+                                {chat.chat_copyright.description}
+                            </span>
+                        </div>
                     </div>
                 </div>
             )}

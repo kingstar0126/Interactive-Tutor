@@ -39,9 +39,7 @@ const Chatmodal = (props) => {
     const [behaviormodel, SetBehaviormodel] =
         useState(`Utilize contextual information from the training
   data, and if necessary, respond with 'I don't know'
-  when appropriate.(The AI Tutor will search the
-  training data for a response and provide an answer
-  only if a matching response is found.)`);
+  when appropriate.`);
     const [behavior, SetBehavior] = useState("You are a helpful assistant");
 
     useEffect(() => {
@@ -62,9 +60,7 @@ const Chatmodal = (props) => {
             SetCreativity(0.3);
             SetBehaviormodel(`Utilize contextual information from the training
     data, and if necessary, respond with 'I don't know'
-    when appropriate.(The AI Tutor will search the
-    training data for a response and provide an answer
-    only if a matching response is found.)`);
+    when appropriate.`);
             SetBehavior("You are a helpful assistant");
         }
         if (props.chat && props.chat.label) {
