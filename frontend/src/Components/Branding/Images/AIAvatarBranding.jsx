@@ -43,6 +43,7 @@ const UserAvatarBranding = (props) => {
             axios
                 .post(webAPI.imageupload, formData)
                 .then((res) => {
+                    console.log(res.data)
                     notification("success", "Uploaded successfully!");
                     let url = SERVER_URL + res.data.data;
                     setSelectedLogo(props.data.url);

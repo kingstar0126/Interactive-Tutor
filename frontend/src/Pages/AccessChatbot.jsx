@@ -98,7 +98,7 @@ const AccessChatbot = () => {
             <Header />
             <Toaster />
             {status == false && (
-                <div className="mt-[100px]">
+                <div className="mt-[100px] p-5">
                     <div className="w-full p-6 m-auto bg-[--site-main-color3] rounded-md h-full lg:max-w-xl">
                         <h1 className="text-3xl font-semibold text-center text-[--site-main-Login] underline">
                             AI Tutor
@@ -152,7 +152,7 @@ const AccessChatbot = () => {
                                             ref={pinField}
                                             validate="0123456789"
                                             onComplete={handleComplete}
-                                            className="mb-1 w-[40px] p-[15px] items-center justify-center h-[40px] focus:border-none focus:ring-opacity-40 text-[--site-card-icon-color] focus:outline-none focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5]"
+                                            className="mb-1 w-[30px] p-[15px] items-center justify-center h-[30px] focus:border-none focus:ring-opacity-40 text-[--site-card-icon-color] focus:outline-none focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5]"
                                         />
                                     </div>
                                     <div className="mb=2">

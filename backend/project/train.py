@@ -336,7 +336,6 @@ def create_train_file():
             elif (filename.split('.')[-1] == 'epub'):
                 output = parse_epub(filename)
             os.remove(filename)
-
             ct = 0
             for text in output:
                 ct += count_tokens(text)
@@ -384,14 +383,15 @@ def handle_request_entity_too_large(error):
 @train.route('/api/data/gettraindatas', methods=['POST'])
 def get_traindatas():
     uuid = request.json['uuid']
+
     chat = db.session.query(Chat).filter_by(uuid=uuid).first()
     train_ids = json.loads(chat.train)
-
     data = []
     for id in train_ids:
         train_data = db.session.query(Train).filter_by(id=id).first()
-        data.append({'id': train_data.id, 'label': train_data.label,
-                    'type': train_data.type, 'status': train_data.status})
+        if train_data is not None:
+            data.append({'id': train_data.id, 'label': train_data.label,
+                         'type': train_data.type, 'status': train_data.status})
     return jsonify(data)
 
 

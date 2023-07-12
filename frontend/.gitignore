@@ -12,10 +12,12 @@
 /build
 
 # misc
+
 src/env.js
 *.crt
 *.key
 *.pem
+
 .DS_Store
 .env.local
 .env.development.local

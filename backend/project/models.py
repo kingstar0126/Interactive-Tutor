@@ -16,7 +16,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(255))
     role = db.Column(db.Integer)
     subscription_id = db.Column(db.String(255))
-    customer_id = db.Column(db.String(250))
+    customer_id = db.Column(db.String(255))
     query = db.Column(db.Integer)
     contact = db.Column(db.String(255))
     state = db.Column(db.String(255))

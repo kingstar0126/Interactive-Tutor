@@ -110,7 +110,7 @@ const Header = () => {
                 </div>
             )}
             {location.pathname === "/chatbot/share/url" && (
-                <div className="flex items-center justify-center w-full px-16">
+            <div className="flex items-center justify-center w-full px-16">
                     {/* Logo */}
                     <div className="flex">
                         <Link to="/">
