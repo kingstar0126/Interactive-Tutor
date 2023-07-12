@@ -8,7 +8,9 @@ __pycache__/
 
 # C extensions
 *.so
-
+*.crt
+*.key
+*.pem
 # Distribution / packaging
 .Python
 build/
