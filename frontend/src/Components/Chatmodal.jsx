@@ -38,9 +38,7 @@ const Chatmodal = (props) => {
         value: "1",
         label: `Utilize contextual information from the training
   data, and if necessary, respond with 'I don't know'
-  when appropriate.(The AI Tutor will search the
-  training data for a response and provide an answer
-  only if a matching response is found.)`,
+  when appropriate.`,
     });
     const [behavior, SetBehavior] = useState("You are a helpful assistant");
     const options = [
@@ -76,9 +74,7 @@ const Chatmodal = (props) => {
                 value: "1",
                 label: `Utilize contextual information from the training
           data, and if necessary, respond with 'I don't know'
-          when appropriate.(The AI Tutor will search the
-          training data for a response and provide an answer
-          only if a matching response is found.)`,
+          when appropriate.`,
             });
             SetBehavior("You are a helpful assistant");
         }
@@ -353,7 +349,7 @@ const Chatmodal = (props) => {
                                                 onChange={(e) => {
                                                     SetBehavior(e.target.value);
                                                 }}
-                                                maxLength={255}
+                                                maxLength={250}
                                                 placeholder="You are a helpful assistant"
                                                 className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5] text-[--site-card-icon-color]"
                                             ></textarea>

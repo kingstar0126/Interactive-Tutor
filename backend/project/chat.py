@@ -66,12 +66,6 @@ def add_chat():
     chat_title = json.dumps({})
     chat_description = json.dumps({})
     chat_copyright = json.dumps({})
-    chat_1_logo = json.dumps({})
-    chat_1_description = json.dumps({})
-    chat_2_logo = json.dumps({})
-    chat_2_description = json.dumps({})
-    chat_3_logo = json.dumps({})
-    chat_3_description = json.dumps({})
     chat_button = json.dumps({})
     bubble = json.dumps({})
 
@@ -106,7 +100,7 @@ def add_chat():
             'message': 'A chart with the same name already exists. Please change the Name and description',
         })
     new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
-                    access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, chat_1_description=chat_1_description, chat_2_description=chat_2_description, chat_3_description=chat_3_description, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_1_logo=chat_1_logo, chat_2_logo=chat_2_logo, chat_3_logo=chat_3_logo, chat_button=chat_button)
+                    access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button)
     db.session.add(new_chat)
     db.session.commit()
     # Create index in the pinecone
@@ -398,7 +392,7 @@ def get_bubble(widgetID):
         'chat_copyright': json.loads(chat.chat_copyright),
         'chat_button': json.loads(chat.chat_button),
         'bubble': json.loads(chat.bubble),
-        'embed_url': 'http://3.11.9.37/chat/embedding/',
+        'embed_url': 'https://app.interactive-tutor.com/chat/embedding/',
     }
 
     data = {

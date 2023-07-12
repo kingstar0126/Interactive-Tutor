@@ -1,9 +1,8 @@
 from project import create_app
-import ssl
+from flask_sslify import SSLify
 
 app = create_app()
+sslify = SSLify(app)
 
 if __name__ == '__main__':
-    context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-    context.load_cert_chain('cert.pem', 'dkey.pem')
-    app.run(ssl_context=context)
+    app.run(ssl_context=('cert.crt', 'key.key'))

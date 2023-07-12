@@ -20,8 +20,8 @@ import ButtonBranding3 from "./Branding/Button/ButtonBranding3";
 const Branding = () => {
     const dispatch = useDispatch();
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
+    const user = JSON.parse(useSelector((state) => state.user.user));
     const current_chat = chat;
-
     const notification = (type, message) => {
         // To do in here
         if (type === "error") {
@@ -84,12 +84,21 @@ const Branding = () => {
                                 data={current_chat.chat_description}
                             />
                         </div>
-                        <div className="w-1/3 border-[1px] border-[--site-card-icon-color] rounded-xl p-2">
-                            <BrandingTextItem
-                                title={"Copyright"}
-                                data={current_chat.chat_copyright}
-                            />
-                        </div>
+                        {user.role === 5 || user.role === 2 ? (
+                            <div className="pointer-events-none w-1/3 border-[1px] border-[--site-card-icon-color] opacity-50 rounded-xl p-2">
+                                <BrandingTextItem
+                                    title={"Copyright"}
+                                    data={current_chat.chat_copyright}
+                                />
+                            </div>
+                        ) : (
+                            <div className="w-1/3 border-[1px] border-[--site-card-icon-color] rounded-xl p-2">
+                                <BrandingTextItem
+                                    title={"Copyright"}
+                                    data={current_chat.chat_copyright}
+                                />
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div name="bubble">

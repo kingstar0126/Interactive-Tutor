@@ -46,7 +46,7 @@ class User(UserMixin, db.Model):
 
     @staticmethod
     def verify_email(email):
-        user = User.query.filter_by(email=email).first()
+        user = db.session.query(User).filter_by(email=email).first()
         return user
 
 
@@ -67,12 +67,6 @@ class Chat(UserMixin, db.Model):
     chat_title = db.Column(db.JSON)
     chat_description = db.Column(db.JSON)
     chat_copyright = db.Column(db.JSON)
-    chat_1_logo = db.Column(db.JSON)
-    chat_1_description = db.Column(db.JSON)
-    chat_2_logo = db.Column(db.JSON)
-    chat_2_description = db.Column(db.JSON)
-    chat_3_logo = db.Column(db.JSON)
-    chat_3_description = db.Column(db.JSON)
     chat_button = db.Column(db.JSON)
     bubble = db.Column(db.JSON)
     create_date = db.Column(db.Date, default=datetime.utcnow)

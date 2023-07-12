@@ -15,6 +15,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { changeuser } from "../redux/actions/userAction";
 import { useEffect } from "react";
+import { SERVER_URL } from "../config/constant";
 
 const Sidebar = () => {
     let location = useLocation();
@@ -36,7 +37,7 @@ const Sidebar = () => {
         <div className="flex flex-col items-center justify-center">
             <div className="container flex items-center justify-center w-1/3 p-1 mt-5">
                 <Link to="chat">
-                    <img src={Logo} className="w-[99px] h-full " alt="logo" />
+                    <img src={`${SERVER_URL}${Logo}`} className="w-[99px] h-full " alt="logo" />
                 </Link>
             </div>
             <div className="flex flex-col items-start justify-center py-5 mt-5">

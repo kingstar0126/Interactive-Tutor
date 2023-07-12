@@ -77,7 +77,7 @@ def login_post():
     email = request.json['email']
     password = request.json['password']
     user = db.session.query(User).filter_by(email=email).first()
-
+    print(request.json)
     if not user:
         return jsonify({
             'success': False,
@@ -90,8 +90,8 @@ def login_post():
             'code': 401,
             'message': 'Your password is incorrect.',
         })
-
-    if user.status != 0:
+    print(user.role, type(user.role))
+    if user.status != '0':
         return jsonify({
             'success': False,
             'code': 401,
