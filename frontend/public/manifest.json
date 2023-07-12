@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Interactive-Tutor",
+  "name": "Interactive Tutor | Create and customise your own AI Tutor",
   "icons": [
     {
       "src": "favicon.ico",

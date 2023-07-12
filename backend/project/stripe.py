@@ -195,17 +195,16 @@ def create_checkout_session():
     subscription_plan_id = request.json['subscriptionPlanId']
 
     user = db.session.query(User).filter_by(id=id).first()
-
+    print(subscription_plan_id)
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
         line_items=[{
             'price': subscription_plan_id,
-            'quantity': 1,
         }],
         payment_method_collection='always',
         mode='subscription',
-        success_url="http://3.11.9.37/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url='http://3.11.9.37/chatbot/subscription',
+        success_url="https://app.interactive-tutor.com/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url='https://app.interactive-tutor.com/chatbot/subscription',
         customer=user.customer_id
     )
     return jsonify({'sessionId': session['id'], 'key': os.getenv('STRIPE_PUBLISHABLE_KEY')})
@@ -214,6 +213,7 @@ def create_checkout_session():
 @payment.route('/api/stripe/webhooks', methods=['POST'])
 def stripe_webhook():
     payload = json.loads(request.get_data(as_text=True))
+    print(payload)
     if payload["type"] == "checkout.session.completed":
         # TODO: run some custom code here
         customer_id = payload["data"]["object"]["customer"]
@@ -264,12 +264,11 @@ def update_subscription():
         payment_method_types=['card'],
         line_items=[{
             'price': subscriptionPlanId,
-            'quantity': 1,
         }],
         payment_method_collection='always',
         mode='subscription',
-        success_url="http://3.11.9.37/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url='http://3.11.9.37/chatbot/subscription',
+        success_url="https://app.interactive-tutor.com/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url='https://app.interactive-tutor.com/chatbot/subscription',
         customer=user.customer_id
     )
     return jsonify({'sessionId': session['id'], 'key': os.getenv('STRIPE_PUBLISHABLE_KEY')})

@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import Logo from "../assets/logo.png";
+import { SERVER_URL } from "../config/constant";
 
 const Header = () => {
     let location = useLocation();
@@ -12,7 +13,7 @@ const Header = () => {
                     <div className="flex">
                         <a href="/">
                             <img
-                                src={Logo}
+                                src={`${SERVER_URL}${Logo}`}
                                 className="w-[99px] h-full "
                                 alt="logo"
                             />
@@ -46,7 +47,7 @@ const Header = () => {
                     <div className="flex">
                         <Link to="/">
                             <img
-                                src={Logo}
+                                src={`${SERVER_URL}${Logo}`}
                                 className="w-[99px] h-full "
                                 alt="logo"
                             />
@@ -80,7 +81,7 @@ const Header = () => {
                     <div className="flex">
                         <Link to="/">
                             <img
-                                src={Logo}
+                                src={`${SERVER_URL}${Logo}`}
                                 className="w-[99px] h-full "
                                 alt="logo"
                             />
@@ -109,12 +110,12 @@ const Header = () => {
                 </div>
             )}
             {location.pathname === "/chatbot/share/url" && (
-                <div className="flex items-center justify-center w-full px-16">
+            <div className="flex items-center justify-center w-full px-16">
                     {/* Logo */}
                     <div className="flex">
                         <Link to="/">
                             <img
-                                src={Logo}
+                                src={`${SERVER_URL}${Logo}`}
                                 className="w-[99px] h-full "
                                 alt="logo"
                             />
@@ -128,7 +129,6 @@ const Header = () => {
                             </span>
                         </span>
                     </div>
-                    {/* Navbar */}
                 </div>
             )}
         </div>
