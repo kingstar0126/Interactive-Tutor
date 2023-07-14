@@ -23,6 +23,8 @@ jobs:
           aws-region: "eu-west-2"
       - name: Create CodeDeploy Deployment
         id: deploy
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           aws deploy create-deployment \
             --application-name InteractiveTutor_Service \
