@@ -50,6 +50,7 @@ const AccessChatbot = () => {
                 console.log(res.data);
                 if (res.data.success === false) {
                     notification("error", res.data.message);
+                    setLoadindg(false);
                     setStatus(false);
                 } else {
                     getchat(dispatch, res.data.data);
@@ -60,15 +61,14 @@ const AccessChatbot = () => {
                                 console.log(res.data.data);
                                 localStorage.setItem("chatbot", res.data.data);
                                 setStatus(true);
-                                setLoadindg(false);
                                 navigate("newchat");
                             } else {
-                                setLoadindg(false);
                                 pinField.current.forEach(
                                     (input) => (input.value = "")
                                 );
                                 pinField.current[0].focus();
                             }
+                            setLoadindg(false);
                         })
                         .catch((err) => {
                             setLoadindg(false);
@@ -94,11 +94,11 @@ const AccessChatbot = () => {
     };
 
     return (
-        <div className="bg-[--site-main-color-home] font-logo h-screen flex flex-col">
+        <div className="bg-[--site-main-color-home] font-logo h-full sm:h-screen pb-10">
             <Header />
             <Toaster />
             {status == false && (
-                <div className="mt-[100px] p-5">
+                <div className="mt-[100px]">
                     <div className="w-full p-6 m-auto bg-[--site-main-color3] rounded-md h-full lg:max-w-xl">
                         <h1 className="text-3xl font-semibold text-center text-[--site-main-Login] underline">
                             AI Tutor
@@ -152,7 +152,7 @@ const AccessChatbot = () => {
                                             ref={pinField}
                                             validate="0123456789"
                                             onComplete={handleComplete}
-                                            className="mb-1 w-[30px] p-[15px] items-center justify-center h-[30px] focus:border-none focus:ring-opacity-40 text-[--site-card-icon-color] focus:outline-none focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5]"
+                                            className="mb-1 w-[40px] p-[15px] items-center justify-center h-[40px] focus:border-none focus:ring-opacity-40 text-[--site-card-icon-color] focus:outline-none focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5]"
                                         />
                                     </div>
                                     <div className="mb=2">

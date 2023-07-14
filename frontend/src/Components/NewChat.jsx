@@ -11,6 +11,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { getUserState } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
+import { useLocation } from "react-router-dom";
 
 const NewChat = () => {
     const navigate = useNavigate();
@@ -36,7 +37,7 @@ const NewChat = () => {
     const ai_background = useRef(null);
     const newchat = useRef(null);
     const messagesEndRef = useRef(null);
-
+    let location = useLocation();
     const [message, setMessage] = useState("");
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
     const chatbot = useSelector((state) => state.chat.chatbot);
@@ -48,8 +49,12 @@ const NewChat = () => {
             toast.error(message);
         }
     };
-
+    
+    
     useEffect(() => {
+        const pattern = /\/chat\/embedding\/(\w+)/;
+        const result = pattern.exec(location.pathname);
+
         if (previous_location !== current_location && chat) {
             console.log("The new chatbot created!!!", chat);
             let new_chat = chat;
@@ -115,8 +120,9 @@ const NewChat = () => {
                         chat.chat_logo.ai_size + "px";
                 }
             }
-        } else if (!chat) {
-            console.log(chatId);
+        } else if (!chat || result) {
+            console.log(chatId );
+            console.log("This is embedding")
             axios
                 .post(webAPI.getchat, chatId)
                 .then(async (res) => {
@@ -267,7 +273,8 @@ const NewChat = () => {
         if (event.keyCode === 13) {
             let id = chatbot;
             let _message = message;
-
+            if (_message === "")
+                {return; }
             setChathistory([
                 ...chathistory,
                 { role: "human", content: _message },
@@ -278,6 +285,20 @@ const NewChat = () => {
             setMessage("");
         }
     };
+
+    const handleSubmitmessage = () => {
+        let id = chatbot;
+        let _message = message;
+        if (_message === "")
+                {return; }
+        setChathistory([
+            ...chathistory,
+            { role: "human", content: _message },
+        ]);
+        sendMessage(id, _message);
+
+        setMessage("");
+    }
 
     const sendMessage = (id, _message) => {
         let { behaviormodel, train, model } = chat;
@@ -462,16 +483,16 @@ const NewChat = () => {
                                 {chat.chat_button.button3_text}
                             </a>
                         </div>
-                        <div className="flex w-2/3 divide-x-2">
+                        <div className="flex sm:w-2/3 divide-x-2">
                             <input
                                 type="text"
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
                                 onKeyDown={handleSubmit}
-                                className="rounded-none w-11/12 rounded-l-lg bg-[--site-main-color3] text-[--site-card-icon-color] block text-sm p-2.5 focus:border-[--site-logo-text-color] "
+                                className="rounded-none w-full rounded-l-lg bg-[--site-main-color3] text-[--site-card-icon-color] block text-sm p-2.5 focus:border-[--site-logo-text-color] "
                                 placeholder="Type message"
                             />
-                            <span className="inline-flex w-1/12 items-center px-3 text-sm text-[--site-card-icon-color] bg-[--site-main-color3] border border-l-0 rounded-r-md">
+                            <span className="inline-flex sm:w-[60px] items-center px-3 text-sm text-[--site-card-icon-color] bg-[--site-main-color3] border border-l-0 rounded-r-md hover:cursor-pointer" onClick={() => {handleSubmitmessage()}}>
                                 <img
                                     src={chatsend}
                                     alt="send"

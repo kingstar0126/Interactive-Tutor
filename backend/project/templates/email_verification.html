@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+    <head>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+        padding: 20px;
+    }
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+        border-radius: 5px;
+        padding: 20px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        color: #333333;
+        font-size: 24px;
+        font-weight: bold;
+        margin-top: 0;
+    }
+
+    p {
+        color: #555555;
+        font-size: 16px;
+        line-height: 1.5;
+        margin-bottom: 20px;
+    }
+
+    span {
+        color: #FFFFFF;
+    }
+
+    .btn-verify {
+        display: inline-block;
+        background-color: #153144;
+        color: #FFFFFF !important;
+        font-size: 16px;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+
+    .btn-verify:hover {
+        background-color: #45a049;
+        transition: background-color 0.3s;
+    }
+
+    .footer {
+        margin-top: 20px;
+        text-align: start;
+        color: #777777;
+        font-size: 14px;
+    }
+
+    .footer p {
+        margin-bottom: 5px;
+    }
+
+    .footer a {
+        color: #777777;
+        text-decoration: none;
+    }
+
+    .footer a:hover {
+        text-decoration: underline;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>Email Verification for Interactive Tutor</h2>
+    <p>Dear {{ username }}!</p>
+    <p>
+        Welcome to Interactive Tutor! <br />
+        To ensure your email address is valid and to complete the account setup process, please verify your email by clicking the link below:
+    </p>
+    <a class="btn-verify" href="{{ url }}" target="_blank"><span>Verify Email</span></a>
+    <p>
+        Once verified, you'll have full access to our platform's features and start creating your own 'Interactive Tutors'. We hope you enjoy exploring all the tools and capabilities available to enhance your learning or teaching experience.
+    </p>
+    <p> 
+        If you have any questions, please don't hesitate to reach out to our support team at {{support_email}}
+    </p>
+    <p>
+        Thank you for choosing Interactive Tutor. Happy tutoring!
+    </p>
+    <div class="footer">
+        <p>Best regards,</p>
+        <p>The Interactive Tutor Team</p>
+    </div>
+</div>
+</body>
+</html>

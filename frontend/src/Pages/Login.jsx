@@ -34,11 +34,11 @@ const Login = () => {
         getUser(dispatch, data);
     };
     return (
-        <div className="bg-[--site-main-color-home] h-screen font-logo">
+        <div className="bg-[--site-main-color-home] font-logo h-full md:h-screen pb-10 px-2 flex flex-col">
             <Header />
             <Toaster />
             <div className="mt-[100px]">
-                <div className="w-full p-6 m-auto bg-[--site-main-color3] rounded-md ring-2 ring-[--site-main-Login1] lg:max-w-xl">
+                <div className="w-full p-6 m-auto bg-[--site-main-color3] rounded-md h-full lg:max-w-xl">
                     <h1 className="text-3xl font-semibold text-center text-[--site-main-Login1] underline uppercase">
                         Login
                     </h1>

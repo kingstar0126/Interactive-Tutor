@@ -23,6 +23,7 @@ from dotenv import load_dotenv
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
+import csv
 
 load_dotenv()
 
@@ -93,9 +94,10 @@ def parse_pdf(file: BytesIO) -> List[str]:
 
 
 def parse_csv(file):
-    df = pd.read_csv(file)
+    data = file.read()
+    string_data = str(data)
     text = []
-    text.append(df.to_string(index=False))
+    text.append(string_data)
     return text
 
 
@@ -148,7 +150,7 @@ def text_to_docs(text: str, filename: str, chat: str) -> List[Document]:
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=400,
             separators=["\n\n", "\n", ".", "!", "?", ",", " ", ""],
-            chunk_overlap=0,
+            chunk_overlap=50,
         )
         if doc.page_content == "":
             continue
@@ -309,20 +311,15 @@ def create_train_text():
 
 @train.route('/api/data/sendfile', methods=['POST'])
 def create_train_file():
-
     try:
         file = request.files.get('file', None)
         chatbot = request.form.get('chatbot', None)
+
         if not file or not chatbot:
             return {"success": False, "message": "Invalid file or chatbot data"}, 400
 
         filename = secure_filename(file.filename)
-        with open(filename, 'wb') as f:
-            while True:
-                chunk = file.stream.read(1024)
-                if not chunk:
-                    break
-                f.write(chunk)
+        file.save(filename)
 
         with open(filename, 'rb') as f:
             if (filename.split('.')[-1] == 'pdf'):
@@ -336,6 +333,7 @@ def create_train_file():
             elif (filename.split('.')[-1] == 'epub'):
                 output = parse_epub(filename)
             os.remove(filename)
+
             ct = 0
             for text in output:
                 ct += count_tokens(text)
@@ -343,7 +341,6 @@ def create_train_file():
                 if compare_token_words(ct, chatbot):
                     result = text_to_docs(output, filename, chatbot)
                     trainid = create_train(filename, 'file', True, chatbot)
-
                     if (trainid == False):
                         return jsonify({
                             'success': False,
@@ -383,15 +380,14 @@ def handle_request_entity_too_large(error):
 @train.route('/api/data/gettraindatas', methods=['POST'])
 def get_traindatas():
     uuid = request.json['uuid']
-
     chat = db.session.query(Chat).filter_by(uuid=uuid).first()
     train_ids = json.loads(chat.train)
+
     data = []
     for id in train_ids:
         train_data = db.session.query(Train).filter_by(id=id).first()
-        if train_data is not None:
-            data.append({'id': train_data.id, 'label': train_data.label,
-                         'type': train_data.type, 'status': train_data.status})
+        data.append({'id': train_data.id, 'label': train_data.label,
+                    'type': train_data.type, 'status': train_data.status})
     return jsonify(data)
 
 

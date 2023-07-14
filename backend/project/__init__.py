@@ -4,11 +4,13 @@ from flask_jwt_extended import JWTManager
 from flask_mail import Mail
 from flask_cors import CORS
 import os
+from dotenv import load_dotenv
 
 from rich import print, pretty
 pretty.install()
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+load_dotenv()
 
 jwt = JWTManager()
 mail = Mail()
@@ -22,11 +24,11 @@ def create_app():
     app.config['SECRET_KEY'] = 'key-goes-here'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/postgres'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    app.config['MAIL_SERVER'] = 'smtp.office365.com'
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'
     app.config['MAIL_PORT'] = 587
     app.config['MAIL_USE_TLS'] = True
-    app.config['MAIL_USERNAME'] = 'popstar0982@outlook.com'
-    app.config['MAIL_PASSWORD'] = 'QWE@#$asd234'
+    app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+    app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
     app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024
 
     db.init_app(app)

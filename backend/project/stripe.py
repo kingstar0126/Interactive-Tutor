@@ -195,7 +195,6 @@ def create_checkout_session():
     subscription_plan_id = request.json['subscriptionPlanId']
 
     user = db.session.query(User).filter_by(id=id).first()
-    print(subscription_plan_id)
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
         line_items=[{
@@ -213,7 +212,6 @@ def create_checkout_session():
 @payment.route('/api/stripe/webhooks', methods=['POST'])
 def stripe_webhook():
     payload = json.loads(request.get_data(as_text=True))
-    print(payload)
     if payload["type"] == "checkout.session.completed":
         # TODO: run some custom code here
         customer_id = payload["data"]["object"]["customer"]

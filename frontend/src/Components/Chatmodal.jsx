@@ -4,6 +4,7 @@ import {
     AccordionHeader,
     AccordionBody,
 } from "@material-tailwind/react";
+import { PinField } from "react-pin-field";
 import Select from "react-select";
 import { useSelector } from "react-redux";
 
@@ -18,6 +19,7 @@ const Chatmodal = (props) => {
     const [Conversation, SetConversation] = useState(
         "Hello friends! How can I help you today?"
     );
+    const [validate, SetValidate] = useState(false);
     const models = [
         {
             value: "1",
@@ -34,27 +36,10 @@ const Chatmodal = (props) => {
     ];
     const [gptmodel, SetGPTmodel] = useState(models);
     const [Creativity, SetCreativity] = useState(0.3);
-    const [behaviormodel, SetBehaviormodel] = useState({
-        value: "1",
-        label: `Utilize contextual information from the training
-  data, and if necessary, respond with 'I don't know'
-  when appropriate.`,
-    });
+    const [behaviormodel, SetBehaviormodel] =
+        useState(`If there is relevant training data available, please utilize it to generate responses using the provided information. However, if no training data exists for the specific query, you may respond with "I don't know."`);
     const [behavior, SetBehavior] = useState("You are a helpful assistant");
-    const options = [
-        {
-            value: "1",
-            label: "Utilize contextual information from the training data, and if necessary, respond with 'I don't know' when appropriate.",
-        },
-        {
-            value: "2",
-            label: "Utilize contextual information from the training data and refrain from using the phrase 'I don't know'",
-        },
-        {
-            value: "3",
-            label: `Behave like the default ChatGPT`,
-        },
-    ];
+
     useEffect(() => {
         if (user.role === 2 || user.role === 5) {
             SetGPTmodel([models[0]]);
@@ -69,13 +54,9 @@ const Chatmodal = (props) => {
             SetChatdescription("");
             setOpen(0);
             SetConversation("Hello friends! How can I help you today?");
+            SetValidate(false);
             SetCreativity(0.3);
-            SetBehaviormodel({
-                value: "1",
-                label: `Utilize contextual information from the training
-          data, and if necessary, respond with 'I don't know'
-          when appropriate.`,
-            });
+            SetBehaviormodel(`If there is relevant training data available, please utilize it to generate responses using the provided information. However, if no training data exists for the specific query, you may respond with "I don't know."`);
             SetBehavior("You are a helpful assistant");
         }
         if (props.chat && props.chat.label) {
@@ -83,12 +64,10 @@ const Chatmodal = (props) => {
             SetChatdescription(props.chat["description"]);
             setOpen(0);
             SetConversation(props.chat["conversation"]);
+            SetValidate(false);
+            SetChatmodel(props.chat["model"]);
             SetCreativity(props.chat["creativity"]);
-            SetBehaviormodel(
-                options.find(
-                    (item) => item.label === props.chat["behaviormodel"]
-                )
-            );
+            SetBehaviormodel(props.chat["behaviormodel"]);
             SetBehavior(props.chat["behavior"]);
         }
     }, [props.open, props.chat]);
@@ -101,7 +80,7 @@ const Chatmodal = (props) => {
                 chatmodel,
                 Conversation,
                 Creativity,
-                behaviormodel: behaviormodel.label,
+                behaviormodel,
                 behavior,
             });
         }
@@ -112,7 +91,7 @@ const Chatmodal = (props) => {
             new_chat["model"] = chatmodel;
             new_chat["conversation"] = Conversation;
             new_chat["creativity"] = Creativity;
-            new_chat["behaviormodel"] = behaviormodel.label;
+            new_chat["behaviormodel"] = behaviormodel;
             new_chat["behavior"] = behavior;
             props.handleOk(new_chat);
         }
@@ -185,7 +164,6 @@ const Chatmodal = (props) => {
                                 type="text"
                                 name="chatdescription"
                                 value={chatdescription}
-                                maxLength={255}
                                 onChange={(e) => {
                                     SetChatdescription(e.target.value);
                                 }}
@@ -223,6 +201,7 @@ const Chatmodal = (props) => {
                                             </label>
                                             <select
                                                 name="chatdescription"
+                                                value={chatmodel}
                                                 onChange={(e) => {
                                                     SetChatmodel(
                                                         e.target.value
@@ -277,7 +256,6 @@ const Chatmodal = (props) => {
                                                 name="chatdescription"
                                                 rows="3"
                                                 cols="50"
-                                                maxLength={255}
                                                 value={Conversation}
                                                 onChange={(e) => {
                                                     SetConversation(
@@ -322,10 +300,27 @@ const Chatmodal = (props) => {
                                             <Select
                                                 className="w-full mb-1 text-[--site-card-icon-color]"
                                                 onChange={(e) => {
-                                                    SetBehaviormodel(e);
+                                                    console.log(e);
+                                                    SetBehaviormodel(e.label);
                                                 }}
-                                                defaultValue={behaviormodel}
-                                                options={options}
+                                                defaultValue={{
+                                                    value: "1",
+                                                    label: `Given contextual information from training data, generate responses using training information as much as possible. If no training data is available, respond with "I don't know".`,
+                                                }}
+                                                options={[
+                                                    {
+                                                        value: "1",
+                                                        label: `If there is relevant training data available, please utilize it to generate responses using the provided information. However, if no training data exists for the specific query, you may respond with "I don't know."`,
+                                                    },
+                                                    {
+                                                        value: "2",
+                                                        label: `Utilize contextual knowledge to provide an informed response. Leverage patterns learned from data to carry out the task at hand.`,
+                                                    },
+                                                    {
+                                                        value: "3",
+                                                        label: `Behave like the default ChatGPT`,
+                                                    },
+                                                ]}
                                             />
                                             <p className="text-sm text-[--site-main-color5] text-start">
                                                 The context behavior determines
@@ -349,7 +344,6 @@ const Chatmodal = (props) => {
                                                 onChange={(e) => {
                                                     SetBehavior(e.target.value);
                                                 }}
-                                                maxLength={250}
                                                 placeholder="You are a helpful assistant"
                                                 className="mb-1 w-full focus:border-none focus:ring-opacity-40 focus:outline-none p-1 focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5] text-[--site-card-icon-color]"
                                             ></textarea>

@@ -30,7 +30,7 @@ const Forgetpassword = () => {
     };
 
     return (
-        <div className="bg-[--site-main-color-home] h-screen font-logo">
+        <div className="bg-[--site-main-color-home] font-logo h-full pb-10">
             <Header />
             <Toaster />
             <div className="mt-[100px]">

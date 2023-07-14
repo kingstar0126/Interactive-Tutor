@@ -1,1 +1,1 @@
-This is private codebase for interactive-tutor
+This is business chatbot project.

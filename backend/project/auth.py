@@ -12,6 +12,8 @@ import stripe
 import os
 from dotenv import load_dotenv
 from datetime import date
+from flask_jwt_extended import create_access_token, decode_token
+from datetime import timedelta
 
 load_dotenv()
 
@@ -74,10 +76,11 @@ def login_post():
             'Access-Control-Allow-Headers': 'content-type',  # Required for cors access
         }
         return '', 200, headers
+
     email = request.json['email']
     password = request.json['password']
     user = db.session.query(User).filter_by(email=email).first()
-    print(request.json)
+
     if not user:
         return jsonify({
             'success': False,
@@ -90,7 +93,6 @@ def login_post():
             'code': 401,
             'message': 'Your password is incorrect.',
         })
-    print(user.role, type(user.role))
     if user.status != '0':
         return jsonify({
             'success': False,
@@ -185,7 +187,7 @@ def get_user_account():
 def send_email(user):
     token = User.get_reset_token(user)
 
-    msg = Message('Interactive', sender='popstar0982@outlook.com',
+    msg = Message('Welcome to Interactive Tutor', sender=os.getenv('MAIL_USERNAME'),
                   recipients=[user.email])
     password = generate_password()
     msg.html = render_template(
@@ -193,6 +195,27 @@ def send_email(user):
 
     mail.send(msg)
     return password
+
+
+def register_new_user(username, email, password):
+    role = 5
+    status = 0
+    query = 500
+    customer = stripe.Customer.create(name=username, email=email)
+    new_user = User(username=username, query=query, status=status, email=email, role=role, customer_id=customer.id,
+                    password=generate_password_hash(password, method='sha256'))
+    db.session.add(new_user)
+    db.session.commit()
+    new_organization = Organization(email=email)
+    db.session.add(new_organization)
+    db.session.commit()
+    msg = Message('Welcome to Interactive Tutor', sender=os.getenv('MAIL_USERNAME'),
+                  recipients=[email])
+    msg.html = render_template(
+        'welcome.html', username=username)
+    mail.send(msg)
+
+    return True
 
 
 @auth.route('/api/reset', methods=['POST'])
@@ -239,24 +262,37 @@ def signup_post():
     username = request.json['username']
     email = request.json['email']
     password = request.json['password']
-    role = 5
-    status = 0
-    query = 500
     user = db.session.query(User).filter_by(email=email).first()
 
     if user:
         return jsonify({'message': 'Email address already exists', 'success': False})
 
-    customer = stripe.Customer.create(name=username, email=email)
-    new_user = User(username=username, query=query, status=status, email=email, role=role, customer_id=customer.id,
-                    password=generate_password_hash(password, method='sha256'))
-    db.session.add(new_user)
-    db.session.commit()
-    new_organization = Organization(email=email)
-    db.session.add(new_organization)
-    db.session.commit()
+    verification_token = create_access_token(identity={'username': username, 'email': email, 'password': password},
+                                             expires_delta=timedelta(hours=1))
+    verification_link = f"https://app.interactive-tutor.com/verify-email/token={verification_token}"
 
-    return jsonify({'success': True, 'message': 'Register successful'})
+    msg = Message('Welcome to Interactive Tutor', sender=os.getenv('MAIL_USERNAME'),
+                  recipients=[email])
+    msg.html = render_template(
+        'email_verification.html', username=user.username, url=verification_link, support_email=os.getenv('MAIL_USERNAME'))
+    mail.send(msg)
+
+    return jsonify({'success': True, 'message': 'A message has been sent to your email. Check your message.'})
+
+
+@auth.route('/api/email_verification', methods=['POST'])
+def email_verification():
+    token = request.json['token']
+    if not token:
+        return jsonify({'message': 'Token is missing', 'success': False})
+    try:
+        token = decode_token(token)
+        if register_new_user(token['sub']['username'], token['sub']['email'], token['sub']['password']):
+            return jsonify({'message': 'You have successfully registered!', 'success': True})
+        else:
+            return jsonify({'message': 'Something is wrong!', 'success': False})
+    except Exception as e:
+        return jsonify({'message': 'Your token had expired!', 'success': False})
 
 
 @auth.route('/api/adduseraccount', methods=['POST'])
@@ -264,7 +300,6 @@ def add_user_account():
     username = request.json['username']
     email = request.json['email']
     password = request.json['password']
-    subscriotion = request.json['subscription']
     role = 5
     status = 0
     query = 500
