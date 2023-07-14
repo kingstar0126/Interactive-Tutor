@@ -57,7 +57,7 @@ def generate_message(query, history, behavior, temp, model, chat, trains=[]):
                          temperature=temp,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "3":
-        llm = ChatOpenAI(model_name="gpt-3.5-turbo",
+        llm = ChatOpenAI(model_name="gpt-4-32k",
                          temperature=temp,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
 
@@ -119,7 +119,7 @@ def generate_AI_message(query, history, behavior, temp, model):
     langchain.llm_cache = GPTCache(init_gptcache)
 
     if model == "1":
-        llm = ChatOpenAI(model_name="gpt-3.5-turbo-4k",
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo",
                          temperature=temp,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "2":
@@ -127,10 +127,9 @@ def generate_AI_message(query, history, behavior, temp, model):
                          temperature=temp,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "3":
-        llm = ChatOpenAI(model_name="gpt-3.5-turbo",
+        llm = ChatOpenAI(model_name="gpt-4-32k",
                          temperature=temp,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
-
     conversation = LLMChain(
         llm=llm,
         verbose=True,

@@ -1,4 +1,6 @@
-{% block content %}
+<!DOCTYPE html>
+<html>
+    <head>
 <style>
     body {
         background-image: url("beautiful-background.jpg");
@@ -42,7 +44,8 @@
         font-style: italic;
     }
 </style>
-
+</head>
+<body>
 <div class="container">
     <h2>Hello, {{ username }}!</h2>
     <p class="password-change">Your password has been successfully changed to:</p>
@@ -51,4 +54,5 @@
         <strong>Please take note:</strong> If you do not take any action within the next 5 minutes, you will need to <i>submit a new password change request</i>.
     </p>
 </div>
-{% endblock %}
+</body>
+</html>

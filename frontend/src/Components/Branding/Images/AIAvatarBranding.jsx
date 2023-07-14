@@ -7,7 +7,7 @@ import { useState, useEffect } from "react";
 
 const UserAvatarBranding = (props) => {
     const [selectedLogo, setSelectedLogo] = useState(null);
-
+    const [flag, setFlag] = useState(false);
     const notification = (type, message) => {
         // To do in here
         if (type === "error") {
@@ -19,8 +19,8 @@ const UserAvatarBranding = (props) => {
     };
 
     useEffect(() => {
-        if (props.data.url) {
-            setSelectedLogo(props.data.url);
+        if (props.data.ai) {
+            setSelectedLogo(props.data.ai);
         }
     }, [props.data]);
 
@@ -29,11 +29,12 @@ const UserAvatarBranding = (props) => {
             notification("error", "Maximum image size allowed is 1MB.");
             return;
         }
+        setFlag(true);
         setSelectedLogo(files[0]);
     };
 
     const handleUpload = () => {
-        if (selectedLogo) {
+        if (selectedLogo && flag) {
             console.log(selectedLogo);
             const formData = new FormData();
 
@@ -45,10 +46,11 @@ const UserAvatarBranding = (props) => {
                 .then((res) => {
                     notification("success", "Uploaded successfully!");
                     let url = SERVER_URL + res.data.data;
-                    setSelectedLogo(props.data.url);
+                    setSelectedLogo(url);
                     handleLogo(url);
                 })
                 .catch((err) => console.error(err));
+                setFlag(false);
         }
     };
 
@@ -93,7 +95,7 @@ const UserAvatarBranding = (props) => {
                             </Dropzone>
                         </div>
                         <button
-                            onClick={handleUpload}
+                            onClick={(e) => { handleUpload();}}
                             className="p-2 rounded-xl bg-[--site-logo-text-color] my-2 border-[1px] border-[--site-card-icon-color] font-bold"
                         >
                             Upload

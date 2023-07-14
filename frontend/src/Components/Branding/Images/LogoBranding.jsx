@@ -10,6 +10,7 @@ const LogoBranding = (props) => {
     const [text, setText] = useState("Disable");
     const [status, setStatus] = useState(props.data.status);
     const [selectedLogo, setSelectedLogo] = useState(null);
+    const [flag, setFlag] = useState(false);
     const notification = (type, message) => {
         // To do in here
         if (type === "error") {
@@ -30,11 +31,12 @@ const LogoBranding = (props) => {
             notification("error", "Maximum image size allowed is 1MB.");
             return;
         }
+        setFlag(true); 
         setSelectedLogo(files[0]);
     };
 
     const handleUpload = () => {
-        if (selectedLogo) {
+        if (selectedLogo && flag) {
             console.log(selectedLogo);
             const formData = new FormData();
 
@@ -47,9 +49,10 @@ const LogoBranding = (props) => {
                     notification("success", "Uploaded successfully!");
                     let url = SERVER_URL + res.data.data;
                     handleLogo(url);
-                    setSelectedLogo(props.data.url);
+                    setSelectedLogo(url);
                 })
                 .catch((err) => console.error(err));
+                setFlag(false);
         }
     };
 
@@ -113,7 +116,7 @@ const LogoBranding = (props) => {
                                 </Dropzone>
                             </div>
                             <button
-                                onClick={handleUpload}
+                                onClick={(e) => { handleUpload();}}
                                 className="p-2 rounded-xl bg-[--site-logo-text-color] my-2 border-[1px] border-[--site-card-icon-color] font-bold"
                             >
                                 Upload

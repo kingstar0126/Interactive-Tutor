@@ -37,9 +37,7 @@ const Chatmodal = (props) => {
     const [gptmodel, SetGPTmodel] = useState(models);
     const [Creativity, SetCreativity] = useState(0.3);
     const [behaviormodel, SetBehaviormodel] =
-        useState(`Utilize contextual information from the training
-  data, and if necessary, respond with 'I don't know'
-  when appropriate.`);
+        useState(`If there is relevant training data available, please utilize it to generate responses using the provided information. However, if no training data exists for the specific query, you may respond with "I don't know."`);
     const [behavior, SetBehavior] = useState("You are a helpful assistant");
 
     useEffect(() => {
@@ -58,9 +56,7 @@ const Chatmodal = (props) => {
             SetConversation("Hello friends! How can I help you today?");
             SetValidate(false);
             SetCreativity(0.3);
-            SetBehaviormodel(`Utilize contextual information from the training
-    data, and if necessary, respond with 'I don't know'
-    when appropriate.`);
+            SetBehaviormodel(`If there is relevant training data available, please utilize it to generate responses using the provided information. However, if no training data exists for the specific query, you may respond with "I don't know."`);
             SetBehavior("You are a helpful assistant");
         }
         if (props.chat && props.chat.label) {
@@ -69,6 +65,7 @@ const Chatmodal = (props) => {
             setOpen(0);
             SetConversation(props.chat["conversation"]);
             SetValidate(false);
+            SetChatmodel(props.chat["model"]);
             SetCreativity(props.chat["creativity"]);
             SetBehaviormodel(props.chat["behaviormodel"]);
             SetBehavior(props.chat["behavior"]);
@@ -204,6 +201,7 @@ const Chatmodal = (props) => {
                                             </label>
                                             <select
                                                 name="chatdescription"
+                                                value={chatmodel}
                                                 onChange={(e) => {
                                                     SetChatmodel(
                                                         e.target.value
@@ -307,16 +305,16 @@ const Chatmodal = (props) => {
                                                 }}
                                                 defaultValue={{
                                                     value: "1",
-                                                    label: "Utilize contextual information from the Training data, and if there isn't suitable data say 'I don't know'",
+                                                    label: `Given contextual information from training data, generate responses using training information as much as possible. If no training data is available, respond with "I don't know".`,
                                                 }}
                                                 options={[
                                                     {
                                                         value: "1",
-                                                        label: "Utilize contextual information from the training data, and if necessary, respond with 'I don't know' when appropriate.",
+                                                        label: `If there is relevant training data available, please utilize it to generate responses using the provided information. However, if no training data exists for the specific query, you may respond with "I don't know."`,
                                                     },
                                                     {
                                                         value: "2",
-                                                        label: "Utilize contextual information from the training data and refrain from using the phrase 'I don't know'",
+                                                        label: `Utilize contextual knowledge to provide an informed response. Leverage patterns learned from data to carry out the task at hand.`,
                                                     },
                                                     {
                                                         value: "3",

@@ -4,6 +4,7 @@ export const stringConstant = {
 };
 
 export const webAPI = {
+    email_verification: SERVER_URL + "/api/email_verification",
     getuseraccount: SERVER_URL + "/api/getuseraccount",
     register: SERVER_URL + "/api/signup",
     adduseraccount: SERVER_URL + "/api/adduseraccount",

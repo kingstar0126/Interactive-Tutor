@@ -30,12 +30,12 @@ const Register = () => {
         }
     };
     return (
-        <React.Fragment>
+        <div className="bg-[--site-main-color-home] font-logo h-full pb-10">
             <Header />
             <Toaster />
-            <div className="relative flex flex-col justify-center min-h-screen overflow-hidden">
-                <div className="w-full p-6 m-auto bg-[--site-main-color3] rounded-md shadow-xl shadow-rose-600/40 ring-2 ring-[--site-main-Login1] lg:max-w-xl">
-                    <h1 className="text-3xl font-semibold text-center text-[--site-main-Login] underline uppercase">
+            <div className="mt-[100px]">
+                <div className="w-full p-6 m-auto bg-[--site-main-color3] rounded-md ring-2 ring-[--site-main-Login1] lg:max-w-xl">
+                    <h1 className="text-3xl font-semibold text-center text-[--site-main-Login1] underline uppercase">
                         Change Password
                     </h1>
                     <form className="mt-6" onSubmit={handleSubmit(onSubmit)}>
@@ -161,7 +161,7 @@ const Register = () => {
                     </p>
                 </div>
             </div>
-        </React.Fragment>
+        </div>
     );
 };
 

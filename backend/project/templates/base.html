@@ -1,0 +1,22 @@
+<!-- base.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block head %}
+    <title>My Flask App</title>
+    <!-- Include any additional CSS or JS files here -->
+    {% endblock %}
+</head>
+<body>
+    {% block content %}
+    <!-- Content from child templates will be placed here -->
+    {% endblock %}
+
+    {% block scripts %}
+    <!-- Include any additional JS files here -->
+    {% endblock %}
+</body>
+</html>

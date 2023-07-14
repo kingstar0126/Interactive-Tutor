@@ -13,6 +13,8 @@ import Manager from "./Components/Manager";
 import ManageAccount from "./Components/ManageAccount";
 import Report from "./Components/Report";
 import AccessChatbot from "./Pages/AccessChatbot";
+import VerifyEmail from "./Pages/VerifyEmail";
+import EmbeddingChat from "./Components/EmbeddingChat";
 
 const AppRoutes = [
     {
@@ -82,7 +84,11 @@ const AppRoutes = [
             },
             {
                 path: "/chat/embedding/:id",
-                element: <NewChat />,
+                element: <EmbeddingChat />,
+            },
+            {
+                path: "/verify-email/:token",
+                element: <VerifyEmail />,
             },
         ],
     },

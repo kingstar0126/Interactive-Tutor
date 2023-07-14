@@ -50,42 +50,44 @@ def send_message():
         source = db.session.query(Train).filter_by(id=source_id).first()
         trains.append(source.label)
     current_message = db.session.query(Message).filter_by(uuid=uuid).first()
-    chat = db.session.query(Chat).filter_by(id=current_message.chat_id).first()
+    if current_message is not None:
+        chat = db.session.query(Chat).filter_by(
+            id=current_message.chat_id).first()
 
-    user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
-        Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
-    if user.query != 0:
-        user.query -= 1
-    else:
-        return jsonify({
-            'success': False,
-            'code': 401,
-            'message': 'Insufficient queries remaining!',
-        })
+        user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
+            Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
+        if user.query != 0:
+            user.query -= 1
+        else:
+            return jsonify({
+                'success': False,
+                'code': 401,
+                'message': 'Insufficient queries remaining!',
+            })
 
-    temp = current_message.creativity
-    history = json.loads(current_message.message)
-    behavior = ""
-    if behaviormodel == "Behave like the default ChatGPT":
-        behavior = current_message.behavior
-        response, chat_history, token = generate_AI_message(
-            query, history, behavior, temp, model)
-    else:
-        behavior = current_message.behavior + "\n" + behaviormodel
-        response, chat_history, token = generate_message(
-            query, history, behavior, temp, model, chat.uuid, trains)
-    current_message.message = json.dumps(chat_history)
-    current_message.update_date = datetime.datetime.now()
+        temp = current_message.creativity
+        history = json.loads(current_message.message)
+        behavior = ""
+        if behaviormodel == "Behave like the default ChatGPT":
+            behavior = current_message.behavior
+            response, chat_history, token = generate_AI_message(
+                query, history, behavior, temp, model)
+        else:
+            behavior = current_message.behavior + "\n" + behaviormodel
+            response, chat_history, token = generate_message(
+                query, history, behavior, temp, model, chat.uuid, trains)
+        current_message.message = json.dumps(chat_history)
+        current_message.update_date = datetime.datetime.now()
 
-    db.session.commit()
-    _response = {
-        'success': True,
-        'code': 200,
-        'query': user.query,
-        'message': 'Your messageBot created successfully!!!',
-        'data': response
-    }
-    return jsonify(_response)
+        db.session.commit()
+        _response = {
+            'success': True,
+            'code': 200,
+            'query': user.query,
+            'message': 'Your messageBot created successfully!!!',
+            'data': response
+        }
+        return jsonify(_response)
 
 
 @message.route('/api/sendchatbubble', methods=['POST'])

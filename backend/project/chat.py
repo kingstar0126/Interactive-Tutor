@@ -65,7 +65,8 @@ def add_chat():
     chat_logo = json.dumps({})
     chat_title = json.dumps({})
     chat_description = json.dumps({})
-    chat_copyright = json.dumps({})
+    chat_copyright = json.dumps(
+        {'description': 'powered by interactive-tutor.com'})
     chat_button = json.dumps({})
     bubble = json.dumps({})
 
@@ -283,7 +284,7 @@ def get_chat_with_pin_organization():
     chat = db.session.query(Chat).join(User, User.id == Chat.user_id).join(
         Organization, Organization.email == User.email).filter(Organization.uuid == organization).first()
     if pin != str(chat.access):
-        return jsonify({'success': False, 'code': 404, 'message': 'Your PIN is incorrect'})
+        return jsonify({'success': False, 'code': 404, 'message': 'Your PIN or Organization ID is incorrect'})
 
     chat_data = {
         'id': chat.id,

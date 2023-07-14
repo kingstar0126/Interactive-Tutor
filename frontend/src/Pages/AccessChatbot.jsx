@@ -50,6 +50,7 @@ const AccessChatbot = () => {
                 console.log(res.data);
                 if (res.data.success === false) {
                     notification("error", res.data.message);
+                    setLoadindg(false);
                     setStatus(false);
                 } else {
                     getchat(dispatch, res.data.data);
@@ -60,15 +61,14 @@ const AccessChatbot = () => {
                                 console.log(res.data.data);
                                 localStorage.setItem("chatbot", res.data.data);
                                 setStatus(true);
-                                setLoadindg(false);
                                 navigate("newchat");
                             } else {
-                                setLoadindg(false);
                                 pinField.current.forEach(
                                     (input) => (input.value = "")
                                 );
                                 pinField.current[0].focus();
                             }
+                            setLoadindg(false);
                         })
                         .catch((err) => {
                             setLoadindg(false);
@@ -94,7 +94,7 @@ const AccessChatbot = () => {
     };
 
     return (
-        <div className="bg-[--site-main-color-home] font-logo h-screen flex flex-col">
+        <div className="bg-[--site-main-color-home] font-logo h-full sm:h-screen pb-10">
             <Header />
             <Toaster />
             {status == false && (

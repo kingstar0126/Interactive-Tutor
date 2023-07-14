@@ -5,7 +5,8 @@ import Chatmodal from "./Chatmodal";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { getchat } from "../redux/actions/chatAction";
-
+import { confirmAlert } from "react-confirm-alert";
+import "react-confirm-alert/src/react-confirm-alert.css";
 import { useNavigate } from "react-router-dom";
 
 const ChatTable = (props) => {
@@ -45,27 +46,71 @@ const ChatTable = (props) => {
         }
     };
     const handleDelete = (id) => {
-        axios
-            .delete(`${webAPI.deletechat}/${id}`)
-            .then((res) => {
-                notification("success", res.data.message);
-                props.handledelete();
-            })
-            .catch((err) => {
-                console.error("Failed to delete chat:", err);
-                // Handle errors here
-            });
+        confirmAlert({
+            customUI: ({ onClose }) => {
+                return (
+                    <div className="flex flex-col px-12 py-5 text-white bg-[--site-main-color3] border-2 border-[--site-error-text-color]">
+                        <div className="flex items-center justify-center w-full">
+                            <span className="text-2xl font-bold text-[--site-error-text-color]">
+                                Are you sure?
+                            </span>
+                        </div>
+                        <div className="flex items-center justify-center w-full">
+                            <p className="p-2 text-[--site-card-icon-color]">
+                                Are you sure to delete this AI Tutor?
+                            </p>
+                        </div>
+                        <div className="flex items-center justify-center w-full gap-2 p-2">
+                            <button
+                                className="w-1/2 px-4 py-2 font-bold text-[--site-error-text-color] bg-white ring-[--site-error-text-color] ring-[1px] rounded focus:outline-none"
+                                onClick={onClose}
+                            >
+                                No
+                            </button>
+                            <button
+                                className="w-1/2 px-4 py-2 font-bold text-white bg-[--site-error-text-color] rounded hover:bg-[--site-error-text-color] focus:outline-none"
+                                onClick={() => {
+                                    axios
+                                        .delete(`${webAPI.deletechat}/${id}`)
+                                        .then((res) => {
+                                            notification(
+                                                "success",
+                                                res.data.message
+                                            );
+                                            props.handledelete();
+                                        })
+                                        .catch((err) => {
+                                            console.error(
+                                                "Failed to delete chat:",
+                                                err
+                                            );
+                                            // Handle errors here
+                                        });
+                                    onClose();
+                                }}
+                            >
+                                Confirm
+                            </button>
+                        </div>
+                    </div>
+                );
+            },
+        });
     };
     return (
         <div className="relative overflow-x-auto rounded-xl">
             <Toaster />
             <table className="w-full bg-[--site-card-icon-color] text-sm text-left text-[--site-main-Table-Text]">
                 <thead className="text-xs text-[--site-main-Table-Tex] uppercase dark:bg-[--site-main-Table-Tex] dark:text-[--site-main-Table-Text_Dark]">
-                    <tr className="w-full">
+                    <tr className="flex w-full">
                         <th className="w-1/5 px-6 py-3">Label</th>
                         <th className="w-1/5 px-6 py-3">PIN</th>
-                        <th className="w-1/5 px-6 py-3">Welcome message</th>
-                        <th className="w-1/5 px-6 py-3">Behavior prompt</th>
+                        <th className="hidden py-3 sm:w-1/5 sm:px-6 sm:flex">
+                            Welcome message
+                        </th>
+                        <th className="hidden py-3 sm:w-1/5 sm:px-6 sm:block">
+                            Behavior prompt
+                        </th>
                         <th className="w-1/5 px-6 py-3 text-center">Action</th>
                     </tr>
                 </thead>
@@ -74,27 +119,31 @@ const ChatTable = (props) => {
                     {props.chat.map((data, index) => {
                         return (
                             <tr
-                                className="bg-[--site-main-color3] text-[--site-card-icon-color] border-[1px] border-[--site-card-icon-color]"
+                                className="bg-[--site-main-color3] text-[--site-card-icon-color] border-[1px] border-[--site-card-icon-color] w-full flex"
                                 key={index}
                             >
                                 <th
                                     scope="row"
-                                    className="px-6 py-4 font-bold text-[--site-card-icon-color] whitespace-nowrap"
+                                    className="px-6 w-1/5 py-4 font-bold text-[--site-card-icon-color] whitespace-nowrap"
                                 >
                                     {data["label"]}
                                 </th>
-                                <td className="px-6 py-4">{data["access"]}</td>
-                                <td className="px-6 py-4">
+                                <td className="w-1/5 px-6 py-4">
+                                    {data["access"]}
+                                </td>
+                                <td className="hidden w-1/5 sm:px-6 sm:py-4 sm:flex">
                                     {data["conversation"]}
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className="hidden w-1/5 sm:px-6 sm:py-4 sm:flex">
                                     {data["behavior"]}
                                 </td>
-                                <td className="flex items-center justify-center gap-2 px-6 py-4">
-                                    <div className="flex gap-2">
+                                <td
+                                    className={`flex items-center justify-center gap-2 px-6 py-4 w-3/5 sm:w-1/5`}
+                                >
+                                    <div className="items-center justify-center pr-2 sm:flex sm:gap-2 sm:p-0">
                                         <span
                                             onClick={() => GetCurrentchat(data)}
-                                            className="w-[60px] text-[--site-card-icon-color] text-center hover:bg-[--site-main-form-success] hover:text-[--site-card-icon-color] p-2 border rounded-xl active:bg-[--site-main-form-success1] select-none active:text-[--site-card-icon-color] border-[--site-main-form-success]"
+                                            className="sm:w-[60px] text-[--site-card-icon-color] text-center hover:bg-[--site-main-form-success] hover:text-[--site-card-icon-color] p-2 border rounded-xl active:bg-[--site-main-form-success1] select-none active:text-[--site-card-icon-color] border-[--site-main-form-success]"
                                         >
                                             Open
                                         </span>
@@ -103,7 +152,7 @@ const ChatTable = (props) => {
                                                 SetCurrentchat(data);
                                                 showModal();
                                             }}
-                                            className="w-[60px] text-[--site-card-icon-color] text-center border-[--site-main-color9] hover:bg-[--site-main-color9] hover:text-white p-2 border rounded-xl active:bg-[--site-main-color4] select-none active:text-white"
+                                            className="sm:w-[60px] text-[--site-card-icon-color] text-center border-[--site-main-color9] hover:bg-[--site-main-color9] hover:text-white p-2 border rounded-xl active:bg-[--site-main-color4] select-none active:text-white"
                                         >
                                             Edit
                                         </span>
@@ -111,7 +160,7 @@ const ChatTable = (props) => {
                                             onClick={() =>
                                                 handleDelete(data["id"])
                                             }
-                                            className="text-[--site-card-icon-color] w-[60px] text-center hover:bg-[--site-main-form-error] border-[--site-main-form-error] hover:text-white p-2 border rounded-xl active:bg-[--site-main-form-error1] select-none active:text-white"
+                                            className="text-[--site-card-icon-color] sm:w-[60px] text-center hover:bg-[--site-main-form-error] border-[--site-main-form-error] hover:text-white p-2 border rounded-xl active:bg-[--site-main-form-error1] select-none active:text-white"
                                         >
                                             Delete
                                         </span>

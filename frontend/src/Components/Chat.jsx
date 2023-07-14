@@ -132,7 +132,7 @@ const Chat = () => {
                                     width={100}
                                     height={58}
                                     ringWidth={10}
-                                    value={trial}
+                                    value={14 - trial}
                                     needleColor="black"
                                     needleHeightRatio={0.5}
                                     maxValue={14}

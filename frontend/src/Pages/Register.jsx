@@ -1,7 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import Header from "../Layout/Header";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
@@ -25,22 +24,19 @@ const Register = () => {
             toast.success(message);
         }
     };
-    const navigate = useNavigate();
 
     const onSubmit = async (data) => {
-        console.log(webAPI.register);
         axios.post(webAPI.register, data).then((res) => {
             console.log(res.data);
             if (res.data.success) {
                 notification("success", res.data.message);
-                navigate("/");
             } else {
                 notification("error", res.data.message);
             }
         });
     };
     return (
-        <div className="bg-[--site-main-color-home] font-logo h-screen flex flex-col">
+        <div className="bg-[--site-main-color-home] font-logo h-full md:h-screen pb-10 px-2 flex flex-col">
             <Header />
             <Toaster />
             <div className="mt-[100px]">
@@ -155,7 +151,7 @@ const Register = () => {
                             )}
                         </div>
                         <div className="mb-2">
-                            <div class="flex items-start w-full select-none">
+                            <div className="flex items-start w-full select-none">
                                 <input
                                     id="link-checkbox"
                                     type="checkbox"
