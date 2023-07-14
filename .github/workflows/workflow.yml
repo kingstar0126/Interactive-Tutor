@@ -1,0 +1,31 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  print-message:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "This job has no dependencies"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [print-message]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: "eu-west-2"
+      - name: Create CodeDeploy Deployment
+        id: deploy
+        run: |
+          aws deploy create-deployment \
+            --application-name Interactive_Tutor_Service \
+            --deployment-group-name Interactive-Tutor_Service_Group \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
+            --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
