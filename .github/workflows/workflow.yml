@@ -25,7 +25,7 @@ jobs:
         id: deploy
         run: |
           aws deploy create-deployment \
-            --application-name Interactive_Tutor_Service \
+            --application-name InteractiveTutor_Service \
             --deployment-group-name Interactive-Tutor_Service_Group \
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
