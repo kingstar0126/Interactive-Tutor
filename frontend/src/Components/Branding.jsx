@@ -33,19 +33,14 @@ const Branding = () => {
     };
 
     const handleConfirm = () => {
-        console.log(current_chat);
         axios
             .post(webAPI.send_branding, current_chat)
             .then((res) => {
-                console.log(res.data);
                 getchat(dispatch, current_chat);
                 notification("success", res.data.message);
             })
             .catch((err) => console.log(err));
     };
-    useEffect(() => {
-        console.log("THis is the current chat. \n ", current_chat, "\n");
-    }, []);
 
     return (
         <div className="container flex flex-col w-full h-full gap-5 p-5">

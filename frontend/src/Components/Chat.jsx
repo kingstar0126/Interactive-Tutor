@@ -32,6 +32,7 @@ const Chat = () => {
     const [chat, SetChat] = useState([]);
     const user = JSON.parse(useSelector((state) => state.user.user));
     const query = useSelector((state) => state.query.query);
+    const _chat = JSON.parse(useSelector((state) => state.chat.chat));
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isOpen, setIsOpen] = useState(true);
     const [trial, setTrial] = useState(0);
@@ -86,7 +87,6 @@ const Chat = () => {
         };
 
         axios.post(webAPI.getchats, data).then((res) => {
-            console.log("This is the getChat", res);
             SetChat(res.data.data);
         });
     };
@@ -97,16 +97,28 @@ const Chat = () => {
             <div className="flex items-center justify-between w-full p-5 bg-[--site-card-icon-color] rounded-full">
                 <div className="flex items-center justify-center gap-2 font-semibold text-[20px] text-white">
                     <BsFillChatLeftTextFill className="fill-[--site-logo-text-color]" />
-                    Chats
+                    Tutors
                 </div>
 
                 <div className="flex items-end justify-end">
+                {_chat && _chat.organization && (
+                <div className="flex flex-col items-start justify-center p-2 bg-[--site-warning-text-color] m-2 rounded-xl shadow-2xl">
+                        <p>
+                            <span className="font-bold text-[14px]">
+                                Organisation ID:{" "}
+                            </span>
+                            <span className="text-[--site-error-text-color] font-semibold">
+                                {_chat.organization}
+                            </span>
+                        </p>
+                </div>
+            )}
                     {query && (
                         <p className="bg-[--site-logo-text-color] p-2 m-2 rounded-md gap-2 items-center justify-center h-full flex">
                             <span className="text-[--site-error-text-color] font-bold">
                                 {query}
                             </span>
-                            <span className="text-[--site-main-color3]">
+                            <span className="text-[--site-card-icon-color]">
                                 Queries
                             </span>
                         </p>
@@ -118,11 +130,11 @@ const Chat = () => {
                                     <span className="text-[--site-error-text-color]">
                                         {trial}
                                     </span>{" "}
-                                    of dyas remainig
+                                    of dyas of
                                 </span>
                                 <span className="text-[--site-main-color3] pl-2">
                                     {" "}
-                                    free trial
+                                    free trial remaining
                                 </span>
                             </p>
                             <div>
@@ -144,7 +156,7 @@ const Chat = () => {
                     )}
                     <button
                         onClick={() => navigate("/chatbot/subscription")}
-                        className="mb-2 p-2 rounded-md bg-[--site-logo-text-color] text-[--site-main-color3]"
+                        className="mb-2 p-2 rounded-md bg-[--site-logo-text-color] text-[--site-card-icon-color]"
                     >
                         Upgrade
                     </button>
@@ -229,7 +241,7 @@ const Chat = () => {
                                 className="text-[--site-logo-text-color] bg-[--site-card-icon-color] hover:bg-[--site-card-icon-color]/90 focus:ring-4 focus:outline-none focus:ring-[--site-card-icon-color]/50 font-medium rounded-xl text-sm px-2 py-1 text-center inline-flex items-center dark:focus:ring-[--site-card-icon-color]/55"
                             >
                                 <BsPlus className="w-[30px] h-[30px] text-xl pointer-events-none" />
-                                Add chat
+                                Add Tutor
                             </button>
                         </div>
                         <div className="w-full h-[500px] bg-[--site-main-color3] rounded-xl">

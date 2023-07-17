@@ -14,13 +14,10 @@ const BubbleItem = (props) => {
             setText("Disabled");
             setStatus(true);
         }
-        console.log(toggle);
         props.data.pageload = toggle;
     };
 
     const handleColor = (e) => {
-        console.log(e.target.value);
-        console.log(props.data);
         props.data.color = e.target.value;
     };
     const handlePosition = (e) => {

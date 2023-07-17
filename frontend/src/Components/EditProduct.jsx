@@ -38,7 +38,6 @@ const EditProduct = (props) => {
                 .post(webAPI.update_product, productData)
                 .then((response) => {
                     setLoadindg(false);
-                    console.log(response.data.message);
                     props.handleEditOk();
                     // Perform any further actions or display success message
                 })

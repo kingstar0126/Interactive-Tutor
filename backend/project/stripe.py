@@ -199,6 +199,7 @@ def create_checkout_session():
         payment_method_types=['card'],
         line_items=[{
             'price': subscription_plan_id,
+            'quantity': 1,
         }],
         payment_method_collection='always',
         mode='subscription',
@@ -215,14 +216,12 @@ def stripe_webhook():
     if payload["type"] == "checkout.session.completed":
         # TODO: run some custom code here
         customer_id = payload["data"]["object"]["customer"]
-        subscription_id = payload["data"]["object"]["subscription"]
-
+        _subscription_id = payload["data"]["object"]["subscription"]
         price_id = stripe.Subscription.retrieve(
-            subscription_id)['items']['data'][0]['price']['id']
-
+            _subscription_id)['items']['data'][0]['price']['id']
         user = db.session.query(User).filter_by(
             customer_id=customer_id).first()
-        user.subscription_id = subscription_id
+        user.subscription_id = _subscription_id
         user.role = db.session.query(Production).filter_by(
             price_id=price_id).first().role
         query = user.query
@@ -262,6 +261,7 @@ def update_subscription():
         payment_method_types=['card'],
         line_items=[{
             'price': subscriptionPlanId,
+            'quantity': 1,
         }],
         payment_method_collection='always',
         mode='subscription',

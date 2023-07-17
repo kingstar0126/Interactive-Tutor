@@ -93,10 +93,19 @@ def send_message():
 @message.route('/api/sendchatbubble', methods=['POST'])
 def send_chat_bubble():
     message = request.json['_message']
+    chat = db.session.query(Chat).filter_by(
+        uuid='83137bf2-a589-476b-b9ad-43f63f4a7574').first()
+    chat.train = eval(chat.train)
+    trains = []
+    for source_id in chat.train:
+        source = db.session.query(Train).filter_by(id=source_id).first()
+        trains.append(source.label)
+    response, chat_history, token = generate_message(
+        message, [], chat.behavior, chat.creativity, '2', chat.uuid, trains)
     data = {
         'success': True,
         'code': 200,
-        'data': generate_Bubble_message(message)
+        'data': response
     }
     return jsonify(data)
 

@@ -109,7 +109,7 @@ const ChatTable = (props) => {
                             Welcome message
                         </th>
                         <th className="hidden py-3 sm:w-1/5 sm:px-6 sm:block">
-                            Behavior prompt
+                            Behaviour prompt
                         </th>
                         <th className="w-1/5 px-6 py-3 text-center">Action</th>
                     </tr>

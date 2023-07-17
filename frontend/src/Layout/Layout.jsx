@@ -11,7 +11,7 @@ const Layout = () => {
     setlocation(dispatch, location.pathname);
     return (
         <div className="flex flex-row font-logo bg-[--site-card-icon-color] min-h-screen ">
-            <div className="w-[25vh] min-w-[200px] h-auto hidden md:block">
+            <div className="w-[25vh] min-w-[200px] h-[200%] hidden md:block">
                 <Sidebar />
             </div>
             <div className="items-center justify-center w-screen bg-[--site-main-color3]">

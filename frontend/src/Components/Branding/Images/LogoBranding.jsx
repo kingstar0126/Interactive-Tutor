@@ -37,7 +37,6 @@ const LogoBranding = (props) => {
 
     const handleUpload = () => {
         if (selectedLogo && flag) {
-            console.log(selectedLogo);
             const formData = new FormData();
 
             const filename = selectedLogo.name.replace(" ", "");

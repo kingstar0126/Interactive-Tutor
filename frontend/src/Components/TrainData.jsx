@@ -31,7 +31,6 @@ export default function TraindataTable() {
         axios
             .post(webAPI.gettraindatas, { uuid: chat.uuid })
             .then((res) => {
-                console.log(res.data);
                 if (res.data) {
                     setTableData(res.data);
                 }

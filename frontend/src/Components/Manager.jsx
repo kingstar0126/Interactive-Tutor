@@ -58,7 +58,6 @@ const Manager = () => {
     };
 
     const handleDelete = (id) => {
-        console.log("id", id);
         axios
             .post(webAPI.deleteuser, { id })
             .then((res) => {

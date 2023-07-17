@@ -56,7 +56,6 @@ const NewChat = () => {
         const result = pattern.exec(location.pathname);
 
         if (previous_location !== current_location && chat) {
-            console.log("The new chatbot created!!!", chat);
             let new_chat = chat;
             getUserState(dispatch, { id: chat.user_id });
             setchatbot(dispatch, new_chat);
@@ -72,24 +71,19 @@ const NewChat = () => {
                 window_chat.current.classList.add("hidden");
             }
         } else if (previous_location === current_location && chat) {
-            console.log("The load chatbot!!!");
             let id = chatbot;
             axios
                 .post(webAPI.getchat, { id: id })
                 .then((res) => {
-                    console.log(res.data);
                     if (res.data.code === 200) {
                         getchat(dispatch, res.data.data);
                     }
-                    // else navigate(-1);
                 })
                 .catch((err) => {
                     console.log(err);
-                    // navigate(-1);
                 });
 
             axios.post(webAPI.get_message, { id }).then((res) => {
-                console.log(res.data);
                 if (res.data.success === "true") {
                     if (res.data.data.message) {
                         setChathistory(res.data.data.message);
@@ -97,10 +91,8 @@ const NewChat = () => {
                 }
             });
             if (chathistory.length === 0) {
-                console.log("hello, there");
                 chatbot_start.current.classList.remove("hidden");
                 window_chat.current.classList.add("hidden");
-                console.log("hello, there", chat.chat_logo.width + "px");
             } else {
                 chatbot_start.current.classList.add("hidden");
                 window_chat.current.classList.remove("hidden");
@@ -121,19 +113,15 @@ const NewChat = () => {
                 }
             }
         } else if (!chat || result) {
-            console.log(chatId );
-            console.log("This is embedding")
             axios
                 .post(webAPI.getchat, chatId)
                 .then(async (res) => {
-                    console.log(res.data);
                     if (res.data.code === 200) {
                         getchat(dispatch, res.data.data);
                         await axios
                             .post(webAPI.start_message, res.data.data)
                             .then((res) => {
                                 if (res.status === 200) {
-                                    console.log(res.data.data);
                                     localStorage.setItem(
                                         "chatbot",
                                         res.data.data
@@ -143,12 +131,12 @@ const NewChat = () => {
                             .catch((err) => console.log(err));
                         window.location.reload();
                     } else {
-                        // navigate(-1);
+                        navigate(-1);
                     }
                 })
                 .catch((err) => {
                     console.log(err);
-                    // navigate(-1);
+                    navigate(-1);
                 });
         }
     }, []);
@@ -303,7 +291,6 @@ const NewChat = () => {
     const sendMessage = (id, _message) => {
         let { behaviormodel, train, model } = chat;
         if (!id || !_message) {
-            console.log("Error", id, _message);
             return;
         }
         axios

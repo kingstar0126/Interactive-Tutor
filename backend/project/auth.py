@@ -266,15 +266,14 @@ def signup_post():
 
     if user:
         return jsonify({'message': 'Email address already exists', 'success': False})
-
     verification_token = create_access_token(identity={'username': username, 'email': email, 'password': password},
-                                             expires_delta=timedelta(hours=1))
+                                             expires_delta=timedelta(minutes=30))
     verification_link = f"https://app.interactive-tutor.com/verify-email/token={verification_token}"
 
     msg = Message('Welcome to Interactive Tutor', sender=os.getenv('MAIL_USERNAME'),
                   recipients=[email])
     msg.html = render_template(
-        'email_verification.html', username=user.username, url=verification_link, support_email=os.getenv('MAIL_USERNAME'))
+        'email_verification.html', username=username, url=verification_link, support_email=os.getenv('MAIL_USERNAME'))
     mail.send(msg)
 
     return jsonify({'success': True, 'message': 'A message has been sent to your email. Check your message.'})
@@ -292,7 +291,7 @@ def email_verification():
         else:
             return jsonify({'message': 'Something is wrong!', 'success': False})
     except Exception as e:
-        return jsonify({'message': 'Your token had expired!', 'success': False})
+        return jsonify({'message': 'Your token expired', 'success': False})
 
 
 @auth.route('/api/adduseraccount', methods=['POST'])

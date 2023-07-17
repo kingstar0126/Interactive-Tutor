@@ -27,7 +27,6 @@ const Register = () => {
 
     const onSubmit = async (data) => {
         axios.post(webAPI.register, data).then((res) => {
-            console.log(res.data);
             if (res.data.success) {
                 notification("success", res.data.message);
             } else {

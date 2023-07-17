@@ -38,7 +38,6 @@ const Subscription = () => {
         axios
             .post(webAPI.get_all_products, { id: user.id })
             .then((res) => {
-                console.log("This is the products list ->", res);
                 setSubscriptions(res.data.data.data);
                 if (res.data.data.price_id) {
                     setPrice(res.data.data.price_id);
@@ -65,7 +64,6 @@ const Subscription = () => {
         axios
             .post(webAPI.delete_product, { user_id: user.id, product_id: data })
             .then((res) => {
-                console.log(res.data);
                 toast.success("Deleted successfully !");
                 getSubscription();
             })
@@ -75,7 +73,6 @@ const Subscription = () => {
         axios
             .post(webAPI.delete_all_product, { user_id: user.id })
             .then((res) => {
-                console.log(res.data);
                 getSubscription();
             })
             .catch((err) => console.error(err));
@@ -92,10 +89,8 @@ const Subscription = () => {
                     id: user.id,
                 })
                 .then(async (res) => {
-                    console.log(res);
                     // Load Stripe and redirect to the Checkout page
                     const stripe = await loadStripe(res.data.key);
-                    console.log(stripe);
 
                     const { error } = stripe.redirectToCheckout({
                         sessionId: res.data.sessionId,
@@ -114,10 +109,8 @@ const Subscription = () => {
                     id: user.id,
                 })
                 .then(async (res) => {
-                    console.log(res);
                     // Load Stripe and redirect to the Checkout page
                     const stripe = await loadStripe(res.data.key);
-                    console.log(stripe);
 
                     const { error } = stripe.redirectToCheckout({
                         sessionId: res.data.sessionId,

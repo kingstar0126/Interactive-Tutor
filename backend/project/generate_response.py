@@ -29,7 +29,7 @@ def init_gptcache(cache_obj: Cache, llm: str):
     cache_obj.init(
         pre_embedding_func=get_prompt,
         data_manager=manager_factory(
-            manager="map", data_dir=f"map_cache_{hashed_llm}"),
+            manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
     )
 
 
@@ -113,7 +113,7 @@ def generate_AI_message(query, history, behavior, temp, model):
         cache_obj.init(
             pre_embedding_func=get_prompt,
             data_manager=manager_factory(
-                manager="map", data_dir=f"map_cache_{hashed_llm}"),
+                manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
         )
 
     langchain.llm_cache = GPTCache(init_gptcache)

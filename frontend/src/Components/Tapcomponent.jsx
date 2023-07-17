@@ -79,7 +79,6 @@ export default function Example() {
         axios
             .post(webAPI.get_messages, { id: chat.id })
             .then((res) => {
-                console.log(res);
                 let messages = [];
                 res.data.data.map(
                     (item) => item.message.length > 0 && messages.push(item)

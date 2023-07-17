@@ -16,7 +16,6 @@ const History = (props) => {
             return new Date(a.update_data) - new Date(b.update_data);
         });
 
-        console.log(new_data);
         setHistory(new_data);
     }, [props.data]);
 
@@ -29,7 +28,6 @@ const History = (props) => {
             axios
                 .post(webAPI.delete_message, { id: item.uuid })
                 .then((res) => {
-                    console.log(res.data.message);
                     const new_history = [...history];
                     new_history.splice(index, 1);
                     setHistory(new_history);

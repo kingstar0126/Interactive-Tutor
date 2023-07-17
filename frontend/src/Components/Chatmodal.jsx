@@ -300,7 +300,6 @@ const Chatmodal = (props) => {
                                             <Select
                                                 className="w-full mb-1 text-[--site-card-icon-color]"
                                                 onChange={(e) => {
-                                                    console.log(e);
                                                     SetBehaviormodel(e.label);
                                                 }}
                                                 defaultValue={{

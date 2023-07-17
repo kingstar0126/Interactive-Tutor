@@ -34,7 +34,6 @@ const AccessChatbot = () => {
     };
 
     const submit = async (pin) => {
-        console.log(pin, organization);
         if (!organization || !pin) {
             setLoadindg(false);
             pinField.current.forEach((input) => (input.value = ""));
@@ -47,7 +46,6 @@ const AccessChatbot = () => {
                 pin: pin,
             })
             .then((res) => {
-                console.log(res.data);
                 if (res.data.success === false) {
                     notification("error", res.data.message);
                     setLoadindg(false);
@@ -58,7 +56,6 @@ const AccessChatbot = () => {
                         .post(webAPI.start_message, res.data.data)
                         .then((res) => {
                             if (res.status === 200) {
-                                console.log(res.data.data);
                                 localStorage.setItem("chatbot", res.data.data);
                                 setStatus(true);
                                 navigate("newchat");
@@ -88,7 +85,6 @@ const AccessChatbot = () => {
     };
 
     const handleComplete = async (value) => {
-        console.log(value);
         submit(value);
         setLoadindg(true);
     };

@@ -53,7 +53,6 @@ const ManageAccount = () => {
                         const new_user = user;
                         new_user.email = email;
                         new_user.username = username;
-                        console.log("The user has been updated");
                         changeuser(dispatch, new_user);
                     }
                 })
@@ -65,7 +64,6 @@ const ManageAccount = () => {
         axios
             .post(webAPI.getuser, { id: user.id })
             .then((res) => {
-                console.log(res.data.data);
                 setUsername(res.data.data.username);
                 setEmail(res.data.data.email);
                 setPhone(res.data.data.contact);
@@ -129,7 +127,6 @@ const ManageAccount = () => {
                                     className="px-4 py-2 gap-2 bg-[--site-main-color3] rounded-lg focus-within:bg-[--site-logo-text-color]"
                                     onChange={(e) => {
                                         setPhone(e);
-                                        console.log(e);
                                     }}
                                 />
                             </div>

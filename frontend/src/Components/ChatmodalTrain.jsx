@@ -47,7 +47,6 @@ const ChatmodalTrain = (props) => {
                         setIsurlloading(false);
                     })
                     .catch((error) => {
-                        console.log(error);
                         setIsurlloading(false);
                     });
             } else {
@@ -68,11 +67,9 @@ const ChatmodalTrain = (props) => {
                         setProgress(progress);
                     },
                 };
-                console.log(file, filename, chatbot);
                 axios
                     .post(webAPI.sendfile, data, config)
                     .then((res) => {
-                        console.log(res);
                         setIsloading(false);
                         if (!res.data.success) {
                             notification("error", res.data.message);
@@ -84,7 +81,6 @@ const ChatmodalTrain = (props) => {
                         props.handleOk(res.data.data);
                     })
                     .catch((err) => {
-                        console.log(err);
                         notification("error", "Failed Uploading File");
                         setIsloading(false);
                     });
