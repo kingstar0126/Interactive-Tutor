@@ -88,6 +88,7 @@ class Message(UserMixin, db.Model):
     chat_id = db.Column(db.Integer, nullable=False)
     message = db.Column(db.JSON)
     behavior = db.Column(db.String(255))
+    name = db.Column(db.String(255))
     creativity = db.Column(db.Float)
     create_date = db.Column(db.Date, default=datetime.utcnow)
     update_date = db.Column(

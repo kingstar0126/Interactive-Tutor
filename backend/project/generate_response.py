@@ -140,8 +140,10 @@ def generate_AI_message(query, history, behavior, temp, model):
 
 
 def generate_Bubble_message(query):
+    template = "Generate a title for a fantasy animal, character or fairy in {query}. Do not provide any explanations. Do not respond with anything except the output of the title."
+    
     load_dotenv()
     chat = ChatOpenAI(model_name="gpt-3.5-turbo",
                       temperature=0.3,
                       openai_api_key=os.getenv('OPENAI_API_KEY'))
-    return chat.predict(query)
+    return chat.predict(template)

@@ -106,6 +106,9 @@ def init_message():
     behavior = request.json['behavior']
     creativity = request.json['creativity']
     conversation = request.json['conversation']
+    country = request.json['country']
+    name = f"{generate_Bubble_message(country)}, {country}"
+    print(country)
     messages = db.session.query(Message).all()
     for row in messages:
         _messages = json.loads(row.message)
@@ -117,7 +120,7 @@ def init_message():
     else:
         message = json.dumps([{"role": "ai", "content": conversation}])
     new_message = Message(chat_id=chat_id, message=message,
-                          behavior=behavior, creativity=creativity)
+                          behavior=behavior, creativity=creativity, name=name)
     db.session.add(new_message)
     db.session.commit()
     response = {'success': True, 'code': 200,
@@ -236,6 +239,7 @@ def get_messages():
     for _message in current_messages:
         message_data = {
             'uuid': _message.uuid,
+            'name': _message.name,
             'message': json.loads(_message.message),
             'update_data': _message.update_date.strftime('%Y-%m-%d %H:%M:%S.%f')
         }
