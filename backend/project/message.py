@@ -107,8 +107,8 @@ def init_message():
     creativity = request.json['creativity']
     conversation = request.json['conversation']
     country = request.json['country']
-    name = f"{generate_Bubble_message(country)}, {country}"
-    print(country)
+    response = generate_Bubble_message(country)
+    name = f"{response}, {country}"
     messages = db.session.query(Message).all()
     for row in messages:
         _messages = json.loads(row.message)

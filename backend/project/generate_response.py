@@ -140,10 +140,36 @@ def generate_AI_message(query, history, behavior, temp, model):
 
 
 def generate_Bubble_message(query):
-    template = "Generate a title for a fantasy animal, character or fairy in {query}. Do not provide any explanations. Do not respond with anything except the output of the title."
-    
     load_dotenv()
-    chat = ChatOpenAI(model_name="gpt-3.5-turbo",
-                      temperature=0.3,
-                      openai_api_key=os.getenv('OPENAI_API_KEY'))
-    return chat.predict(template)
+
+    template = "Generate a title for a fantasy animal, character or fairy in {query}. A title must two words, first is adjective and second is noun. Do not provide any explanations. Do not respond with anything except the output of the title."
+
+    prompt = PromptTemplate(
+        input_variables=["query"], template=template)
+
+    def get_hashed_name(name):
+        return hashlib.sha256(name.encode()).hexdigest()
+
+    def init_gptcache(cache_obj: Cache, llm: str):
+        hashed_llm = get_hashed_name(llm)
+        cache_obj.init(
+            pre_embedding_func=get_prompt,
+            data_manager=manager_factory(
+                manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
+        )
+
+    langchain.llm_cache = GPTCache(init_gptcache)
+
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo",
+                     temperature=1,
+                     openai_api_key=os.getenv('OPENAI_API_KEY'))
+    conversation = LLMChain(
+        llm=llm,
+        verbose=True,
+        prompt=prompt
+    )
+    response = conversation.run(
+        query=query
+    )
+    response = response.replace('"', '')
+    return response
