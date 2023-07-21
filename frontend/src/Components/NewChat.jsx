@@ -12,6 +12,7 @@ import { useParams } from "react-router-dom";
 import { getUserState } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
 import { useLocation } from "react-router-dom";
+import ReactLoading from "react-loading";
 
 const NewChat = () => {
     const navigate = useNavigate();
@@ -39,6 +40,7 @@ const NewChat = () => {
     const messagesEndRef = useRef(null);
     let location = useLocation();
     const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
     const chatbot = useSelector((state) => state.chat.chatbot);
     const chatId = useParams();
@@ -55,6 +57,7 @@ const NewChat = () => {
         const result = pattern.exec(location.pathname);
 
         if (previous_location !== current_location && chat) {
+            setLoading(true);
             let new_chat = chat;
             axios
                 .get("https://geolocation-db.com/json/")
@@ -63,6 +66,7 @@ const NewChat = () => {
                     getUserState(dispatch, { id: chat.user_id });
                     new_chat["country"] = country;
                     setchatbot(dispatch, new_chat);
+                    setLoading(false);
                     if (new_chat.conversation !== "") {
                         setChathistory([
                             ...chathistory,
@@ -75,7 +79,9 @@ const NewChat = () => {
                         window_chat.current.classList.add("hidden");
                     }
                 })
-                .catch((err) => {});
+                .catch((err) => {
+                    setLoading(false);
+                });
         } else if (previous_location === current_location && chat) {
             let id = chatbot;
             axios
@@ -149,7 +155,7 @@ const NewChat = () => {
     }, []);
 
     useEffect(() => {
-        if (chat) {
+        if (chat && loading === false) {
             if (chathistory.length > 0) {
                 chatbot_start.current.classList.add("hidden");
                 window_chat.current.classList.remove("hidden");
@@ -327,8 +333,22 @@ const NewChat = () => {
 
     return (
         <div className="w-full h-screen">
+            {loading && (
+                <div className="flex flex-col items-center justify-center w-full">
+                    <ReactLoading
+                        type="spin"
+                        color="#c1ff72"
+                        height={40}
+                        width={40}
+                        delay={15}
+                    ></ReactLoading>
+                    <span className="text-[--site-logo-text-color]">
+                        Creating AI Tutor...
+                    </span>
+                </div>
+            )}
             <Toaster />
-            {chat && (
+            {chat && loading === false && (
                 <div className="w-full h-screen">
                     <div
                         ref={newchat}
