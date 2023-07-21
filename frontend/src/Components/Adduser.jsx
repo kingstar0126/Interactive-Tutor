@@ -42,9 +42,7 @@ const Adduser = (props) => {
             .post(webAPI.adduseraccount, data)
             .then((res) => {
                 if (res.data.success) {
-                    {
-                        props.handleOk();
-                    }
+                    props.handleOk();
                 } else {
                     notification("error", res.data.message);
                 }

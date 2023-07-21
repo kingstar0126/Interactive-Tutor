@@ -26,7 +26,7 @@ export default function Example() {
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
     const [activeTab, setActiveTab] = useState("preview");
     const dispatch = useDispatch();
-    const [messagehistory, setMeessagehistory] = useState([]);
+    const [message_history, setMessage_history] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [updateModalOpen, setUpdateModalOpen] = useState(false);
 
@@ -75,7 +75,7 @@ export default function Example() {
         setIsModalOpen(false);
         setUpdateModalOpen(false);
     };
-    const getMessageHistory = () => {
+    const getMessage_history = () => {
         axios
             .post(webAPI.get_messages, { id: chat.id })
             .then((res) => {
@@ -83,14 +83,14 @@ export default function Example() {
                 res.data.data.map(
                     (item) => item.message.length > 0 && messages.push(item)
                 );
-                setMeessagehistory(messages);
+                setMessage_history(messages);
             })
             .catch((err) => console.error(err));
     };
 
     useEffect(() => {
         if (activeTab === "conversation Explorer") {
-            getMessageHistory();
+            getMessage_history();
         }
     }, [activeTab]);
     const data = [
@@ -101,7 +101,7 @@ export default function Example() {
                 <div className="w-full h-full">
                     <Toaster />
                     <div className="flex justify-between">
-                        <div className="gap-5 flex">
+                        <div className="flex gap-5">
                             <button
                                 onClick={handleOpen}
                                 className="bg-[--site-logo-text-color] p-2 rounded-xl flex items-center justify-center gap-2"
@@ -154,7 +154,7 @@ export default function Example() {
         {
             label: "Conversation Explorer",
             value: "conversation Explorer",
-            desc: <History data={messagehistory} />,
+            desc: <History data={message_history} />,
         },
     ];
     return (

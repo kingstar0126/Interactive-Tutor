@@ -49,27 +49,33 @@ const NewChat = () => {
             toast.error(message);
         }
     };
-    
-    
+
     useEffect(() => {
         const pattern = /\/chat\/embedding\/(\w+)/;
         const result = pattern.exec(location.pathname);
 
         if (previous_location !== current_location && chat) {
             let new_chat = chat;
-            getUserState(dispatch, { id: chat.user_id });
-            setchatbot(dispatch, new_chat);
-            if (new_chat.conversation !== "") {
-                setChathistory([
-                    ...chathistory,
-                    { role: "ai", content: new_chat.conversation },
-                ]);
-                chatbot_start.current.classList.add("hidden");
-                window_chat.current.classList.remove("hidden");
-            } else {
-                chatbot_start.current.classList.remove("hidden");
-                window_chat.current.classList.add("hidden");
-            }
+            axios
+                .get("https://geolocation-db.com/json/")
+                .then((res) => {
+                    let country = res.data.country_name;
+                    getUserState(dispatch, { id: chat.user_id });
+                    new_chat["country"] = country;
+                    setchatbot(dispatch, new_chat);
+                    if (new_chat.conversation !== "") {
+                        setChathistory([
+                            ...chathistory,
+                            { role: "ai", content: new_chat.conversation },
+                        ]);
+                        chatbot_start.current.classList.add("hidden");
+                        window_chat.current.classList.remove("hidden");
+                    } else {
+                        chatbot_start.current.classList.remove("hidden");
+                        window_chat.current.classList.add("hidden");
+                    }
+                })
+                .catch((err) => {});
         } else if (previous_location === current_location && chat) {
             let id = chatbot;
             axios
@@ -77,7 +83,7 @@ const NewChat = () => {
                 .then((res) => {
                     if (res.data.code === 200) {
                         getchat(dispatch, res.data.data);
-                        console.log(res.data.data)
+                        console.log(res.data.data);
                     }
                 })
                 .catch((err) => {
@@ -106,7 +112,8 @@ const NewChat = () => {
                         if (ai_background.current) {
                             ai_background.current.style["background-color"] =
                                 chat.chat_logo.ai_bg;
-                            ai_background.current.style.color = chat.chat_logo.ai_color;
+                            ai_background.current.style.color =
+                                chat.chat_logo.ai_color;
                             ai_background.current.style["font-size"] =
                                 chat.chat_logo.ai_size + "px";
                         }
@@ -136,7 +143,6 @@ const NewChat = () => {
                     }
                 })
                 .catch((err) => {
-                    console.log(err);
                     navigate(-1);
                 });
         }
@@ -262,8 +268,9 @@ const NewChat = () => {
         if (event.keyCode === 13) {
             let id = chatbot;
             let _message = message;
-            if (_message === "")
-                {return; }
+            if (_message === "") {
+                return;
+            }
             setChathistory([
                 ...chathistory,
                 { role: "human", content: _message },
@@ -278,16 +285,14 @@ const NewChat = () => {
     const handleSubmitmessage = () => {
         let id = chatbot;
         let _message = message;
-        if (_message === "")
-                {return; }
-        setChathistory([
-            ...chathistory,
-            { role: "human", content: _message },
-        ]);
+        if (_message === "") {
+            return;
+        }
+        setChathistory([...chathistory, { role: "human", content: _message }]);
         sendMessage(id, _message);
 
         setMessage("");
-    }
+    };
 
     const sendMessage = (id, _message) => {
         let { behaviormodel, train, model } = chat;
@@ -471,7 +476,7 @@ const NewChat = () => {
                                 {chat.chat_button.button3_text}
                             </a>
                         </div>
-                        <div className="flex sm:w-2/3 divide-x-2">
+                        <div className="flex divide-x-2 sm:w-2/3">
                             <input
                                 type="text"
                                 value={message}
@@ -480,7 +485,12 @@ const NewChat = () => {
                                 className="rounded-none w-full rounded-l-lg bg-[--site-main-color3] text-[--site-card-icon-color] block text-sm p-2.5 focus:border-[--site-logo-text-color] "
                                 placeholder="Type message"
                             />
-                            <span className="inline-flex sm:w-[60px] items-center px-3 text-sm text-[--site-card-icon-color] bg-[--site-main-color3] border border-l-0 rounded-r-md hover:cursor-pointer" onClick={() => {handleSubmitmessage()}}>
+                            <span
+                                className="inline-flex sm:w-[60px] items-center px-3 text-sm text-[--site-card-icon-color] bg-[--site-main-color3] border border-l-0 rounded-r-md hover:cursor-pointer"
+                                onClick={() => {
+                                    handleSubmitmessage();
+                                }}
+                            >
                                 <img
                                     src={chatsend}
                                     alt="send"

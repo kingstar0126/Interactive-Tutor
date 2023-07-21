@@ -1,9 +1,11 @@
 import {
-    BsFillChatLeftTextFill,
     BsPlus,
     BsFillCaretUpSquareFill,
     BsFillCaretDownSquareFill,
 } from "react-icons/bs";
+
+import { AiOutlineUser } from "react-icons/ai";
+
 import { useState, useEffect } from "react";
 import Chatmodal from "./Chatmodal";
 import ChatTable from "./ChatTable";
@@ -92,27 +94,27 @@ const Chat = () => {
     };
 
     return (
-        <div className="p-4 pl-5 pr-10">
+        <div>
             <Toaster />
-            <div className="flex items-center justify-between w-full p-5 bg-[--site-card-icon-color] rounded-full">
-                <div className="flex items-center justify-center gap-2 font-semibold text-[20px] text-white">
-                    <BsFillChatLeftTextFill className="fill-[--site-logo-text-color]" />
-                    Tutors
+            <div className="flex items-center justify-between w-full p-5">
+                <div className="flex items-center justify-center gap-2 font-semibold text-[20px] text-[--site-card-icon-color]">
+                    <AiOutlineUser className="w-7 h-7" />
+                    <span className="flex items-end">Tutors</span>
                 </div>
 
                 <div className="flex items-end justify-end">
-                {_chat && _chat.organization && (
-                <div className="flex flex-col items-start justify-center p-2 bg-[--site-warning-text-color] m-2 rounded-xl shadow-2xl">
-                        <p>
-                            <span className="font-bold text-[14px]">
-                                Organisation ID:{" "}
-                            </span>
-                            <span className="text-[--site-error-text-color] font-semibold">
-                                {_chat.organization}
-                            </span>
-                        </p>
-                </div>
-            )}
+                    {_chat && _chat.organization && (
+                        <div className="flex flex-col items-start justify-center p-2 bg-[--site-warning-text-color] m-2 rounded-xl shadow-2xl">
+                            <p>
+                                <span className="font-bold text-[14px]">
+                                    Organisation ID:{" "}
+                                </span>
+                                <span className="text-[--site-error-text-color] font-semibold">
+                                    {_chat.organization}
+                                </span>
+                            </p>
+                        </div>
+                    )}
                     {query && (
                         <p className="bg-[--site-logo-text-color] p-2 m-2 rounded-md gap-2 items-center justify-center h-full flex">
                             <span className="text-[--site-error-text-color] font-bold">
@@ -175,7 +177,7 @@ const Chat = () => {
                     </button>
                 </div>
             </div>
-            <div className="flex flex-col w-full">
+            <div className="flex flex-col w-full p-10">
                 <div className={showDescription}>
                     <p className="text-[20px] font-semibold">
                         Hello, {user.username}!

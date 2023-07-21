@@ -1,12 +1,9 @@
-import { ListItem, ListItemPrefix } from "@material-tailwind/react";
-import {
-    BsDatabaseFillGear,
-    BsFillChatLeftTextFill,
-    BsFillCreditCard2FrontFill,
-} from "react-icons/bs";
-import { HiDocumentReport } from "react-icons/hi";
-import { BiLogOut } from "react-icons/bi";
-import { MdManageAccounts } from "react-icons/md";
+import { BsDatabaseFillGear } from "react-icons/bs";
+
+//! Sidebar icons
+import { AiOutlineUser, AiOutlineTrophy } from "react-icons/ai";
+import { PiUserCircleGearLight } from "react-icons/pi";
+import { IoLogOutOutline } from "react-icons/io5";
 
 import Logo from "../assets/logo.png";
 import { useLocation, Link } from "react-router-dom";
@@ -16,18 +13,20 @@ import { useNavigate } from "react-router-dom";
 import { changeuser } from "../redux/actions/userAction";
 import { useEffect } from "react";
 import { SERVER_URL } from "../config/constant";
+import { useState } from "react";
 
 const Sidebar = () => {
     let location = useLocation();
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [selection, setSelection] = useState(1);
     useEffect(() => {
         if (location) {
             setlocation(dispatch, location.pathname);
         }
     }, []);
     const user = JSON.parse(useSelector((state) => state.user.user));
-    
+
     const handleLogout = () => {
         changeuser(dispatch, null);
         navigate("/login");
@@ -35,65 +34,88 @@ const Sidebar = () => {
 
     return (
         <div className="flex flex-col items-center justify-center">
-            <div className="container flex items-center justify-center w-1/3 p-1 mt-5">
+            <div className="flex items-center justify-center w-3/5 p-2 mt-10">
                 <Link to="chat">
-                    <img src={`${SERVER_URL}${Logo}`} className="w-[99px] h-full " alt="logo" />
+                    <img
+                        src={`${SERVER_URL}${Logo}`}
+                        className="w-full h-auto"
+                        alt="logo"
+                    />
                 </Link>
             </div>
-            <div className="flex flex-col items-start justify-center py-5 mt-5">
-                <Link to="chat" className="w-full text-white">
-                    <ListItem className="p-2">
-                        <ListItemPrefix>
-                            <BsFillChatLeftTextFill className="w-5 h-5 fill-[--site-logo-text-color]" />
-                        </ListItemPrefix>
-                        Tutors
-                    </ListItem>
+            <div className="flex flex-col items-end justify-center w-full gap-3 px-3 mt-10">
+                <Link
+                    to="chat"
+                    className="flex w-full gap-3 p-2 transition-colors duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
+                    onClick={() => {
+                        setSelection(1);
+                    }}
+                    style={{
+                        color: selection === 1 ? "#c1ff72" : "#ffffff",
+                    }}
+                >
+                    <AiOutlineUser className="w-7 h-7" />
+
+                    <span className="flex items-end">Tutor</span>
                 </Link>
-                <Link to="subscription" className="w-full text-white">
-                    <ListItem className="p-2">
-                        <ListItemPrefix>
-                            <BsFillCreditCard2FrontFill className="w-5 h-5 fill-[--site-logo-text-color]" />
-                        </ListItemPrefix>
-                        Subscriptions
-                    </ListItem>
+                <Link
+                    to="subscription"
+                    className="flex w-full gap-3 p-2 transition-colors duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
+                    onClick={() => {
+                        setSelection(2);
+                    }}
+                    style={{
+                        color: selection === 2 ? "#c1ff72" : "#ffffff",
+                    }}
+                >
+                    <AiOutlineTrophy className="w-7 h-7" />
+                    <span className="flex items-end">Subscriptions</span>
                 </Link>
+                {/* //Todo This is user manager page */}
                 {user.role === 1 ? (
-                    <Link to="manager" className="w-full text-white">
-                        <ListItem className="p-2">
-                            <ListItemPrefix>
-                                <BsDatabaseFillGear className="w-5 h-5 fill-[--site-logo-text-color]" />
-                            </ListItemPrefix>
-                            Manager
-                        </ListItem>
+                    <Link
+                        to="manager"
+                        className="flex w-full gap-3 p-2 transition-colors duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
+                        onClick={() => {
+                            setSelection(3);
+                        }}
+                        style={{
+                            color: selection === 3 ? "#c1ff72" : "#ffffff",
+                        }}
+                    >
+                        <BsDatabaseFillGear className="w-7 h-7" />
+
+                        <span className="flex items-end">Manager</span>
                     </Link>
                 ) : null}
-                <Link to="account" className="w-full text-white">
-                    <ListItem className="p-2">
-                        <ListItemPrefix>
-                            <MdManageAccounts className="w-5 h-5 fill-[--site-logo-text-color]" />
-                        </ListItemPrefix>
-                        Account
-                    </ListItem>
-                </Link>
-                <Link to="report" className="w-full text-white">
-                    <ListItem className="p-2">
-                        <ListItemPrefix>
-                            <HiDocumentReport className="w-5 h-5 fill-[--site-logo-text-color]" />
-                        </ListItemPrefix>
-                        Report
-                    </ListItem>
+                <Link
+                    to="account"
+                    className="flex w-full gap-3 p-2 transition-colors duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
+                    onClick={() => {
+                        setSelection(4);
+                    }}
+                    style={{
+                        color: selection === 4 ? "#c1ff72" : "#ffffff",
+                    }}
+                >
+                    <PiUserCircleGearLight className="w-7 h-7" />
+                    <span className="flex items-end">Account</span>
                 </Link>
             </div>
-            
-            <div className="fixed bottom-10 left-10">
+
+            <div className="fixed bottom-10 left-3">
                 <div
-                    className="flex items-center justify-center gap-2 hover:scale-110"
+                    className="flex w-full gap-3 p-2 hover:scale-110"
                     onClick={() => {
                         handleLogout();
                     }}
                 >
-                    <BiLogOut className="w-5 h-5 fill-[--site-logo-text-color]" />
-                    <span className="text-[--site-main-color3]">Logout</span>
+                    <div className="w-7 h-7">
+                        <IoLogOutOutline className="text-white w-7 h-7" />
+                    </div>
+                    <span className="flex items-center text-[--site-main-color3]">
+                        Logout
+                    </span>
                 </div>
             </div>
         </div>

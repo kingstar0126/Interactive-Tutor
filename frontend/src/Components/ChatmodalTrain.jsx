@@ -3,7 +3,7 @@ import Select from "react-select";
 import { webAPI } from "../utils/constants";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import ReactLoading from "react-loading";
 
 const ChatmodalTrain = (props) => {
@@ -90,7 +90,10 @@ const ChatmodalTrain = (props) => {
             data = { text, chatbot };
             axios
                 .post(webAPI.sendtext, data)
-                .then((res) =>{console.log(res.data); props.handleOk(res.data.data)})
+                .then((res) => {
+                    console.log(res.data);
+                    props.handleOk(res.data.data);
+                })
                 .catch((err) => console.log(err));
         }
     };

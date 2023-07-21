@@ -4,7 +4,6 @@ import {
     AccordionHeader,
     AccordionBody,
 } from "@material-tailwind/react";
-import { PinField } from "react-pin-field";
 import Select from "react-select";
 import { useSelector } from "react-redux";
 
@@ -19,7 +18,6 @@ const Chatmodal = (props) => {
     const [Conversation, SetConversation] = useState(
         "Hello friends! How can I help you today?"
     );
-    const [validate, SetValidate] = useState(false);
     const models = [
         {
             value: "1",
@@ -36,8 +34,9 @@ const Chatmodal = (props) => {
     ];
     const [gptmodel, SetGPTmodel] = useState(models);
     const [Creativity, SetCreativity] = useState(0.3);
-    const [behaviormodel, SetBehaviormodel] =
-        useState(`If there is relevant training data available, please utilize it to generate responses using the provided information. However, if no training data exists for the specific query, you may respond with "I don't know."`);
+    const [behaviormodel, SetBehaviormodel] = useState(
+        `If there is relevant training data available, please utilize it to generate responses using the provided information. However, if no training data exists for the specific query, you may respond with "I don't know."`
+    );
     const [behavior, SetBehavior] = useState("You are a helpful assistant");
 
     useEffect(() => {
@@ -54,9 +53,10 @@ const Chatmodal = (props) => {
             SetChatdescription("");
             setOpen(0);
             SetConversation("Hello friends! How can I help you today?");
-            SetValidate(false);
             SetCreativity(0.3);
-            SetBehaviormodel(`If there is relevant training data available, please utilize it to generate responses using the provided information. However, if no training data exists for the specific query, you may respond with "I don't know."`);
+            SetBehaviormodel(
+                `If there is relevant training data available, please utilize it to generate responses using the provided information. However, if no training data exists for the specific query, you may respond with "I don't know."`
+            );
             SetBehavior("You are a helpful assistant");
         }
         if (props.chat && props.chat.label) {
@@ -64,7 +64,6 @@ const Chatmodal = (props) => {
             SetChatdescription(props.chat["description"]);
             setOpen(0);
             SetConversation(props.chat["conversation"]);
-            SetValidate(false);
             SetChatmodel(props.chat["model"]);
             SetCreativity(props.chat["creativity"]);
             SetBehaviormodel(props.chat["behaviormodel"]);

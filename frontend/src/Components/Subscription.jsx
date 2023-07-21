@@ -4,12 +4,10 @@ import { useEffect } from "react";
 import { webAPI } from "../utils/constants";
 import { useLocation } from "react-router-dom";
 import { MdCloudDone } from "react-icons/md";
-import CreateProduct from "./CreateProduct";
 import { useState } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { useSelector } from "react-redux";
-import EditProduct from "./EditProduct";
-import { BsFillCreditCard2FrontFill } from "react-icons/bs";
+import { AiOutlineTrophy } from "react-icons/ai";
 import { getUseraccount } from "../redux/actions/userAction";
 import { useDispatch } from "react-redux";
 
@@ -18,11 +16,9 @@ const Subscription = () => {
     const [iscreateModal, setCreateModal] = useState(false);
     const [iseditModal, setEditModal] = useState(false);
     const [subscriptions, setSubscriptions] = useState([]);
-    const params = new URLSearchParams(location.search);
     const [price, setPrice] = useState("");
     const dispatch = useDispatch();
     const user = JSON.parse(useSelector((state) => state.user.user));
-    const [state, setState] = useState(false);
     //success the payment insert the DB for the user role
 
     const handleCancel = () => {
@@ -45,38 +41,11 @@ const Subscription = () => {
             })
             .catch((err) => console.error(err));
     };
-    const handleEditOk = () => {
-        setEditModal(false);
-        toast.success("Updated successfully !");
-        getSubscription();
-    };
 
     useEffect(() => {
         getSubscription();
         getUseraccount(dispatch, { id: user.id });
     }, []);
-
-    const handleCreateProduct = () => {
-        setCreateModal(true);
-    };
-
-    const handleDeleteProduct = (data) => {
-        axios
-            .post(webAPI.delete_product, { user_id: user.id, product_id: data })
-            .then((res) => {
-                toast.success("Deleted successfully !");
-                getSubscription();
-            })
-            .catch((err) => console.error(err));
-    };
-    const handleDeleteAllProducts = () => {
-        axios
-            .post(webAPI.delete_all_product, { user_id: user.id })
-            .then((res) => {
-                getSubscription();
-            })
-            .catch((err) => console.error(err));
-    };
 
     const initiateSubscriptionCheckout = (data) => {
         if (price) {
@@ -126,15 +95,15 @@ const Subscription = () => {
     };
 
     return (
-        <div className="w-full h-full p-4 pl-5 pr-10">
+        <div className="w-full h-full">
             <Toaster />
-            <div className="flex items-center justify-between p-5 bg-[--site-card-icon-color] rounded-full">
-                <div className="flex items-center justify-center gap-2 font-semibold text-[20px] text-white">
-                    <BsFillCreditCard2FrontFill className="fill-[--site-logo-text-color]" />
-                    Subscriptions
+            <div className="flex items-center justify-between w-full p-5">
+                <div className="flex items-center justify-center gap-2 font-semibold text-[20px] text-[--site-card-icon-color]">
+                    <AiOutlineTrophy className="w-7 h-7" />
+                    <span className="flex items-end">Subscriptions</span>
                 </div>
             </div>
-            <div className="py-5">
+            <div className="p-4 py-5 pl-5 pr-10">
                 {subscriptions && subscriptions.length !== 0 && (
                     <div className="bg-[--site-card-icon-color] gap-5 w-full h-full rounded-xl flex justify-center items-start container p-10 border border-[--site-card-icon-color]">
                         {subscriptions.map((item, index) => {

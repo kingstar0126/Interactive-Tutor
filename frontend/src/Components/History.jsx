@@ -15,7 +15,6 @@ const History = (props) => {
         const new_data = props.data.sort((a, b) => {
             return new Date(a.update_data) - new Date(b.update_data);
         });
-
         setHistory(new_data);
     }, [props.data]);
 
@@ -56,8 +55,8 @@ const History = (props) => {
                                     className="w-10 h-10"
                                 />
                                 <div className="flex justify-between w-full">
-                                    <span>
-                                        {item.uuid.toString().slice(0, 23)}
+                                    <span className="text-[--site-main-color3]">
+                                        {item.name}
                                     </span>
                                     <AiFillDelete
                                         className="active:fill-[--site-card-icon-color] fill-[--site-error-text-color]"

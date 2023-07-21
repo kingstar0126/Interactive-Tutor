@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { IoChatbubblesSharp, IoCloseSharp } from "react-icons/io5";
+import { IoChatbubblesSharp } from "react-icons/io5";
 import { Scrollbars } from "react-custom-scrollbars";
 import { CodeBlock, dracula } from "react-code-blocks";
 import axios from "axios";
@@ -31,21 +31,31 @@ const Chatbubble = () => {
     };
 
     useEffect(() => {
-        let id = '83137bf2-a589-476b-b9ad-43f63f4a7574';
-        axios.post(webAPI.getchat, {'id' : id})
-          .then(res => {setChat(res.data.data); setChathistory([{role: "ai", content: "How can I help you?"}])})
-          .catch(err => console.error(err));
-      }, [])
+        let id = "83137bf2-a589-476b-b9ad-43f63f4a7574";
+        axios
+            .post(webAPI.getchat, { id: id })
+            .then((res) => {
+                setChat(res.data.data);
+                setChathistory([
+                    { role: "ai", content: "How can I help you?" },
+                ]);
+            })
+            .catch((err) => console.error(err));
+    }, []);
 
     useEffect(() => {
-        if (click === true) dialogWidget.current.classList.add("hidden");
-        else dialogWidget.current.classList.remove("hidden");
+        if (click === true) {
+            dialogWidget.current.classList.add("hidden");
+        } else {
+            dialogWidget.current.classList.remove("hidden");
+        }
     }, [click]);
 
     const sendMessage = (_message) => {
         axios.post(webAPI.send_bubble_chat, { _message }).then((res) => {
-            if (!res.data.success) console.log("error");
-            else {
+            if (!res.data.success) {
+                console.log("error");
+            } else {
                 receiveMessage(res.data.data);
             }
         });
@@ -69,70 +79,76 @@ const Chatbubble = () => {
                         {chathistory.map((data, index) => {
                             return data.role === "human" && data.content ? (
                                 <div
-                                            name="human_bg"
-                                            className="flex items-center justify-center p-2"
-                                            key={index}
-                                        >
-                                            <div className="flex w-2/3">
-                                                <img
-                                                    src={chat.chat_logo.user}
-                                                    alt="human"
-                                                    className="w-10 h-10"
-                                                />
-                                                <div
-                                                    name="human"
-                                                    className="text-[--site-logo-text-color] whitespace-break-spaces w-full flex p-2"
-                                                >
-                                                    <span>{data.content}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : data.role === "ai" && data.content ? (
+                                    name="human_bg"
+                                    className="flex items-center justify-center p-2"
+                                    key={index}
+                                >
+                                    <div className="flex w-2/3">
+                                        <img
+                                            src={chat.chat_logo.user}
+                                            alt="human"
+                                            className="w-10 h-10"
+                                        />
                                         <div
-                                            name="ai_bg"
-                                            className="flex items-center justify-center p-2"
-                                            key={index}
+                                            name="human"
+                                            className="text-[--site-logo-text-color] whitespace-break-spaces w-full flex p-2"
                                         >
-                                            <div className="flex w-2/3">
-                                                <img
-                                                    src={chat.chat_logo.ai}
-                                                    className="w-10 h-10"
-                                                    alt="AI"
-                                                />
-                                                <div
-                                                    name="ai"
-                                                    key={index}
-                                                    className="text-[--site-main-color3] whitespace-break-spaces w-full flex flex-col p-2"
-                                                >
-                                                    {data.content
-                                                        .split("```")
-                                                        .map((item, index) => {
-                                                            if (
-                                                                index === 0 ||
-                                                                index % 2 === 0
-                                                            ) {
-                                                                return (
-                                                                    <span key={index}>
-                                                                        {item}
-                                                                    </span>
-                                                                );
-                                                            } else {
-                                                                return (
-                                                                    <CodeBlock
-                                                                        key={index}
-                                                                        text={item}
-                                                                        language={"javascript"}
-                                                                        showLineNumbers={false}
-                                                                        wrapLongLines={true}
-                                                                        theme={dracula}
-                                                                        wrapLines
-                                                                    />
-                                                                );
-                                                            }
-                                                        })}
-                                                </div>
-                                            </div>
+                                            <span>{data.content}</span>
                                         </div>
+                                    </div>
+                                </div>
+                            ) : data.role === "ai" && data.content ? (
+                                <div
+                                    name="ai_bg"
+                                    className="flex items-center justify-center p-2"
+                                    key={index}
+                                >
+                                    <div className="flex w-2/3">
+                                        <img
+                                            src={chat.chat_logo.ai}
+                                            className="w-10 h-10"
+                                            alt="AI"
+                                        />
+                                        <div
+                                            name="ai"
+                                            key={index}
+                                            className="text-[--site-main-color3] whitespace-break-spaces w-full flex flex-col p-2"
+                                        >
+                                            {data.content
+                                                .split("```")
+                                                .map((item, index) => {
+                                                    if (
+                                                        index === 0 ||
+                                                        index % 2 === 0
+                                                    ) {
+                                                        return (
+                                                            <span key={index}>
+                                                                {item}
+                                                            </span>
+                                                        );
+                                                    } else {
+                                                        return (
+                                                            <CodeBlock
+                                                                key={index}
+                                                                text={item}
+                                                                language={
+                                                                    "javascript"
+                                                                }
+                                                                showLineNumbers={
+                                                                    false
+                                                                }
+                                                                wrapLongLines={
+                                                                    true
+                                                                }
+                                                                theme={dracula}
+                                                                wrapLines
+                                                            />
+                                                        );
+                                                    }
+                                                })}
+                                        </div>
+                                    </div>
+                                </div>
                             ) : null;
                         })}
                     </Scrollbars>

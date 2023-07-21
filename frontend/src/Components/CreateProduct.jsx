@@ -45,8 +45,11 @@ const CreateProduct = (props) => {
     };
 
     useEffect(() => {
-        if (name && price && description) SetError(false);
-        else SetError(true);
+        if (name && price && description) {
+            SetError(false);
+        } else {
+            SetError(true);
+        }
     }, [name, price, description]);
 
     const showHideClassname = props.open
@@ -56,14 +59,14 @@ const CreateProduct = (props) => {
     return (
         <div className={showHideClassname}>
             <div className="relative w-3/5 p-5 mx-auto bg-[--site-card-icon-color] text-white rounded-md shadow-lg top-[250px]">
-                <div className="flex flex-col gap-5 items-center justify-center p-5">
+                <div className="flex flex-col items-center justify-center gap-5 p-5">
                     {error && (
                         <span className="text-[--site-error-text-color] font-light">
                             Please Enter all field
                         </span>
                     )}
-                    <label className="w-2/3 justify-center flex">
-                        <span className="w-1/3 flex justify-end pr-2 items-center">
+                    <label className="flex justify-center w-2/3">
+                        <span className="flex items-center justify-end w-1/3 pr-2">
                             Product Name:
                         </span>
                         <input
@@ -73,8 +76,8 @@ const CreateProduct = (props) => {
                             onChange={(e) => setName(e.target.value)}
                         />
                     </label>
-                    <label className="w-2/3 justify-center flex">
-                        <span className="w-1/3 flex justify-end pr-2 items-center">
+                    <label className="flex justify-center w-2/3">
+                        <span className="flex items-center justify-end w-1/3 pr-2">
                             Price:
                         </span>
                         <input
@@ -84,8 +87,8 @@ const CreateProduct = (props) => {
                             onChange={(e) => setPrice(e.target.value)}
                         />
                     </label>
-                    <label className="w-2/3 justify-center flex">
-                        <span className="w-1/3 flex justify-end pr-2 items-center">
+                    <label className="flex justify-center w-2/3">
+                        <span className="flex items-center justify-end w-1/3 pr-2">
                             Description:
                         </span>
                         <textarea
@@ -96,8 +99,8 @@ const CreateProduct = (props) => {
                             onChange={(e) => setDescription(e.target.value)}
                         />
                     </label>
-                    <label className="w-2/3 justify-center flex">
-                        <span className="w-1/3 flex justify-end pr-2 items-center">
+                    <label className="flex justify-center w-2/3">
+                        <span className="flex items-center justify-end w-1/3 pr-2">
                             Currency:
                         </span>
                         <select
@@ -110,7 +113,7 @@ const CreateProduct = (props) => {
                             {/* Add other currency options as needed */}
                         </select>
                     </label>
-                    <div className="flex w-2/3 items-center justify-center">
+                    <div className="flex items-center justify-center w-2/3">
                         <button
                             onClick={props.handleCancel}
                             className="mr-10 bg-[--site-logo-text-color] text-[--site-card-icon-color] rounded-lg p-2"

@@ -8,7 +8,7 @@ import Autocomplete from "react-google-autocomplete";
 import { GOOGLE_MAP_API } from "../env";
 import toast, { Toaster } from "react-hot-toast";
 import { changeuser } from "../redux/actions/userAction";
-import { MdManageAccounts } from "react-icons/md";
+import { PiUserCircleGearLight } from "react-icons/pi";
 
 const ManageAccount = () => {
     const [username, setUsername] = useState("");
@@ -77,15 +77,16 @@ const ManageAccount = () => {
     }, []);
 
     return (
-        <div className="w-full h-full py-4 pl-5 pr-10">
+        <div className="w-full h-full">
             <Toaster />
-            <div className="flex items-center justify-between p-5 bg-[--site-card-icon-color] rounded-full">
-                <div className="flex items-center justify-center gap-2 font-semibold text-[20px] text-white">
-                    <MdManageAccounts className="fill-[--site-logo-text-color]" />
-                    Account
+
+            <div className="flex items-center justify-between w-full p-5">
+                <div className="flex items-center justify-center gap-2 font-semibold text-[20px] text-[--site-card-icon-color]">
+                    <PiUserCircleGearLight className="w-7 h-7" />
+                    <span className="flex items-end">Subscriptions</span>
                 </div>
             </div>
-            <div className="py-5">
+            <div className="py-5 pl-5 pr-10">
                 <div className="bg-[--site-card-icon-color] w-full h-full rounded-xl p-10 flex flex-col gap-5 ">
                     <div className="border-2 rounded-lg border-[--site-logo-text-color] p-5 items-center justify-start flex-col flex gap-5">
                         <div className="flex flex-col w-3/5">

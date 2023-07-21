@@ -5,7 +5,6 @@ import { getchat } from "../redux/actions/chatAction";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { webAPI } from "../utils/constants";
-import { useEffect } from "react";
 import BubbleItem from "./Branding/Bubble/BubbleItem";
 import NotificationBubble from "./Branding/Bubble/NotificationBubble";
 import LogoBranding from "./Branding/Images/LogoBranding";

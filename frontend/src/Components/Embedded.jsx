@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { SERVER_URL } from "../config/constant";
-import { useSelector } from "react-redux";
 
 const Embedded = (props) => {
     const [chatwindow, setChatwindow] = useState("");
@@ -9,7 +8,6 @@ const Embedded = (props) => {
     const chatbot_window = useRef(null);
     const chatbot_bubble = useRef(null);
     const chatbot_URL = useRef(null);
-    const chat = JSON.parse(useSelector((state) => state.chat.chat));
 
     const showHideClassname = props.open
         ? "fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto"
