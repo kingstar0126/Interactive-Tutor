@@ -90,7 +90,7 @@ const ChatmodalTrain = (props) => {
             data = { text, chatbot };
             axios
                 .post(webAPI.sendtext, data)
-                .then((res) => props.handleOk(res.data.data))
+                .then((res) =>{console.log(res.data); props.handleOk(res.data.data)})
                 .catch((err) => console.log(err));
         }
     };

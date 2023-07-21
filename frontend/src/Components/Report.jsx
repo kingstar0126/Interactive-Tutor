@@ -43,10 +43,12 @@ const Report = () => {
         axios
             .post(webAPI.get_report_data, { id: user.id })
             .then((res) => {
+                console.log(res.data)
+                const one = res.data.data.slice(0, -1);
+                const two = res.data.data.slice(-1);
                 const dataset = [];
-                res.data.data.map((item, index) => {
+                one.map((item, index) => {
                     const output = Array(daysInMonth).fill("0");
-
                     item.forEach((element) => {
                         output.forEach((ele, index) => {
                             if (index === parseInt(element)) {
@@ -57,7 +59,7 @@ const Report = () => {
                         });
                     });
                     let new_data = {
-                        label: "AI Tutor" + (index + 1).toString(),
+                        label: two[0][index],
                         data: output,
                         borderColor: getRandomColor(),
                     };

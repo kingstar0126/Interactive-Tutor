@@ -437,12 +437,15 @@ def get_report_data():
     id = request.json['id']
     chats = db.session.query(Chat).filter_by(user_id=id).all()
     messages = []
+    labels = []
     for chat in chats:
         data = []
+        labels.append(chat.label)
         message = db.session.query(Message).filter_by(chat_id=chat.id).all()
         for msg in message:
             data.append(msg.create_date.strftime("%Y-%m-%d").split('-')[2])
         messages.append(data)
+    messages.append(labels)
     return jsonify({'success': True, 'data': messages})
 
 

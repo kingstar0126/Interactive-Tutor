@@ -1,4 +1,3 @@
-from langchain.callbacks import get_openai_callback
 from langchain.chat_models import ChatOpenAI
 from gptcache import Cache
 from gptcache.manager.factory import manager_factory
@@ -33,11 +32,12 @@ def init_gptcache(cache_obj: Cache, llm: str):
     )
 
 
-def generate_message(query, history, behavior, temp, model, chat, trains=[]):
+def generate_message(query, history, behavior, temp, model, chat):
     load_dotenv()
 
     template = """ {behavior}
-
+    Make the most of your training data to answer Human's question with as much detail as possible.
+    
     Training data: {examples}
 
     Chathistory: {history}
@@ -69,28 +69,23 @@ def generate_message(query, history, behavior, temp, model, chat, trains=[]):
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
     docsearch = Pinecone.from_existing_index(
         index_name=PINECONE_INDEX_NAME, embedding=embeddings)
-    docs = docsearch.similarity_search_with_score(query=query, k=10)
+    _query = query
+    docs = docsearch.similarity_search(query=_query, k=10)
 
     examples = ""
-    for doc, _ in docs:
-        for source in trains:
-            if doc.metadata['source'] == source and doc.metadata['chat'] == str(chat):
-                examples += doc.page_content + '\n'
+    for doc in docs:
+        if doc.metadata['chat'] == str(chat):
+            doc.page_content = doc.page_content.replace('\n\n', ' ')
+            examples += doc.page_content + '\n'
 
-    with get_openai_callback() as cb:
+    response = conversation.run(
+        human_input=query,
+        history=history,
+        behavior=behavior,
+        examples=examples
+    )
 
-        chat_history = history
-        chat_history.append({"role": "human", "content": query})
-        response = conversation.run(
-            human_input=query,
-            history=history,
-            behavior=behavior,
-            examples=examples
-        )
-
-        chat_history.append({"role": "ai", "content": response})
-        token = cb.total_tokens
-        return response, chat_history, token
+    return response
 
 
 def generate_AI_message(query, history, behavior, temp, model):
@@ -136,19 +131,13 @@ def generate_AI_message(query, history, behavior, temp, model):
         prompt=prompt
     )
 
-    with get_openai_callback() as cb:
+    response = conversation.run(
+        human_input=query,
+        history=history,
+        behavior=behavior,
+    )
 
-        chat_history = history
-        chat_history.append({"role": "human", "content": query})
-        response = conversation.run(
-            human_input=query,
-            history=history,
-            behavior=behavior,
-        )
-
-        chat_history.append({"role": "ai", "content": response})
-        token = cb.total_tokens
-        return response, chat_history, token
+    return response
 
 
 def generate_Bubble_message(query):

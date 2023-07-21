@@ -77,6 +77,7 @@ const NewChat = () => {
                 .then((res) => {
                     if (res.data.code === 200) {
                         getchat(dispatch, res.data.data);
+                        console.log(res.data.data)
                     }
                 })
                 .catch((err) => {
@@ -84,34 +85,34 @@ const NewChat = () => {
                 });
 
             axios.post(webAPI.get_message, { id }).then((res) => {
-                if (res.data.success === "true") {
+                if (res.data.success === true) {
                     if (res.data.data.message) {
                         setChathistory(res.data.data.message);
                     }
+                    if (res.data.data.message.length === 0) {
+                        chatbot_start.current.classList.remove("hidden");
+                        window_chat.current.classList.add("hidden");
+                    } else {
+                        chatbot_start.current.classList.add("hidden");
+                        window_chat.current.classList.remove("hidden");
+                        if (human_background.current) {
+                            human_background.current.style["background-color"] =
+                                chat.chat_logo.user_bg;
+                            human_background.current.style.color =
+                                chat.chat_logo.user_color;
+                            human_background.current.style["font-size"] =
+                                chat.chat_logo.user_size + "px";
+                        }
+                        if (ai_background.current) {
+                            ai_background.current.style["background-color"] =
+                                chat.chat_logo.ai_bg;
+                            ai_background.current.style.color = chat.chat_logo.ai_color;
+                            ai_background.current.style["font-size"] =
+                                chat.chat_logo.ai_size + "px";
+                        }
+                    }
                 }
             });
-            if (chathistory.length === 0) {
-                chatbot_start.current.classList.remove("hidden");
-                window_chat.current.classList.add("hidden");
-            } else {
-                chatbot_start.current.classList.add("hidden");
-                window_chat.current.classList.remove("hidden");
-                if (human_background.current) {
-                    human_background.current.style["background-color"] =
-                        chat.chat_logo.user_bg;
-                    human_background.current.style.color =
-                        chat.chat_logo.user_color;
-                    human_background.current.style["font-size"] =
-                        chat.chat_logo.user_size + "px";
-                }
-                if (ai_background.current) {
-                    ai_background.current.style["background-color"] =
-                        chat.chat_logo.ai_bg;
-                    ai_background.current.style.color = chat.chat_logo.ai_color;
-                    ai_background.current.style["font-size"] =
-                        chat.chat_logo.ai_size + "px";
-                }
-            }
         } else if (!chat || result) {
             axios
                 .post(webAPI.getchat, chatId)
