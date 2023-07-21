@@ -93,16 +93,8 @@ def search_google():
         top_sentences = sorted(ranking, key=ranking.get, reverse=True)[:10]
 
         summary = ''
-        word_count = 0
         for i in top_sentences:
-            sentence_words = sentences[i].split()
-            remaining_words = 500 - word_count
-            if len(sentence_words) <= remaining_words:
-                summary += sentences[i]
-                word_count += len(sentence_words)
-            else:
-                summary += ' '.join(sentence_words[:remaining_words])
-                break
+            summary += ' '.join(sentence[i])
         result['summary'] = summary
         search_results.append(result)
     return {'results': search_results}

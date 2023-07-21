@@ -36,7 +36,6 @@ def generate_message(query, history, behavior, temp, model, chat):
     load_dotenv()
 
     template = """ {behavior}
-    Make the most of your training data to answer Human's question with as much detail as possible.
     
     Training data: {examples}
 
