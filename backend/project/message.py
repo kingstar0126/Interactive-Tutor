@@ -141,6 +141,7 @@ def send_message():
     query = request.json['_message']
     behaviormodel = request.json['behaviormodel']
     model = request.json['model']
+    print(uuid)
     current_message = db.session.query(Message).filter_by(uuid=uuid).first()
     if current_message is not None:
         chat = db.session.query(Chat).filter_by(
@@ -159,8 +160,8 @@ def send_message():
 
         temp = current_message.creativity
         history = json.loads(current_message.message)
-        if len(history) > 4:
-            last_history = history[-4:]
+        if len(history) > 6:
+            last_history = history[-6:]
         else:
             last_history = history
         behavior = ""

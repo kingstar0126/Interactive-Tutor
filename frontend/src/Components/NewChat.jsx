@@ -89,7 +89,6 @@ const NewChat = () => {
                 .then((res) => {
                     if (res.data.code === 200) {
                         getchat(dispatch, res.data.data);
-                        console.log(res.data.data);
                     }
                 })
                 .catch((err) => {

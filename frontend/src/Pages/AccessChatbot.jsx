@@ -5,12 +5,14 @@ import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import PinField from "react-pin-field";
 import { webAPI } from "../utils/constants";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getchat } from "../redux/actions/chatAction";
 import ReactLoading from "react-loading";
+import { useLocation } from "react-router-dom";
+import { setlocation } from "../redux/actions/locationAction";
 
 const AccessChatbot = () => {
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
@@ -18,10 +20,13 @@ const AccessChatbot = () => {
     const navigate = useNavigate();
     const [organization, setOrganization] = useState("");
     const [validate, SetValidate] = useState(false);
-
+    let location = useLocation();
+    const previous_location = useSelector(
+        (state) => state.location.previous_location
+    );
+    const dispatch = useDispatch();
     const pinField = useRef(null);
     const [status, setStatus] = useState(false);
-    const dispatch = useDispatch();
     const [isloading, setLoadindg] = useState(false);
     const notification = (type, message) => {
         // To do in here
@@ -32,6 +37,9 @@ const AccessChatbot = () => {
             toast.success(message);
         }
     };
+    useEffect(()=> {
+        localStorage.clear();
+    }, [])
 
     const submit = async (pin) => {
         await axios
@@ -61,6 +69,7 @@ const AccessChatbot = () => {
                                             res.data.data
                                         );
                                         setStatus(true);
+                                        setlocation(dispatch, location.pathname);
                                         navigate("newchat");
                                     } else {
                                         pinField.current.forEach(
