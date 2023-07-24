@@ -18,7 +18,11 @@ import { Outlet, useLocation } from "react-router-dom";
 import { getUserState } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
 import ReactSpeedometer from "react-d3-speedometer";
-import { Scrollbar } from "react-scrollbars-custom";
+import {
+    MdOutlineUpdate,
+    MdArrowDropDown,
+    MdArrowDropUp,
+} from "react-icons/md";
 
 const Chat = () => {
     const location = useLocation();
@@ -83,7 +87,8 @@ const Chat = () => {
         } else {
             getChats();
         }
-    }, [location]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
     const getChats = () => {
         let data = {
             user_id: user.id,
@@ -105,7 +110,7 @@ const Chat = () => {
 
                 <div className="flex items-end justify-end mt-[27px] mb-[30px]">
                     {_chat && _chat.organization && (
-                        <div className="xl:flex flex-col items-start justify-center p-2 bg-[--site-warning-text-color] rounded-xl shadow-2xl hidden">
+                        <div className="xl:flex flex-col items-start justify-center mr-2 p-2 bg-[--site-warning-text-color] rounded shadow-2xl hidden">
                             <p>
                                 <span className="font-bold text-[14px]">
                                     Organisation ID:{" "}
@@ -117,51 +122,48 @@ const Chat = () => {
                         </div>
                     )}
                     {query && (
-                        <p className="bg-[--site-logo-text-color] p-2 rounded-md gap-2 items-center justify-center h-full flex">
-                            <span className="text-[--site-error-text-color] font-bold">
+                        <p className="bg-[--site-logo-text-color] p-2 rounded gap-2 items-center justify-center h-full flex">
+                            <span className="text-[--site-error-text-color] font-semibold text-base">
                                 {query}
                             </span>
-                            <span className="text-[--site-card-icon-color]">
+                            <span className="text-[--site-card-icon-color] text-base font-medium">
                                 Queries
                             </span>
                         </p>
                     )}
                     {trial > 0 && (
-                        <div className="flex items-center justify-center">
-                            <div>
-                                <ReactSpeedometer
-                                    maxSegmentLabels={0}
-                                    segments={4}
-                                    width={100}
-                                    height={58}
-                                    ringWidth={10}
-                                    value={14 - trial}
-                                    needleColor="black"
-                                    needleHeightRatio={0.5}
-                                    maxValue={14}
-                                    startColor={"#f5da42"}
-                                    endColor={"#ff0000"}
-                                />
-                            </div>
+                        <div className="flex items-end justify-end">
+                            <ReactSpeedometer
+                                maxSegmentLabels={0}
+                                segments={4}
+                                width={100}
+                                height={58}
+                                ringWidth={10}
+                                value={14 - trial}
+                                needleColor="black"
+                                needleHeightRatio={0.5}
+                                maxValue={14}
+                                startColor={"#f5da42"}
+                                endColor={"#ff0000"}
+                            />
                         </div>
                     )}
                     <button
                         onClick={() => navigate("/chatbot/subscription")}
-                        className="p-2 rounded-md bg-[--site-logo-text-color] text-[--site-card-icon-color]"
+                        className="flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color]"
                     >
-                        Upgrade
+                        <MdOutlineUpdate className="w-6 h-6" />
+                        <span className="text-base font-medium">Upgrade</span>
                     </button>
-                    <button className="p-2 mb-2">
+
+                    <button
+                        className="p-2 flex justify-center items-center bg-[--site-logo-text-color] rounded text-[--site-card-icon-color] pt-3 ml-2"
+                        onClick={() => setIsOpen(!isOpen)}
+                    >
                         {isOpen ? (
-                            <BsFillCaretUpSquareFill
-                                onClick={() => setIsOpen(!isOpen)}
-                                className="fill-[--site-logo-text-color] w-5 h-5 hover:scale-105"
-                            />
+                            <MdArrowDropUp className="w-5 h-5 hover:scale-105" />
                         ) : (
-                            <BsFillCaretDownSquareFill
-                                onClick={() => setIsOpen(!isOpen)}
-                                className="fill-[--site-logo-text-color] w-5 h-5 hover:scale-105"
-                            />
+                            <MdArrowDropDown className="w-5 h-5 hover:scale-105" />
                         )}
                     </button>
                 </div>
@@ -230,13 +232,13 @@ const Chat = () => {
                             <button
                                 type="button"
                                 onClick={showModal}
-                                className="text-[--site-logo-text-color] bg-[--site-card-icon-color] hover:bg-[--site-card-icon-color]/90 focus:ring-4 focus:outline-none focus:ring-[--site-card-icon-color]/50 font-medium rounded-xl text-sm px-2 py-1 text-center inline-flex items-center dark:focus:ring-[--site-card-icon-color]/55"
+                                className="text-[--site-logo-text-color] bg-[--site-card-icon-color] hover:bg-[--site-card-icon-color]/90 focus:ring-4 focus:outline-none focus:ring-[--site-card-icon-color]/50 font-medium rounded text-sm px-2 py-1 text-center inline-flex items-center dark:focus:ring-[--site-card-icon-color]/55"
                             >
                                 <BsPlus className="w-[30px] h-[30px] text-xl pointer-events-none" />
                                 Add Tutor
                             </button>
                         </div>
-                        <div className="w-full h-[500px] bg-[--site-main-color3] rounded-xl">
+                        <div className="w-full h-[500px] bg-[--site-main-color3] rounded">
                             <ChatTable
                                 chat={chat}
                                 handledelete={getChats}
@@ -245,7 +247,7 @@ const Chat = () => {
                         </div>
                     </div>
                 ) : (
-                    <div className="p-5 w-full mt-5 border-2 border-[--site-card-icon-color] bg-[--site-main-color3] rounded-2xl">
+                    <div className="p-5 w-full mt-5 border-2 border-[--site-card-icon-color] bg-[--site-main-color3] rounded">
                         <Outlet />
                     </div>
                 )}

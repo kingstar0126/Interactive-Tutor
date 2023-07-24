@@ -34,12 +34,6 @@ const AccessChatbot = () => {
     };
 
     const submit = async (pin) => {
-        if (!organization || !pin) {
-            setLoadindg(false);
-            pinField.current.forEach((input) => (input.value = ""));
-            pinField.current[0].focus();
-            return;
-        }
         await axios
             .post(webAPI.getChatwithPIN, {
                 organization: organization,
@@ -52,35 +46,42 @@ const AccessChatbot = () => {
                     setStatus(false);
                 } else {
                     getchat(dispatch, res.data.data);
+                    let chat = res.data.data;
                     axios
-                        .post(webAPI.start_message, res.data.data)
+                        .get("https://geolocation-db.com/json/")
                         .then((res) => {
-                            if (res.status === 200) {
-                                localStorage.setItem("chatbot", res.data.data);
-                                setStatus(true);
-                                navigate("newchat");
-                            } else {
-                                pinField.current.forEach(
-                                    (input) => (input.value = "")
-                                );
-                                pinField.current[0].focus();
-                            }
-                            setLoadindg(false);
+                            let country = res.data.country_name;
+                            chat["country"] = country;
+                            axios
+                                .post(webAPI.start_message, chat)
+                                .then((res) => {
+                                    if (res.status === 200) {
+                                        localStorage.setItem(
+                                            "chatbot",
+                                            res.data.data
+                                        );
+                                        setStatus(true);
+                                        navigate("newchat");
+                                    } else {
+                                        pinField.current.forEach(
+                                            (input) => (input.value = "")
+                                        );
+                                        pinField.current[0].focus();
+                                    }
+                                    setLoadindg(false);
+                                })
+                                .catch(() => {
+                                    setLoadindg(false);
+                                    pinField.current.forEach(
+                                        (input) => (input.value = "")
+                                    );
+                                    pinField.current[0].focus();
+                                });
                         })
-                        .catch((err) => {
+                        .catch(() => {
                             setLoadindg(false);
-                            pinField.current.forEach(
-                                (input) => (input.value = "")
-                            );
-                            pinField.current[0].focus();
                         });
                 }
-            })
-            .catch((error) => {
-                setLoadindg(false);
-                pinField.current.forEach((input) => (input.value = ""));
-                pinField.current[0].focus();
-                console.error(error);
             });
     };
 
@@ -91,9 +92,9 @@ const AccessChatbot = () => {
 
     return (
         <div className="bg-[--site-main-color-home] font-logo h-full sm:h-screen pb-10">
-            <Header />
+            {status === false && <Header />}
             <Toaster />
-            {status == false && (
+            {status === false && (
                 <div className="mt-[100px]">
                     <div className="w-full p-6 m-auto bg-[--site-main-color3] rounded-md h-full lg:max-w-xl">
                         <h1 className="text-3xl font-semibold text-center text-[--site-main-Login] underline">

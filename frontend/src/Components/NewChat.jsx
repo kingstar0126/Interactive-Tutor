@@ -79,7 +79,7 @@ const NewChat = () => {
                         window_chat.current.classList.add("hidden");
                     }
                 })
-                .catch((err) => {
+                .catch(() => {
                     setLoading(false);
                 });
         } else if (previous_location === current_location && chat) {
