@@ -3,7 +3,7 @@ import chatsend from "../assets/chatgpt-send.svg";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
 import { useSelector, useDispatch } from "react-redux";
-import { setchatbot, getchatbot, getchat } from "../redux/actions/chatAction";
+import { setchatbot, getchat } from "../redux/actions/chatAction";
 import { useNavigate } from "react-router-dom";
 import { Scrollbar } from "react-scrollbars-custom";
 import { dracula, CopyBlock } from "react-code-blocks";
@@ -127,29 +127,42 @@ const NewChat = () => {
                 }
             });
         } else if (!chat || result) {
+            setLoading(true);
             axios
-                .post(webAPI.getchat, chatId)
-                .then(async (res) => {
-                    if (res.data.code === 200) {
-                        getchat(dispatch, res.data.data);
-                        await axios
-                            .post(webAPI.start_message, res.data.data)
-                            .then((res) => {
-                                if (res.status === 200) {
-                                    localStorage.setItem(
-                                        "chatbot",
-                                        res.data.data
-                                    );
-                                }
-                            })
-                            .catch((err) => console.log(err));
-                        window.location.reload();
-                    } else {
-                        navigate(-1);
-                    }
+                .get("https://geolocation-db.com/json/")
+                .then((res) => {
+                    let country = res.data.country_name;
+                    axios
+                        .post(webAPI.getchat, chatId)
+                        .then(async (res) => {
+                            if (res.data.code === 200) {
+                                getchat(dispatch, res.data.data);
+                                res.data.data["country"] = country;
+                                await axios
+                                    .post(webAPI.start_message, res.data.data)
+                                    .then((res) => {
+                                        if (res.status === 200) {
+                                            localStorage.setItem(
+                                                "chatbot",
+                                                res.data.data
+                                            );
+                                        }
+                                    })
+                                    .catch((err) => console.log(err));
+                                setLoading(false);
+                                window.location.reload();
+                            } else {
+                                navigate(-1);
+                                setLoading(false);
+                            }
+                        })
+                        .catch((err) => {
+                            setLoading(false);
+                            navigate(-1);
+                        });
                 })
                 .catch((err) => {
-                    navigate(-1);
+                    setLoading(false);
                 });
         }
     }, []);

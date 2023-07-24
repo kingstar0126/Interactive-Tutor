@@ -46,4 +46,7 @@ code {
     --site-error-text-color: #f80707;
     --site-card-icon-color: #153144;
     --site-chat-background-color: #fafafa;
+    --site-chat-header-to-color: #f4f9fc4f;
+    --site-chat-header-from-color: #c8e1f242;
+    --site-chat-header-border: #cfdce9;
 }

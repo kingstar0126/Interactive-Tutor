@@ -18,6 +18,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { getUserState } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
 import ReactSpeedometer from "react-d3-speedometer";
+import { Scrollbar } from "react-scrollbars-custom";
 
 const Chat = () => {
     const location = useLocation();
@@ -96,15 +97,15 @@ const Chat = () => {
     return (
         <div>
             <Toaster />
-            <div className="flex items-center justify-between w-full p-5">
-                <div className="flex items-center justify-center gap-2 font-semibold text-[20px] text-[--site-card-icon-color]">
-                    <AiOutlineUser className="w-7 h-7" />
-                    <span className="flex items-end">Tutors</span>
+            <div className="flex items-center justify-between w-full h-[100px] px-10 from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] border-b-[--site-chat-header-border] border bg-gradient-to-r">
+                <div className="flex gap-2 mt-9 mb-8 text-[--site-card-icon-color]">
+                    <AiOutlineUser className="w-8 h-8" />
+                    <span className="text-2xl font-semibold">Tutors</span>
                 </div>
 
-                <div className="flex items-end justify-end">
+                <div className="flex items-end justify-end mt-[27px] mb-[30px]">
                     {_chat && _chat.organization && (
-                        <div className="flex flex-col items-start justify-center p-2 bg-[--site-warning-text-color] m-2 rounded-xl shadow-2xl">
+                        <div className="xl:flex flex-col items-start justify-center p-2 bg-[--site-warning-text-color] rounded-xl shadow-2xl hidden">
                             <p>
                                 <span className="font-bold text-[14px]">
                                     Organisation ID:{" "}
@@ -116,7 +117,7 @@ const Chat = () => {
                         </div>
                     )}
                     {query && (
-                        <p className="bg-[--site-logo-text-color] p-2 m-2 rounded-md gap-2 items-center justify-center h-full flex">
+                        <p className="bg-[--site-logo-text-color] p-2 rounded-md gap-2 items-center justify-center h-full flex">
                             <span className="text-[--site-error-text-color] font-bold">
                                 {query}
                             </span>
@@ -127,18 +128,6 @@ const Chat = () => {
                     )}
                     {trial > 0 && (
                         <div className="flex items-center justify-center">
-                            <p className="flex flex-col">
-                                <span className="text-[--site-main-color3]">
-                                    <span className="text-[--site-error-text-color]">
-                                        {trial}
-                                    </span>{" "}
-                                    of dyas of
-                                </span>
-                                <span className="text-[--site-main-color3] pl-2">
-                                    {" "}
-                                    free trial remaining
-                                </span>
-                            </p>
                             <div>
                                 <ReactSpeedometer
                                     maxSegmentLabels={0}
@@ -158,7 +147,7 @@ const Chat = () => {
                     )}
                     <button
                         onClick={() => navigate("/chatbot/subscription")}
-                        className="mb-2 p-2 rounded-md bg-[--site-logo-text-color] text-[--site-card-icon-color]"
+                        className="p-2 rounded-md bg-[--site-logo-text-color] text-[--site-card-icon-color]"
                     >
                         Upgrade
                     </button>
@@ -177,6 +166,7 @@ const Chat = () => {
                     </button>
                 </div>
             </div>
+
             <div className="flex flex-col w-full p-10">
                 <div className={showDescription}>
                     <p className="text-[20px] font-semibold">
