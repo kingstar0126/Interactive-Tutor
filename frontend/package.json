@@ -26,6 +26,7 @@
         "react-hook-form": "^7.44.3",
         "react-hot-toast": "^2.4.1",
         "react-icons": "^4.10.1",
+        "react-loader-spinner": "^5.3.4",
         "react-loading": "^2.0.3",
         "react-phone-number-input": "^3.2.25",
         "react-pin-field": "^3.1.3",

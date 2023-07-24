@@ -34,7 +34,7 @@ const Sidebar = () => {
 
     return (
         <div className="flex flex-col items-center justify-center">
-            <div className="flex items-center justify-center w-3/5 p-2 mt-10">
+            <div className="flex items-center justify-center mt-[40px] mb-[50px] px-[78px]">
                 <Link to="chat">
                     <img
                         src={`${SERVER_URL}${Logo}`}
@@ -43,63 +43,71 @@ const Sidebar = () => {
                     />
                 </Link>
             </div>
-            <div className="flex flex-col items-end justify-center w-full gap-3 px-3 mt-10">
+            <div className="flex-col items-center justify-start w-full">
                 <Link
                     to="chat"
-                    className="flex w-full gap-3 p-2 transition-colors duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
+                    className="flex w-full gap-4 px-6 py-4 transition-all duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
                     onClick={() => {
                         setSelection(1);
                     }}
                     style={{
                         color: selection === 1 ? "#c1ff72" : "#ffffff",
+                        fontWeight: selection === 1 ? 600 : 500,
                     }}
                 >
-                    <AiOutlineUser className="w-7 h-7" />
+                    <AiOutlineUser className="w-6 h-6" />
 
-                    <span className="flex items-end">Tutor</span>
+                    <span className="flex items-end text-base">Tutor</span>
                 </Link>
                 <Link
                     to="subscription"
-                    className="flex w-full gap-3 p-2 transition-colors duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
+                    className="flex w-full gap-4 px-6 py-4 transition-all duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
                     onClick={() => {
                         setSelection(2);
                     }}
                     style={{
                         color: selection === 2 ? "#c1ff72" : "#ffffff",
+                        fontWeight: selection === 2 ? 600 : 500,
                     }}
                 >
-                    <AiOutlineTrophy className="w-7 h-7" />
-                    <span className="flex items-end">Subscriptions</span>
+                    <AiOutlineUser className="w-6 h-6" />
+                    <span className="flex items-end text-base ">
+                        Subscriptions
+                    </span>
                 </Link>
                 {/* //Todo This is user manager page */}
                 {user.role === 1 ? (
                     <Link
                         to="manager"
-                        className="flex w-full gap-3 p-2 transition-colors duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
+                        className="flex w-full gap-4 px-6 py-4 transition-all duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
                         onClick={() => {
                             setSelection(3);
                         }}
                         style={{
                             color: selection === 3 ? "#c1ff72" : "#ffffff",
+                            fontWeight: selection === 3 ? 600 : 500,
                         }}
                     >
-                        <BsDatabaseFillGear className="w-7 h-7" />
+                        <BsDatabaseFillGear className="w-6 h-6" />
 
-                        <span className="flex items-end">Manager</span>
+                        <span className="flex items-end text-base ">
+                            Manager
+                        </span>
                     </Link>
                 ) : null}
                 <Link
                     to="account"
-                    className="flex w-full gap-3 p-2 transition-colors duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
+                    className="flex w-full gap-4 px-6 py-4 transition-all duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
                     onClick={() => {
                         setSelection(4);
                     }}
                     style={{
                         color: selection === 4 ? "#c1ff72" : "#ffffff",
+                        fontWeight: selection === 4 ? 600 : 500,
                     }}
                 >
-                    <PiUserCircleGearLight className="w-7 h-7" />
-                    <span className="flex items-end">Account</span>
+                    <PiUserCircleGearLight className="w-6 h-6" />
+                    <span className="flex items-end text-base ">Account</span>
                 </Link>
             </div>
 
@@ -111,9 +119,9 @@ const Sidebar = () => {
                     }}
                 >
                     <div className="w-7 h-7">
-                        <IoLogOutOutline className="text-white w-7 h-7" />
+                        <IoLogOutOutline className="w-6 h-6 text-white" />
                     </div>
-                    <span className="flex items-center text-[--site-main-color3]">
+                    <span className="flex items-center text-[--site-main-color3] font-normal text-base">
                         Logout
                     </span>
                 </div>
