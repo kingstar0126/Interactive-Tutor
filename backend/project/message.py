@@ -49,7 +49,6 @@ def correct_grammar(text):
 
 @message.route('/api/search', methods=['POST'])
 def search_google():
-    search_query = request.form.get('query')
     nltk.download('stopwords')
     nltk.download('punkt')
     nltk.download('averaged_perceptron_tagger')
