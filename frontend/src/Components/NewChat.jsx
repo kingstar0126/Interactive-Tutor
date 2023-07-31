@@ -398,7 +398,7 @@ const NewChat = () => {
                                         <div
                                             ref={human_background}
                                             name="human_bg"
-                                            className="flex justify-start lg:items-center lg:justify-center lg:p-2"
+                                            className="flex items-center justify-start p-2 lg:justify-center"
                                             key={index}
                                         >
                                             <div className="flex justify-start lg:w-4/5">

@@ -98,11 +98,11 @@ export default function Example() {
             label: "Preview",
             value: "preview",
             desc: (
-                <div className="w-full h-full rounded-xl border-[--site-chat-header-border] border ">
+                <div className="w-full h-full rounded-xl border-[--site-chat-header-border] border flex-col flex from-[--site-main-modal-from-color] bg-gradient-to-br">
                     <Toaster />
-                    <div className="absolute md:w-full p-5 z-10 md:z-0">
-                        <div className="flex md:flex-row flex-col gap-5 md:gap-0 justify-between text-black">
-                            <div className="flex gap-5 md:flex-row flex-col">
+                    <div className="flex flex-col p-5 md:w-full md:z-0">
+                        <div className="flex flex-col justify-between gap-5 text-black md:flex-row md:gap-0">
+                            <div className="flex flex-col gap-5 md:flex-row">
                                 <button
                                     onClick={handleOpen}
                                     className="bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2"
@@ -127,7 +127,7 @@ export default function Example() {
                             </button>
                         </div>
                     </div>
-                    <div className="h-hull min-h-[430px] grid">
+                    <div className="h-hull min-h-[430px] flex">
                         <NewChat />
                     </div>
                     <Embedded
