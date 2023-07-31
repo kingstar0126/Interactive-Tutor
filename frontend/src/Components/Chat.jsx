@@ -13,14 +13,13 @@ import { getUserState } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
 import ReactSpeedometer from "react-d3-speedometer";
 import { setOpenSidebar } from "../redux/actions/locationAction";
-import { Scrollbar } from "react-scrollbars-custom";
 import {
     MdOutlineUpdate,
     MdArrowDropDown,
     MdArrowDropUp,
 } from "react-icons/md";
-
-import { Carousel } from "@material-tailwind/react";
+import { Scrollbar } from "react-scrollbars-custom";
+import { Carousel, IconButton } from "@material-tailwind/react";
 
 const Chat = () => {
     const location = useLocation();
@@ -42,7 +41,6 @@ const Chat = () => {
     const [isOpen, setIsOpen] = useState(true);
     const [trial, setTrial] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
-    const videosRef = useRef([]);
     const descroption = [
         {
             title: "Creating an account",
@@ -207,19 +205,11 @@ const Chat = () => {
     Interactive Tutor allows you to control who has access to your content, safeguarding your intellectual property.`,
         },
     ];
-    const [text, setText] = useState({});
-    const [position, setPosition] = useState(0);
-    const [showDescription, setShowDescription] = useState("block");
-    const dispatch = useDispatch();
-    const handleOpenSidebar = () => {
-        dispatch(setOpenSidebar());
-    };
-    const showModal = () => {
-        setIsModalOpen(true);
-    };
+    const [isactiveIndex, setIsActiveIndex] = useState(0);
+    const videoRef = useRef([]);
 
     const togglePlay = (index) => {
-        const video = videosRef.current[index];
+        const video = videoRef.current[index];
 
         if (video.paused) {
             video.play();
@@ -228,6 +218,15 @@ const Chat = () => {
         }
 
         setIsPlaying(!video.paused);
+    };
+
+    const [showDescription, setShowDescription] = useState("block");
+    const dispatch = useDispatch();
+    const handleOpenSidebar = () => {
+        dispatch(setOpenSidebar());
+    };
+    const showModal = () => {
+        setIsModalOpen(true);
     };
 
     const handleOk = (data) => {
@@ -282,7 +281,7 @@ const Chat = () => {
     return (
         <div>
             <Toaster />
-            <div className="flex md:items-center items-end justify-between w-full md:h-[100px] md:px-10 from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] md:border-b-[--site-chat-header-border] md:border md:bg-gradient-to-r px-4 py-2 max-h-min gap-1">
+            <div className="flex md:items-center items-end justify-between w-full md:h-[100px] md:px-10 from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] md:border-b-[--site-chat-header-border] md:border md:bg-gradient-to-r px-4 pb-2 max-h-min gap-1">
                 <div className="hidden md:flex gap-2 mt-9 mb-8 text-[--site-card-icon-color]">
                     <AiOutlineUser className="w-8 h-8" />
                     <span className="text-2xl font-semibold">Tutors</span>
@@ -357,65 +356,112 @@ const Chat = () => {
                 <AiOutlineUser className="w-8 h-8" />
                 <span className="text-2xl font-semibold">Tutors</span>
             </div>
-            <div className="flex flex-col w-full p-2 md:gap-8 md:px-10">
+            <div className="flex flex-col w-full px-5 pt-8 pb-16 md:gap-8 md:px-10">
                 <div className={showDescription}>
                     <div className="flex w-full h-auto rounded-lg md:w-7/12">
                         <Carousel
+                            autoplay={false}
                             navigation={({
                                 setActiveIndex,
                                 activeIndex,
                                 length,
-                            }) => {
-                                setPosition(activeIndex);
-                                return (
-                                    <div className="absolute z-50 flex gap-2 bottom-4 left-2/4 -translate-x-2/4">
-                                        {new Array(length)
-                                            .fill("")
-                                            .map((_, i) => (
-                                                <span
-                                                    key={i}
-                                                    className={`block h-1 cursor-pointer rounded-2xl transition-all content-[''] ${
-                                                        activeIndex === i
-                                                            ? "w-8 bg-white"
-                                                            : "w-4 bg-white/50"
-                                                    }`}
-                                                    onClick={() => {
-                                                        setActiveIndex(i);
-                                                    }}
-                                                />
-                                            ))}
-                                    </div>
-                                );
-                            }}
+                            }) => (
+                                <div className="absolute z-50 flex gap-2 bottom-4 left-2/4 -translate-x-2/4">
+                                    {setIsActiveIndex(activeIndex)}
+                                    {new Array(length).fill("").map((_, i) => (
+                                        <span
+                                            key={i}
+                                            className={`block h-1 cursor-pointer rounded-2xl transition-all content-[''] ${
+                                                activeIndex === i
+                                                    ? "w-8 bg-white"
+                                                    : "w-4 bg-white/50"
+                                            }`}
+                                            onClick={() => {
+                                                setActiveIndex(i);
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                            prevArrow={({ handlePrev, activeIndex }) => (
+                                <IconButton
+                                    variant="text"
+                                    size="lg"
+                                    onClick={() => {
+                                        handlePrev();
+                                    }}
+                                    className="!absolute top-2/4 left-4 -translate-y-2/4 text-[--site-logo-text-color]"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth={2}
+                                        stroke="currentColor"
+                                        className="w-6 h-6"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
+                                        />
+                                    </svg>
+                                </IconButton>
+                            )}
+                            nextArrow={({ handleNext, activeIndex }) => (
+                                <IconButton
+                                    variant="text"
+                                    size="lg"
+                                    onClick={() => {
+                                        handleNext();
+                                    }}
+                                    className="!absolute top-2/4 !right-4 -translate-y-2/4 text-[--site-logo-text-color]"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="green"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth={2}
+                                        stroke="currentColor"
+                                        className="w-6 h-6"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                                        />
+                                    </svg>
+                                </IconButton>
+                            )}
                         >
                             {[
                                 {
                                     src: "https://video.wixstatic.com/video/4d69d5_c737c9f71590405ab8ad2024877c9250/720p/mp4/file.mp4",
-                                    type: "video/webm",
+                                    type: "video/mp4",
                                 },
                                 {
                                     src: "https://video.wixstatic.com/video/4d69d5_99cd4885087e41e4a8d8a8973583143d/720p/mp4/file.mp4",
-                                    type: "video/webm",
+                                    type: "video/mp4",
                                 },
                                 {
                                     src: "https://video.wixstatic.com/video/4d69d5_ce4ed8c9d08c4c76842a597f684d5f3e/720p/mp4/file.mp4",
-                                    type: "video/webm",
+                                    type: "video/mp4",
                                 },
                                 {
                                     src: "https://video.wixstatic.com/video/4d69d5_ca127d9db93c4475bb3cf55781f88b70/720p/mp4/file.mp4",
-                                    type: "video/webm",
+                                    type: "video/mp4",
                                 },
                                 {
                                     src: "https://video.wixstatic.com/video/4d69d5_8e22f27eb45946fc9269ab9dafedc7da/720p/mp4/file.mp4",
-                                    type: "video/webm",
+                                    type: "video/mp4",
                                 },
                                 {
                                     src: "https://video.wixstatic.com/video/4d69d5_7ac0914dc4d9438ca13eb2c087f0115c/720p/mp4/file.mp4",
-                                    type: "video/webm",
+                                    type: "video/mp4",
                                 },
                                 {
                                     src: "https://video.wixstatic.com/video/4d69d5_9659672cc61c45d0b0c6606356b2b83b/720p/mp4/file.mp4",
-                                    type: "video/webm",
+                                    type: "video/mp4",
                                 },
                             ].map((videoData, index) => (
                                 <div
@@ -427,7 +473,7 @@ const Chat = () => {
                                         controls={false}
                                         onClick={() => togglePlay(index)}
                                         ref={(ref) =>
-                                            (videosRef.current[index] = ref)
+                                            (videoRef.current[index] = ref)
                                         }
                                     >
                                         <source
@@ -435,6 +481,7 @@ const Chat = () => {
                                             type={videoData.type}
                                         />
                                     </video>
+
                                     <div className="absolute w-full translate-x-1/2 -translate-y-1/2 top-1/2">
                                         {isPlaying ? null : (
                                             <button
@@ -451,13 +498,13 @@ const Chat = () => {
                             ))}
                         </Carousel>
                     </div>
-                    <div className="flex-col flex md:pr-[26px] md:py-5 md:gap-[30px] md:w-5/12">
-                        <span className="text-3xl font-bold text-[--site-card-icon-color]">
-                            {descroption[position].title}
+                    <div className="flex flex-col md:w-5/12">
+                        <span className="text-[16px] font-medium text-[--site-card-icon-color]">
+                            {descroption[isactiveIndex].title}
                         </span>
-                        <span className="text-[24px] leading-[40px] font-medium text-[--site-chat-video-description-color] md:h-full h-[20rem]">
+                        <span className="text-[14px] leading-[40px] font-medium text-[--site-chat-video-description-color] h-[20rem]">
                             <Scrollbar>
-                                {descroption[position].content}
+                                {descroption[isactiveIndex].content}
                             </Scrollbar>
                         </span>
                     </div>
