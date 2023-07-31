@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { SERVER_URL } from "../config/constant";
 import {
-    Accordion,
-    AccordionHeader,
-    AccordionBody,
     DialogHeader,
     Dialog,
     DialogBody,
     DialogFooter,
 } from "@material-tailwind/react";
+import { useSelector } from "react-redux";
 import { Scrollbar } from "react-scrollbars-custom";
 
 const Embedded = (props) => {
@@ -18,6 +16,9 @@ const Embedded = (props) => {
     const chatbot_window = useRef(null);
     const chatbot_bubble = useRef(null);
     const chatbot_URL = useRef(null);
+    const chatbot_organization = useRef(null);
+    const chatbot_access = useRef(null);
+    const chat = JSON.parse(useSelector((state) => state.chat.chat));
 
     useEffect(() => {
         setChatURL(`${SERVER_URL}/chatbot/share/url`);
@@ -44,6 +45,54 @@ const Embedded = (props) => {
             <DialogBody className="border-t border-[--site-chat-header-border] text-black text-base font-medium pl-8 py-5 h-[30rem]">
                 <Scrollbar>
                     <div className="mr-4">
+                        <div className="flex flex-col items-center justify-center w-full my-5">
+                            <div
+                                name="Window embedding"
+                                className="border items-start gap-5 justify-center border-[--site-chat-header-border] rounded-xl w-full py-5 flex flex-col"
+                            >
+                                <h3 className="border-b-[1px] border-[--site-chat-header-border] p-5 w-full">
+                                    Your Information
+                                </h3>
+                                <div className="flex flex-col w-full gap-2 px-5">
+                                    <span>Your Organisation ID:</span>
+                                    <input
+                                        ref={chatbot_organization}
+                                        defaultValue={chat.organization}
+                                        readOnly
+                                        className="w-full rounded-xl text-[--site-card-icon-color] p-5 bg-transparent border-[--site-chat-header-border] border"
+                                    />
+                                </div>
+                                <button
+                                    className="bg-[--site-card-icon-color] text-white py-2 px-4 gap-2 rounded-md mx-5"
+                                    onClick={() => {
+                                        chatbot_organization.current.select();
+                                        document.execCommand("copy");
+                                    }}
+                                >
+                                    Copy to clipboard
+                                </button>
+
+                                <div className="flex flex-col w-full gap-2 px-5">
+                                    <span>Your PIN Code:</span>
+                                    <input
+                                        ref={chatbot_access}
+                                        defaultValue={chat.access}
+                                        readOnly
+                                        className="w-full rounded-xl text-[--site-card-icon-color] p-5 bg-transparent border-[--site-chat-header-border] border"
+                                    />
+                                </div>
+                                <button
+                                    className="bg-[--site-card-icon-color] text-white py-2 px-4 gap-2 rounded-md mx-5"
+                                    onClick={() => {
+                                        chatbot_access.current.select();
+                                        document.execCommand("copy");
+                                    }}
+                                >
+                                    Copy to clipboard
+                                </button>
+                            </div>
+                        </div>
+
                         <div className="flex flex-col items-center justify-center w-full my-5">
                             <div
                                 name="Window embedding"
