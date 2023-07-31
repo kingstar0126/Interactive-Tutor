@@ -426,6 +426,8 @@ def handle_request_entity_too_large(error):
 def get_traindatas():
     uuid = request.json['uuid']
     chat = db.session.query(Chat).filter_by(uuid=uuid).first()
+    if not chat:
+        return jsonify({'success': False, 'message': 'Not found', 'code': 404})
     train_ids = json.loads(chat.train)
 
     data = []
@@ -433,7 +435,7 @@ def get_traindatas():
         train_data = db.session.query(Train).filter_by(id=id).first()
         data.append({'id': train_data.id, 'label': train_data.label,
                     'type': train_data.type, 'status': train_data.status})
-    return jsonify(data)
+    return jsonify({'data': data, 'success': True})
 
 
 @train.route('/api/data/deletetrain', methods=['POST'])

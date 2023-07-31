@@ -54,7 +54,7 @@ def search_google():
     nltk.download('averaged_perceptron_tagger')
     api_key = os.getenv('GOOGLE_API')
     cse_id = os.getenv('GOOGLE_CX')
-
+    search_query = request.form['query']
     num_results = 5
 
     url = f"https://www.googleapis.com/customsearch/v1?cx={cse_id}&key={api_key}&q={search_query}&num={num_results}"
@@ -78,23 +78,23 @@ def search_google():
 
         content_text = content_text.strip()
         result['content'] = content_text
-        sentences = sent_tokenize(content_text.lower())
-        word_freq = nltk.FreqDist(word_tokenize(content_text))
-        stop_words = set(stopwords.words('english'))
+        # sentences = sent_tokenize(content_text.lower())
+        # word_freq = nltk.FreqDist(word_tokenize(content_text))
+        # stop_words = set(stopwords.words('english'))
 
-        ranking = {}
-        for i, sentence in enumerate(sentences):
-            sentence_tokens = word_tokenize(sentence)
-            sentence_score = sum(
-                word_freq[token] for token in sentence_tokens if token not in stop_words)
-            ranking[i] = sentence_score
+        # ranking = {}
+        # for i, sentence in enumerate(sentences):
+        #     sentence_tokens = word_tokenize(sentence)
+        #     sentence_score = sum(
+        #         word_freq[token] for token in sentence_tokens if token not in stop_words)
+        #     ranking[i] = sentence_score
 
-        top_sentences = sorted(ranking, key=ranking.get, reverse=True)[:10]
+        # top_sentences = sorted(ranking, key=ranking.get, reverse=True)[:10]
 
-        summary = ''
-        for i in top_sentences:
-            summary += ' '.join(sentence[i])
-        result['summary'] = summary
+        # summary = ''
+        # for i in top_sentences:
+        #     summary += ' '.join(sentence[i])
+        # result['summary'] = summary
         search_results.append(result)
     return {'results': search_results}
 

@@ -33,14 +33,6 @@ def delete_vectore(source):
         }
     )
 
-# def create_index(uuid):
-#     name = f"{uuid}"
-#     pinecone.create_index(name, dimension=1536)
-
-
-# def delete_index(uuid):
-#     name = f"{uuid}"
-#     pinecone.delete_index(name)
 
 def is_valid_uuid(value):
     try:
@@ -66,7 +58,7 @@ def add_chat():
     chat_title = json.dumps({})
     chat_description = json.dumps({})
     chat_copyright = json.dumps(
-        {'description': 'powered by interactive-tutor.com'})
+        {'description': 'powered by interactive-tutor.com', 'status': 'false', 'color': '#ff0000'})
     chat_button = json.dumps({})
     bubble = json.dumps({})
 
@@ -170,7 +162,7 @@ def update_brandingData():
         response = {
             'success': True,
             'code': 200,
-            'message': 'Your ChatBot was updated successfully'
+            'message': 'Your ChatBot was updated successfully,'
         }
     return jsonify(response)
 
