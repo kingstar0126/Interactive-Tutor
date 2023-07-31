@@ -3,7 +3,7 @@ import { SET_LOCATION, SET_OPEN_SIDEBAR } from "../type";
 const initialState = {
     previous_location: localStorage.getItem("location.previous"),
     current_location: localStorage.getItem("location.current"),
-    openSidebar: true,
+    openSidebar: false,
 };
 
 const chatReducer = (state = initialState, action) => {

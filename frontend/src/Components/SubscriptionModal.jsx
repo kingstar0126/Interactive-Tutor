@@ -32,7 +32,6 @@ const SubscriptionModal = (props) => {
     }, []);
     const initiateSubscriptionCheckout = (data) => {
         if (price) {
-            console.log("Update");
             if (price === data) {
                 return;
             }
@@ -56,7 +55,6 @@ const SubscriptionModal = (props) => {
                     console.error(err);
                 });
         } else {
-            console.log("Create");
             axios
                 .post(webAPI.create_checkout, {
                     subscriptionPlanId: data,

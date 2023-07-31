@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 
 const Login = () => {
     const statedata = JSON.parse(useSelector((state) => state.user.user));
+    const isOpenSidebar = useSelector((state) => state.location.openSidebar);
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [status, Setstatus] = useState(1);

@@ -6,7 +6,6 @@ import { setlocation } from "../redux/actions/locationAction";
 import { useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setOpenSidebar } from "../redux/actions/locationAction";
-
 const Layout = () => {
     let location = useLocation();
     const handleOpenSidebar = () => {

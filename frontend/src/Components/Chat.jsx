@@ -13,6 +13,7 @@ import { getUserState } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
 import ReactSpeedometer from "react-d3-speedometer";
 import { setOpenSidebar } from "../redux/actions/locationAction";
+import { Scrollbar } from "react-scrollbars-custom";
 import {
     MdOutlineUpdate,
     MdArrowDropDown,
@@ -20,11 +21,6 @@ import {
 } from "react-icons/md";
 
 import { Carousel } from "@material-tailwind/react";
-import data1 from "../assets/movie/data1.webm";
-import data2 from "../assets/movie/data2.webm";
-import data3 from "../assets/movie/data3.webm";
-import data4 from "../assets/movie/data4.webm";
-import data5 from "../assets/movie/data5.webm";
 
 const Chat = () => {
     const location = useLocation();
@@ -47,6 +43,172 @@ const Chat = () => {
     const [trial, setTrial] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
     const videosRef = useRef([]);
+    const descroption = [
+        {
+            title: "Creating an account",
+            content: `This tutorial provides a clear, step-by-step guide on setting up a new account with Interactive Tutor, an essential process for anyone looking to utilize this powerful educational tool. The guide begins at the homepage of interactive-tutor.com, instructing users to find and select the 'Start for Free' button located at the top right of the screen.
+
+    ​
+    
+    In the following segment, we explain how to navigate the Sign-Up page. Here, we stress the importance of filling out all required information accurately, including your first and last name, a valid email address, and a secure password. We emphasize the significance of a strong password that uses a mix of numbers, letters, and special characters to enhance account security.
+    
+    ​
+    
+    The guide also highlights the need to re-enter your chosen password in the 'Confirm Password' field for verification purposes. An important step in this process is agreeing to the 'Terms of Service' and 'Privacy Policy'. To accept, users are directed to tick the checkbox after careful reading.
+    
+    ​
+    
+    We explain that once all fields are correctly filled out and terms and conditions are agreed upon, users should select 'Create Account' to finalize the setup process. The tutorial assures users that a successful account creation will prompt a confirmation message and an email verification step, advising users to check their inbox and follow the provided instructions.
+    
+     
+    
+    By successfully creating an account with Interactive Tutor, users gain the ability to start crafting their very own 'Interactive Tutor', absolutely free for a 14-day trial period. This tutorial is especially beneficial for educators, trainers, or individuals who seek an effective and interactive method to share and impart knowledge. After the trial, users can choose a subscription that fits their needs best.
+    
+    ​`,
+        },
+        {
+            title: "Account Access",
+            content: `This succinct tutorial illustrates how to log in and out of your Interactive Tutor account, a necessary process for utilizing the platform's educational tools and ensuring account security.
+
+    ​
+    
+    First, it shows how to log in from the homepage, with a simple click on the 'Login' button and entering the appropriate credentials.
+    
+    ​
+    
+    The tutorial also offers guidance on how to reset a forgotten password, ensuring a smooth login process.
+    
+    ​
+    
+    Finally, it demonstrates how to log out, a step that promotes account security, especially on shared devices. By mastering these steps, users can safely and effectively use Interactive Tutor.`,
+        },
+        {
+            title: "The Dashboard",
+            content: `This quick guide introduces the Interactive Tutor's dashboard, the user-friendly hub for accessing its tools and features.
+
+    ​
+    
+    Upon login, users land on the dashboard that displays subscription details, usage, and options to upgrade for increased benefits.
+    
+    ​
+    
+    The left toolbar provides quick access to key sections: 'Tutors' for an overview of created tutorials, 'Subscriptions' to adjust plans, 'Account' for user settings, and 'Reports' for usage analytics.
+    
+    ​
+    
+    The central console provides extensive resources for creating an interactive tutor, a topic covered in our subsequent tutorials.
+    
+    ​
+    
+    Users are encouraged to explore this intuitive platform and discover its potential.`,
+        },
+        {
+            title: "Add a Tutor",
+            content: `This brief video outlines the steps to create a new tutor in the Interactive Tutor platform. Click 'Add Tutor' located at the console's bottom right to open the Tutor Menu.
+
+    ​
+    
+    First, assign a 'Label' (visible only to you) and 'Description' to the Tutor. The 'Models' section allows you to select an OpenAI Large Language Model to power your Tutor's interactions - options range from GPT 3.5 4k to GPT 4.
+    
+    ​
+    
+    Customize the initial interaction with users using the 'Conversation Starter.'
+    
+    'Advanced Settings' let you fine-tune your Tutor for the best results. 'Context Behaviour' controls how the Tutor uses uploaded training data. You can instruct the Tutor to solely rely on this data, combine it with its own reasoning, or operate like ChatGPT for the most natural interactions.
+    
+    ​
+    
+    'Behaviour Prompt' allows you to guide the Tutor's demeanor towards users, and 'Creativity Temperature' adjusts response specificity.
+    
+    ​
+    
+    Once settings are in place, click 'Confirm' to finalize your new tutor, which is now ready for training and styling.`,
+        },
+        {
+            title: "Training Your Tutor",
+            content: `Navigate to your Tutor and select 'Training Data.' Here you'll see a summary of data sources your Tutor has been trained on - it should currently be empty.
+
+    ​
+    
+    By clicking 'Add Data,' you can start feeding content to your Tutor. For example, let's train our Yoda-themed tutor with the Wikipedia page on Jedi history. Label this data source and paste the webpage URL, then confirm. The engine will begin training your Tutor on this data.
+    
+    ​
+    
+    Upon completion, the data source appears in your dashboard. Remember, with a free trial, you can only add one data source per Tutor. Standard and Pro packages allow for three and ten data sources, respectively.
+    
+    To remove a data source, simply select 'Delete.'
+    
+    ​
+    
+    Adding a new data source follows the same process. Let's upload a whole book - 'The Jedi Path' by Daniel Wallace. The engine might take a bit longer this time. Once it's listed as 'trained' in the dashboard, you're done!
+    
+    ​
+    
+    You've now trained your Tutor, and it's ready for styling.`,
+        },
+        {
+            title: "Styling Your Tutor",
+            content: `In this tutorial we'll explore the customization options to style your Tutor.
+
+    Navigate to the 'Branding' tab in the Tutor. Here, you'll find a variety of features for personalization.
+    
+    ​
+    
+    First, set the 'Title' and 'Description' - these will be publicly visible. For example, our Tutor, named ‘Learn from Yoda,’ has the description, “Ask Yoda questions on how to become a Jedi”.
+    
+    ​
+    
+    If you're on the Standard or Pro subscription, you can add a 'Copyright' or disclaimer and remove the ‘Powered by Interactive Tutor’ text.
+    
+    ​
+    
+    If you plan to embed your Tutor as a chatbot, you can set up the color scheme and notifications.
+    
+    ​
+    
+    For branding, you can upload a 'Logo' for your Tutor and customize its size. 'User Avatar' and 'AI Avatar' can be added to represent learners and your Tutor, respectively. In our example, a cartoon of Luke Skywalker and Yoda serve these roles.
+    
+    ​
+    
+    Below, you can select colors for both the Tutor and User communication boxes, including background and text color.
+    
+    ​
+    
+    Lastly, 'Call to action' buttons can link to external resources. In our case, it redirects to the previously uploaded Wikipedia page.
+    
+    ​
+    
+    After customization, preview your new Tutor. Isn't it cool?
+    
+    ​`,
+        },
+        {
+            title: "Sharing Your Tutor",
+            content: `Once your Tutor is ready, there are several ways to distribute it. From embedding it on your site or intranet, to sharing via an Organization ID and Pin Code for access on the Interactive Tutor mobile app.
+
+    ​
+    
+    But before sharing, it's a good idea to test your Tutor and verify the branding and responses. Use the preview window for this.
+    
+    ​
+    
+    When you're ready to share, you have a few options:
+    
+    ​
+    
+    Embed the Tutor on your site: Open the embed menu and choose to embed your Tutor as an iFrame (a window on your page) or as a chatbot.
+    
+    Share via a unique login page: Share the URL of the login page where users can access the Tutor by entering your unique Organization ID and the Tutor Pin Code.
+    
+    Share for mobile access: Users can download the Interactive Tutor app from their app store and access your Tutor by entering the same Organization ID and Pin Code.
+    
+    ​
+    
+    Interactive Tutor allows you to control who has access to your content, safeguarding your intellectual property.`,
+        },
+    ];
+    const [text, setText] = useState({});
+    const [position, setPosition] = useState(0);
     const [showDescription, setShowDescription] = useState("block");
     const dispatch = useDispatch();
     const handleOpenSidebar = () => {
@@ -195,16 +357,66 @@ const Chat = () => {
                 <AiOutlineUser className="w-8 h-8" />
                 <span className="text-2xl font-semibold">Tutors</span>
             </div>
-            <div className="flex flex-col w-full px-5 pt-8 pb-16 md:gap-8 md:px-10">
+            <div className="flex flex-col w-full p-2 md:gap-8 md:px-10">
                 <div className={showDescription}>
                     <div className="flex w-full h-auto rounded-lg md:w-7/12">
-                        <Carousel>
+                        <Carousel
+                            navigation={({
+                                setActiveIndex,
+                                activeIndex,
+                                length,
+                            }) => {
+                                setPosition(activeIndex);
+                                return (
+                                    <div className="absolute z-50 flex gap-2 bottom-4 left-2/4 -translate-x-2/4">
+                                        {new Array(length)
+                                            .fill("")
+                                            .map((_, i) => (
+                                                <span
+                                                    key={i}
+                                                    className={`block h-1 cursor-pointer rounded-2xl transition-all content-[''] ${
+                                                        activeIndex === i
+                                                            ? "w-8 bg-white"
+                                                            : "w-4 bg-white/50"
+                                                    }`}
+                                                    onClick={() => {
+                                                        setActiveIndex(i);
+                                                    }}
+                                                />
+                                            ))}
+                                    </div>
+                                );
+                            }}
+                        >
                             {[
-                                { src: data1, type: "video/webm" },
-                                { src: data2, type: "video/webm" },
-                                { src: data3, type: "video/webm" },
-                                { src: data4, type: "video/webm" },
-                                { src: data5, type: "video/webm" },
+                                {
+                                    src: "https://video.wixstatic.com/video/4d69d5_c737c9f71590405ab8ad2024877c9250/720p/mp4/file.mp4",
+                                    type: "video/webm",
+                                },
+                                {
+                                    src: "https://video.wixstatic.com/video/4d69d5_99cd4885087e41e4a8d8a8973583143d/720p/mp4/file.mp4",
+                                    type: "video/webm",
+                                },
+                                {
+                                    src: "https://video.wixstatic.com/video/4d69d5_ce4ed8c9d08c4c76842a597f684d5f3e/720p/mp4/file.mp4",
+                                    type: "video/webm",
+                                },
+                                {
+                                    src: "https://video.wixstatic.com/video/4d69d5_ca127d9db93c4475bb3cf55781f88b70/720p/mp4/file.mp4",
+                                    type: "video/webm",
+                                },
+                                {
+                                    src: "https://video.wixstatic.com/video/4d69d5_8e22f27eb45946fc9269ab9dafedc7da/720p/mp4/file.mp4",
+                                    type: "video/webm",
+                                },
+                                {
+                                    src: "https://video.wixstatic.com/video/4d69d5_7ac0914dc4d9438ca13eb2c087f0115c/720p/mp4/file.mp4",
+                                    type: "video/webm",
+                                },
+                                {
+                                    src: "https://video.wixstatic.com/video/4d69d5_9659672cc61c45d0b0c6606356b2b83b/720p/mp4/file.mp4",
+                                    type: "video/webm",
+                                },
                             ].map((videoData, index) => (
                                 <div
                                     key={"video" + videoData.src}
@@ -223,7 +435,6 @@ const Chat = () => {
                                             type={videoData.type}
                                         />
                                     </video>
-
                                     <div className="absolute w-full translate-x-1/2 -translate-y-1/2 top-1/2">
                                         {isPlaying ? null : (
                                             <button
@@ -240,13 +451,14 @@ const Chat = () => {
                             ))}
                         </Carousel>
                     </div>
-                    <div className="flex-col flex md:pr-[26px] md:pt-[71px] md:pb-[95px] md:gap-[30px] md:w-5/12">
+                    <div className="flex-col flex md:pr-[26px] md:py-5 md:gap-[30px] md:w-5/12">
                         <span className="text-3xl font-bold text-[--site-card-icon-color]">
-                            How to build Your Tutor
+                            {descroption[position].title}
                         </span>
-                        <span className="text-[24px] leading-[40px] font-medium text-[--site-chat-video-description-color]">
-                            Watch the video, Once you've finished watch the next
-                            one for how to customize your Tutor.
+                        <span className="text-[24px] leading-[40px] font-medium text-[--site-chat-video-description-color] md:h-full h-[20rem]">
+                            <Scrollbar>
+                                {descroption[position].content}
+                            </Scrollbar>
                         </span>
                     </div>
                 </div>
