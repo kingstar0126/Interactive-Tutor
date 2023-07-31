@@ -2,22 +2,79 @@ import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { webAPI } from "../utils/constants";
 import Chatmodal from "./Chatmodal";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getchat } from "../redux/actions/chatAction";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
 import { useNavigate } from "react-router-dom";
+import { AiOutlinePlus } from "react-icons/ai";
+import {
+    Typography,
+    Button,
+    Dialog,
+    DialogHeader,
+    DialogBody,
+    DialogFooter,
+} from "@material-tailwind/react";
+import React from "react";
 
 const ChatTable = (props) => {
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const dispatch = useDispatch();
     const [currentchat, SetCurrentchat] = useState({});
+    const [tableData, setTableData] = useState([]);
+    const [currentPage, setCurrentPage] = useState(0);
+    const [chatData, setChatData] = useState([]);
+    const itemsPerPage = 5;
+    const [open, setOpen] = useState(false);
+    const [id, setId] = useState(0);
+    const TABLE_HEAD = [
+        { label: "1", value: "Label" },
+        { label: "2", value: "Pin" },
+        { label: "3", value: "Welcome message" },
+        { label: "4", value: "Behaviour prompt" },
+        { label: "5", value: "" },
+    ];
+    const TABLE_HEAD_SM = [
+        { label: "1", value: "Label" },
+        { label: "2", value: "Action" },
+    ];
 
     const showModal = () => {
         setIsModalOpen(true);
     };
+
+    useEffect(() => {
+        if (props.chat.length) {
+            setChatData(props.chat);
+            setCurrentPage(1);
+        }
+    }, [props.chat]);
+
+    const getTotalPages = () => {
+        return Math.ceil(chatData.length / itemsPerPage);
+    };
+
+    const getPaginationRange = () => {
+        const lastIndex = currentPage * itemsPerPage;
+        const firstIndex = lastIndex - itemsPerPage;
+        return {
+            firstIndex,
+            lastIndex,
+        };
+    };
+
+    useEffect(() => {
+        setTableData(getCurrentPageData);
+    }, [currentPage]);
+
+    const getCurrentPageData = () => {
+        const { firstIndex, lastIndex } = getPaginationRange();
+        return props.chat.slice(firstIndex, lastIndex);
+    };
+
     const handleOk = (data) => {
         axios.post(webAPI.updatechat, data).then((res) => {
             if (!res.data.success) {
@@ -45,125 +102,147 @@ const ChatTable = (props) => {
             toast.success(message);
         }
     };
-    const handleDelete = (id) => {
-        confirmAlert({
-            customUI: ({ onClose }) => {
-                return (
-                    <div className="flex flex-col px-12 py-5 text-white bg-[--site-main-color3] border-2 border-[--site-error-text-color]">
-                        <div className="flex items-center justify-center w-full">
-                            <span className="text-2xl font-bold text-[--site-error-text-color]">
-                                Are you sure?
-                            </span>
-                        </div>
-                        <div className="flex items-center justify-center w-full">
-                            <p className="p-2 text-[--site-card-icon-color]">
-                                Are you sure to delete this AI Tutor?
-                            </p>
-                        </div>
-                        <div className="flex items-center justify-center w-full gap-2 p-2">
-                            <button
-                                className="w-1/2 px-4 py-2 font-bold text-[--site-error-text-color] bg-white ring-[--site-error-text-color] ring-[1px] rounded focus:outline-none"
-                                onClick={onClose}
-                            >
-                                No
-                            </button>
-                            <button
-                                className="w-1/2 px-4 py-2 font-bold text-white bg-[--site-error-text-color] rounded hover:bg-[--site-error-text-color] focus:outline-none"
-                                onClick={() => {
-                                    axios
-                                        .delete(`${webAPI.deletechat}/${id}`)
-                                        .then((res) => {
-                                            notification(
-                                                "success",
-                                                res.data.message
-                                            );
-                                            props.handledelete();
-                                        })
-                                        .catch((err) => {
-                                            console.error(
-                                                "Failed to delete chat:",
-                                                err
-                                            );
-                                            // Handle errors here
-                                        });
-                                    onClose();
-                                }}
-                            >
-                                Confirm
-                            </button>
-                        </div>
-                    </div>
-                );
-            },
-        });
-    };
+
+    const handleOpen = () => setOpen(!open);
+
     return (
         <div className="relative overflow-x-auto rounded-xl">
             <Toaster />
-            <table className="w-full bg-[--site-card-icon-color] text-sm text-left text-[--site-main-Table-Text]">
-                <thead className="text-xs text-[--site-main-Table-Tex] uppercase dark:bg-[--site-main-Table-Tex] dark:text-[--site-main-Table-Text_Dark]">
-                    <tr className="flex w-full">
-                        <th className="w-1/5 px-6 py-3">Label</th>
-                        <th className="w-1/5 px-6 py-3">PIN</th>
-                        <th className="hidden py-3 sm:w-1/5 sm:px-6 sm:flex">
-                            Welcome message
-                        </th>
-                        <th className="hidden py-3 sm:w-1/5 sm:px-6 sm:block">
-                            Behaviour prompt
-                        </th>
-                        <th className="w-1/5 px-6 py-3 text-center">Action</th>
+            <div className="flex xl:hidden justify-end pt-3 px-2">
+                <button
+                    className="px-4 py-2 rounded-md gap-2 inline-flex items-center justify-center bg-[--site-card-icon-color] w-1/2 text-[--site-main-Table-Text]"
+                    onClick={() => {
+                        props.handleAdd();
+                    }}
+                >
+                    <span className="text-base">Add Tutors</span>
+                    <AiOutlinePlus className="w-5 h-5" />
+                </button>
+            </div>
+            <table className="w-full table-fixed text-start">
+                <thead>
+                    <tr className="w-full border-b border-[--site-main-Table-border-color]">
+                        {TABLE_HEAD.map((head) => {
+                            const classes =
+                                head.label === "1"
+                                    ? "xl:w-2/12 w-1/2 text-start pt-10 pb-5 pl-8"
+                                    : head.label === "2"
+                                    ? "xl:w-1/12 text-start xl:table-cell hidden pt-10 pb-5 pl-8"
+                                    : head.label === "5"
+                                    ? "text-start  pt-10 pb-5 pl-8 pr-8"
+                                    : "xl:w-3/12 text-start xl:table-cell hidden pt-10 pb-5 pl-8";
+                            return (
+                                <React.Fragment key={head.label}>
+                                    {head.label !== "5" ? (
+                                        <th className={classes}>
+                                            <Typography
+                                                variant="small"
+                                                className="text-base font-medium text-[--site-card-icon-color]"
+                                            >
+                                                {head.value}
+                                            </Typography>
+                                        </th>
+                                    ) : (
+                                        <th className={classes}>
+                                            <button
+                                                className="px-4 py-2 rounded-md gap-2 hidden xl:inline-flex items-center justify-center bg-[--site-card-icon-color] w-full text-[--site-main-Table-Text]"
+                                                onClick={() => {
+                                                    props.handleAdd();
+                                                }}
+                                            >
+                                                <span className="text-2xl">
+                                                    Add Tutors
+                                                </span>
+                                                <AiOutlinePlus className="w-8 h-8" />
+                                            </button>
+                                            <Typography
+                                                variant="small"
+                                                className="text-base xl:hidden font-medium text-[--site-card-icon-color] text-start"
+                                            >
+                                                Action
+                                            </Typography>
+                                        </th>
+                                    )}
+                                </React.Fragment>
+                            );
+                        })}
                     </tr>
                 </thead>
-
                 <tbody>
-                    {props.chat.map((data, index) => {
+                    {tableData.map((data) => {
                         return (
                             <tr
-                                className="bg-[--site-main-color3] text-[--site-card-icon-color] border-[1px] border-[--site-card-icon-color] w-full flex"
-                                key={index}
+                                key={data["label"]}
+                                className="w-full border-b border-[--site-main-Table-border-color]"
                             >
-                                <th
-                                    scope="row"
-                                    className="px-6 w-1/5 py-4 font-bold text-[--site-card-icon-color] whitespace-nowrap"
-                                >
-                                    {data["label"]}
-                                </th>
-                                <td className="w-1/5 px-6 py-4">
-                                    {data["access"]}
+                                <td className="w-1/2 xl:w-2/12 py-5 pl-8 text-start">
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-normal"
+                                    >
+                                        {data["label"]}
+                                    </Typography>
                                 </td>
-                                <td className="hidden w-1/5 sm:px-6 sm:py-4 sm:flex">
-                                    {data["conversation"]}
+                                <td className="xl:w-1/12 hidden xl:table-cell py-5 pl-8 text-start">
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-normal"
+                                    >
+                                        {data["access"]}
+                                    </Typography>
                                 </td>
-                                <td className="hidden w-1/5 sm:px-6 sm:py-4 sm:flex">
-                                    {data["behavior"]}
+                                <td className="xl:w-3/12 py-5 hidden xl:table-cell pl-8 text-start">
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-normal"
+                                    >
+                                        {data["conversation"]}
+                                    </Typography>
                                 </td>
-                                <td
-                                    className={`flex items-center justify-center gap-2 px-6 py-4 w-3/5 sm:w-1/5`}
-                                >
-                                    <div className="items-center justify-center pr-2 sm:flex sm:gap-2 sm:p-0">
-                                        <span
+                                <td className="xl:w-3/12 py-5 pl-8 hidden xl:table-cell text-start">
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-normal"
+                                    >
+                                        {data["behavior"]}
+                                    </Typography>
+                                </td>
+                                <td className="xl:py-5 xl:pl-8 xl:pr-8 text-start pr-4">
+                                    <div className="flex w-full h-full gap-2">
+                                        <button
+                                            className="w-2/6 h-full xl:p-2 px-1 bg-[#479200]/25 rounded-md text-[#479200] hover:bg-[#479200]/75 hover:text-white transition-color duration-150 ease-out active:bg-white active:ring active:ring-[#479200] active:text-[#479200]"
                                             onClick={() => GetCurrentchat(data)}
-                                            className="sm:w-[60px] text-[--site-card-icon-color] text-center hover:bg-[--site-main-form-success] hover:text-[--site-card-icon-color] p-2 border rounded-xl active:bg-[--site-main-form-success1] select-none active:text-[--site-card-icon-color] border-[--site-main-form-success]"
                                         >
-                                            Open
-                                        </span>
-                                        <span
+                                            <span className="xl:text-base text-sm font-medium">
+                                                Open
+                                            </span>
+                                        </button>
+                                        <button
+                                            className="w-2/6 h-full xl:p-2 px-1 bg-[#153144]/25 rounded-md text-[#153144] hover:bg-[#153144]/75 hover:text-white transition-color duration-150 ease-out active:bg-white active:ring active:ring-[#153144] active:text-[#153144]"
                                             onClick={() => {
                                                 SetCurrentchat(data);
                                                 showModal();
                                             }}
-                                            className="sm:w-[60px] text-[--site-card-icon-color] text-center border-[--site-main-color9] hover:bg-[--site-main-color9] hover:text-white p-2 border rounded-xl active:bg-[--site-main-color4] select-none active:text-white"
                                         >
-                                            Edit
-                                        </span>
-                                        <span
-                                            onClick={() =>
-                                                handleDelete(data["id"])
-                                            }
-                                            className="text-[--site-card-icon-color] sm:w-[60px] text-center hover:bg-[--site-main-form-error] border-[--site-main-form-error] hover:text-white p-2 border rounded-xl active:bg-[--site-main-form-error1] select-none active:text-white"
+                                            <span className="xl:text-base text-sm font-medium">
+                                                Edit
+                                            </span>
+                                        </button>
+                                        <button
+                                            className="h-full xl:p-2 px-1 bg-[#FF2121]/25 rounded-md text-[#FF2121] hover:bg-[#FF2121]/75 hover:text-white transition-color duration-150 ease-out active:bg-white active:ring active:ring-[#FF2121] active:text-[#FF2121]"
+                                            onClick={() => {
+                                                handleOpen();
+                                                setId(data["id"]);
+                                            }}
                                         >
-                                            Delete
-                                        </span>
+                                            <span className="xl:text-base text-sm font-medium">
+                                                Delete
+                                            </span>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -171,6 +250,88 @@ const ChatTable = (props) => {
                     })}
                 </tbody>
             </table>
+            {chatData.length > 5 && (
+                <div className="flex justify-between border-t border-[--site-main-modal-input-border-color] p-5">
+                    <Typography
+                        variant="small"
+                        color="black"
+                        className="font-normal"
+                    >
+                        Page {currentPage} of {getTotalPages()}
+                    </Typography>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outlined"
+                            color="blue-gray"
+                            size="sm"
+                            onClick={() =>
+                                setCurrentPage(
+                                    currentPage > 1
+                                        ? currentPage - 1
+                                        : currentPage
+                                )
+                            }
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            color="blue-gray"
+                            size="sm"
+                            onClick={() => {
+                                setCurrentPage(
+                                    currentPage < getTotalPages() - 1
+                                        ? currentPage + 1
+                                        : getTotalPages()
+                                );
+                            }}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </div>
+            )}
+            <Dialog
+                open={open}
+                handler={handleOpen}
+                className="border-[--site-chat-header-border] border rounded-2xl from-[--site-main-modal-from-color] to-[--site-main-modal-to-color] bg-gradient-to-br shadow-lg shadow-[--site-card-icon-color]"
+            >
+                <DialogHeader>Are you sure?</DialogHeader>
+                <DialogBody divider>
+                    <span className="text-base text-black">
+                        Are you sure to delete this AI Tutor?
+                    </span>
+                </DialogBody>
+                <DialogFooter className="flex items-center justify-end gap-4 pb-8">
+                    <button
+                        onClick={handleOpen}
+                        className="bg-transparent border-[--site-card-icon-color] text-[--site-card-icon-color] text-base font-semibold border rounded-md px-4 py-2"
+                    >
+                        cancel
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            axios
+                                .delete(`${webAPI.deletechat}/${id}`)
+                                .then((res) => {
+                                    notification("success", res.data.message);
+                                    props.handleDelete();
+                                })
+                                .catch((err) => {
+                                    console.error(
+                                        "Failed to delete chat:",
+                                        err
+                                    );
+                                });
+                            handleOpen();
+                        }}
+                        className="px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md"
+                    >
+                        confirm
+                    </button>
+                </DialogFooter>
+            </Dialog>
             <Chatmodal
                 chat={currentchat}
                 open={isModalOpen}

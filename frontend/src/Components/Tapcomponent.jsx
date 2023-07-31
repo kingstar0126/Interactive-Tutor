@@ -98,34 +98,38 @@ export default function Example() {
             label: "Preview",
             value: "preview",
             desc: (
-                <div className="w-full h-full">
+                <div className="w-full h-full rounded-xl border-[--site-chat-header-border] border ">
                     <Toaster />
-                    <div className="flex justify-between">
-                        <div className="flex gap-5">
+                    <div className="absolute md:w-full p-5 z-10 md:z-0">
+                        <div className="flex md:flex-row flex-col gap-5 md:gap-0 justify-between text-black">
+                            <div className="flex gap-5 md:flex-row flex-col">
+                                <button
+                                    onClick={handleOpen}
+                                    className="bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2"
+                                >
+                                    <AiFillFolderOpen />
+                                    Open Chat
+                                </button>
+                                <button
+                                    onClick={handleEmbedding}
+                                    className="bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2"
+                                >
+                                    <SiHiveBlockchain />
+                                    Embedded Chat
+                                </button>
+                            </div>
                             <button
-                                onClick={handleOpen}
-                                className="bg-[--site-logo-text-color] p-2 rounded-xl flex items-center justify-center gap-2"
+                                className="bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2"
+                                onClick={handleUpdate}
                             >
-                                <AiFillFolderOpen />
-                                Open Chat
-                            </button>
-                            <button
-                                onClick={handleEmbedding}
-                                className="bg-[--site-logo-text-color] p-2 rounded-xl flex items-center justify-center gap-2"
-                            >
-                                <SiHiveBlockchain />
-                                Embedded Chat
+                                <MdUpdate className="w-6 h-6" />
+                                Update Chat
                             </button>
                         </div>
-                        <button
-                            className="bg-[--site-logo-text-color] p-2 rounded-xl flex items-center justify-center gap-2"
-                            onClick={handleUpdate}
-                        >
-                            <MdUpdate />
-                            Update Chat
-                        </button>
                     </div>
-                    <NewChat />
+                    <div className="h-hull min-h-[430px] grid">
+                        <NewChat />
+                    </div>
                     <Embedded
                         data={chat}
                         open={isModalOpen}
@@ -144,26 +148,38 @@ export default function Example() {
         {
             label: "Branding",
             value: "branding",
-            desc: <Branding />,
+            desc: (
+                <div className="bg-transparent">
+                    <Branding />
+                </div>
+            ),
         },
         {
             label: "Training Data",
             value: "training Data",
-            desc: <TraindataTable />,
+            desc: (
+                <div className="border-[--site-chat-header-border] border rounded-xl from-[--site-main-modal-from-color] bg-gradient-to-br">
+                    <TraindataTable />
+                </div>
+            ),
         },
         {
             label: "Conversation Explorer",
             value: "conversation Explorer",
-            desc: <History data={message_history} />,
+            desc: (
+                <div className="border-[--site-chat-header-border] border rounded-xl from-[--site-main-modal-from-color] bg-gradient-to-br">
+                    <History data={message_history} />
+                </div>
+            ),
         },
     ];
     return (
         <Tabs value={activeTab} id="custom-animation">
             <TabsHeader
-                className="p-2"
+                className="md:px-6 md:py-4 bg-transparent border-b rounded-none border-[--site-chat-header-border] flex xl:flex-row flex-col gap-2 xl:gap-0"
                 indicatorProps={{
                     className:
-                        "bg-transparent border-b-[3px] pb-0 border-[--site-card-icon-color] shadow-none rounded-none",
+                        "bg-[--site-card-icon-color] shadow-none text-white py-3 px-20",
                 }}
             >
                 {data.map(({ label, value }) => (
@@ -175,8 +191,8 @@ export default function Example() {
                         }}
                         className={
                             activeTab === value
-                                ? "text-[--site-card-icon-color] pb-0 font-bold"
-                                : ""
+                                ? "text-white w-full"
+                                : "xl:border-none border w-full border-black rounded-md"
                         }
                     >
                         {label}
@@ -189,12 +205,13 @@ export default function Example() {
                     mount: { y: 0 },
                     unmount: { y: 250 },
                 }}
+                className="mt-6"
             >
                 {data.map(({ value, desc }) => (
                     <TabPanel
                         key={value}
                         value={value}
-                        className="flex justify-center bg-[--site-card-icon-color] rounded-xl min-h-[800px]"
+                        className="p-0 rounded-2xl"
                     >
                         {desc}
                     </TabPanel>

@@ -4,7 +4,7 @@ import { Scrollbars } from "react-custom-scrollbars";
 import { CodeBlock, dracula } from "react-code-blocks";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
-import chatsend from "../assets/chatgpt-send.svg";
+import { BsSendPlus } from "react-icons/bs";
 
 const Chatbubble = () => {
     const bubbleWidget = useRef(null);
@@ -28,6 +28,14 @@ const Chatbubble = () => {
             event.preventDefault();
             setMessage("");
         }
+    };
+
+    const handleSend = () => {
+        let _message = message;
+
+        setChathistory([...chathistory, { role: "human", content: _message }]);
+        sendMessage(_message);
+        setMessage("");
     };
 
     useEffect(() => {
@@ -164,12 +172,13 @@ const Chatbubble = () => {
                         className="rounded-none w-5/6 rounded-l-lg bg-[--site-main-color3] text-[--site-card-icon-color] text-sm p-2.5 focus:border-[--site-logo-text-color] "
                         placeholder="Type message"
                     />
-                    <span className="inline-flex w-1/6 items-center justify-center px-3 text-sm text-[--site-card-icon-color] border border-l-0 rounded-r-md bg-[--site-main-color10]">
-                        <img
-                            src={chatsend}
-                            alt="send"
-                            className="w-[15px] h-[15px]"
-                        />
+                    <span
+                        className="inline-flex w-1/6 items-center justify-center px-3 text-sm text-[--site-card-icon-color] border border-l-0 rounded-r-md bg-[--site-main-color10]"
+                        onClick={() => {
+                            handleSend();
+                        }}
+                    >
+                        <BsSendPlus className="w-[15px] h-[15px]" />
                     </span>
                 </div>
             </div>

@@ -1,12 +1,6 @@
-import {
-    BsPlus,
-    BsFillCaretUpSquareFill,
-    BsFillCaretDownSquareFill,
-} from "react-icons/bs";
-
-import { AiOutlineUser } from "react-icons/ai";
-
-import { useState, useEffect } from "react";
+import { BsFillPlayFill } from "react-icons/bs";
+import { AiOutlineUser, AiOutlineMenu } from "react-icons/ai";
+import { useState, useEffect, useRef } from "react";
 import Chatmodal from "./Chatmodal";
 import ChatTable from "./ChatTable";
 import { useSelector, useDispatch } from "react-redux";
@@ -18,11 +12,19 @@ import { Outlet, useLocation } from "react-router-dom";
 import { getUserState } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
 import ReactSpeedometer from "react-d3-speedometer";
+import { setOpenSidebar } from "../redux/actions/locationAction";
 import {
     MdOutlineUpdate,
     MdArrowDropDown,
     MdArrowDropUp,
 } from "react-icons/md";
+
+import { Carousel } from "@material-tailwind/react";
+import data1 from "../assets/movie/data1.webm";
+import data2 from "../assets/movie/data2.webm";
+import data3 from "../assets/movie/data3.webm";
+import data4 from "../assets/movie/data4.webm";
+import data5 from "../assets/movie/data5.webm";
 
 const Chat = () => {
     const location = useLocation();
@@ -43,11 +45,27 @@ const Chat = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isOpen, setIsOpen] = useState(true);
     const [trial, setTrial] = useState(0);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const videosRef = useRef([]);
     const [showDescription, setShowDescription] = useState("block");
     const dispatch = useDispatch();
-
+    const handleOpenSidebar = () => {
+        dispatch(setOpenSidebar());
+    };
     const showModal = () => {
         setIsModalOpen(true);
+    };
+
+    const togglePlay = (index) => {
+        const video = videosRef.current[index];
+
+        if (video.paused) {
+            video.play();
+        } else {
+            video.pause();
+        }
+
+        setIsPlaying(!video.paused);
     };
 
     const handleOk = (data) => {
@@ -69,7 +87,7 @@ const Chat = () => {
     useEffect(() => {
         if (isOpen) {
             setShowDescription(
-                "flex flex-col items-start justify-center w-full gap-3 p-5 bg-[--site-card-icon-color] text-white mt-[10px] rounded-2xl"
+                "flex bg-gradient-to-r from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] border-[--site-chat-header-border] border md:p-6 p-4 gap-8 w-full rounded-2xl shadow-xl shadow-[--site-chat-header-border] md:flex-row flex-col"
             );
         } else {
             setShowDescription("hidden");
@@ -89,12 +107,12 @@ const Chat = () => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-    const getChats = () => {
+    const getChats = async () => {
         let data = {
             user_id: user.id,
         };
 
-        axios.post(webAPI.getchats, data).then((res) => {
+        await axios.post(webAPI.getchats, data).then((res) => {
             SetChat(res.data.data);
         });
     };
@@ -102,13 +120,16 @@ const Chat = () => {
     return (
         <div>
             <Toaster />
-            <div className="flex items-center justify-between w-full h-[100px] px-10 from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] border-b-[--site-chat-header-border] border bg-gradient-to-r">
-                <div className="flex gap-2 mt-9 mb-8 text-[--site-card-icon-color]">
+            <div className="flex md:items-center items-end justify-between w-full md:h-[100px] md:px-10 from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] md:border-b-[--site-chat-header-border] md:border md:bg-gradient-to-r px-4 py-2 max-h-min gap-1">
+                <div className="hidden md:flex gap-2 mt-9 mb-8 text-[--site-card-icon-color]">
                     <AiOutlineUser className="w-8 h-8" />
                     <span className="text-2xl font-semibold">Tutors</span>
                 </div>
-
-                <div className="flex items-end justify-end mt-[27px] mb-[30px]">
+                <AiOutlineMenu
+                    onClick={handleOpenSidebar}
+                    className="w-6 h-6 mb-1 md:hidden"
+                />
+                <div className="flex items-end justify-end md:mt-[27px] md:mb-[30px]">
                     {_chat && _chat.organization && (
                         <div className="xl:flex flex-col items-start justify-center mr-2 p-2 bg-[--site-warning-text-color] rounded shadow-2xl hidden">
                             <p>
@@ -122,17 +143,17 @@ const Chat = () => {
                         </div>
                     )}
                     {query && (
-                        <p className="bg-[--site-logo-text-color] p-2 rounded gap-2 items-center justify-center h-full flex">
-                            <span className="text-[--site-error-text-color] font-semibold text-base">
+                        <p className="bg-[--site-logo-text-color] p-2 rounded gap-2 items-center justify-center h-full flex md:mr-0">
+                            <span className="text-[--site-error-text-color] font-semibold text-[12px] md:text-base">
                                 {query}
                             </span>
-                            <span className="text-[--site-card-icon-color] text-base font-medium">
+                            <span className="text-[--site-card-icon-color] text-[12px] md:text-base font-medium">
                                 Queries
                             </span>
                         </p>
                     )}
                     {trial > 0 && (
-                        <div className="flex items-end justify-end">
+                        <div className="flex items-end justify-end md:w-max scale-75 md:scale-100 ml-[-20px] mr-[-23px] md:mr-0 translate-y-2 md:translate-y-0">
                             <ReactSpeedometer
                                 maxSegmentLabels={0}
                                 segments={4}
@@ -150,10 +171,12 @@ const Chat = () => {
                     )}
                     <button
                         onClick={() => navigate("/chatbot/subscription")}
-                        className="flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color]"
+                        className="flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
                     >
-                        <MdOutlineUpdate className="w-6 h-6" />
-                        <span className="text-base font-medium">Upgrade</span>
+                        <MdOutlineUpdate className="w-4 h-4 md:w-6 md:h-6" />
+                        <span className="md:text-base text-[12px] font-medium">
+                            Upgrade
+                        </span>
                     </button>
 
                     <button
@@ -161,96 +184,88 @@ const Chat = () => {
                         onClick={() => setIsOpen(!isOpen)}
                     >
                         {isOpen ? (
-                            <MdArrowDropUp className="w-5 h-5 hover:scale-105" />
+                            <MdArrowDropUp className="w-3 h-3 md:w-5 md:h-5 hover:scale-105" />
                         ) : (
-                            <MdArrowDropDown className="w-5 h-5 hover:scale-105" />
+                            <MdArrowDropDown className="w-3 h-3 md:w-5 md:h-5 hover:scale-105" />
                         )}
                     </button>
                 </div>
             </div>
-
-            <div className="flex flex-col w-full p-10">
+            <div className="flex md:hidden gap-2 text-[--site-card-icon-color] pt-8 px-10">
+                <AiOutlineUser className="w-8 h-8" />
+                <span className="text-2xl font-semibold">Tutors</span>
+            </div>
+            <div className="flex flex-col w-full px-5 pt-8 pb-16 md:gap-8 md:px-10">
                 <div className={showDescription}>
-                    <p className="text-[20px] font-semibold">
-                        Hello, {user.username}!
-                    </p>
-                    <p className="text-[14px]">
-                        Welcome to here! To get started, the first step is to
-                        create a widget, which can be either a AI Tutor (chats).
-                        Once you've created your first widget, you'll be
-                        redirected to the details page, where you'll have access
-                        to multiple tabs for customization and management.
-                    </p>
-                    <p className="text-[14px]">
-                        Let's take a closer look at each tab:
-                    </p>
-                    <p className="text-[14px]">
-                        <span className="font-bold">Preview Tab:</span> In this
-                        tab, you can see a preview of your widget as a chat
-                        window. It provides two buttons: "Open" to preview the
-                        widget in full-page mode and "Embed" to obtain the
-                        necessary code for integrating the widget into your
-                        website or app.
-                    </p>
-                    <p className="text-[14px]">
-                        <span className="font-bold">Branding Tab:</span> In this
-                        tab, you can customize various aspects of your widget's
-                        interface. You have the freedom to change texts, colors,
-                        images, notifications, information cards, buttons, and
-                        more. Every element of the interface can be configured
-                        to align with your desired branding.
-                    </p>
-                    <p className="text-[14px]">
-                        <span className="font-bold">Training Data Tab:</span> In
-                        this tab, you can train your widget. You have the option
-                        to choose from three types of data sources: URLs, files,
-                        or texts. Each data source allows you to input relevant
-                        information to initiate the training process. This step
-                        is crucial for optimizing your widget's performance and
-                        accuracy. website or app.
-                    </p>
-                    <p className="text-[14px]">
-                        <span className="font-bold">
-                            Conversation Explorer Tab:
-                        </span>{" "}
-                        In this tab, you can see all the conversations your
-                        widget has had. It stores and organizes the
-                        interactions, making it easier for you to review and
-                        analyze the conversations with your users. This
-                        information can provide valuable insights and help
-                        improve the effectiveness of your widget.
-                    </p>
-                    <p className="text-[14px]">
-                        By utilizing these tabs, you can create, customize,
-                        train, and manage your widget effectively, ensuring a
-                        seamless and engaging experience for your users.
-                    </p>
+                    <div className="flex w-full h-auto rounded-lg md:w-7/12">
+                        <Carousel>
+                            {[
+                                { src: data1, type: "video/webm" },
+                                { src: data2, type: "video/webm" },
+                                { src: data3, type: "video/webm" },
+                                { src: data4, type: "video/webm" },
+                                { src: data5, type: "video/webm" },
+                            ].map((videoData, index) => (
+                                <div
+                                    key={"video" + videoData.src}
+                                    className="flex w-full h-full"
+                                >
+                                    <video
+                                        className="object-cover w-full h-full"
+                                        controls={false}
+                                        onClick={() => togglePlay(index)}
+                                        ref={(ref) =>
+                                            (videosRef.current[index] = ref)
+                                        }
+                                    >
+                                        <source
+                                            src={videoData.src}
+                                            type={videoData.type}
+                                        />
+                                    </video>
+
+                                    <div className="absolute w-full translate-x-1/2 -translate-y-1/2 top-1/2">
+                                        {isPlaying ? null : (
+                                            <button
+                                                className="bg-[--site-main-Table-Text] ml-[-22px] w-[44px] h-[44px] rounded-full flex items-center justify-center"
+                                                onClick={() => {
+                                                    togglePlay(index);
+                                                }}
+                                            >
+                                                <BsFillPlayFill className="w-7 h-7" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </Carousel>
+                    </div>
+                    <div className="flex-col flex md:pr-[26px] md:pt-[71px] md:pb-[95px] md:gap-[30px] md:w-5/12">
+                        <span className="text-3xl font-bold text-[--site-card-icon-color]">
+                            How to build Your Tutor
+                        </span>
+                        <span className="text-[24px] leading-[40px] font-medium text-[--site-chat-video-description-color]">
+                            Watch the video, Once you've finished watch the next
+                            one for how to customize your Tutor.
+                        </span>
+                    </div>
                 </div>
                 {location.pathname === "/chatbot/chat" ? (
-                    <div>
-                        <div className="flex justify-end w-full py-2 ">
-                            <button
-                                type="button"
-                                onClick={showModal}
-                                className="text-[--site-logo-text-color] bg-[--site-card-icon-color] hover:bg-[--site-card-icon-color]/90 focus:ring-4 focus:outline-none focus:ring-[--site-card-icon-color]/50 font-medium rounded text-sm px-2 py-1 text-center inline-flex items-center dark:focus:ring-[--site-card-icon-color]/55"
-                            >
-                                <BsPlus className="w-[30px] h-[30px] text-xl pointer-events-none" />
-                                Add Tutor
-                            </button>
-                        </div>
-                        <div className="w-full h-[500px] bg-[--site-main-color3] rounded">
+                    <div className="pt-8 md:pt-0">
+                        <div className="w-full border-[--site-chat-header-border] border rounded-2xl from-[--site-chat-header-to-color] bg-gradient-to-br">
                             <ChatTable
                                 chat={chat}
-                                handledelete={getChats}
-                                handleupdate={getChats}
+                                handleAdd={showModal}
+                                handleDelete={getChats}
                             />
                         </div>
                     </div>
                 ) : (
-                    <div className="p-5 w-full mt-5 border-2 border-[--site-card-icon-color] bg-[--site-main-color3] rounded">
+                    <div className="pt-8">
                         <Outlet />
                     </div>
                 )}
+
                 <Chatmodal
                     open={isModalOpen}
                     handleOk={handleOk}
