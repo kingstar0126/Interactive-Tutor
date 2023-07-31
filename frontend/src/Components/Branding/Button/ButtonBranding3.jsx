@@ -3,7 +3,11 @@ import Switch from "../../Switch";
 
 const ButtonBranding3 = (props) => {
     const [text, setText] = useState("Disable");
-    const [status, setStatus] = useState(props.data.button3_status);
+    const [status, setStatus] = useState(
+        props.data.button3_status === undefined
+            ? true
+            : props.data.button3_status
+    );
 
     const change_text = (toggle) => {
         if (!toggle) {
@@ -18,22 +22,22 @@ const ButtonBranding3 = (props) => {
 
     return (
         <div>
-            <div className="flex flex-col p-2 gap-5">
-                <h1 className="border-b-[1px] border-[--site-card-icon-color] font-semibold pb-2">
+            <div className="flex flex-col border border-[--site-chat-header-border] rounded-lg p-4 gap-5">
+                <h1 className="border-b-[1px] border-[--site-chat-header-border] font-semibold pb-2">
                     {props.title}
                 </h1>
-                <div name="switch" className="gap-2">
+                <div name="switch" className="flex flex-col gap-2">
                     <span className="font-medium">Status</span>
-                    <div className="flex gap-2 w-full font-medium">
+                    <div className="flex w-full gap-2 font-medium">
                         <Switch handlechange={change_text} toggle={status} />
                         <span>{text}</span>
                     </div>
                 </div>
-                <div name="input" className="w-full flex flex-col gap-3 p-2">
+                <div name="input" className="flex flex-col w-full gap-3 p-2">
                     <div className="w-full">
                         <span>URL</span>
                         <input
-                            className="w-full rounded-full border-[1px] border-[--site-card-icon-color] p-2"
+                            className="w-full border-[--site-chat-header-border] border bg-transparent px-4 py-2 rounded-md"
                             onChange={(e) =>
                                 (props.data.button3_url = e.target.value)
                             }
@@ -47,39 +51,55 @@ const ButtonBranding3 = (props) => {
                             onChange={(e) =>
                                 (props.data.button3_text = e.target.value)
                             }
-                            className="w-full rounded-full border-[1px] border-[--site-card-icon-color] p-2"
+                            className="w-full border-[--site-chat-header-border] border bg-transparent px-4 py-2 rounded-md"
                         />
                     </div>
                     <div className="flex justify-between gap-3">
-                        <div className="flex flex-col gap-2 w-1/3">
-                            <span>Background</span>
+                        <div className="flex flex-col w-1/3 gap-2 pr-2">
+                            <span className="text-[12px] md:text-[16px]">
+                                Background
+                            </span>
                             <input
                                 type="color"
-                                defaultValue={props.data.button3_bg}
                                 onChange={(e) =>
                                     (props.data.button3_bg = e.target.value)
                                 }
+                                defaultValue={
+                                    props.data.button3_bg === undefined
+                                        ? "#efefef"
+                                        : props.data.button3_bg
+                                }
+                                className="w-full my-1 bg-transparent"
                             />
                         </div>
-                        <div className="flex flex-col gap-2 w-1/3">
-                            <span>Color</span>
+                        <div className="flex flex-col w-1/3 gap-2">
+                            <span className="text-[12px] md:text-[16px]">
+                                Color
+                            </span>
                             <input
                                 type="color"
-                                defaultValue={props.data.button3_color}
                                 onChange={(e) =>
                                     (props.data.button3_color = e.target.value)
                                 }
+                                defaultValue={
+                                    props.data.button3_color === undefined
+                                        ? "#efefef"
+                                        : props.data.button3_color
+                                }
+                                className="my-1 bg-transparent"
                             />
                         </div>
-                        <div className="flex flex-col gap-2 w-1/3">
-                            <span>Size (pixel)</span>
+                        <div className="flex flex-col w-1/3 gap-2">
+                            <span className="text-[12px] md:text-[16px]">
+                                Size (pixel)
+                            </span>
                             <input
                                 type="number"
                                 defaultValue={props.data.button3_size}
                                 onChange={(e) =>
                                     (props.data.button3_size = e.target.value)
                                 }
-                                className="p-2 rounded-full border-[1px] border-[--site-card-icon-color]"
+                                className="px-4 py-1 rounded-md border-[1px] border-[--site-chat-header-border] bg-transparent"
                             />
                         </div>
                     </div>

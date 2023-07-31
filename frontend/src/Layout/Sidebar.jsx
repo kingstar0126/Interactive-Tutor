@@ -1,7 +1,6 @@
 import { BsDatabaseFillGear } from "react-icons/bs";
-
 //! Sidebar icons
-import { AiOutlineUser, AiOutlineTrophy } from "react-icons/ai";
+import { AiOutlineUser, AiOutlineClose, AiOutlineTrophy } from "react-icons/ai";
 import { PiUserCircleGearLight } from "react-icons/pi";
 import { IoLogOutOutline } from "react-icons/io5";
 
@@ -11,30 +10,65 @@ import { setlocation } from "../redux/actions/locationAction";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { changeuser } from "../redux/actions/userAction";
-import { useEffect } from "react";
 import { SERVER_URL } from "../config/constant";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { setOpenSidebar } from "../redux/actions/locationAction";
 
 const Sidebar = () => {
     let location = useLocation();
+    const redirections = ["chat", "subscription", "manager", "account"];
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [selection, setSelection] = useState(1);
+    const [sidebarStyle, setSidebarStyle] = useState("");
+    const user = JSON.parse(useSelector((state) => state.user.user));
+    const isOpenSidebar = useSelector((state) => state.location.openSidebar);
+
     useEffect(() => {
         if (location) {
             setlocation(dispatch, location.pathname);
+            setSidebarStyle(
+                "md:flex hidden flex-col items-center justify-center"
+            );
         }
     }, []);
-    const user = JSON.parse(useSelector((state) => state.user.user));
+
+    const handleOpenSidebar = () => {
+        dispatch(setOpenSidebar());
+    };
+
+    useEffect(() => {
+        let url = location.pathname.split("/").slice(-1);
+        let index = redirections.indexOf(url[0]) + 1;
+        if (index) {
+            setSelection(index);
+        } else {
+            let url = location.pathname.split("/").slice(-2, -1);
+            let index = redirections.indexOf(url[0]) + 1;
+            setSelection(index);
+        }
+    }, [location]);
 
     const handleLogout = () => {
         changeuser(dispatch, null);
         navigate("/login");
     };
 
+    useEffect(() => {
+        if (isOpenSidebar) {
+            setSidebarStyle(
+                "md:flex fixed top-0 left-0 h-full w-[266px] flex-col items-center z-[9999] bg-[--site-card-icon-color] justify-start"
+            );
+        } else {
+            setSidebarStyle(
+                "md:flex hidden flex-col items-center justify-start"
+            );
+        }
+    }, [isOpenSidebar]);
+
     return (
-        <div className="flex flex-col items-center justify-center">
-            <div className="flex items-center justify-center mt-[40px] mb-[50px] px-[78px]">
+        <div className={sidebarStyle}>
+            <div className="hidden md:flex items-center justify-center mt-[40px] mb-[50px] px-[78px]">
                 <Link to="chat">
                     <img
                         src={`${SERVER_URL}${Logo}`}
@@ -43,13 +77,16 @@ const Sidebar = () => {
                     />
                 </Link>
             </div>
+            <div className="flex justify-end p-5 md:hidden">
+                <AiOutlineClose
+                    className="w-5 h-5 text-white"
+                    onClick={handleOpenSidebar}
+                />
+            </div>
             <div className="flex-col items-center justify-start w-full">
                 <Link
                     to="chat"
                     className="flex w-full gap-4 px-6 py-4 transition-all duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
-                    onClick={() => {
-                        setSelection(1);
-                    }}
                     style={{
                         color: selection === 1 ? "#c1ff72" : "#ffffff",
                         fontWeight: selection === 1 ? 600 : 500,
@@ -62,15 +99,12 @@ const Sidebar = () => {
                 <Link
                     to="subscription"
                     className="flex w-full gap-4 px-6 py-4 transition-all duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
-                    onClick={() => {
-                        setSelection(2);
-                    }}
                     style={{
                         color: selection === 2 ? "#c1ff72" : "#ffffff",
                         fontWeight: selection === 2 ? 600 : 500,
                     }}
                 >
-                    <AiOutlineUser className="w-6 h-6" />
+                    <AiOutlineTrophy className="w-6 h-6" />
                     <span className="flex items-end text-base ">
                         Subscriptions
                     </span>
@@ -80,9 +114,6 @@ const Sidebar = () => {
                     <Link
                         to="manager"
                         className="flex w-full gap-4 px-6 py-4 transition-all duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
-                        onClick={() => {
-                            setSelection(3);
-                        }}
                         style={{
                             color: selection === 3 ? "#c1ff72" : "#ffffff",
                             fontWeight: selection === 3 ? 600 : 500,
@@ -98,9 +129,6 @@ const Sidebar = () => {
                 <Link
                     to="account"
                     className="flex w-full gap-4 px-6 py-4 transition-all duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
-                    onClick={() => {
-                        setSelection(4);
-                    }}
                     style={{
                         color: selection === 4 ? "#c1ff72" : "#ffffff",
                         fontWeight: selection === 4 ? 600 : 500,

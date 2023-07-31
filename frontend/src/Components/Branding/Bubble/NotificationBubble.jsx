@@ -40,13 +40,13 @@ const NotificationBubble = (props) => {
     };
 
     return (
-        <div className="flex flex-col p-2 gap-5">
+        <div className="flex flex-col gap-5 border border-[--site-chat-header-border] rounded-lg p-4 h-full">
             <h1 className="border-b-[1px] border-[--site-card-icon-color] font-semibold pb-2">
                 {props.title}
             </h1>
-            <div name="switch" className="gap-2 flex flex-col">
+            <div name="switch" className="flex flex-col gap-2">
                 <span className="font-medium">Status</span>
-                <div className="flex gap-2 w-full font-medium">
+                <div className="flex w-full gap-2 font-medium">
                     <Switch handlechange={change_text} toggle={status} />
                     <span>{text}</span>
                 </div>

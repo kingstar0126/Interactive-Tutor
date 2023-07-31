@@ -1,36 +1,52 @@
 const UserMessage = (props) => {
     return (
         <div>
-            <div className="flex flex-col p-2 gap-5">
-                <h1 className="border-b-[1px] border-[--site-card-icon-color] font-semibold pb-2">
+            <div className="flex flex-col border border-[--site-chat-header-border] rounded-lg p-4 gap-5">
+                <span className="border-b border-[--site-chat-header-border] pb-2">
                     {props.title}
-                </h1>
+                </span>
                 <div className="flex justify-between gap-3">
-                    <div className="flex flex-col gap-2 w-1/3">
-                        <span>Background</span>
+                    <div className="flex flex-col w-1/3 gap-2">
+                        <span className="text-[12px] md:text-[16px]">
+                            Background
+                        </span>
                         <input
                             type="color"
                             onChange={(e) =>
                                 (props.data.user_bg = e.target.value)
                             }
-                            defaultValue={props.data.user_bg}
+                            defaultValue={
+                                props.data.user_bg === undefined
+                                    ? "#efefef"
+                                    : props.data.user_bg
+                            }
+                            className="my-1 bg-transparent"
                         />
                     </div>
-                    <div className="flex flex-col gap-2 w-1/3">
-                        <span>Color</span>
+                    <div className="flex flex-col w-1/3 gap-2">
+                        <span className="text-[12px] md:text-[16px]">
+                            Color
+                        </span>
                         <input
                             type="color"
                             onChange={(e) =>
                                 (props.data.user_color = e.target.value)
                             }
-                            defaultValue={props.data.user_color}
+                            defaultValue={
+                                props.data.user_color === undefined
+                                    ? "#efefef"
+                                    : props.data.user_color
+                            }
+                            className="my-1 bg-transparent"
                         />
                     </div>
-                    <div className="flex flex-col gap-2 w-1/3">
-                        <span>Size (pixel)</span>
+                    <div className="flex flex-col w-1/3 gap-2">
+                        <span className="text-[12px] md:text-[16px]">
+                            Size (pixel)
+                        </span>
                         <input
                             type="number"
-                            className="p-2 rounded-full border-[1px] border-[--site-card-icon-color]"
+                            className="p-2 rounded-md border border-[--site-chat-header-border] bg-transparent"
                             onChange={(e) =>
                                 (props.data.user_size = e.target.value)
                             }

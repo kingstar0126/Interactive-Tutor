@@ -34,7 +34,7 @@ const Login = () => {
         getUser(dispatch, data);
     };
     return (
-        <div className="bg-[--site-main-color-home] font-logo h-full md:h-screen pb-10 px-2 flex flex-col">
+        <div className="bg-[--site-main-color-home] font-logo h-screen pb-10 px-2 flex flex-col">
             <Header />
             <Toaster />
             <div className="mt-[100px]">

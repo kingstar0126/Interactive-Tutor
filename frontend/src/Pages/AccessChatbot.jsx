@@ -37,9 +37,9 @@ const AccessChatbot = () => {
             toast.success(message);
         }
     };
-    useEffect(()=> {
+    useEffect(() => {
         localStorage.clear();
-    }, [])
+    }, []);
 
     const submit = async (pin) => {
         await axios
@@ -69,7 +69,10 @@ const AccessChatbot = () => {
                                             res.data.data
                                         );
                                         setStatus(true);
-                                        setlocation(dispatch, location.pathname);
+                                        setlocation(
+                                            dispatch,
+                                            location.pathname
+                                        );
                                         navigate("newchat");
                                     } else {
                                         pinField.current.forEach(
@@ -100,7 +103,7 @@ const AccessChatbot = () => {
     };
 
     return (
-        <div className="bg-[--site-main-color-home] font-logo h-full sm:h-screen pb-10">
+        <div className="bg-[--site-main-color-home] font-logo h-screen pb-10">
             {status === false && <Header />}
             <Toaster />
             {status === false && (

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Scrollbar } from "react-scrollbars-custom";
 import { CodeBlock, dracula } from "react-code-blocks";
-import { AiFillDelete } from "react-icons/ai";
+import { RiDeleteBin6Line } from "react-icons/ri";
 import { webAPI } from "../utils/constants";
 import axios from "axios";
 
@@ -35,30 +35,30 @@ const History = (props) => {
         }
     };
     return (
-        <div className="flex w-full h-full">
-            <div className="flex flex-col  w-1/3 h-screen p-2 border-r-[1px] border-[--site-main-color3]">
+        <div className="flex flex-col w-full h-screen p-6 sm:flex-row">
+            <div className="flex flex-col h-1/3 sm:w-1/3 sm:h-screen text-[--site-card-icon-color]">
                 <Scrollbar>
                     {history.map((item, index) => {
                         return (
                             <div
                                 key={index}
-                                onClick={(e) => handleMessage(index)}
+                                onClick={() => handleMessage(index)}
                                 className={
                                     index % 2
-                                        ? "p-2 flex items-center justify-center w-full gap-3 bg-[--site-logo-text-color] rounded-xl mb-2"
-                                        : "p-2 flex items-center justify-center w-full gap-3 bg-[--site-main-form-success1] rounded-xl mb-2"
+                                        ? "p-2 flex items-center justify-center w-full gap-3 bg-[#C1FF72] rounded-xl mb-2"
+                                        : "p-2 flex items-center justify-center w-full gap-3 bg-[#2DC937] rounded-xl mb-2"
                                 }
                             >
                                 <img
                                     src={chat.chat_logo.user}
                                     alt="human"
-                                    className="w-10 h-10"
+                                    className="w-10 h-10 rounded-full"
                                 />
-                                <div className="flex justify-between w-full">
-                                    <span className="text-[--site-main-color3]">
+                                <div className="flex items-center justify-between w-full">
+                                    <span className="w-4/5 leading-5">
                                         {item.name}
                                     </span>
-                                    <AiFillDelete
+                                    <RiDeleteBin6Line
                                         className="active:fill-[--site-card-icon-color] fill-[--site-error-text-color]"
                                         onClick={() =>
                                             handleDelete(item, index)
@@ -70,7 +70,7 @@ const History = (props) => {
                     })}
                 </Scrollbar>
             </div>
-            <div className="flex flex-col w-2/3 h-screen">
+            <div className="sm:h-screen h-2/3 sm:w-2/3">
                 {message && (
                     <Scrollbar name="scroll content">
                         {message &&
@@ -79,21 +79,21 @@ const History = (props) => {
                                     <div
                                         name="human_bg"
                                         className={
-                                            "flex items-center justify-center p-2 bg-[" +
+                                            "flex items-center justify-start pl-12 pb-4 bg-[" +
                                             chat.chat_logo.user_bg +
                                             "]"
                                         }
                                         key={index}
                                     >
-                                        <div className="flex w-2/3">
+                                        <div className="flex items-start w-full">
                                             <img
                                                 src={chat.chat_logo.user}
                                                 alt="human"
-                                                className="w-10 h-10"
+                                                className="w-10 h-10 rounded-full"
                                             />
                                             <div
                                                 name="human"
-                                                className="text-[--site-logo-text-color] whitespace-break-spaces w-full flex p-2"
+                                                className="text-[--site-card-icon-color] whitespace-break-spaces w-full flex p-2"
                                             >
                                                 <span>{data.content}</span>
                                             </div>
@@ -103,21 +103,21 @@ const History = (props) => {
                                     <div
                                         name="ai_bg"
                                         className={
-                                            "flex items-center justify-center p-2 bg-[" +
+                                            "flex items-center justify-start pl-12 pb-4 bg-[" +
                                             chat.chat_logo.ai_bg +
                                             "]"
                                         }
                                         key={index}
                                     >
-                                        <div className="flex w-2/3">
+                                        <div className="flex items-start w-full">
                                             <img
                                                 src={chat.chat_logo.ai}
-                                                className="w-10 h-10"
+                                                className="w-10 h-10 rounded-full"
                                                 alt="AI"
                                             />
                                             <div
                                                 name="ai"
-                                                className="text-[--site-main-color3] whitespace-break-spaces w-full flex flex-col p-2"
+                                                className="flex flex-col w-full p-2 whitespace-break-spaces"
                                             >
                                                 {data.content
                                                     .split("```")

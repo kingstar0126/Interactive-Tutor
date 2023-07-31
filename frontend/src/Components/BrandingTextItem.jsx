@@ -3,8 +3,9 @@ import Switch from "./Switch";
 
 const BrandingTextItem = (props) => {
     const [text, setText] = useState("Disable");
-    const [status, setStatus] = useState(props.data.status);
-
+    const [status, setStatus] = useState(
+        props.data.status === undefined ? true : props.data.status
+    );
     const change_text = (toggle) => {
         if (!toggle) {
             setText("Enabled");
@@ -29,41 +30,46 @@ const BrandingTextItem = (props) => {
     };
 
     return (
-        <div className="flex flex-col p-2 gap-5">
-            <h1 className="border-b-[1px] border-[--site-card-icon-color] font-semibold pb-2">
+        <div className="flex flex-col gap-5 border border-[--site-chat-header-border] rounded-lg p-4">
+            <span className="border-b border-[--site-chat-header-border] pb-2">
                 {props.title}
-            </h1>
-            <div name="switch" className="gap-2">
+            </span>
+            <div name="switch" className="flex flex-col gap-2">
                 <span className="font-medium">Status</span>
-                <div className="flex gap-2 w-full font-medium">
+                <div className="flex w-full gap-2 font-medium">
                     <Switch handlechange={change_text} toggle={status} />
                     <span>{text}</span>
                 </div>
             </div>
             <div name="input" className="w-full">
-                <span>Text</span>
+                <span>Texts</span>
                 <input
                     defaultValue={props.data.description}
-                    className="w-full rounded-full border-[--site-card-icon-color] border border-[1px]m p-2"
+                    className="w-full border-[--site-chat-header-border] border bg-transparent px-4 py-2 rounded-md"
                     onChange={handleDescription}
                 ></input>
             </div>
-            <div name="colorsize" className="w-full flex justify-between">
+            <div name="colorsize" className="flex justify-between w-full">
                 <div className="flex flex-col">
                     <span>Color</span>
                     <input
                         type="color"
                         onChange={handleColor}
-                        defaultValue={props.data.color}
+                        defaultValue={
+                            props.data.color === undefined
+                                ? "#efefef"
+                                : props.data.color
+                        }
+                        className="my-1 bg-transparent"
                     />
                 </div>
-                <div name="size" className="flex flex-col w-1/3">
+                <div name="size" className="flex flex-col w-1/3 gap-1">
                     <span>Size (pixel)</span>
                     <input
                         defaultValue={props.data.size}
                         type="number"
                         onChange={handleSize}
-                        className="border-[1px] border-[--site-card-icon-color] rounded-full p-2"
+                        className="border-[--site-chat-header-border] border bg-transparent px-4 py-1 rounded-md"
                     />
                 </div>
             </div>
