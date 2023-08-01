@@ -233,7 +233,25 @@ def stripe_webhook():
             query += 10000
         user.query = query
         db.session.commit()
-
+    elif payload["type"] == "invoice.payment_succeeded":
+        customer_id = payload["data"]["object"]["customer"]
+        _subscription_id = payload["data"]["object"]["subscription"]
+        price_id = stripe.Subscription.retrieve(
+            _subscription_id)['items']['data'][0]['price']['id']
+        user = db.session.query(User).filter_by(
+            customer_id=customer_id).first()
+        user.subscription_id = _subscription_id
+        user.role = db.session.query(Production).filter_by(
+            price_id=price_id).first().role
+        query = user.query
+        if user.role == 2:
+            query += 500
+        elif user.role == 3:
+            query += 3000
+        elif user.role == 4:
+            query += 10000
+        user.query = query
+        db.session.commit()
     elif payload["type"] == "customer.subscription.deleted":
         customer_id = payload["data"]["object"]["customer"]
         user = db.session.query(User).filter_by(
