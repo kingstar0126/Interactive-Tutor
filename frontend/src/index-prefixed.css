@@ -1,0 +1,61 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+        "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+        "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+        monospace;
+}
+
+:root {
+    --site-main-color-home: #153144;
+    --site-main-color1: #c1ff72;
+    --site-main-color2: #153144;
+    --site-main-color3: #fafafa;
+    --site-main-color4: #c1ff72;
+    --site-main-color5: #c1ff72;
+    --site-main-color6: #ddd7d7;
+    --site-main-color7: #c1ff72;
+    --site-main-color8: #f0f0ea;
+    --site-main-color9: #153144;
+    --site-main-color10: #ebebe0;
+    --site-main-Login: #153144;
+    --site-main-Login-border-focus: #153144;
+    --site-main-Login1: #153144;
+    --site-main-Login-Text: #424242;
+    --site-main-form-error: #ff1122;
+    --site-main-form-error1: #c40d19;
+    --site-main-form-success: #21d338;
+    --site-main-form-success1: #129106;
+    --site-main-Table-Text: #ffffff;
+    --site-main-Table-Text_Dark: #ffffff;
+    --site-file-upload: #c1ff72;
+    --site-file-upload-hover: #c1ff72;
+    --site-logo-text-color: #c1ff72;
+    --site-success-text-color: #21e60f;
+    --site-warning-text-color: #eeea06;
+    --site-error-text-color: #f80707;
+    --site-card-icon-color: #153144;
+    --site-chat-background-color: #fafafa;
+    --site-chat-header-to-color: #f4f9fc4f;
+    --site-chat-header-from-color: #c8e1f242;
+    --site-chat-header-border: #cfdce9;
+    --site-chat-video-description-color: #767c81;
+    --site-main-Table-border-color: #dae9f2;
+    --site-main-modal-to-color: #f4f9fc;
+    --site-main-modal-from-color: #c8e1f25f;
+    --site-main-modal-divide-color: #878f97;
+    --site-main-modal-input-border-color: #7ca0b9;
+    --site-main-newchat-input-color: #f6f5f6;
+    --site-main-slider-thumb-color: #6eae1c;
+    --site-main-pricing-color: #034f75;
+}

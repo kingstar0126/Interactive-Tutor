@@ -129,10 +129,10 @@ const Subscription = () => {
                                 width={100}
                                 height={58}
                                 ringWidth={10}
-                                value={14 - trial}
+                                value={24 - trial}
                                 needleColor="black"
                                 needleHeightRatio={0.5}
-                                maxValue={14}
+                                maxValue={24}
                                 startColor={"#f5da42"}
                                 endColor={"#ff0000"}
                             />
