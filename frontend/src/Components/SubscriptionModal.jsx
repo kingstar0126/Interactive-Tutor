@@ -32,6 +32,9 @@ const SubscriptionModal = (props) => {
         getUseraccount(dispatch, { id: user.id });
     }, []);
 
+    const getClientReferenceId = () => {
+        return window.Rewardful && window.Rewardful.referral || ('checkout_'+(new Date).getTime());
+      }
     const notification = (type, message) => {
         // To do in here
         if (type === "error") {
@@ -51,6 +54,7 @@ const SubscriptionModal = (props) => {
                 .post(webAPI.updateSubscription, {
                     subscriptionPlanId: data,
                     id: user.id,
+                    clientReferenceId: getClientReferenceId(),
                 })
                 .then(async (res) => {
                     // Load Stripe and redirect to the Checkout page
@@ -71,6 +75,7 @@ const SubscriptionModal = (props) => {
                 .post(webAPI.create_checkout, {
                     subscriptionPlanId: data,
                     id: user.id,
+                    clientReferenceId: getClientReferenceId()
                 })
                 .then(async (res) => {
                     // Load Stripe and redirect to the Checkout page
@@ -97,7 +102,6 @@ const SubscriptionModal = (props) => {
                 if (res.data.data.price_id) {
                     setPrice(res.data.data.price_id);
                 }
-                console.log(res.data.data.data, res.data.data.price_id);
             })
             .catch((err) => console.error(err));
     };
@@ -129,7 +133,7 @@ const SubscriptionModal = (props) => {
                     Chat
                 </span>
             </DialogHeader>
-            <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium md:px-12 md:pb-20 md:h-[42rem] h-[30rem] overflow-y-auto">
+            <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium md:px-12 md:pb-20 md:h-[680px] h-[30rem] overflow-y-auto">
                 <Toaster />
                 {subscriptions && subscriptions.length !== 0 && (
                     <div className="flex flex-col items-center justify-center w-full gap-12 py-4 md:flex-row">
@@ -181,7 +185,7 @@ const SubscriptionModal = (props) => {
                                                                         subscription
                                                                     }
                                                                 >
-                                                                    <GoCheckCircle className="text-[#2DC937] w-5 h-5" />
+                                                                    <div className="w-6"><GoCheckCircle className="text-[#2DC937] w-5 h-5 p-1" /></div>
 
                                                                     <Typography className="font-normal">
                                                                         {
@@ -251,7 +255,7 @@ const SubscriptionModal = (props) => {
                                                                         subscription
                                                                     }
                                                                 >
-                                                                    <GoCheckCircle className="text-[#2DC937] w-5 h-5" />
+                                                                    <div className="w-6"><GoCheckCircle className="text-[#2DC937] w-5 h-5 p-1" /></div>
 
                                                                     <Typography className="font-normal">
                                                                         {

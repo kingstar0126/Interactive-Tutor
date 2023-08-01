@@ -180,7 +180,7 @@ def delete_all_products():
 def create_checkout_session():
     id = request.json['id']
     subscription_plan_id = request.json['subscriptionPlanId']
-
+    clientReferenceId = request.json['clientReferenceId']
     user = db.session.query(User).filter_by(id=id).first()
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
@@ -192,7 +192,8 @@ def create_checkout_session():
         mode='subscription',
         success_url="https://app.interactive-tutor.com/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
         cancel_url='https://app.interactive-tutor.com/chatbot/subscription',
-        customer=user.customer_id
+        customer=user.customer_id,
+        client_reference_id=clientReferenceId,
     )
     return jsonify({'sessionId': session['id'], 'key': os.getenv('STRIPE_PUBLISHABLE_KEY')})
 
@@ -213,11 +214,11 @@ def stripe_webhook():
             price_id=price_id).first().role
         query = user.query
         if user.role == 2:
-            query += 500
+            query = 500
         elif user.role == 3:
-            query += 3000
+            query = 3000
         elif user.role == 4:
-            query += 10000
+            query = 10000
         user.query = query
         db.session.commit()
     elif payload["type"] == "invoice.payment_succeeded":
@@ -232,11 +233,11 @@ def stripe_webhook():
             price_id=price_id).first().role
         query = user.query
         if user.role == 2:
-            query += 500
+            query = 500
         elif user.role == 3:
-            query += 3000
+            query = 3000
         elif user.role == 4:
-            query += 10000
+            query = 10000
         user.query = query
         db.session.commit()
     elif payload["type"] == "customer.subscription.deleted":
@@ -263,6 +264,8 @@ def update_subscription():
     id = request.json['id']
     user = db.session.query(User).filter_by(id=id).first()
     subscriptionPlanId = request.json['subscriptionPlanId']
+    clientReferenceId = request.json['clientReferenceId']
+
     stripe.Subscription.cancel(user.subscription_id)
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
@@ -274,6 +277,7 @@ def update_subscription():
         mode='subscription',
         success_url="https://app.interactive-tutor.com/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
         cancel_url='https://app.interactive-tutor.com/chatbot/subscription',
-        customer=user.customer_id
+        customer=user.customer_id,
+        client_reference_id=clientReferenceId,
     )
     return jsonify({'sessionId': session['id'], 'key': os.getenv('STRIPE_PUBLISHABLE_KEY')})

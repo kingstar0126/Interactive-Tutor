@@ -20,6 +20,16 @@ import {
 } from "react-icons/md";
 import { Scrollbar } from "react-scrollbars-custom";
 import { Carousel, IconButton } from "@material-tailwind/react";
+import { changeuser } from "../redux/actions/userAction";
+import {
+    Typography,
+    Button,
+    Dialog,
+    DialogHeader,
+    DialogBody,
+    DialogFooter,
+} from "@material-tailwind/react";
+
 
 const Chat = () => {
     const location = useLocation();
@@ -41,6 +51,7 @@ const Chat = () => {
     const [isOpen, setIsOpen] = useState(true);
     const [trial, setTrial] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
+    const [open, setOpen] = useState(false)
     const descroption = [
         {
             title: "Creating an account",
@@ -262,7 +273,8 @@ const Chat = () => {
             setTrial(user.days);
             getChats();
         } else if (user.role === undefined || user.role === 0) {
-            navigate("/chatbot/subscription");
+            setOpen(true);
+            
         } else {
             getChats();
         }
@@ -281,7 +293,7 @@ const Chat = () => {
     return (
         <div>
             <Toaster />
-            <div className="flex md:items-center items-end justify-between w-full md:h-[100px] md:px-10 from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] md:border-b-[--site-chat-header-border] md:border md:bg-gradient-to-r px-4 py-2 max-h-min gap-1">
+            <div className="flex md:items-center items-end justify-between w-full md:h-[100px] md:px-10 from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] md:border-b-[--site-chat-header-border] md:border bg-gradient-to-r px-4 py-2 max-h-min gap-1">
                 <div className="hidden md:flex gap-2 mt-9 mb-8 text-[--site-card-icon-color]">
                     <AiOutlineUser className="w-8 h-8" />
                     <span className="text-2xl font-semibold">Tutors</span>
@@ -524,13 +536,42 @@ const Chat = () => {
                         <Outlet />
                     </div>
                 )}
+                <Dialog
+                    open={open}
+                    className="border-[--site-chat-header-border] border rounded-2xl from-[--site-main-modal-from-color] to-[--site-main-modal-to-color] bg-gradient-to-br shadow-lg shadow-[--site-card-icon-color]"
+                >
+                    <DialogHeader>Important</DialogHeader>
+                    <DialogBody divider>
+                        <span className="text-base text-black">
+                        Your trial has expired, please choose your subscription to continue using interactive tutor.
+                        </span>
+                    </DialogBody>
+                    <DialogFooter className="flex items-center justify-end gap-4 pb-8">
+                        <button
+                            onClick={() => {changeuser(dispatch, null);
+                                navigate("/login");setOpen(false);}}
+                            className="bg-transparent border-[--site-card-icon-color] text-[--site-card-icon-color] text-base font-semibold border rounded-md px-4 py-2"
+                        >
+                            logout
+                        </button>
 
+                        <button
+                            onClick={() => {
+                                navigate("/chatbot/subscription");
+                                setOpen(false);
+                            }}
+                            className="px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md"
+                        >
+                            subscribe
+                        </button>
+                    </DialogFooter>
+                </Dialog>
                 <Chatmodal
                     open={isModalOpen}
                     handleOk={handleOk}
                     handleCancel={handleCancel}
                 />
-            </div>
+            </div> 
         </div>
     );
 };

@@ -63,6 +63,8 @@ const Subscription = () => {
                 if (two && two[0].length >= 1) setLabels(two[0].slice());
             })
             .catch((err) => console.error(err));
+        if (user.role === undefined || user.role === 0)
+        {handleOpenModel()}
     }, []);
 
     const handleOpenModel = () => {
@@ -87,7 +89,7 @@ const Subscription = () => {
         <div className="w-full h-full">
             <Toaster />
 
-            <div className="flex md:items-center items-end justify-between w-full md:h-[100px] md:px-10 from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] md:border-b-[--site-chat-header-border] md:border md:bg-gradient-to-r px-4 py-2 max-h-min gap-1">
+            <div className="flex md:items-center items-end justify-between w-full md:h-[100px] md:px-10 from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] md:border-b-[--site-chat-header-border] md:border bg-gradient-to-r px-4 py-2 max-h-min gap-1">
                 <div className="hidden md:flex gap-2 mt-9 mb-8 text-[--site-card-icon-color]">
                     <AiOutlineTrophy className="w-8 h-8" />
                     <span className="text-2xl font-semibold">
