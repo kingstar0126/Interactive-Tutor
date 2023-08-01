@@ -44,8 +44,8 @@
         "web-vitals": "^2.1.4"
     },
     "scripts": {
-        "start": "react-scripts start",
-        "build": "react-scripts build",
+        "start": "postcss src/index.css -o src/index-prefixed.css && react-scripts start",
+        "build": "postcss src/index.css -o src/index-prefixed.css && react-scripts build",
         "test": "react-scripts test",
         "eject": "react-scripts eject"
     },
@@ -68,6 +68,8 @@
         ]
     },
     "devDependencies": {
+        "autoprefixer": "^10.4.14",
+        "postcss-cli": "^10.1.0",
         "tailwindcss": "^3.3.2"
     }
 }
