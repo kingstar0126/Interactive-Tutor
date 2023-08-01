@@ -232,7 +232,13 @@ const Subscription = () => {
                                 <Slider
                                     size="lg"
                                     id="datasources"
-                                    value={(datasources / maxtutorCount) * 100}
+                                    value={
+                                        ((datasources < maxtutorCount
+                                            ? datasources
+                                            : maxtutorCount) /
+                                            maxtutorCount) *
+                                        100
+                                    }
                                     className="text-[#6EAE1C] opacity-50"
                                     trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
                                 />

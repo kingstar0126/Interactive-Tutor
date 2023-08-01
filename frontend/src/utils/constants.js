@@ -45,6 +45,7 @@ export const webAPI = {
     // get_products: SERVER_URL + "/api/getproducts",
     get_all_products: SERVER_URL + "/api/getallproducts",
     update_product: SERVER_URL + "/api/update/product", //user_id, product_id
+    cancel_subscription: SERVER_URL + "/api/cancel/subscription",
     delete_product: SERVER_URL + "/api/delete/product", //user_id, product_id
     delete_all_product: SERVER_URL + "/api/delete/all_products", //user_id
 
