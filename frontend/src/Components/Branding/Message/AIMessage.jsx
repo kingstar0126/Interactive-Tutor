@@ -20,7 +20,7 @@ const AIMessage = (props) => {
                                     ? "#efefef"
                                     : props.data.ai_bg
                             }
-                            className="my-1 bg-transparent"
+                            className="my-1 bg-transparent border border-[--site-card-icon-color]"
                         />
                     </div>
                     <div className="flex flex-col w-1/3 gap-2">
@@ -37,7 +37,7 @@ const AIMessage = (props) => {
                                     ? "#efefef"
                                     : props.data.ai_color
                             }
-                            className="my-1 bg-transparent"
+                            className="my-1 bg-transparent border border-[--site-card-icon-color]"
                         />
                     </div>
                     <div className="flex flex-col w-1/3 gap-2">

@@ -60,7 +60,7 @@ const BubbleItem = (props) => {
                                     ? "#efefef"
                                     : props.data.color
                             }
-                            className="w-1/3 my-1 bg-transparent"
+                            className="w-1/3 my-1 bg-transparent  border border-[--site-card-icon-color]"
                         />
                     </div>
                     <div className="flex flex-col w-1/2 gap-1">

@@ -191,8 +191,8 @@ export default function Example() {
                         }}
                         className={
                             activeTab === value
-                                ? "text-white w-full"
-                                : "xl:border-none border w-full border-black rounded-md"
+                                ? "text-white w-full flex justify-center"
+                                : "flex justify-center xl:border-none border w-full border-black rounded-md"
                         }
                     >
                         {label}

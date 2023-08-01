@@ -27,19 +27,6 @@ def create_customer():
     organization = request.json['organization']
     password = request.json['password']
     phone = request.json['phone']
-    # payment_method = request.json['paymentMethod']
-    # subscription = request.json['subscription']
-
-    # product_id = ''
-    # if subscription == 'Starter':
-    #     product_id = os.getenv('STRIPE_STARTER_PRODUCT_ID')
-    #     role = 2
-    # elif subscription == 'Standard':
-    #     product_id = os.getenv('STRIPE_STANDARD_PRODUCT_ID')
-    #     role = 3
-    # elif subscription == 'Pro':
-    #     product_id = os.getenv('STRIPE_PRO_PRODUCT_ID')
-    #     role = 4
 
     user = db.session.query(User).filter_by(id=id).first()
 
@@ -265,8 +252,10 @@ def stripe_webhook():
 def cancel_subscription():
     id = request.json['id']
     user = db.session.query(User).filter_by(id=id).first()
-    subscription = stripe.Subscription.list(
-        customer=user.customer_id, status='active').data[0]
+    stripe.Subscription.modify(
+        user.subscription_id, cancel_at_period_end=True
+    )
+    return jsonify({'message': 'Canceled the Subscription', 'code': 200, 'success': True})
 
 
 @payment.route('/api/update/subscription', methods=['POST'])

@@ -69,7 +69,7 @@ const ButtonBranding2 = (props) => {
                                         ? "#efefef"
                                         : props.data.button2_bg
                                 }
-                                className="w-full my-1 bg-transparent"
+                                className="w-full my-1 bg-transparent border border-[--site-card-icon-color]"
                             />
                         </div>
                         <div className="flex flex-col w-1/3 gap-2">
@@ -86,7 +86,7 @@ const ButtonBranding2 = (props) => {
                                         ? "#efefef"
                                         : props.data.button2_color
                                 }
-                                className="my-1 bg-transparent"
+                                className="my-1 bg-transparent border border-[--site-card-icon-color]"
                             />
                         </div>
                         <div className="flex flex-col w-1/3 gap-2">

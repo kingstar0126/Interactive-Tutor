@@ -60,7 +60,7 @@ const BrandingTextItem = (props) => {
                                 ? "#efefef"
                                 : props.data.color
                         }
-                        className="my-1 bg-transparent"
+                        className="my-1 bg-transparent border border-[--site-card-icon-color]"
                     />
                 </div>
                 <div name="size" className="flex flex-col w-1/3 gap-1">

@@ -79,7 +79,7 @@ const History = (props) => {
                                     <div
                                         name="human_bg"
                                         className={
-                                            "flex items-center justify-start pl-12 pb-4 bg-[" +
+                                            "flex items-center justify-start md:pl-12 pb-4 bg-[" +
                                             chat.chat_logo.user_bg +
                                             "]"
                                         }
@@ -103,7 +103,7 @@ const History = (props) => {
                                     <div
                                         name="ai_bg"
                                         className={
-                                            "flex items-center justify-start pl-12 pb-4 bg-[" +
+                                            "flex items-center justify-start md:pl-12 pb-4 bg-[" +
                                             chat.chat_logo.ai_bg +
                                             "]"
                                         }
