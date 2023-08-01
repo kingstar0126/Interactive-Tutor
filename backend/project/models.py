@@ -23,9 +23,9 @@ class User(UserMixin, db.Model):
     city = db.Column(db.String(255))
     country = db.Column(db.String(255))
     status = db.Column(db.Integer)
-    create_date = db.Column(db.Date, default=datetime.utcnow)
+    create_date = db.Column(db.DateTime, default=datetime.utcnow)
     update_date = db.Column(
-        db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
+        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     def __repr__(self):
         return 'User {}'.format(self.username)

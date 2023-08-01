@@ -11,9 +11,8 @@ from sqlalchemy import exc
 import stripe
 import os
 from dotenv import load_dotenv
-from datetime import date
+from datetime import datetime, timedelta
 from flask_jwt_extended import create_access_token, decode_token
-from datetime import timedelta
 
 load_dotenv()
 
@@ -40,28 +39,12 @@ def generate_pin_password(length=6):
     return password
 
 
-def calculate_days(day, _date):
-    current_date = date.today()
-    delta = current_date - _date
-    days = day - delta.days
-    return days
-
-
-def compare_month():
-    today = date.today()
-    is_new_month = today.day == 1
-
-    if is_new_month:
-        users = db.session.query(User).all()
-        for user in users:
-            query = user.query
-            if user.role == 2:
-                user.query = query + 500
-            elif user.role == 3:
-                user.query = query + 3000
-            elif user.role == 4:
-                user.query = query + 10000
-            db.session.commit()
+def calculate_days(signup_date):
+    current_time = datetime.utcnow()
+    time_difference = current_time - signup_date
+    hours = 24 - int(time_difference.total_seconds() / 3600)
+    print(hours)
+    return hours
 
 
 auth = Blueprint('auth', __name__)
@@ -100,8 +83,8 @@ def login_post():
             'message': 'You are blocked.',
         })
     if user.role == 5:
-        days = calculate_days(14, user.create_date)
-        if days <= 0:
+        days = calculate_days(user.create_date)
+        if days < 0:
             user.role = 0
             db.session.commit()
             new_user = {
@@ -143,10 +126,9 @@ def login_post():
 def get_user_account():
     id = request.json['id']
     user = db.session.query(User).filter_by(id=id).first()
-    compare_month()
     if user.role == 5:
-        days = calculate_days(14, user.create_date)
-        if days <= 0:
+        days = calculate_days(user.create_date)
+        if days < 0:
             user.role = 0
             db.session.commit()
             new_user = {
@@ -321,8 +303,8 @@ def get_useraccount():
     id = request.json['id']
     user = db.session.query(User).filter_by(id=id).first()
     if user.role == 5:
-        days = calculate_days(14, user.create_date)
-        if days <= 0:
+        days = calculate_days(user.create_date)
+        if days < 0:
             user.role = 0
             db.session.commit()
             new_user = {
