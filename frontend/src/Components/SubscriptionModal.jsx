@@ -12,6 +12,7 @@ import {
 } from "@material-tailwind/react";
 import React, { Fragment } from "react";
 import { useState, useEffect } from "react";
+import toast, { Toaster } from "react-hot-toast";
 import { webAPI } from "../utils/constants";
 import { loadStripe } from "@stripe/stripe-js";
 import { GoCheckCircle } from "react-icons/go";
@@ -30,6 +31,17 @@ const SubscriptionModal = (props) => {
         getSubscription();
         getUseraccount(dispatch, { id: user.id });
     }, []);
+
+    const notification = (type, message) => {
+        // To do in here
+        if (type === "error") {
+            toast.error(message);
+        }
+        if (type === "success") {
+            toast.success(message);
+        }
+    };
+
     const initiateSubscriptionCheckout = (data) => {
         if (price) {
             if (price === data) {
@@ -85,10 +97,18 @@ const SubscriptionModal = (props) => {
                 if (res.data.data.price_id) {
                     setPrice(res.data.data.price_id);
                 }
+                console.log(res.data.data.data, res.data.data.price_id);
             })
             .catch((err) => console.error(err));
     };
-
+    const handleCancelSubscription = () => {
+        axios
+            .post(webAPI.cancel_subscription, { id: user.id })
+            .then((res) => {
+                notification("success", res.data.message);
+            })
+            .catch((err) => console.error(err));
+    };
     useEffect(() => {
         const newDescription = subscriptions.map((item) => {
             const parsedDescription = JSON.parse(item["description"]);
@@ -110,6 +130,7 @@ const SubscriptionModal = (props) => {
                 </span>
             </DialogHeader>
             <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium md:px-12 md:pb-20 md:h-[42rem] h-[30rem] overflow-y-auto">
+                <Toaster />
                 {subscriptions && subscriptions.length !== 0 && (
                     <div className="flex flex-col items-center justify-center w-full gap-12 py-4 md:flex-row">
                         {subscriptions.map((item, index) => {
@@ -178,9 +199,12 @@ const SubscriptionModal = (props) => {
                                                     color="white"
                                                     className="text-white bg-[--site-card-icon-color] hover:scale-[1.02] focus:scale-[1.02] active:scale-100 text-[20px] normal-case"
                                                     ripple={false}
+                                                    onClick={() => {
+                                                        handleCancelSubscription();
+                                                    }}
                                                     fullWidth={true}
                                                 >
-                                                    Choose Plan
+                                                    Cancel Plan
                                                 </Button>
                                             </CardFooter>
                                         </Card>
