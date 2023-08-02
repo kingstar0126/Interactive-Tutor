@@ -103,7 +103,7 @@ const Login = () => {
                                 to="/changepassword"
                                 className="text-xs text-[--site-card-icon-color] hover:underline justify-end"
                             >
-                                Change passwrod
+                                Change password
                             </Link>
                             <Link
                                 to="/resetpassword"

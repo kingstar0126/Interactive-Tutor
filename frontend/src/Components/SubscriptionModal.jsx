@@ -109,14 +109,14 @@ const SubscriptionModal = (props) => {
         axios
             .post(webAPI.cancel_subscription, { id: user.id })
             .then((res) => {
-                notification("success", res.data.message);
+                window.location.href = res.data.url;
             })
             .catch((err) => console.error(err));
     };
     useEffect(() => {
         const newDescription = subscriptions.map((item) => {
             const parsedDescription = JSON.parse(item["description"]);
-            return parsedDescription.slice(1, parsedDescription.length - 1);
+            return parsedDescription.slice(0, parsedDescription.length - 1);
         });
         setDescription(newDescription);
     }, [subscriptions]);
@@ -133,7 +133,7 @@ const SubscriptionModal = (props) => {
                     Chat
                 </span>
             </DialogHeader>
-            <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium md:px-12 md:pb-20 md:h-[680px] h-[30rem] overflow-y-auto">
+            <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium md:px-12 md:pb-20 md:h-[42rem] h-[30rem] overflow-y-auto">
                 <Toaster />
                 {subscriptions && subscriptions.length !== 0 && (
                     <div className="flex flex-col items-center justify-center w-full gap-12 py-4 md:flex-row">
@@ -166,7 +166,7 @@ const SubscriptionModal = (props) => {
                                                     className="flex items-end justify-center gap-1 mt-6 font-semibold"
                                                 >
                                                     <span className="text-[36px]">
-                                                        ${item.price} /
+                                                    £{item.price} /
                                                     </span>
                                                     <span className="text-[20px] pb-2">
                                                         month
@@ -208,7 +208,7 @@ const SubscriptionModal = (props) => {
                                                     }}
                                                     fullWidth={true}
                                                 >
-                                                    Cancel Plan
+                                                    Manage Plan
                                                 </Button>
                                             </CardFooter>
                                         </Card>
@@ -236,7 +236,7 @@ const SubscriptionModal = (props) => {
                                                     className="flex items-end justify-center gap-1 mt-6 font-semibold"
                                                 >
                                                     <span className="text-[36px] text-[#034F75]">
-                                                        ${item.price} /
+                                                    £{item.price} /
                                                     </span>
                                                     <span className="text-[#034F75] text-[20px] pb-2">
                                                         month

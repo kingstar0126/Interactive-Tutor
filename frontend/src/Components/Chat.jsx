@@ -216,6 +216,7 @@ const Chat = () => {
     Interactive Tutor allows you to control who has access to your content, safeguarding your intellectual property.`,
         },
     ];
+    
     const [isactiveIndex, setIsActiveIndex] = useState(0);
     const videoRef = useRef([]);
 
@@ -353,7 +354,7 @@ const Chat = () => {
                     </button>
 
                     <button
-                        className="p-2 flex justify-center items-center bg-[--site-logo-text-color] rounded text-[--site-card-icon-color] pt-3 ml-2"
+                        className="p-2 flex justify-center items-center bg-[--site-card-icon-color] rounded text-[--site-logo-text-color] pt-3 ml-2"
                         onClick={() => setIsOpen(!isOpen)}
                     >
                         {isOpen ? (
@@ -510,15 +511,17 @@ const Chat = () => {
                             ))}
                         </Carousel>
                     </div>
-                    <div className="flex flex-col md:w-5/12">
-                        <span className="text-[16px] font-medium text-[--site-card-icon-color]">
-                            {descroption[isactiveIndex].title}
-                        </span>
-                        <span className="text-[14px] leading-[40px] font-medium text-[--site-chat-video-description-color] h-[20rem]">
-                            <Scrollbar>
-                                {descroption[isactiveIndex].content}
-                            </Scrollbar>
-                        </span>
+                    <div className="md:w-5/12">
+                        <div className="flex flex-col h-full w-full">
+                            <span className="text-[16px] font-medium text-[--site-card-icon-color]">
+                                {descroption[isactiveIndex].title}
+                            </span>
+                            <span className="text-[14px] leading-[40px] font-medium text-[--site-chat-video-description-color] md:h-full h-[20rem]">
+                                <Scrollbar>
+                                    {descroption[isactiveIndex].content}
+                                </Scrollbar>
+                            </span>
+                        </div>
                     </div>
                 </div>
                 {location.pathname === "/chatbot/chat" ? (
