@@ -74,7 +74,7 @@ const ManageAccount = () => {
     };
 
     const handleOpenModel = () => {
-        setIsOpenModal(!isopenModal);
+        handleCancelSubscription();
     };
 
     const handleCancelSubscription = () => {

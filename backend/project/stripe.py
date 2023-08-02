@@ -193,8 +193,10 @@ def create_checkout_session():
         success_url="https://app.interactive-tutor.com/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
         cancel_url='https://app.interactive-tutor.com/chatbot/subscription',
         customer=user.customer_id,
+        allow_promotion_codes=True,
         client_reference_id=clientReferenceId,
     )
+
     return jsonify({'sessionId': session['id'], 'key': os.getenv('STRIPE_PUBLISHABLE_KEY')})
 
 
@@ -253,10 +255,11 @@ def stripe_webhook():
 def cancel_subscription():
     id = request.json['id']
     user = db.session.query(User).filter_by(id=id).first()
-    stripe.Subscription.modify(
-        user.subscription_id, cancel_at_period_end=True
+    session = stripe.billing_portal.Session.create(
+        customer=user.customer_id,
+        return_url="https://app.interactive-tutor.com/"
     )
-    return jsonify({'message': 'Canceled the Subscription', 'code': 200, 'success': True})
+    return jsonify({'message': 'Canceled the Subscription', 'code': 200, 'success': True, 'url': session.url})
 
 
 @payment.route('/api/update/subscription', methods=['POST'])
@@ -278,6 +281,7 @@ def update_subscription():
         success_url="https://app.interactive-tutor.com/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
         cancel_url='https://app.interactive-tutor.com/chatbot/subscription',
         customer=user.customer_id,
+        allow_promotion_codes=True,
         client_reference_id=clientReferenceId,
     )
     return jsonify({'sessionId': session['id'], 'key': os.getenv('STRIPE_PUBLISHABLE_KEY')})
