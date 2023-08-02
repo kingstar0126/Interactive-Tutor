@@ -60,13 +60,15 @@ const Chatbubble = () => {
     }, [click]);
 
     const sendMessage = (_message) => {
-        axios.post(webAPI.send_bubble_chat, { _message }).then((res) => {
-            if (!res.data.success) {
-                console.log("error");
-            } else {
-                receiveMessage(res.data.data);
-            }
-        });
+        if (_message) {
+            axios.post(webAPI.send_bubble_chat, { _message }).then((res) => {
+                if (!res.data.success) {
+                    console.log("error");
+                } else {
+                    receiveMessage(res.data.data);
+                }
+            });
+        }
     };
 
     const receiveMessage = (message) => {
@@ -82,7 +84,7 @@ const Chatbubble = () => {
                 ref={dialogWidget}
                 className="fixed right-[40px] bottom-[115px] rounded-xl bg-[--site-main-color10] border border-[--site-card-icon-color] flex flex-col items-center justify-center w-[400px] h-[600px] py-10 divide-y drop-shadow-xl"
             >
-                <div className="w-full h-full bg-[--site-card-icon-color]">
+                <div className="w-full h-full from-[--site-main-modal-from-color] bg-gradient-to-br border border-[--site-main-modal-input-border-color] border-x-0">
                     <Scrollbars ref={messagesEndRef}>
                         {chathistory.map((data, index) => {
                             return data.role === "human" && data.content ? (
@@ -99,7 +101,7 @@ const Chatbubble = () => {
                                         />
                                         <div
                                             name="human"
-                                            className="text-[--site-logo-text-color] whitespace-break-spaces w-full flex p-2"
+                                            className="text-[--site-card-icon-color] whitespace-break-spaces w-full flex p-2"
                                         >
                                             <span>{data.content}</span>
                                         </div>
@@ -120,7 +122,7 @@ const Chatbubble = () => {
                                         <div
                                             name="ai"
                                             key={index}
-                                            className="text-[--site-main-color3] whitespace-break-spaces w-full flex flex-col p-2"
+                                            className="flex flex-col w-full p-2 text-block whitespace-break-spaces"
                                         >
                                             {data.content
                                                 .split("```")
@@ -162,24 +164,26 @@ const Chatbubble = () => {
                     </Scrollbars>
                 </div>
 
-                <div className="flex w-full p-2">
-                    <input
-                        type="text"
-                        id="website-admin"
-                        value={message}
-                        onChange={(e) => setMessage(e.target.value)}
-                        onKeyDown={handleSubmit}
-                        className="rounded-none w-5/6 rounded-l-lg bg-[--site-main-color3] text-[--site-card-icon-color] text-sm p-2.5 focus:border-[--site-logo-text-color] "
-                        placeholder="Type message"
-                    />
-                    <span
-                        className="inline-flex w-1/6 items-center justify-center px-3 text-sm text-[--site-card-icon-color] border border-l-0 rounded-r-md bg-[--site-main-color10]"
-                        onClick={() => {
-                            handleSend();
-                        }}
-                    >
-                        <BsSendPlus className="w-[15px] h-[15px]" />
-                    </span>
+                <div className="flex items-center w-full mt-5 divide-x-2 sm:w-4/5">
+                    <div className="flex items-center justify-end w-full text-black">
+                        <input
+                            type="text"
+                            value={message}
+                            onChange={(e) => setMessage(e.target.value)}
+                            onKeyDown={handleSubmit}
+                            className="w-full rounded-md border border-[--site-chat-header-border] bg-[--site-main-newchat-input-color] text-[--site-card-icon-color] block text-sm p-2.5 pr-9"
+                            placeholder="Type message"
+                        />
+
+                        <span
+                            onClick={() => {
+                                handleSend();
+                            }}
+                            className="absolute pr-4"
+                        >
+                            <BsSendPlus />
+                        </span>
+                    </div>
                 </div>
             </div>
             <div

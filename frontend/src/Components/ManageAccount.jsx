@@ -77,6 +77,15 @@ const ManageAccount = () => {
         setIsOpenModal(!isopenModal);
     };
 
+    const handleCancelSubscription = () => {
+        axios
+            .post(webAPI.cancel_subscription, { id: user.id })
+            .then((res) => {
+                window.location.href = res.data.url;
+            })
+            .catch((err) => console.error(err));
+    };
+
     useEffect(() => {
         if (user.role === 5) {
             setTrial(user.days);
@@ -253,7 +262,7 @@ const ManageAccount = () => {
                     <div className="flex flex-col justify-end w-full gap-3 md:flex-row">
                         <button
                             className="px-4 py-2 text-base font-semibold text-[--site-card-icon-color] border bg-transparent border-[--site-card-icon-color] rounded-md"
-                            onClick={() => navigate("/chatbot/subscription")}
+                            onClick={() => handleCancelSubscription()}
                         >
                             Manage Subscription
                         </button>

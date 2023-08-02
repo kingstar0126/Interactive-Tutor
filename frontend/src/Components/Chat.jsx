@@ -30,7 +30,6 @@ import {
     DialogFooter,
 } from "@material-tailwind/react";
 
-
 const Chat = () => {
     const location = useLocation();
     const navigate = useNavigate();
@@ -51,7 +50,7 @@ const Chat = () => {
     const [isOpen, setIsOpen] = useState(true);
     const [trial, setTrial] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
-    const [open, setOpen] = useState(false)
+    const [open, setOpen] = useState(false);
     const descroption = [
         {
             title: "Creating an account",
@@ -216,11 +215,42 @@ const Chat = () => {
     Interactive Tutor allows you to control who has access to your content, safeguarding your intellectual property.`,
         },
     ];
+    const videos = [
+        {
+            src: "http://192.168.103.63:3000/video1.webm",
+            type: "video/webm",
+        },
+        {
+            src: "http://192.168.103.63:3000/video2.webm",
+            type: "video/webm",
+        },
+        {
+            src: "http://192.168.103.63:3000/video3.webm",
+            type: "video/webm",
+        },
+        {
+            src: "http://192.168.103.63:3000/video4.webm",
+            type: "video/webm",
+        },
+        {
+            src: "http://192.168.103.63:3000/video5.webm",
+            type: "video/webm",
+        },
+        {
+            src: "http://192.168.103.63:3000/video6.webm",
+            type: "video/webm",
+        },
+        {
+            src: "http://192.168.103.63:3000/video7.webm",
+            type: "video/webm",
+        },
+    ];
     const [isactiveIndex, setIsActiveIndex] = useState(0);
     const videoRef = useRef([]);
 
-    const togglePlay = (index) => {
-        const video = videoRef.current[index];
+    const togglePlay = () => {
+        const video = videoRef.current[isactiveIndex];
+        console.log(video, isactiveIndex);
 
         if (video.paused) {
             video.play();
@@ -274,7 +304,6 @@ const Chat = () => {
             getChats();
         } else if (user.role === undefined || user.role === 0) {
             setOpen(true);
-            
         } else {
             getChats();
         }
@@ -395,6 +424,66 @@ const Chat = () => {
                                     ))}
                                 </div>
                             )}
+                        >
+                            {videos.map((videoData, index) => (
+                                <div
+                                    key={"video" + videoData.src}
+                                    className="flex w-full h-full"
+                                >
+                                    <video
+                                        className="object-cover w-full h-full"
+                                        controls={false}
+                                        onClick={() => togglePlay(index)}
+                                        ref={(ref) =>
+                                            (videoRef.current[index] = ref)
+                                        }
+                                    >
+                                        <source
+                                            src={videoData.src}
+                                            type={videoData.type}
+                                        />
+                                    </video>
+
+                                    <div className="absolute w-full translate-x-1/2 -translate-y-1/2 top-1/2">
+                                        {isPlaying ? null : (
+                                            <button
+                                                className="bg-[--site-main-Table-Text] ml-[-22px] w-[44px] h-[44px] rounded-full flex items-center justify-center"
+                                                onClick={() => {
+                                                    togglePlay(index);
+                                                }}
+                                            >
+                                                <BsFillPlayFill className="w-7 h-7" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </Carousel>
+                    </div>
+                    <div className="flex flex-col md:w-5/12">
+                        <Carousel
+                            navigation={({
+                                setActiveIndex,
+                                activeIndex,
+                                length,
+                            }) => (
+                                <div className="absolute z-50 flex gap-2 bottom-4 left-2/4 -translate-x-2/4">
+                                    {setIsActiveIndex(activeIndex)}
+                                    {new Array(length).fill("").map((_, i) => (
+                                        <span
+                                            key={i}
+                                            className={`block h-1 cursor-pointer rounded-2xl transition-all content-[''] ${
+                                                activeIndex === i
+                                                    ? "w-8 bg-white"
+                                                    : "w-4 bg-white/50"
+                                            }`}
+                                            onClick={() => {
+                                                setActiveIndex(i);
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                            )}
                             prevArrow={({ handlePrev, activeIndex }) => (
                                 <IconButton
                                     variant="text"
@@ -446,79 +535,24 @@ const Chat = () => {
                                 </IconButton>
                             )}
                         >
-                            {[
-                                {
-                                    src: "https://video.wixstatic.com/video/4d69d5_c737c9f71590405ab8ad2024877c9250/720p/mp4/file.mp4",
-                                    type: "video/mp4",
-                                },
-                                {
-                                    src: "https://video.wixstatic.com/video/4d69d5_99cd4885087e41e4a8d8a8973583143d/720p/mp4/file.mp4",
-                                    type: "video/mp4",
-                                },
-                                {
-                                    src: "https://video.wixstatic.com/video/4d69d5_ce4ed8c9d08c4c76842a597f684d5f3e/720p/mp4/file.mp4",
-                                    type: "video/mp4",
-                                },
-                                {
-                                    src: "https://video.wixstatic.com/video/4d69d5_ca127d9db93c4475bb3cf55781f88b70/720p/mp4/file.mp4",
-                                    type: "video/mp4",
-                                },
-                                {
-                                    src: "https://video.wixstatic.com/video/4d69d5_8e22f27eb45946fc9269ab9dafedc7da/720p/mp4/file.mp4",
-                                    type: "video/mp4",
-                                },
-                                {
-                                    src: "https://video.wixstatic.com/video/4d69d5_7ac0914dc4d9438ca13eb2c087f0115c/720p/mp4/file.mp4",
-                                    type: "video/mp4",
-                                },
-                                {
-                                    src: "https://video.wixstatic.com/video/4d69d5_9659672cc61c45d0b0c6606356b2b83b/720p/mp4/file.mp4",
-                                    type: "video/mp4",
-                                },
-                            ].map((videoData, index) => (
-                                <div
-                                    key={"video" + videoData.src}
-                                    className="flex w-full h-full"
-                                >
-                                    <video
-                                        className="object-cover w-full h-full"
-                                        controls={false}
-                                        onClick={() => togglePlay(index)}
-                                        ref={(ref) =>
-                                            (videoRef.current[index] = ref)
-                                        }
+                            {descroption.map((description, index) => {
+                                return (
+                                    <div
+                                        className="flex flex-col"
+                                        key={description.title + index}
                                     >
-                                        <source
-                                            src={videoData.src}
-                                            type={videoData.type}
-                                        />
-                                    </video>
-
-                                    <div className="absolute w-full translate-x-1/2 -translate-y-1/2 top-1/2">
-                                        {isPlaying ? null : (
-                                            <button
-                                                className="bg-[--site-main-Table-Text] ml-[-22px] w-[44px] h-[44px] rounded-full flex items-center justify-center"
-                                                onClick={() => {
-                                                    togglePlay(index);
-                                                }}
-                                            >
-                                                <BsFillPlayFill className="w-7 h-7" />
-                                            </button>
-                                        )}
+                                        <span className="text-[16px] font-medium text-[--site-card-icon-color]">
+                                            {description.title}
+                                        </span>
+                                        <span className="text-[14px] leading-[40px] font-medium text-[--site-chat-video-description-color] h-[20rem]">
+                                            <Scrollbar>
+                                                {description.content}
+                                            </Scrollbar>
+                                        </span>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </Carousel>
-                    </div>
-                    <div className="flex flex-col md:w-5/12">
-                        <span className="text-[16px] font-medium text-[--site-card-icon-color]">
-                            {descroption[isactiveIndex].title}
-                        </span>
-                        <span className="text-[14px] leading-[40px] font-medium text-[--site-chat-video-description-color] h-[20rem]">
-                            <Scrollbar>
-                                {descroption[isactiveIndex].content}
-                            </Scrollbar>
-                        </span>
                     </div>
                 </div>
                 {location.pathname === "/chatbot/chat" ? (
@@ -543,13 +577,17 @@ const Chat = () => {
                     <DialogHeader>Important</DialogHeader>
                     <DialogBody divider>
                         <span className="text-base text-black">
-                        Your trial has expired, please choose your subscription to continue using interactive tutor.
+                            Your trial has expired, please choose your
+                            subscription to continue using interactive tutor.
                         </span>
                     </DialogBody>
                     <DialogFooter className="flex items-center justify-end gap-4 pb-8">
                         <button
-                            onClick={() => {changeuser(dispatch, null);
-                                navigate("/login");setOpen(false);}}
+                            onClick={() => {
+                                changeuser(dispatch, null);
+                                navigate("/login");
+                                setOpen(false);
+                            }}
                             className="bg-transparent border-[--site-card-icon-color] text-[--site-card-icon-color] text-base font-semibold border rounded-md px-4 py-2"
                         >
                             logout
@@ -571,7 +609,7 @@ const Chat = () => {
                     handleOk={handleOk}
                     handleCancel={handleCancel}
                 />
-            </div> 
+            </div>
         </div>
     );
 };
