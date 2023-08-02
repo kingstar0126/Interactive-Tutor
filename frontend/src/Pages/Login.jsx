@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { getUser } from "../redux/actions/userAction";
 import { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
+import { setOpenSidebar } from "../redux/actions/locationAction";
 
 const Login = () => {
     const statedata = JSON.parse(useSelector((state) => state.user.user));
@@ -19,6 +20,10 @@ const Login = () => {
         handleSubmit,
     } = useForm();
 
+    const handleOpenSidebar = () => {
+        dispatch(setOpenSidebar());
+    };
+
     useEffect(() => {
         if (statedata && statedata.username) {
             Setstatus(0);
@@ -26,6 +31,9 @@ const Login = () => {
     }, [statedata]);
 
     useEffect(() => {
+        if (isOpenSidebar) {
+            handleOpenSidebar();
+        }
         if (status === 0) {
             navigate("/chatbot/chat");
             Setstatus(1);
