@@ -142,7 +142,7 @@ const ManageAccount = () => {
                         </p>
                     )}
                     {trial > 0 && (
-                        <div className="flex items-end justify-end md:w-max scale-75 md:scale-100 ml-[-20px] mr-[-23px] md:mr-0 translate-y-2 md:translate-y-0">
+                        <div className="flex items-end justify-end md:w-max scale-75 md:scale-100 ml-[-14px] mr-[-20px] translate-y-2 md:translate-y-0">
                             <ReactSpeedometer
                                 maxSegmentLabels={0}
                                 segments={4}
