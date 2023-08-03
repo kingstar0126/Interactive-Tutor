@@ -25,6 +25,7 @@ const NewChat = () => {
         (state) => state.location.current_location
     );
     const dispatch = useDispatch();
+    const backgroundRef = useRef(null);
     const chatbot_logo = useRef(null);
     const chatbot_start = useRef(null);
     const chatbot_copyright = useRef(null);
@@ -44,7 +45,6 @@ const NewChat = () => {
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
     const chatbot = useSelector((state) => state.chat.chatbot);
     const chatId = useParams();
-
     const notification = (type, message) => {
         // To do in here
         if (type === "error") {
@@ -344,7 +344,12 @@ const NewChat = () => {
     };
 
     return (
-        <div className="w-full h-full from-[--site-main-modal-from-color] bg-gradient-to-br rounded-xl">
+        <div
+            style={{
+                background: `linear-gradient(to bottom right, ${chat.chat_logo.bg}, transparent)`,
+            }}
+            className="w-full h-full rounded-xl"
+        >
             {loading && (
                 <div className="flex flex-col items-center justify-center w-full min-h-[20rem]">
                     <ReactLoading

@@ -11,6 +11,7 @@ import LogoBranding from "./Branding/Images/LogoBranding";
 import UserAvatarBranding from "./Branding/Images/UserAvatarBranding";
 import AIAvatarBranding from "./Branding/Images/AIAvatarBranding";
 import AIMessage from "./Branding/Message/AIMessage";
+import BackgroundColor from "./Branding/Message/BackgroundColor";
 import UserMessage from "./Branding/Message/UserMessage";
 import ButtonBranding1 from "./Branding/Button/ButtonBranding1";
 import ButtonBranding2 from "./Branding/Button/ButtonBranding2";
@@ -162,15 +163,21 @@ const Branding = () => {
                         name="text"
                         className="flex flex-col w-full gap-5 2xl:flex-row"
                     >
-                        <div className="w-full 2xl:w-1/2">
+                        <div className="w-full 2xl:w-1/3">
                             <UserMessage
                                 title={"User"}
                                 data={current_chat.chat_logo}
                             />
                         </div>
-                        <div className="w-full 2xl:w-1/2">
+                        <div className="w-full 2xl:w-1/3">
                             <AIMessage
                                 title={"AI"}
+                                data={current_chat.chat_logo}
+                            />
+                        </div>
+                        <div className="w-full 2xl:w-1/3">
+                            <BackgroundColor
+                                title={"Background"}
                                 data={current_chat.chat_logo}
                             />
                         </div>
@@ -185,7 +192,7 @@ const Branding = () => {
                     </div>
                     <div
                         name="text"
-                        className="grid w-full grid-rows-3 xl:grid-rows-1 gap-5 auto-rows-max xl:grid-cols-3"
+                        className="grid w-full grid-rows-3 gap-5 xl:grid-rows-1 auto-rows-max xl:grid-cols-3"
                     >
                         <div className="min-w-[250px] sm:w-auto">
                             <ButtonBranding1
