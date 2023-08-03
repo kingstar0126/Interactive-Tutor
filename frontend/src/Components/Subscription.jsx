@@ -219,8 +219,7 @@ const Subscription = () => {
                             </Button>
                         </div>
                     </div>
-
-                    {labels && (
+                    {datas && (
                         <div className="w-full px-2">
                             <span className="text-black text-[24px] font-semibold">
                                 Tutors
@@ -229,9 +228,7 @@ const Subscription = () => {
                                 <Slider
                                     size="lg"
                                     id="tutors"
-                                    value={
-                                        (labels.length / maxtutorCount) * 100
-                                    }
+                                    value={(datas.length / maxtutorCount) * 100}
                                     className="text-[#6EAE1C] opacity-50"
                                     trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
                                 />
