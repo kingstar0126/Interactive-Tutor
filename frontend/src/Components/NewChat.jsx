@@ -409,7 +409,7 @@ const NewChat = () => {
                                                 />
                                                 <div
                                                     name="human"
-                                                    className="text-[--site-card-icon-color] whitespace-break-spaces w-full flex p-2"
+                                                    className="flex w-full p-2 whitespace-break-spaces"
                                                 >
                                                     <span>{data.content}</span>
                                                 </div>
@@ -430,7 +430,7 @@ const NewChat = () => {
                                                 />
                                                 <div
                                                     name="ai"
-                                                    className="flex flex-col w-full p-2 text-black whitespace-break-spaces"
+                                                    className="flex flex-col w-full p-2 whitespace-break-spaces"
                                                 >
                                                     {data.content
                                                         .split("```")
