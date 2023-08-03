@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request, send_file
 from .models import Chat, Message, Train, User, Organization
 from . import db
-from rich import print, pretty
+from collections import Counter
 import json
 import pinecone
 import openai
@@ -10,6 +10,7 @@ import uuid
 from dotenv import load_dotenv
 from .auth import generate_pin_password
 from werkzeug.utils import secure_filename
+import datetime
 
 load_dotenv()
 
@@ -20,7 +21,6 @@ PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
 pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
 openai.openai_api_key = OPENAI_API_KEY
 
-pretty.install()
 
 chat = Blueprint('chat', __name__)
 
@@ -40,6 +40,24 @@ def is_valid_uuid(value):
         return True
     except ValueError:
         return False
+
+
+def generate_final_report_data(source_data):
+    current_date = datetime.datetime.now().date()
+
+    # Count the occurrences of each date in the source data
+    date_counts = Counter(source_data)
+
+    # Generate the final data based on the current day
+    final_data = []
+    cumulative_sum = 0
+
+    for i in range(1, current_date.day + 1):
+        date_str = current_date.replace(day=i).strftime('%Y-%m-%d')
+        cumulative_sum += date_counts[date_str]
+        final_data.append(cumulative_sum)
+
+    return final_data
 
 
 @chat.route('/api/addchat', methods=['POST'])
@@ -428,15 +446,18 @@ def delete_chat(id):
 def get_report_data():
     id = request.json['id']
     chats = db.session.query(Chat).filter_by(user_id=id).all()
+    current_month = datetime.datetime.now().month
     messages = []
     labels = []
     for chat in chats:
         data = []
         labels.append(chat.label)
-        message = db.session.query(Message).filter_by(chat_id=chat.id).all()
+        message = db.session.query(Message).filter_by(
+            chat_id=chat.id).order_by(Message.create_date).all()
         for msg in message:
-            data.append(msg.create_date.strftime("%Y-%m-%d").split('-')[2])
-        messages.append(data)
+            if msg.create_date.month == current_month:
+                data.append(msg.create_date.strftime("%Y-%m-%d"))
+        messages.append(generate_final_report_data(data))
     messages.append(labels)
     return jsonify({'success': True, 'data': messages})
 

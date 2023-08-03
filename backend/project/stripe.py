@@ -190,6 +190,9 @@ def create_checkout_session():
         }],
         payment_method_collection='always',
         mode='subscription',
+        subscription_data={
+            'default_tax_rates': [os.getenv('TAX_RATE_ID')],
+        },
         success_url="https://app.interactive-tutor.com/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
         cancel_url='https://app.interactive-tutor.com/chatbot/subscription',
         customer=user.customer_id,
@@ -205,25 +208,6 @@ def stripe_webhook():
     payload = json.loads(request.get_data(as_text=True))
     if payload["type"] == "checkout.session.completed":
         # TODO: run some custom code here
-        customer_id = payload["data"]["object"]["customer"]
-        _subscription_id = payload["data"]["object"]["subscription"]
-        price_id = stripe.Subscription.retrieve(
-            _subscription_id)['items']['data'][0]['price']['id']
-        user = db.session.query(User).filter_by(
-            customer_id=customer_id).first()
-        user.subscription_id = _subscription_id
-        user.role = db.session.query(Production).filter_by(
-            price_id=price_id).first().role
-        query = user.query
-        if user.role == 2:
-            query = 500
-        elif user.role == 3:
-            query = 3000
-        elif user.role == 4:
-            query = 10000
-        user.query = query
-        db.session.commit()
-    elif payload["type"] == "invoice.payment_succeeded":
         customer_id = payload["data"]["object"]["customer"]
         _subscription_id = payload["data"]["object"]["subscription"]
         price_id = stripe.Subscription.retrieve(
@@ -269,7 +253,6 @@ def update_subscription():
     subscriptionPlanId = request.json['subscriptionPlanId']
     clientReferenceId = request.json['clientReferenceId']
 
-    stripe.Subscription.cancel(user.subscription_id)
     session = stripe.checkout.Session.create(
         payment_method_types=['card'],
         line_items=[{
@@ -278,6 +261,9 @@ def update_subscription():
         }],
         payment_method_collection='always',
         mode='subscription',
+        subscription_data={
+            'default_tax_rates': [os.getenv('TAX_RATE_ID')],
+        },
         success_url="https://app.interactive-tutor.com/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
         cancel_url='https://app.interactive-tutor.com/chatbot/subscription',
         customer=user.customer_id,

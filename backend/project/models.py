@@ -18,6 +18,7 @@ class User(UserMixin, db.Model):
     subscription_id = db.Column(db.String(255))
     customer_id = db.Column(db.String(250))
     query = db.Column(db.Integer)
+    usage = db.Column(db.Integer)
     contact = db.Column(db.String(255))
     state = db.Column(db.String(255))
     city = db.Column(db.String(255))

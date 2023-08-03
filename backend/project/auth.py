@@ -47,6 +47,24 @@ def calculate_days(signup_date):
     return hours
 
 
+def compare_month():
+    today = datetime.today()
+    is_new_month = today.day == 1
+
+    if is_new_month:
+        users = db.session.query(User).all()
+        for user in users:
+            query = user.query
+            user.usage = 0
+            if user.role == 2:
+                user.query = query + 500
+            elif user.role == 3:
+                user.query = query + 3000
+            elif user.role == 4:
+                user.query = query + 10000
+            db.session.commit()
+
+
 auth = Blueprint('auth', __name__)
 
 
@@ -90,7 +108,7 @@ def login_post():
             new_user = {
                 'id': user.id,
                 'username': user.username,
-                'query': user.query,
+                'query': user.query - user.usage,
                 'role': user.role,
             }
             response = {
@@ -104,7 +122,7 @@ def login_post():
             'id': user.id,
             'username': user.username,
             'role': user.role,
-            'query': user.query,
+            'query': user.query - user.usage,
             'days': days
         }
     else:
@@ -112,7 +130,7 @@ def login_post():
             'id': user.id,
             'username': user.username,
             'role': user.role,
-            'query': user.query
+            'query': user.query - user.usage
         }
     response = {
         'success': True,
@@ -134,7 +152,7 @@ def get_user_account():
             new_user = {
                 'id': user.id,
                 'username': user.username,
-                'query': user.query,
+                'query': user.query - user.usage,
                 'role': user.role,
             }
             response = {
@@ -148,14 +166,14 @@ def get_user_account():
             'id': user.id,
             'username': user.username,
             'role': user.role,
-            'query': user.query,
+            'query': user.query - user.usage,
             'days': days
         }
     else:
         new_user = {
             'id': user.id,
             'username': user.username,
-            'query': user.query,
+            'query': user.query - user.usage,
             'role': user.role
         }
     response = {
@@ -183,6 +201,7 @@ def register_new_user(username, email, password):
     role = 5
     status = 0
     query = 500
+    usage = 0
     customer = stripe.Customer.create(name=username, email=email)
     new_user = User(username=username, query=query, status=status, email=email, role=role, customer_id=customer.id,
                     password=generate_password_hash(password, method='sha256'))
@@ -315,7 +334,7 @@ def get_useraccount():
                 'state': user.state,
                 'city': user.city,
                 'role': user.role,
-                'query': user.query,
+                'query': user.query - user.usage,
                 'country': user.country
             }
             response = {
@@ -333,7 +352,7 @@ def get_useraccount():
                 'contact': user.contact,
                 'state': user.state,
                 'city': user.city,
-                'query': user.query,
+                'query': user.query - user.usage,
                 'role': user.role,
                 'country': user.country,
                 'days': days
@@ -348,7 +367,7 @@ def get_useraccount():
             'state': user.state,
             'city': user.city,
             'role': user.role,
-            'query': user.query,
+            'query': user.query - user.usage,
             'country': user.country
         }
         return jsonify({'success': True, 'data': new_user, 'code': 200})

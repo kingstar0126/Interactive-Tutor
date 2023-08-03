@@ -132,7 +132,7 @@ def get_query():
     uuid = request.json['id']
     user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
         Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
-    return user.query
+    return jsonify({'query': user.query, 'usage': user.usage})
 
 
 @message.route('/api/sendchat', methods=['POST'])
@@ -141,7 +141,6 @@ def send_message():
     query = request.json['_message']
     behaviormodel = request.json['behaviormodel']
     model = request.json['model']
-    print(uuid)
     current_message = db.session.query(Message).filter_by(uuid=uuid).first()
     if current_message is not None:
         chat = db.session.query(Chat).filter_by(
@@ -149,8 +148,8 @@ def send_message():
 
         user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
             Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
-        if user.query != 0:
-            user.query -= 1
+        if user.query - user.usage != 0:
+            user.usage += 1
         else:
             return jsonify({
                 'success': False,
@@ -182,7 +181,7 @@ def send_message():
         _response = {
             'success': True,
             'code': 200,
-            'query': user.query,
+            'query': user.query - user.usage,
             'message': 'Your messageBot created generated!!!',
             'data': response
         }
