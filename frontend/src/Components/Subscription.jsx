@@ -24,6 +24,7 @@ const Subscription = () => {
     const [trial, setTrial] = useState(0);
     const [datas, setDatas] = useState([]);
     const [labels, setLabels] = useState(null);
+    const [index_length, setIndex_length] = useState(0);
     const [datasources, setDataSources] = useState(null);
     const [isopenModal, setIsOpenModal] = useState(false);
 
@@ -58,13 +59,31 @@ const Subscription = () => {
             .then((res) => {
                 const one = res.data.data.slice(0, -1);
                 const two = res.data.data.slice(-1);
-                const dataset = one.map((item) => item.length);
-                setDatas(dataset);
-                if (two && two[0].length >= 1) setLabels(two[0].slice());
+
+                const combineData = (arr1, arr2) => {
+                    return arr1.map((item, index) => [...item, arr2[0][index]]);
+                };
+
+                const datasets = combineData(one, two);
+
+                const currentDate = new Date();
+                const totalDays = new Date(
+                    currentDate.getFullYear(),
+                    currentDate.getMonth() + 1,
+                    0
+                ).getDate();
+                const labels = Array.from(
+                    { length: totalDays + 1 },
+                    (_, i) => `${i}`
+                );
+                setLabels(labels);
+                setIndex_length(datasets[0].length);
+                setDatas(datasets);
             })
             .catch((err) => console.error(err));
-        if (user.role === undefined || user.role === 0)
-        {handleOpenModel()}
+        if (user.role === undefined || user.role === 0) {
+            handleOpenModel();
+        }
     }, []);
 
     const handleOpenModel = () => {
@@ -100,7 +119,7 @@ const Subscription = () => {
                     onClick={handleOpenSidebar}
                     className="w-6 h-6 mb-1 md:hidden"
                 />
-                <div className="flex items-end justify-end md:mt-[27px] md:mb-[30px]">
+                <div className="flex items-end justify-end md:mt-[27px] md:mb-[30px] md:pr-[44px] pr-9">
                     {chat && chat.organization && (
                         <div className="xl:flex flex-col items-start justify-center mr-2 p-2 bg-[--site-warning-text-color] rounded shadow-2xl hidden">
                             <p>
@@ -164,7 +183,11 @@ const Subscription = () => {
                         <span className="text-[16px] items-start w-full pt-4 px-4">
                             Users
                         </span>
-                        <Report labels={labels} datas={datas} />
+                        <Report
+                            labels={labels}
+                            datas={datas}
+                            index={index_length}
+                        />
                     </div>
                 )}
                 <div className="flex flex-col w-[99.33%]  bg-gradient-to-r from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] border-[--site-chat-header-border] border rounded-2xl shadow-xl shadow-[--site-chat-header-border] 2xl:min-h-[20rem] h-auto py-8 px-4">
@@ -176,8 +199,9 @@ const Subscription = () => {
                             <Slider
                                 size="lg"
                                 id="queries"
-                                value={
-                                    ((query > maxquery ? maxquery : query) /
+                                defaultValue={
+                                    ((maxquery -
+                                        (query > maxquery ? maxquery : query)) /
                                         maxquery) *
                                     100
                                 }
@@ -224,7 +248,6 @@ const Subscription = () => {
                             </div>
                         </div>
                     )}
-
                     {datasources > 0 ? (
                         <div className="w-full px-2">
                             <span className="text-black text-[24px] font-semibold">
@@ -255,7 +278,31 @@ const Subscription = () => {
                                 </Button>
                             </div>
                         </div>
-                    ) : null}
+                    ) : (
+                        <div className="w-full px-2">
+                            <span className="text-black text-[24px] font-semibold">
+                                Data Sources
+                            </span>
+                            <div className="flex items-center gap-2 mt-4">
+                                <Slider
+                                    size="lg"
+                                    id="datasources"
+                                    defaultValue={0}
+                                    className="text-[#6EAE1C] opacity-50"
+                                    trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
+                                />
+                                <Button
+                                    variant="outlined"
+                                    className="ring-[--site-logo-text-color] border-0 ring-2 font-semibold text-[--site-card-icon-color] rounded-full px-1 py-1 sm:py-3 sm:px-6 text-[12px] sm:text-[16px]"
+                                    onClick={() => {
+                                        handleOpenModel();
+                                    }}
+                                >
+                                    Upgrade
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
             <SubscriptionModal

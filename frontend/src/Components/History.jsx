@@ -36,7 +36,7 @@ const History = (props) => {
     };
     return (
         <div className="flex flex-col w-full h-screen p-6 sm:flex-row">
-            <div className="flex flex-col h-1/3 sm:w-1/3 sm:h-screen text-[--site-card-icon-color]">
+            <div className="flex flex-col h-1/3 sm:w-1/3 sm:h-screen text-[--site-card-icon-color] pb-6">
                 <Scrollbar>
                     {history.map((item, index) => {
                         return (

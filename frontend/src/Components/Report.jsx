@@ -30,19 +30,26 @@ const Report = (props) => {
 
     useEffect(() => {
         let { labels, datas } = props;
-
         if (labels && datas.length) {
+            let dataset = [];
+            props.datas.map((item) => {
+                if (item.length <= props.index) {
+                    item.unshift(0);
+                }
+                const data = {
+                    label: item.slice(-1),
+                    fill: true,
+                    data: item.slice(0, -1),
+                    borderColor: getRandomColor(),
+                    backgroundColor: createGradientBackground(),
+                    borderWidth: 1,
+                };
+                dataset.push(data);
+            });
+
             setData({
                 labels,
-                datasets: [
-                    {
-                        fill: true,
-                        data: props.datas,
-                        borderColor: "rgba(71, 141, 4, 1)",
-                        backgroundColor: createGradientBackground(),
-                        borderWidth: 1,
-                    },
-                ],
+                datasets: dataset,
             });
             if (data.labels && datas.length) {
                 setData((prevState) => ({ ...prevState }));
@@ -50,11 +57,21 @@ const Report = (props) => {
         }
     }, [props]);
 
+    function getRandomColor() {
+        const letters = "0123456789ABCDEF";
+        let color = "#";
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
     const createGradientBackground = () => {
         const ctx = document.createElement("canvas").getContext("2d");
         const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-        gradient.addColorStop(0, "rgba(216, 249, 173, 1)");
-        gradient.addColorStop(1, "rgba(216, 249, 173, 0)");
+        const color = getRandomColor();
+        gradient.addColorStop(0, color + "ff");
+        gradient.addColorStop(1, color + "00");
 
         return gradient;
     };
@@ -64,7 +81,7 @@ const Report = (props) => {
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                display: false,
+                display: true,
             },
         },
         scales: {

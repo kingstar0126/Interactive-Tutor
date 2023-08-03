@@ -169,7 +169,7 @@ const SubscriptionModal = (props) => {
                                                     className="flex items-end justify-center gap-1 mt-6 font-semibold"
                                                 >
                                                     <span className="text-[36px]">
-                                                        ${item.price} /
+                                                        £{item.price} /
                                                     </span>
                                                     <span className="text-[20px] pb-2">
                                                         month
@@ -240,7 +240,7 @@ const SubscriptionModal = (props) => {
                                                     className="flex items-end justify-center gap-1 mt-6 font-semibold"
                                                 >
                                                     <span className="text-[36px] text-[#034F75]">
-                                                        ${item.price} /
+                                                        £{item.price} /
                                                     </span>
                                                     <span className="text-[#034F75] text-[20px] pb-2">
                                                         month

@@ -1,5 +1,9 @@
 import { BsFillPlayFill } from "react-icons/bs";
-import { AiOutlineUser, AiOutlineMenu } from "react-icons/ai";
+import {
+    AiOutlineUser,
+    AiOutlineMenu,
+    AiOutlineConsoleSql,
+} from "react-icons/ai";
 import { useState, useEffect, useRef } from "react";
 import Chatmodal from "./Chatmodal";
 import ChatTable from "./ChatTable";
@@ -247,10 +251,8 @@ const Chat = () => {
     ];
     const [isactiveIndex, setIsActiveIndex] = useState(0);
     const videoRef = useRef([]);
-
     const togglePlay = () => {
         const video = videoRef.current[isactiveIndex];
-        console.log(video, isactiveIndex);
 
         if (video.paused) {
             video.play();
@@ -382,7 +384,7 @@ const Chat = () => {
                     </button>
 
                     <button
-                        className="p-2 flex justify-center items-center bg-[--site-logo-text-color] rounded text-[--site-card-icon-color] pt-3 ml-2"
+                        className="p-2 flex justify-center items-center bg-[--site-logo-text-color] rounded text-[--site-card-icon-color] pt-3 ml-2 opacity-100"
                         onClick={() => setIsOpen(!isOpen)}
                     >
                         {isOpen ? (
@@ -400,40 +402,20 @@ const Chat = () => {
             <div className="flex flex-col w-full px-5 pt-8 pb-16 md:gap-8 md:px-10">
                 <div className={showDescription}>
                     <div className="flex w-full h-auto rounded-lg md:w-7/12">
-                        <Carousel
-                            autoplay={false}
-                            navigation={({
-                                setActiveIndex,
-                                activeIndex,
-                                length,
-                            }) => (
-                                <div className="absolute z-50 flex gap-2 bottom-4 left-2/4 -translate-x-2/4">
-                                    {setIsActiveIndex(activeIndex)}
-                                    {new Array(length).fill("").map((_, i) => (
-                                        <span
-                                            key={i}
-                                            className={`block h-1 cursor-pointer rounded-2xl transition-all content-[''] ${
-                                                activeIndex === i
-                                                    ? "w-8 bg-white"
-                                                    : "w-4 bg-white/50"
-                                            }`}
-                                            onClick={() => {
-                                                setActiveIndex(i);
-                                            }}
-                                        />
-                                    ))}
-                                </div>
-                            )}
-                        >
-                            {videos.map((videoData, index) => (
+                        {videos.map((videoData, index) => {
+                            const className =
+                                index === isactiveIndex
+                                    ? "relative w-full h-full"
+                                    : "hidden w-full h-full";
+                            return (
                                 <div
                                     key={"video" + videoData.src}
-                                    className="flex w-full h-full"
+                                    className={className}
                                 >
                                     <video
                                         className="object-cover w-full h-full"
                                         controls={false}
-                                        onClick={() => togglePlay(index)}
+                                        onClick={() => togglePlay()}
                                         ref={(ref) =>
                                             (videoRef.current[index] = ref)
                                         }
@@ -449,7 +431,7 @@ const Chat = () => {
                                             <button
                                                 className="bg-[--site-main-Table-Text] ml-[-22px] w-[44px] h-[44px] rounded-full flex items-center justify-center"
                                                 onClick={() => {
-                                                    togglePlay(index);
+                                                    togglePlay();
                                                 }}
                                             >
                                                 <BsFillPlayFill className="w-7 h-7" />
@@ -457,8 +439,8 @@ const Chat = () => {
                                         )}
                                     </div>
                                 </div>
-                            ))}
-                        </Carousel>
+                            );
+                        })}
                     </div>
                     <div className="flex flex-col md:w-5/12">
                         <Carousel
@@ -474,8 +456,8 @@ const Chat = () => {
                                             key={i}
                                             className={`block h-1 cursor-pointer rounded-2xl transition-all content-[''] ${
                                                 activeIndex === i
-                                                    ? "w-8 bg-white"
-                                                    : "w-4 bg-white/50"
+                                                    ? "w-8 bg-[--site-card-icon-color]"
+                                                    : "w-4 bg-[--site-card-icon-color] opacity-50"
                                             }`}
                                             onClick={() => {
                                                 setActiveIndex(i);
@@ -491,7 +473,7 @@ const Chat = () => {
                                     onClick={() => {
                                         handlePrev();
                                     }}
-                                    className="!absolute top-2/4 left-4 -translate-y-2/4 text-[--site-logo-text-color]"
+                                    className="!absolute top-2/4 left-4 -translate-y-2/4 text-[--site-card-icon-color]"
                                 >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -516,7 +498,7 @@ const Chat = () => {
                                     onClick={() => {
                                         handleNext();
                                     }}
-                                    className="!absolute top-2/4 !right-4 -translate-y-2/4 text-[--site-logo-text-color]"
+                                    className="!absolute top-2/4 !right-4 -translate-y-2/4 text-[--site-card-icon-color]"
                                 >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
