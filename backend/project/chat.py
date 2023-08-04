@@ -453,3 +453,14 @@ def get_access_AI_tutor():
     organization_id = db.session.query(
         Organization).filter_by(email=email).first().uuid
     return jsonify({'success': True, 'data': organization_id, 'code': 200})
+
+
+@chat.route('/api/transfer_tutor', methods=['POST'])
+def transfer_tutor_customer():
+    email = request.json['email']
+    id = request.json['id']
+    chat = db.session.query(Chat).filter_by(id=id).first()
+    user = db.session.query(User).filter_by(email=email).first()
+    chat.user_id = user.id
+    db.session.commit()
+    return jsonify({'success': True, 'message': f'You have successfully transferred your tutor to {email}!', 'code': 200})

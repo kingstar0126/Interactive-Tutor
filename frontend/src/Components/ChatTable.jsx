@@ -67,7 +67,7 @@ const ChatTable = (props) => {
 
     useEffect(() => {
         setTableData(getCurrentPageData);
-    }, [chatData]);
+    }, [chatData, currentPage]);
 
     const getCurrentPageData = () => {
         const { firstIndex, lastIndex } = getPaginationRange();

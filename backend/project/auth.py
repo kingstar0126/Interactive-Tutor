@@ -152,8 +152,17 @@ def get_user_account():
             new_user = {
                 'id': user.id,
                 'username': user.username,
-                'query': user.query - user.usage,
+                'email': user.email,
+                'contact': user.contact,
+                'state': user.state,
+                'city': user.city,
                 'role': user.role,
+                'maxquery': user.query,
+                'query': user.query - user.usage,
+                'country': user.country,
+                'tutors': user.tutors,
+                'training_datas': user.training_datas,
+                'training_words': user.training_words
             }
             response = {
                 'success': True,
@@ -165,16 +174,34 @@ def get_user_account():
         new_user = {
             'id': user.id,
             'username': user.username,
+            'email': user.email,
+            'contact': user.contact,
+            'state': user.state,
+            'city': user.city,
             'role': user.role,
+            'maxquery': user.query,
             'query': user.query - user.usage,
+            'country': user.country,
+            'tutors': user.tutors,
+            'training_datas': user.training_datas,
+            'training_words': user.training_words,
             'days': days
         }
     else:
         new_user = {
             'id': user.id,
             'username': user.username,
+            'email': user.email,
+            'contact': user.contact,
+            'state': user.state,
+            'city': user.city,
+            'role': user.role,
+            'maxquery': user.query,
             'query': user.query - user.usage,
-            'role': user.role
+            'country': user.country,
+            'tutors': user.tutors,
+            'training_datas': user.training_datas,
+            'training_words': user.training_words
         }
     response = {
         'success': True,
@@ -341,8 +368,12 @@ def get_useraccount():
                 'state': user.state,
                 'city': user.city,
                 'role': user.role,
+                'maxquery': user.query,
                 'query': user.query - user.usage,
-                'country': user.country
+                'country': user.country,
+                'tutors': user.tutors,
+                'training_datas': user.training_datas,
+                'training_words': user.training_words
             }
             response = {
                 'success': True,
@@ -359,9 +390,13 @@ def get_useraccount():
                 'contact': user.contact,
                 'state': user.state,
                 'city': user.city,
-                'query': user.query - user.usage,
                 'role': user.role,
+                'maxquery': user.query,
+                'query': user.query - user.usage,
                 'country': user.country,
+                'tutors': user.tutors,
+                'training_datas': user.training_datas,
+                'training_words': user.training_words,
                 'days': days
             }
             return jsonify({'success': True, 'data': new_user, 'code': 200})
@@ -373,9 +408,13 @@ def get_useraccount():
             'contact': user.contact,
             'state': user.state,
             'city': user.city,
+            'maxquery': user.query,
             'role': user.role,
             'query': user.query - user.usage,
-            'country': user.country
+            'country': user.country,
+            'tutors': user.tutors,
+            'training_datas': user.training_datas,
+            'training_words': user.training_words
         }
         return jsonify({'success': True, 'data': new_user, 'code': 200})
 
@@ -431,20 +470,21 @@ def change_account_status():
         return jsonify({'success': False, 'code': 404, 'message': 'User not found'})
 
 
-# @auth.route('/api/deleteaccount', methods=['POST'])
-# def delete_account():
-#     id = request.json['id']
-#     try:
-#         user = User.query.get(id)
-#         if user:
-#             db.session.delete(user)
-#             db.session.commit()
-#             return jsonify({'success': True, 'code': 200, 'message': 'Deleted successfully'})
-#         else:
-#             return jsonify({'success': False, 'code': 404, 'message': 'User not found'})
-#     except exc.SQLAlchemyError as e:
-#         # Handle any potential database errors
-#         return jsonify({'success': False, 'code': 500, 'message': 'An error occurred while deleting the user'})
+@auth.route('/api/change_user_limitation', methods=['POST'])
+def Change_user_limitation():
+    email = request.json['email']
+    query = request.json['query']
+    train = request.json['train']
+    tutors = request.json['tutor']
+    word = request.json['word']
+
+    user = db.session.query(User).filter_by(email=email).first()
+    user.query = query
+    user.training_datas = train
+    user.tutors = tutors
+    user.training_words = word
+    db.session.commit()
+    return jsonify({'success': True, 'code': 200, 'message': 'Updated Successfully'})
 
 
 @auth.route('/api/changeaccount', methods=['POST'])
