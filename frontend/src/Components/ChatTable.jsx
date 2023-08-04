@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { getchat } from "../redux/actions/chatAction";
 import { useNavigate } from "react-router-dom";
 import { AiOutlinePlus } from "react-icons/ai";
+import { useSelector } from "react-redux";
 import {
     Typography,
     Button,
@@ -22,11 +23,14 @@ const ChatTable = (props) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const dispatch = useDispatch();
     const [currentchat, SetCurrentchat] = useState({});
+    const [email, setEmail] = useState("");
     const [tableData, setTableData] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [chatData, setChatData] = useState([]);
     const itemsPerPage = 5;
     const [open, setOpen] = useState(false);
+    const [isTransModal, setIsTrnasModal] = useState(false);
+    const user = JSON.parse(useSelector((state) => state.user.user));
     const [id, setId] = useState(0);
     const TABLE_HEAD = [
         { label: "1", value: "Label" },
@@ -35,10 +39,6 @@ const ChatTable = (props) => {
         { label: "4", value: "Behaviour prompt" },
         { label: "5", value: "" },
     ];
-    const TABLE_HEAD_SM = [
-        { label: "1", value: "Label" },
-        { label: "2", value: "Action" },
-    ];
 
     const showModal = () => {
         setIsModalOpen(true);
@@ -46,7 +46,6 @@ const ChatTable = (props) => {
 
     useEffect(() => {
         if (props.chat.length) {
-            console.log("THis is chatTablr", props.chat);
             setChatData(props.chat);
             setCurrentPage(1);
         }
@@ -67,7 +66,7 @@ const ChatTable = (props) => {
 
     useEffect(() => {
         setTableData(getCurrentPageData);
-    }, [chatData]);
+    }, [chatData, currentPage]);
 
     const getCurrentPageData = () => {
         const { firstIndex, lastIndex } = getPaginationRange();
@@ -103,6 +102,7 @@ const ChatTable = (props) => {
     };
 
     const handleOpen = () => setOpen(!open);
+    const handleOpenTransModal = () => setIsTrnasModal(!isTransModal);
 
     return (
         <div className="relative overflow-x-auto rounded-xl">
@@ -211,9 +211,9 @@ const ChatTable = (props) => {
                                     </Typography>
                                 </td>
                                 <td className="xl:py-5 xl:pl-8 xl:pr-8 text-start pr-4">
-                                    <div className="flex w-full h-full gap-2">
+                                    <div className="flex w-full h-full gap-2 justify-center">
                                         <button
-                                            className="w-2/6 h-full xl:p-2 px-1 bg-[#479200]/25 rounded-md text-[#479200] hover:bg-[#479200]/75 hover:text-white transition-color duration-150 ease-out active:bg-white active:ring active:ring-[#479200] active:text-[#479200]"
+                                            className="w-full h-full xl:p-2 px-1 bg-[#479200]/25 rounded-md text-[#479200] hover:bg-[#479200]/75 hover:text-white transition-color duration-150 ease-out active:bg-white active:ring active:ring-[#479200] active:text-[#479200]"
                                             onClick={() => GetCurrentchat(data)}
                                         >
                                             <span className="xl:text-base text-sm font-medium">
@@ -221,7 +221,7 @@ const ChatTable = (props) => {
                                             </span>
                                         </button>
                                         <button
-                                            className="w-2/6 h-full xl:p-2 px-1 bg-[#153144]/25 rounded-md text-[#153144] hover:bg-[#153144]/75 hover:text-white transition-color duration-150 ease-out active:bg-white active:ring active:ring-[#153144] active:text-[#153144]"
+                                            className="w-full h-full xl:p-2 px-1 bg-[#153144]/25 rounded-md text-[#153144] hover:bg-[#153144]/75 hover:text-white transition-color duration-150 ease-out active:bg-white active:ring active:ring-[#153144] active:text-[#153144]"
                                             onClick={() => {
                                                 SetCurrentchat(data);
                                                 showModal();
@@ -231,8 +231,22 @@ const ChatTable = (props) => {
                                                 Edit
                                             </span>
                                         </button>
+                                        {user.role === 1 && (
+                                            <button
+                                                className="w-full h-full xl:p-2 px-1 bg-[#5f3f4f]/25 rounded-md text-[#5f3f4f] hover:bg-[#5f3f4f]/75 hover:text-white transition-color duration-150 ease-out active:bg-white active:ring active:ring-[#5f3f4f] active:text-[#5f3f4f]"
+                                                onClick={() => {
+                                                    handleOpenTransModal();
+                                                    setId(data["id"]);
+                                                }}
+                                            >
+                                                <span className="xl:text-base text-sm font-medium">
+                                                    Transfer
+                                                </span>
+                                            </button>
+                                        )}
+
                                         <button
-                                            className="h-full xl:p-2 px-1 bg-[#FF2121]/25 rounded-md text-[#FF2121] hover:bg-[#FF2121]/75 hover:text-white transition-color duration-150 ease-out active:bg-white active:ring active:ring-[#FF2121] active:text-[#FF2121]"
+                                            className="w-full h-full xl:p-2 px-1 bg-[#FF2121]/25 rounded-md text-[#FF2121] hover:bg-[#FF2121]/75 hover:text-white transition-color duration-150 ease-out active:bg-white active:ring active:ring-[#FF2121] active:text-[#FF2121]"
                                             onClick={() => {
                                                 handleOpen();
                                                 setId(data["id"]);
@@ -331,6 +345,51 @@ const ChatTable = (props) => {
                     </button>
                 </DialogFooter>
             </Dialog>
+            <Dialog
+                open={isTransModal}
+                handler={handleOpenTransModal}
+                className="border-[--site-chat-header-border] border rounded-2xl from-[--site-main-modal-from-color] to-[--site-main-modal-to-color] bg-gradient-to-br shadow-lg shadow-[--site-card-icon-color]"
+            >
+                <DialogHeader>Transfer</DialogHeader>
+                <DialogBody divider>
+                    <span className="text-base text-black">
+                        Input Customer Email to transfer this tutor.
+                    </span>
+                    <input
+                        type="text"
+                        name="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black/60 placeholder:opacity-50"
+                    />
+                </DialogBody>
+                <DialogFooter className="flex items-center justify-end gap-4 pb-8">
+                    <button
+                        onClick={handleOpenTransModal}
+                        className="bg-transparent border-[--site-card-icon-color] text-[--site-card-icon-color] text-base font-semibold border rounded-md px-4 py-2"
+                    >
+                        cancel
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            axios
+                                .post(webAPI.transfer_tutor, {
+                                    email,
+                                    id,
+                                })
+                                .then((res) => {
+                                    props.handleTransfer(res.data.message);
+                                });
+                            handleOpenTransModal();
+                        }}
+                        className="px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md"
+                    >
+                        confirm
+                    </button>
+                </DialogFooter>
+            </Dialog>
+
             <Chatmodal
                 chat={currentchat}
                 open={isModalOpen}

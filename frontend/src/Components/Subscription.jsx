@@ -28,22 +28,6 @@ const Subscription = () => {
     const [datasources, setDataSources] = useState(null);
     const [isopenModal, setIsOpenModal] = useState(false);
 
-    const maxquery =
-        user.role === 4
-            ? 10000
-            : user.role === 3
-            ? 3000
-            : user.role === 2 || user.role === 5
-            ? 500
-            : 500;
-    const maxtutorCount =
-        user.role === 4
-            ? 10
-            : user.role === 3
-            ? 3
-            : user.role === 2 || user.role === 5
-            ? 1
-            : 1;
     useEffect(() => {
         getUseraccount(dispatch, { id: user.id });
         getUserState(dispatch, { id: user.id });
@@ -77,7 +61,11 @@ const Subscription = () => {
                     (_, i) => `${i}`
                 );
                 setLabels(labels);
-                setIndex_length(datasets[0].length);
+                if (datasets.length > 0 && datasets[0]) {
+                    setIndex_length(datasets[0].length);
+                } else {
+                    setIndex_length(0);
+                }
                 setDatas(datasets);
             })
             .catch((err) => console.error(err));
@@ -178,7 +166,7 @@ const Subscription = () => {
             </div>
 
             <div className="flex flex-col gap-6 px-5 py-8 md:px-10">
-                {labels !== null && (
+                {index_length !== 0 && (
                     <div className="flex flex-col w-[99.33%]  bg-gradient-to-r from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] border-[--site-chat-header-border] border rounded-2xl shadow-xl shadow-[--site-chat-header-border] 2xl:min-h-[20rem] h-auto">
                         <span className="text-[16px] items-start w-full pt-4 px-4">
                             Users
@@ -196,18 +184,27 @@ const Subscription = () => {
                             Queries
                         </span>
                         <div className="flex items-center gap-2 mt-4">
-                            <Slider
-                                size="lg"
-                                id="queries"
-                                defaultValue={
-                                    ((maxquery -
-                                        (query > maxquery ? maxquery : query)) /
-                                        maxquery) *
-                                    100
-                                }
-                                className="text-[#6EAE1C] opacity-50"
-                                trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
-                            />
+                            {user.maxquery - query !== 0 ? (
+                                <Slider
+                                    size="lg"
+                                    id="queries"
+                                    value={
+                                        ((user.maxquery - query) /
+                                            user.maxquery) *
+                                        100
+                                    }
+                                    className="text-[#6EAE1C] opacity-50"
+                                    trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
+                                />
+                            ) : (
+                                <Slider
+                                    size="lg"
+                                    id="queries123"
+                                    defaultValue={0}
+                                    className="text-[#6EAE1C] opacity-50"
+                                    trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
+                                />
+                            )}
                             <Button
                                 variant="outlined"
                                 className="ring-[--site-logo-text-color] border-0 ring-2 text-[12px] sm:text-[16px] font-semibold text-[--site-card-icon-color] rounded-full px-1 py-1 sm:py-3 sm:px-6"
@@ -225,13 +222,25 @@ const Subscription = () => {
                                 Tutors
                             </span>
                             <div className="flex items-center gap-2 mt-4">
-                                <Slider
-                                    size="lg"
-                                    id="tutors"
-                                    value={(datas.length / maxtutorCount) * 100}
-                                    className="text-[#6EAE1C] opacity-50"
-                                    trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
-                                />
+                                {datas.length !== 0 ? (
+                                    <Slider
+                                        size="lg"
+                                        id="tutors"
+                                        value={
+                                            (datas.length / user.tutors) * 100
+                                        }
+                                        className="text-[#6EAE1C] opacity-50"
+                                        trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
+                                    />
+                                ) : (
+                                    <Slider
+                                        size="lg"
+                                        id="tutors123"
+                                        defaultValue={0}
+                                        className="text-[#6EAE1C] opacity-50"
+                                        trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
+                                    />
+                                )}
 
                                 <Button
                                     variant="outlined"
@@ -255,10 +264,10 @@ const Subscription = () => {
                                     size="lg"
                                     id="datasources"
                                     value={
-                                        ((datasources < maxtutorCount
+                                        ((datasources < user.training_datas
                                             ? datasources
-                                            : maxtutorCount) /
-                                            maxtutorCount) *
+                                            : user.training_datas) /
+                                            user.training_datas) *
                                         100
                                     }
                                     className="text-[#6EAE1C] opacity-50"

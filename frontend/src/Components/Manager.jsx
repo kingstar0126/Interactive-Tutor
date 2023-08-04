@@ -1,11 +1,15 @@
 import axios from "axios";
 import { webAPI } from "../utils/constants";
 import { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
 import { BsPersonFillAdd } from "react-icons/bs";
 import { BsDatabaseFillGear } from "react-icons/bs";
 import StripeCard from "./StripeCard";
+import { AiOutlineMenu } from "react-icons/ai";
+import { setOpenSidebar } from "../redux/actions/locationAction";
+import { MdOutlineUpdate } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 import {
     DialogHeader,
     Dialog,
@@ -13,20 +17,30 @@ import {
     DialogFooter,
 } from "@material-tailwind/react";
 import { Scrollbar } from "react-scrollbars-custom";
+import ReactSpeedometer from "react-d3-speedometer";
 
 const Manager = () => {
     const [data, setData] = useState([]);
     const [isOpenModal, setIsOpenModal] = useState(false);
     const [open, setOpen] = useState(false);
+    const [userEmail, setUserEmail] = useState("");
+    const [userQueryCount, setUserQueryCount] = useState(0);
+    const [userTutorCount, setUserTutorCount] = useState(0);
+    const [userTrainCount, setUserTrainCount] = useState(0);
+    const [userWordCount, setUserWordCount] = useState(0);
+    const _chat = JSON.parse(useSelector((state) => state.chat.chat));
+    const query = useSelector((state) => state.query.query);
+    const [trial, setTrial] = useState(0);
     const handleOk = () => {
         getAlluser();
         setIsOpenModal(false);
     };
+    const navigate = useNavigate();
     const [item, setItem] = useState({});
     const handleCancel = () => {
         setIsOpenModal(false);
     };
-
+    const dispatch = useDispatch();
     const user = JSON.parse(useSelector((state) => state.user.user));
 
     const notification = (type, message) => {
@@ -40,6 +54,9 @@ const Manager = () => {
     };
 
     useEffect(() => {
+        if (user.role === 5) {
+            setTrial(user.days);
+        }
         getAlluser();
     }, []);
 
@@ -48,15 +65,12 @@ const Manager = () => {
             .post(webAPI.getallusers, { id: user.id })
             .then((res) => {
                 setData(res.data.data);
-                console.log(res.data.data);
             })
             .catch((err) => console.error(err));
     };
 
     const handleChange = (id, current_status) => {
-        console.log(current_status, typeof current_status);
         const status = current_status === "0" ? 1 : 0;
-        console.log(status);
         axios
             .post(webAPI.changeuserstatus, { id, status })
             .then((res) => {
@@ -68,6 +82,10 @@ const Manager = () => {
                 }
             })
             .catch((err) => console.error(err));
+    };
+
+    const handleOpenSidebar = () => {
+        dispatch(setOpenSidebar());
     };
 
     const getSubscriptionName = (role) => {
@@ -119,18 +137,106 @@ const Manager = () => {
         }
     };
 
+    const handleConfirm = () => {
+        if (
+            userQueryCount &&
+            userTrainCount &&
+            userWordCount &&
+            userTutorCount
+        ) {
+            axios
+                .post(webAPI.change_user_limitation, {
+                    email: userEmail,
+                    tutor: userTutorCount,
+                    query: userQueryCount,
+                    train: userTrainCount,
+                    word: userWordCount,
+                })
+                .then((res) => {
+                    getAlluser();
+                    setOpen(false);
+                    notification("success", res.data.message);
+                })
+                .catch((err) => console.error(err));
+        } else {
+            setOpen(false);
+        }
+    };
+
     return (
-        <div className="w-full h-full p-4 pl-5 pr-10">
+        <div className="w-full h-full">
             <Toaster />
-            <div className="flex items-center justify-between p-5 bg-[--site-card-icon-color] rounded-full">
-                <div className="flex items-center justify-center gap-2 font-semibold text-[20px] text-white">
-                    <BsDatabaseFillGear className="fill-[--site-logo-text-color]" />
-                    Manager
+            <div className="flex md:items-center items-end justify-between w-full md:h-[100px] md:px-10 from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] md:border-b-[--site-chat-header-border] md:border bg-gradient-to-r px-4 py-2 max-h-min gap-1">
+                <div className="hidden md:flex gap-2 mt-9 mb-8 text-[--site-card-icon-color]">
+                    <BsDatabaseFillGear className="w-8 h-8" />
+                    <span className="text-2xl font-semibold">Manager</span>
+                </div>
+                <AiOutlineMenu
+                    onClick={handleOpenSidebar}
+                    className="w-6 h-6 mb-1 md:hidden"
+                />
+                <div className="flex items-end justify-end md:mt-[27px] md:mb-[30px] md:pr-[44px] pr-9">
+                    {_chat && _chat.organization && (
+                        <div className="xl:flex flex-col items-start justify-center mr-2 p-2 bg-[--site-warning-text-color] rounded shadow-2xl hidden">
+                            <p>
+                                <span className="font-bold text-[14px]">
+                                    Organisation ID:{" "}
+                                </span>
+                                <span className="text-[--site-error-text-color] font-semibold">
+                                    {_chat.organization}
+                                </span>
+                            </p>
+                        </div>
+                    )}
+                    {query && (
+                        <p className="bg-[--site-logo-text-color] p-2 rounded gap-2 items-center justify-center h-full flex md:mr-0">
+                            <span className="text-[--site-error-text-color] font-semibold text-[12px] md:text-base">
+                                {query}
+                            </span>
+                            <span className="text-[--site-card-icon-color] text-[12px] md:text-base font-medium">
+                                Queries
+                            </span>
+                        </p>
+                    )}
+                    {trial > 0 && (
+                        <div className="flex items-end justify-end md:w-max scale-75 md:scale-100 ml-[-14px] mr-[-20px] translate-y-2 md:translate-y-0">
+                            <ReactSpeedometer
+                                maxSegmentLabels={0}
+                                segments={4}
+                                width={100}
+                                height={58}
+                                ringWidth={10}
+                                value={24 - trial}
+                                needleColor="black"
+                                needleHeightRatio={0.5}
+                                maxValue={24}
+                                startColor={"#f5da42"}
+                                endColor={"#ff0000"}
+                            />
+                        </div>
+                    )}
+                    <button
+                        onClick={() => {
+                            navigate("/chatbot/subscription");
+                        }}
+                        className="flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
+                    >
+                        <MdOutlineUpdate className="w-4 h-4 md:w-6 md:h-6" />
+                        <span className="md:text-base text-[12px] font-medium">
+                            Upgrade
+                        </span>
+                    </button>
                 </div>
             </div>
-            <div className="py-5">
-                <div className="bg-[--site-card-icon-color] w-full h-full rounded-xl p-2">
-                    <div className="flex items-center justify-end w-full p-2">
+
+            <div className="flex md:hidden gap-2 text-[--site-card-icon-color] pt-8 px-5">
+                <BsDatabaseFillGear className="w-8 h-8" />
+                <span className="text-2xl font-semibold">Manager</span>
+            </div>
+
+            <div className="bg-gradient-to-r from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] border-[--site-chat-header-border] border rounded-xl md:m-10 m-5 flex flex-col gap-5 shadow-xl shadow-[--site-chat-header-border]">
+                <div className="w-full h-full rounded-xl p-2">
+                    {/* <div className="flex items-center justify-end w-full p-2">
                         <button
                             className="bg-[--site-logo-text-color] p-2 rounded-lg font-semibold text-[--site-card-icon-color] flex gap-3 items-center justify-center"
                             onClick={(e) => setIsOpenModal(true)}
@@ -138,14 +244,14 @@ const Manager = () => {
                             <BsPersonFillAdd className="fill-[ --site-card-icon-color] w-[20px] h-[20px]" />
                             Add user
                         </button>
-                    </div>
+                    </div> */}
                     <table className="w-full rounded-xl">
                         <thead className="rounded-xl">
-                            <tr className="text-md font-semibold tracking-wide text-center text-[--site-main-color3] uppercase border-b border-gray-600 rounded-xl">
+                            <tr className="text-md font-semibold tracking-wide text-center text-[black] uppercase border-b border-gray-600 rounded-xl">
                                 <th className="px-4 py-3 w-[50px]">No</th>
                                 <th className="px-4 py-3 ">Name</th>
                                 <th className="px-4 py-3 ">Email</th>
-                                <th className="px-4 py-3 ">Usage</th>
+                                <th className="px-4 py-3 ">Tutors</th>
                                 <th className="px-4 py-3 ">query</th>
                                 <th className="px-4 py-3 ">Data Sources</th>
                                 <th className="px-4 py-3 ">Subscription</th>
@@ -169,7 +275,7 @@ const Manager = () => {
                                             {item.email}
                                         </td>
                                         <td className="px-4 py-3 text-ms font-semibold border">
-                                            {item.usage}
+                                            {item.tutors}
                                         </td>
                                         <td className="px-4 py-3 font-semibold border text-ms">
                                             {item.query}
@@ -194,6 +300,19 @@ const Manager = () => {
                                         <td className="px-4 py-3 font-semibold border text-ms">
                                             <button
                                                 onClick={() => {
+                                                    setUserEmail(item.email);
+                                                    setUserTutorCount(
+                                                        item.tutors
+                                                    );
+                                                    setUserQueryCount(
+                                                        item.query
+                                                    );
+                                                    setUserTrainCount(
+                                                        item.training_datas
+                                                    );
+                                                    setUserWordCount(
+                                                        item.training_words
+                                                    );
                                                     setItem(item);
                                                     setOpen(true);
                                                 }}
@@ -229,14 +348,82 @@ const Manager = () => {
             >
                 <DialogHeader className="px-8 pt-8 pb-6">
                     <span className="text-[32px] leading-12 font-semibold text-[--site-card-icon-color]">
-                        Chat
+                        Change Account
                     </span>
                 </DialogHeader>
                 <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium pl-8 pt-6 h-[30rem]">
                     <Scrollbar>
-                        <div className="mr-4">
-                            <div>{item.username}</div>
-                            <div>{item.email}</div>
+                        <div className="mr-4 flex flex-col gap-2">
+                            <div className="flex flex-col">
+                                <label>UserName</label>
+                                <input
+                                    type="text"
+                                    name="username"
+                                    readOnly
+                                    value={item.username || ""}
+                                    className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black/60 placeholder:opacity-50"
+                                />
+                            </div>
+                            <div className="flex flex-col">
+                                <label>User email</label>
+                                <input
+                                    type="text"
+                                    name="email"
+                                    readOnly
+                                    value={item.email || ""}
+                                    className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black/60 placeholder:opacity-50"
+                                />
+                            </div>
+                            <div className="flex flex-col">
+                                <label>User Tutors</label>
+                                <input
+                                    type="text"
+                                    name="email"
+                                    onChange={(e) =>
+                                        setUserTutorCount(e.target.value)
+                                    }
+                                    value={userTutorCount}
+                                    className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black/60 placeholder:opacity-50"
+                                />
+                            </div>
+
+                            <div className="flex flex-col">
+                                <label>User Query</label>
+                                <input
+                                    type="text"
+                                    name="email"
+                                    onChange={(e) =>
+                                        setUserQueryCount(e.target.value)
+                                    }
+                                    value={userQueryCount}
+                                    className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black/60 placeholder:opacity-50"
+                                />
+                            </div>
+                            <div className="flex flex-col">
+                                <label>User Training data</label>
+                                <input
+                                    type="text"
+                                    name="email"
+                                    onChange={(e) =>
+                                        setUserTrainCount(e.target.value)
+                                    }
+                                    value={userTrainCount}
+                                    className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black/60 placeholder:opacity-50"
+                                />
+                            </div>
+
+                            <div className="flex flex-col">
+                                <label>User Training words</label>
+                                <input
+                                    type="text"
+                                    name="email"
+                                    onChange={(e) =>
+                                        setUserWordCount(e.target.value)
+                                    }
+                                    value={userWordCount}
+                                    className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black/60 placeholder:opacity-50"
+                                />
+                            </div>
                         </div>
                     </Scrollbar>
                 </DialogBody>
@@ -248,7 +435,7 @@ const Manager = () => {
                         cancel
                     </button>
                     <button
-                        onClick={() => setOpen(false)}
+                        onClick={() => handleConfirm()}
                         className="px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md"
                     >
                         confirm

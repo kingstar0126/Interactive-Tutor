@@ -56,6 +56,7 @@ export const webAPI = {
     getaccess_AI_Tutor: SERVER_URL + "/api/getaccess_ai_tutor", //chatbot uuid to get pin code and organization code
     getquery: SERVER_URL + "/api/getquery",
     getChatwithPIN: SERVER_URL + "/api/getchatwithpin",
-
+    change_user_limitation: SERVER_URL + "/api/change_user_limitation",
+    transfer_tutor: SERVER_URL + "/api/transfer_tutor",
     imageupload: SERVER_URL + "/api/imageupload",
 };

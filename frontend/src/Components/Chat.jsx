@@ -139,6 +139,11 @@ const Chat = () => {
         setIsModalOpen(false);
     };
 
+    const handleTransfer = (message) => {
+        notification("success", message);
+        getChats();
+    };
+
     useEffect(() => {
         if (isOpen) {
             setShowDescription(
@@ -177,7 +182,6 @@ const Chat = () => {
 
         axios.post(webAPI.getchats, data).then((res) => {
             SetChat(res.data.data);
-            console.log(res.data.data);
         });
     };
 
@@ -406,11 +410,11 @@ const Chat = () => {
                 {location.pathname === "/chatbot/chat" ? (
                     <div className="pt-8 md:pt-0">
                         <div className="w-full border-[--site-chat-header-border] border rounded-2xl from-[--site-chat-header-to-color] bg-gradient-to-br">
-                            {console.log("Chat", chat)}
                             <ChatTable
                                 chat={chat}
                                 handleAdd={showModal}
                                 handleDelete={getChats}
+                                handleTransfer={handleTransfer}
                             />
                         </div>
                     </div>
