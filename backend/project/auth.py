@@ -202,8 +202,11 @@ def register_new_user(username, email, password):
     status = 0
     query = 500
     usage = 0
+    tutors = 1
+    training_datas = 1
+    training_words = 100000
     customer = stripe.Customer.create(name=username, email=email)
-    new_user = User(username=username, query=query, status=status, email=email, role=role, customer_id=customer.id,
+    new_user = User(username=username, query=query, tutors=tutors, training_datas=training_datas, training_words=training_words, status=status, email=email, role=role, customer_id=customer.id, usage=usage,
                     password=generate_password_hash(password, method='sha256'))
     db.session.add(new_user)
     db.session.commit()
@@ -303,12 +306,16 @@ def add_user_account():
     role = 5
     status = 0
     query = 500
+    usage = 0
+    tutors = 1
+    training_datas = 1
+    training_words = 100000
     user = db.session.query(User).filter_by(email=email).first()
 
     if user:
         return jsonify({'message': 'Email address already exists', 'success': False})
 
-    new_user = User(username=username, query=query, status=status, email=email, role=role,
+    new_user = User(username=username, query=query, status=status, email=email, usage=usage, tutors=tutors, training_words=training_words, training_datas=training_datas, role=role,
                     password=generate_password_hash(password, method='sha256'))
 
     db.session.add(new_user)
@@ -397,7 +404,14 @@ def get_all_useraccount():
             'state': current_user.state,
             'city': current_user.city,
             'country': current_user.country,
-            'status': current_user.status
+            'status': current_user.status,
+            'query': current_user.query,
+            'usage': current_user.usage,
+            'tutors': current_user.tutors,
+            'role': current_user.role,
+            'training_datas': current_user.training_datas,
+            'training_words': current_user.training_words
+
         }
         current_users.append(new_user)
     return jsonify({'success': True, 'data': current_users, 'code': 200})
@@ -417,20 +431,20 @@ def change_account_status():
         return jsonify({'success': False, 'code': 404, 'message': 'User not found'})
 
 
-@auth.route('/api/deleteaccount', methods=['POST'])
-def delete_account():
-    id = request.json['id']
-    try:
-        user = User.query.get(id)
-        if user:
-            db.session.delete(user)
-            db.session.commit()
-            return jsonify({'success': True, 'code': 200, 'message': 'Deleted successfully'})
-        else:
-            return jsonify({'success': False, 'code': 404, 'message': 'User not found'})
-    except exc.SQLAlchemyError as e:
-        # Handle any potential database errors
-        return jsonify({'success': False, 'code': 500, 'message': 'An error occurred while deleting the user'})
+# @auth.route('/api/deleteaccount', methods=['POST'])
+# def delete_account():
+#     id = request.json['id']
+#     try:
+#         user = User.query.get(id)
+#         if user:
+#             db.session.delete(user)
+#             db.session.commit()
+#             return jsonify({'success': True, 'code': 200, 'message': 'Deleted successfully'})
+#         else:
+#             return jsonify({'success': False, 'code': 404, 'message': 'User not found'})
+#     except exc.SQLAlchemyError as e:
+#         # Handle any potential database errors
+#         return jsonify({'success': False, 'code': 500, 'message': 'An error occurred while deleting the user'})
 
 
 @auth.route('/api/changeaccount', methods=['POST'])

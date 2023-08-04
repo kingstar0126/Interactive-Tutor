@@ -50,8 +50,8 @@ const Sidebar = () => {
     }, [location]);
 
     const handleLogout = () => {
-        changeuser(dispatch, null);
-        navigate("/login");
+        window.localStorage.clear();
+        window.location.replace('https://app.interactive-tutor.com/login');
     };
 
     useEffect(() => {

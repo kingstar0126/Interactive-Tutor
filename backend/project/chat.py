@@ -83,22 +83,8 @@ def add_chat():
     user = db.session.query(User).filter_by(id=user_id).first()
     ct = db.session.query(Chat).filter_by(user_id=user_id).count() + 1
 
-    if user.role == 2 or user.role == 5:
-        if ct > 1:
-            return jsonify({
-                'success': False,
-                'code': 401,
-                'message': "You can no longer create AI Tutors.",
-            })
-    elif user.role == 3:
-        if ct > 3:
-            return jsonify({
-                'success': False,
-                'code': 401,
-                'message': "You can no longer create AI Tutors.",
-            })
-    elif user.role == 4:
-        if ct > 10:
+    if not user.role == 1:
+        if ct > user.tutors:
             return jsonify({
                 'success': False,
                 'code': 401,
@@ -114,7 +100,6 @@ def add_chat():
                     access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button)
     db.session.add(new_chat)
     db.session.commit()
-    # Create index in the pinecone
 
     response = {
         'success': True,

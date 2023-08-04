@@ -24,7 +24,6 @@ import {
 } from "react-icons/md";
 import { Scrollbar } from "react-scrollbars-custom";
 import { Carousel, IconButton } from "@material-tailwind/react";
-import { changeuser } from "../redux/actions/userAction";
 import {
     Typography,
     Button,
@@ -57,196 +56,46 @@ const Chat = () => {
     const [open, setOpen] = useState(false);
     const descroption = [
         {
-            title: "Creating an account",
-            content: `This tutorial provides a clear, step-by-step guide on setting up a new account with Interactive Tutor, an essential process for anyone looking to utilize this powerful educational tool. The guide begins at the homepage of interactive-tutor.com, instructing users to find and select the 'Start for Free' button located at the top right of the screen.
-
-    ​
-    
-    In the following segment, we explain how to navigate the Sign-Up page. Here, we stress the importance of filling out all required information accurately, including your first and last name, a valid email address, and a secure password. We emphasize the significance of a strong password that uses a mix of numbers, letters, and special characters to enhance account security.
-    
-    ​
-    
-    The guide also highlights the need to re-enter your chosen password in the 'Confirm Password' field for verification purposes. An important step in this process is agreeing to the 'Terms of Service' and 'Privacy Policy'. To accept, users are directed to tick the checkbox after careful reading.
-    
-    ​
-    
-    We explain that once all fields are correctly filled out and terms and conditions are agreed upon, users should select 'Create Account' to finalize the setup process. The tutorial assures users that a successful account creation will prompt a confirmation message and an email verification step, advising users to check their inbox and follow the provided instructions.
-    
-     
-    
-    By successfully creating an account with Interactive Tutor, users gain the ability to start crafting their very own 'Interactive Tutor', absolutely free for a 14-day trial period. This tutorial is especially beneficial for educators, trainers, or individuals who seek an effective and interactive method to share and impart knowledge. After the trial, users can choose a subscription that fits their needs best.
-    
-    ​`,
+            title: "Welcome to Interactive Tutor",
+            content: `Congratulations on registering your account, you are moments away from creating interactive tutors for your content. This collapsible dashboard is where you can find video lessons on how to get the most out of Interactive Tutor.`,
         },
         {
-            title: "Account Access",
-            content: `This succinct tutorial illustrates how to log in and out of your Interactive Tutor account, a necessary process for utilizing the platform's educational tools and ensuring account security.
-
-    ​
-    
-    First, it shows how to log in from the homepage, with a simple click on the 'Login' button and entering the appropriate credentials.
-    
-    ​
-    
-    The tutorial also offers guidance on how to reset a forgotten password, ensuring a smooth login process.
-    
-    ​
-    
-    Finally, it demonstrates how to log out, a step that promotes account security, especially on shared devices. By mastering these steps, users can safely and effectively use Interactive Tutor.`,
-        },
-        {
-            title: "The Dashboard",
-            content: `This quick guide introduces the Interactive Tutor's dashboard, the user-friendly hub for accessing its tools and features.
-
-    ​
-    
-    Upon login, users land on the dashboard that displays subscription details, usage, and options to upgrade for increased benefits.
-    
-    ​
-    
-    The left toolbar provides quick access to key sections: 'Tutors' for an overview of created tutorials, 'Subscriptions' to adjust plans, 'Account' for user settings, and 'Reports' for usage analytics.
-    
-    ​
-    
-    The central console provides extensive resources for creating an interactive tutor, a topic covered in our subsequent tutorials.
-    
-    ​
-    
-    Users are encouraged to explore this intuitive platform and discover its potential.`,
-        },
-        {
-            title: "Add a Tutor",
-            content: `This brief video outlines the steps to create a new tutor in the Interactive Tutor platform. Click 'Add Tutor' located at the console's bottom right to open the Tutor Menu.
-
-    ​
-    
-    First, assign a 'Label' (visible only to you) and 'Description' to the Tutor. The 'Models' section allows you to select an OpenAI Large Language Model to power your Tutor's interactions - options range from GPT 3.5 4k to GPT 4.
-    
-    ​
-    
-    Customize the initial interaction with users using the 'Conversation Starter.'
-    
-    'Advanced Settings' let you fine-tune your Tutor for the best results. 'Context Behaviour' controls how the Tutor uses uploaded training data. You can instruct the Tutor to solely rely on this data, combine it with its own reasoning, or operate like ChatGPT for the most natural interactions.
-    
-    ​
-    
-    'Behaviour Prompt' allows you to guide the Tutor's demeanor towards users, and 'Creativity Temperature' adjusts response specificity.
-    
-    ​
-    
-    Once settings are in place, click 'Confirm' to finalize your new tutor, which is now ready for training and styling.`,
+            title: "Add Your Tutor",
+            content: `This brief video outlines the steps to create a new tutor in the Interactive Tutor platform. Click 'Add Tutor' located at the console's bottom right to open the Tutor Menu. You will then have the options you need to setup your Tutor.`,
         },
         {
             title: "Training Your Tutor",
-            content: `Navigate to your Tutor and select 'Training Data.' Here you'll see a summary of data sources your Tutor has been trained on - it should currently be empty.
-
-    ​
-    
-    By clicking 'Add Data,' you can start feeding content to your Tutor. For example, let's train our Yoda-themed tutor with the Wikipedia page on Jedi history. Label this data source and paste the webpage URL, then confirm. The engine will begin training your Tutor on this data.
-    
-    ​
-    
-    Upon completion, the data source appears in your dashboard. Remember, with a free trial, you can only add one data source per Tutor. Standard and Pro packages allow for three and ten data sources, respectively.
-    
-    To remove a data source, simply select 'Delete.'
-    
-    ​
-    
-    Adding a new data source follows the same process. Let's upload a whole book - 'The Jedi Path' by Daniel Wallace. The engine might take a bit longer this time. Once it's listed as 'trained' in the dashboard, you're done!
-    
-    ​
-    
-    You've now trained your Tutor, and it's ready for styling.`,
+            content: `By clicking 'Add Data,' you can start feeding content to your Tutor. For example, let's train our Yoda-themed tutor with the Wikipedia page on Jedi history. Label this data source and paste the webpage URL, then confirm. The engine will begin training your Tutor on this data.`,
         },
         {
             title: "Styling Your Tutor",
-            content: `In this tutorial we'll explore the customization options to style your Tutor.
-
-    Navigate to the 'Branding' tab in the Tutor. Here, you'll find a variety of features for personalization.
-    
-    ​
-    
-    First, set the 'Title' and 'Description' - these will be publicly visible. For example, our Tutor, named ‘Learn from Yoda,’ has the description, “Ask Yoda questions on how to become a Jedi”.
-    
-    ​
-    
-    If you're on the Standard or Pro subscription, you can add a 'Copyright' or disclaimer and remove the ‘Powered by Interactive Tutor’ text.
-    
-    ​
-    
-    If you plan to embed your Tutor as a chatbot, you can set up the color scheme and notifications.
-    
-    ​
-    
-    For branding, you can upload a 'Logo' for your Tutor and customize its size. 'User Avatar' and 'AI Avatar' can be added to represent learners and your Tutor, respectively. In our example, a cartoon of Luke Skywalker and Yoda serve these roles.
-    
-    ​
-    
-    Below, you can select colors for both the Tutor and User communication boxes, including background and text color.
-    
-    ​
-    
-    Lastly, 'Call to action' buttons can link to external resources. In our case, it redirects to the previously uploaded Wikipedia page.
-    
-    ​
-    
-    After customization, preview your new Tutor. Isn't it cool?
-    
-    ​`,
+            content: `In this tutorial we'll explore the customisation options to style your Tutor. Navigate to the 'Branding' tab in the Tutor. Here, you'll find a variety of features for personalisation. You can change the logos, avatars, colours and font sizes. You can also add buttons to link your Interactive Tutor to other websites or pages.`,
         },
         {
             title: "Sharing Your Tutor",
-            content: `Once your Tutor is ready, there are several ways to distribute it. From embedding it on your site or intranet, to sharing via an Organization ID and Pin Code for access on the Interactive Tutor mobile app.
-
-    ​
-    
-    But before sharing, it's a good idea to test your Tutor and verify the branding and responses. Use the preview window for this.
-    
-    ​
-    
-    When you're ready to share, you have a few options:
-    
-    ​
-    
-    Embed the Tutor on your site: Open the embed menu and choose to embed your Tutor as an iFrame (a window on your page) or as a chatbot.
-    
-    Share via a unique login page: Share the URL of the login page where users can access the Tutor by entering your unique Organization ID and the Tutor Pin Code.
-    
-    Share for mobile access: Users can download the Interactive Tutor app from their app store and access your Tutor by entering the same Organization ID and Pin Code.
-    
-    ​
-    
-    Interactive Tutor allows you to control who has access to your content, safeguarding your intellectual property.`,
+            content: `Once your Interactive Tutor is ready, there are several ways for you to make it available. From embedding it on your site or intranet, to sharing via an Organization ID and Pin Code for access on the Interactive Tutor mobile app.`,
         },
     ];
     const videos = [
         {
-            src: "http://192.168.103.63:3000/video1.webm",
-            type: "video/webm",
+            src: "https://video.wixstatic.com/video/4d69d5_460d6c1987694c569ea62b7f32b51bf1/1080p/mp4/file.mp4",
+            type: "video/mp4",
         },
         {
-            src: "http://192.168.103.63:3000/video2.webm",
-            type: "video/webm",
+            src: "https://video.wixstatic.com/video/4d69d5_ca127d9db93c4475bb3cf55781f88b70/720p/mp4/file.mp4",
+            type: "video/mp4",
         },
         {
-            src: "http://192.168.103.63:3000/video3.webm",
-            type: "video/webm",
+            src: "https://video.wixstatic.com/video/4d69d5_8e22f27eb45946fc9269ab9dafedc7da/720p/mp4/file.mp4",
+            type: "video/mp4",
         },
         {
-            src: "http://192.168.103.63:3000/video4.webm",
-            type: "video/webm",
+            src: "https://video.wixstatic.com/video/4d69d5_7ac0914dc4d9438ca13eb2c087f0115c/720p/mp4/file.mp4",
+            type: "video/mp4",
         },
         {
-            src: "http://192.168.103.63:3000/video5.webm",
-            type: "video/webm",
-        },
-        {
-            src: "http://192.168.103.63:3000/video6.webm",
-            type: "video/webm",
-        },
-        {
-            src: "http://192.168.103.63:3000/video7.webm",
-            type: "video/webm",
+            src: "https://video.wixstatic.com/video/4d69d5_9659672cc61c45d0b0c6606356b2b83b/720p/mp4/file.mp4",
+            type: "video/mp4",
         },
     ];
     const [isactiveIndex, setIsActiveIndex] = useState(0);
@@ -298,6 +147,14 @@ const Chat = () => {
         }
     }, [isOpen]);
 
+    const pauseVideo = (index) => {
+        const video = videoRef.current[index];
+        if (!video.paused) {
+            video.pause();
+        }
+
+        setIsPlaying(!video.paused);
+    };
     useEffect(() => {
         getUserState(dispatch, { id: user.id });
         setquery(dispatch, user.query);
@@ -384,7 +241,7 @@ const Chat = () => {
                     </button>
 
                     <button
-                        className="p-2 flex justify-center items-center bg-[--site-logo-text-color] rounded text-[--site-card-icon-color] pt-3 ml-2 opacity-100"
+                        className="p-2 flex justify-center items-center bg-[--site-card-icon-color] rounded text-[--site-logo-text-color] pt-3 ml-2 opacity-100"
                         onClick={() => setIsOpen(!isOpen)}
                     >
                         {isOpen ? (
@@ -413,7 +270,7 @@ const Chat = () => {
                                     className={className}
                                 >
                                     <video
-                                        className="object-cover w-full h-full"
+                                        className="object-cover rounded-xl w-full h-full"
                                         controls={false}
                                         onClick={() => togglePlay()}
                                         ref={(ref) =>
@@ -471,9 +328,12 @@ const Chat = () => {
                                     variant="text"
                                     size="lg"
                                     onClick={() => {
+                                        {
+                                            pauseVideo(activeIndex);
+                                        }
                                         handlePrev();
                                     }}
-                                    className="!absolute top-2/4 left-4 -translate-y-2/4 text-[--site-card-icon-color]"
+                                    className="!absolute top-3/4 left-4 -translate-y-2/4 text-[--site-card-icon-color]"
                                 >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -496,9 +356,12 @@ const Chat = () => {
                                     variant="text"
                                     size="lg"
                                     onClick={() => {
+                                        {
+                                            pauseVideo(activeIndex);
+                                        }
                                         handleNext();
                                     }}
-                                    className="!absolute top-2/4 !right-4 -translate-y-2/4 text-[--site-card-icon-color]"
+                                    className="!absolute top-3/4 !right-4 -translate-y-2/4 text-[--site-card-icon-color]"
                                 >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -520,17 +383,17 @@ const Chat = () => {
                             {descroption.map((description, index) => {
                                 return (
                                     <div
-                                        className="flex flex-col"
+                                        className="flex h-full items-center"
                                         key={description.title + index}
                                     >
-                                        <span className="text-[16px] font-medium text-[--site-card-icon-color]">
-                                            {description.title}
-                                        </span>
-                                        <span className="text-[14px] leading-[40px] font-medium text-[--site-chat-video-description-color] h-[20rem]">
-                                            <Scrollbar>
+                                        <div className="flex flex-col w-full items-center text-center justify center">
+                                            <span className="text-[16px] font-semibold text-[--site-card-icon-color]">
+                                                {description.title}
+                                            </span>
+                                            <span className="text-[14px] leading-[40px] font-medium text-[--site-chat-video-description-color] ">
                                                 {description.content}
-                                            </Scrollbar>
-                                        </span>
+                                            </span>
+                                        </div>
                                     </div>
                                 );
                             })}
@@ -566,7 +429,7 @@ const Chat = () => {
                     <DialogFooter className="flex items-center justify-end gap-4 pb-8">
                         <button
                             onClick={() => {
-                                changeuser(dispatch, null);
+                                window.localStorage.clear()
                                 navigate("/login");
                                 setOpen(false);
                             }}

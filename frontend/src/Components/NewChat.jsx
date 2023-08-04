@@ -345,9 +345,9 @@ const NewChat = () => {
 
     return (
         <div
-            style={{
-                background: `linear-gradient(to bottom right, ${chat.chat_logo.bg}, transparent)`,
-            }}
+        style={{
+            background: `linear-gradient(to bottom right, ${chat?.chat_logo?.bg || '#ffffff00'}, transparent)`,
+        }}
             className="w-full h-full rounded-xl"
         >
             {loading && (
