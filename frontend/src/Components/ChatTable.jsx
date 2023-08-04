@@ -5,8 +5,6 @@ import Chatmodal from "./Chatmodal";
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { getchat } from "../redux/actions/chatAction";
-import { confirmAlert } from "react-confirm-alert";
-import "react-confirm-alert/src/react-confirm-alert.css";
 import { useNavigate } from "react-router-dom";
 import { AiOutlinePlus } from "react-icons/ai";
 import {
@@ -48,6 +46,7 @@ const ChatTable = (props) => {
 
     useEffect(() => {
         if (props.chat.length) {
+            console.log("THis is chatTablr", props.chat);
             setChatData(props.chat);
             setCurrentPage(1);
         }
@@ -68,7 +67,7 @@ const ChatTable = (props) => {
 
     useEffect(() => {
         setTableData(getCurrentPageData);
-    }, [currentPage]);
+    }, [chatData]);
 
     const getCurrentPageData = () => {
         const { firstIndex, lastIndex } = getPaginationRange();

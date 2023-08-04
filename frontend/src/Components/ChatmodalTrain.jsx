@@ -3,7 +3,7 @@ import Select from "react-select";
 import { webAPI } from "../utils/constants";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import toast from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import { Scrollbar } from "react-scrollbars-custom";
 import {
     Progress,
@@ -51,6 +51,9 @@ const ChatmodalTrain = (props) => {
                 axios
                     .post(webAPI.sendurl, data)
                     .then((res) => {
+                        if (res.data.code === 401) {
+                            notification("error", res.data.message);
+                        }
                         props.handleOk(res.data.data);
                         setIsurlloading(false);
                     })

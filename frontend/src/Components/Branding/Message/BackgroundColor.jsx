@@ -10,6 +10,7 @@ const BackgroundColor = (props) => {
                         <span className="text-[12px] md:text-[16px]">
                             Background
                         </span>
+
                         <input
                             type="color"
                             onChange={(e) => (props.data.bg = e.target.value)}
@@ -18,7 +19,7 @@ const BackgroundColor = (props) => {
                                     ? "#efefef"
                                     : props.data.bg
                             }
-                            className="my-1 bg-transparent border border-[--site-card-icon-color]"
+                            className="my-1 bg-transparent border border-[--site-card-icon-color] relative"
                         />
                     </div>
                 </div>
