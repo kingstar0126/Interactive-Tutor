@@ -139,7 +139,7 @@ const SubscriptionModal = (props) => {
             <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium md:px-12 md:pb-20 md:h-[42rem] h-[30rem] overflow-y-auto">
                 <Toaster />
                 {subscriptions && subscriptions.length !== 0 && (
-                    <div className="flex flex-col items-center justify-center w-full gap-12 py-4 md:flex-row">
+                    <div className="flex flex-col items-start justify-center w-full gap-12 py-4 md:flex-row">
                         {subscriptions.map((item, index) => {
                             return (
                                 <React.Fragment key={item.price_id}>

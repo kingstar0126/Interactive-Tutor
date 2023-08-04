@@ -98,4 +98,54 @@ const AppRoutes = [
     },
 ];
 
-export default AppRoutes;
+const AppRoutes_login = [
+    {
+        path: "/",
+        children: [
+            {
+                path: "/",
+                element: <Login />,
+            },
+            {
+                path: "/login",
+                element: <Login />,
+            },
+            {
+                path: "/register",
+                element: <Register />,
+            },
+            {
+                path: "/resetpassword",
+                element: <Forgetpassword />,
+            },
+            {
+                path: "/changepassword",
+                element: <Changepassword />,
+            },
+            {
+                path: "/chatbot/share/url",
+                element: <AccessChatbot />,
+                children: [
+                    {
+                        path: "newchat",
+                        element: <NewChat />,
+                    },
+                ],
+            },
+            {
+                path: "/chat/embedding/:id",
+                element: <EmbeddingChat />,
+            },
+            {
+                path: "/verify-email/:token",
+                element: <VerifyEmail />,
+            },
+        ],
+    },
+    {
+        path: "*",
+        element: <Notfound />,
+    },
+];
+
+export {AppRoutes, AppRoutes_login};

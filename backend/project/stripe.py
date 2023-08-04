@@ -220,11 +220,23 @@ def stripe_webhook():
         query = user.query
         if user.role == 2:
             query = 500
+            tutors = 1
+            training_datas = 1
+            training_words = 100000
         elif user.role == 3:
             query = 3000
+            tutors = 3
+            training_datas = 3
+            training_words = 10000000
         elif user.role == 4:
             query = 10000
+            tutors = 10
+            training_datas = 10
+            training_words = 20000000
         user.query = query
+        user.tutors = tutors
+        user.training_datas = training_datas
+        user.training_words = training_words
         db.session.commit()
     elif payload["type"] == "customer.subscription.deleted":
         customer_id = payload["data"]["object"]["customer"]

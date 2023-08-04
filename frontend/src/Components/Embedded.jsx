@@ -23,7 +23,7 @@ const Embedded = (props) => {
     useEffect(() => {
         setChatURL(`${SERVER_URL}/chatbot/share/url`);
         setChatwindow(
-            `<iframe style="border: 0" frameborder="0" scrolling="no" height="100%" width="100%" src="${SERVER_URL}/chat/embedding/${props.data.uuid}"></iframe>`
+            `<iframe style="border: 0" frameborder="0" scrolling="no" height="600px" width="100%" src="${SERVER_URL}/chat/embedding/${props.data.uuid}"></iframe>`
         );
         setBubble(
             `<script type="text/javascript">window.$icg=[];window.ICG_WIDGET_ID="${props.data.uuid}";(function(){d=document;s=d.createElement("script");s.src="${SERVER_URL}/widget/bubble.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>`

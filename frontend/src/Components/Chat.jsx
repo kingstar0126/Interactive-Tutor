@@ -24,7 +24,6 @@ import {
 } from "react-icons/md";
 import { Scrollbar } from "react-scrollbars-custom";
 import { Carousel, IconButton } from "@material-tailwind/react";
-import { changeuser } from "../redux/actions/userAction";
 import {
     Typography,
     Button,
@@ -152,7 +151,6 @@ const Chat = () => {
 
     const pauseVideo = (index) => {
         const video = videoRef.current[index];
-        console.log(video.paused);
         if (!video.paused) {
             video.pause();
         }
@@ -435,7 +433,7 @@ const Chat = () => {
                     <DialogFooter className="flex items-center justify-end gap-4 pb-8">
                         <button
                             onClick={() => {
-                                changeuser(dispatch, null);
+                                window.localStorage.clear();
                                 navigate("/login");
                                 setOpen(false);
                             }}

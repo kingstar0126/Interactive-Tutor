@@ -15,7 +15,7 @@ const NotFound = () => {
                 But let's take you back to safety.
             </p>
             <Link
-                to="/"
+                to="/login"
                 className="px-6 py-4 rounded-md bg-[--site-logo-text-color] text-[--site-card-icon-color] hover:bg-[--site-success-text-color] hover:text-[--site-logo-text-color] transition-colors ease-in-out duration-300"
             >
                 Go back Login
