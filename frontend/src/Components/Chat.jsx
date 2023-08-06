@@ -1,9 +1,5 @@
 import { BsFillPlayFill } from "react-icons/bs";
-import {
-    AiOutlineUser,
-    AiOutlineMenu,
-    AiOutlineConsoleSql,
-} from "react-icons/ai";
+import { AiOutlineUser, AiOutlineMenu } from "react-icons/ai";
 import { useState, useEffect, useRef } from "react";
 import Chatmodal from "./Chatmodal";
 import ChatTable from "./ChatTable";
@@ -22,16 +18,14 @@ import {
     MdArrowDropDown,
     MdArrowDropUp,
 } from "react-icons/md";
-import { Scrollbar } from "react-scrollbars-custom";
 import { Carousel, IconButton } from "@material-tailwind/react";
 import {
-    Typography,
-    Button,
     Dialog,
     DialogHeader,
     DialogBody,
     DialogFooter,
 } from "@material-tailwind/react";
+import SubscriptionModal from "./SubscriptionModal";
 
 const Chat = () => {
     const location = useLocation();
@@ -54,6 +48,7 @@ const Chat = () => {
     const [trial, setTrial] = useState(0);
     const [isPlaying, setIsPlaying] = useState(false);
     const [open, setOpen] = useState(false);
+    const [isopenModal, setIsOpenModal] = useState(false);
     const descroption = [
         {
             title: "Welcome to Interactive Tutor",
@@ -98,6 +93,9 @@ const Chat = () => {
             type: "video/mp4",
         },
     ];
+    const handleOpenModel = () => {
+        setIsOpenModal(!isopenModal);
+    };
     const [isactiveIndex, setIsActiveIndex] = useState(0);
     const videoRef = useRef([]);
     const togglePlay = () => {
@@ -238,7 +236,7 @@ const Chat = () => {
                         </div>
                     )}
                     <button
-                        onClick={() => navigate("/chatbot/subscription")}
+                        onClick={handleOpenModel}
                         className="flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
                     >
                         <MdOutlineUpdate className="w-4 h-4 md:w-6 md:h-6" />
@@ -459,6 +457,10 @@ const Chat = () => {
                         </button>
                     </DialogFooter>
                 </Dialog>
+                <SubscriptionModal
+                    open={isopenModal}
+                    handleCancel={() => handleOpenModel()}
+                />
                 <Chatmodal
                     open={isModalOpen}
                     handleOk={handleOk}

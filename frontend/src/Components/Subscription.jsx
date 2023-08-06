@@ -4,7 +4,6 @@ import { Toaster } from "react-hot-toast";
 import { AiOutlineTrophy, AiOutlineMenu } from "react-icons/ai";
 import { getUseraccount } from "../redux/actions/userAction";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { getUserState } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
 import ReactSpeedometer from "react-d3-speedometer";

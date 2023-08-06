@@ -59,4 +59,5 @@ export const webAPI = {
     change_user_limitation: SERVER_URL + "/api/change_user_limitation",
     transfer_tutor: SERVER_URL + "/api/transfer_tutor",
     imageupload: SERVER_URL + "/api/imageupload",
+    custom_plan: SERVER_URL + "/api/subscription/custom_plan",
 };

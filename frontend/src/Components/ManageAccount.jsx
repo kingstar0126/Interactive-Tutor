@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import ReactSpeedometer from "react-d3-speedometer";
 import { MdOutlineUpdate } from "react-icons/md";
 import { setOpenSidebar } from "../redux/actions/locationAction";
+import SubscriptionModal from "./SubscriptionModal";
 
 const ManageAccount = () => {
     const [username, setUsername] = useState("");
@@ -21,6 +22,8 @@ const ManageAccount = () => {
     const [phone, setPhone] = useState("");
     const [state, setState] = useState("");
     const [city, setCity] = useState("");
+    const [isSubscriptionOpenModal, setIsSubscriptionOpenModal] =
+        useState(false);
     const [country, setCountry] = useState("");
     const user = JSON.parse(useSelector((state) => state.user.user));
     const query = useSelector((state) => state.query.query);
@@ -28,7 +31,6 @@ const ManageAccount = () => {
     const [trial, setTrial] = useState(0);
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const [isopenModal, setIsOpenModal] = useState(false);
     const notification = (type, message) => {
         if (type === "error") {
             toast.error(message);
@@ -36,6 +38,10 @@ const ManageAccount = () => {
         if (type === "success") {
             toast.success(message);
         }
+    };
+
+    const handleSubscriptionOpenModel = () => {
+        setIsSubscriptionOpenModal(!isSubscriptionOpenModal);
     };
 
     const handleChange = () => {
@@ -160,7 +166,7 @@ const ManageAccount = () => {
                     )}
                     <button
                         onClick={() => {
-                            handleOpenModel();
+                            handleSubscriptionOpenModel();
                         }}
                         className="flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
                     >
@@ -276,6 +282,10 @@ const ManageAccount = () => {
                     </div>
                 </div>
             </div>
+            <SubscriptionModal
+                open={isSubscriptionOpenModal}
+                handleCancel={() => handleSubscriptionOpenModel()}
+            />
         </div>
     );
 };
