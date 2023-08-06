@@ -483,13 +483,13 @@ def Change_user_limitation():
     user.training_datas = train
     user.tutors = tutors
     user.training_words = word
+    user.role = 6
     db.session.commit()
     return jsonify({'success': True, 'code': 200, 'message': 'Updated Successfully'})
 
 
 @auth.route('/api/changeaccount', methods=['POST'])
 def change_useraccount():
-
     id = request.json['id']
     username = request.json['username']
     email = request.json['email']
@@ -508,3 +508,15 @@ def change_useraccount():
     db.session.commit()
 
     return jsonify({'success': True, 'code': 200})
+
+
+@auth.route('/api/subscription/custom_plan', methods=['POST'])
+def subscription_custom_plan():
+    id = request.json['id']
+    user = db.session.query(User).filter_by(id=id).first()
+    msg = Message('Customer wants to use custom plan !!!', sender=os.getenv('MAIL_USERNAME'),
+                  recipients=[os.getenv('MAIL_USERNAME')])
+    msg.html = render_template(
+        'send_custom_plan.html', username=user.username, email=user.email, phone=user.contact)
+    mail.send(msg)
+    return jsonify({'success': True, 'code': 200, 'message': 'We have sent your request to the manager.'})
