@@ -51,7 +51,7 @@ const Sidebar = () => {
 
     const handleLogout = () => {
         window.localStorage.clear();
-        window.location.replace('https://app.interactive-tutor.com/login');
+        window.location.replace(window.location.origin + "/login");
     };
 
     useEffect(() => {

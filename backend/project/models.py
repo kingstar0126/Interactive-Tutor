@@ -64,7 +64,7 @@ class Chat(UserMixin, db.Model):
     conversation = db.Column(db.String(255))
     access = db.Column(db.Integer)
     creativity = db.Column(db.Float)
-    behavior = db.Column(db.String(255))
+    behavior = db.Column(db.String(700))
     behaviormodel = db.Column(db.String(255))
     train = db.Column(db.JSON)
     chat_logo = db.Column(db.JSON)

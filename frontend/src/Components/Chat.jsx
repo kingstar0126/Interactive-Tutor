@@ -438,7 +438,9 @@ const Chat = () => {
                         <button
                             onClick={() => {
                                 window.localStorage.clear();
-                                navigate("/login");
+                                window.location.replace(
+                                    window.location.origin + "/login"
+                                );
                                 setOpen(false);
                             }}
                             className="bg-transparent border-[--site-card-icon-color] text-[--site-card-icon-color] text-base font-semibold border rounded-md px-4 py-2"

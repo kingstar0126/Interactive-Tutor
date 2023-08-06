@@ -129,14 +129,14 @@ const AccessChatbot = () => {
                                         htmlFor="username"
                                         className="block text-sm font-semibold text-[--site-main-Login-Text]"
                                     >
-                                        Organizaiotn ID
+                                        Organisation ID
                                     </label>
                                     <input
                                         type="text"
                                         onChange={(e) =>
                                             setOrganization(e.target.value)
                                         }
-                                        placeholder="First, enter your Organization ID."
+                                        placeholder="First, enter your Organisation ID."
                                         className="block w-full px-4 py-2 mt-2 mb-2 text-[--site-main-Login] bg-[--site-main-color3] border rounded-md focus:border-[--site-main-Login-border-focus] focus:ring-[--site-main-Login-border-focus] focus:outline-none focus:ring focus:ring-opacity-40"
                                         required
                                     />
