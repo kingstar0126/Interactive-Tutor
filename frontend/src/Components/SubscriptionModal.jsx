@@ -23,6 +23,7 @@ import { useSelector, useDispatch } from "react-redux";
 const SubscriptionModal = (props) => {
     const [subscriptions, setSubscriptions] = useState([]);
     const [price, setPrice] = useState("");
+    const [isopen, setIsOpen] = useState(false);
     const [description, setDescription] = useState([]);
     const user = JSON.parse(useSelector((state) => state.user.user));
     const dispatch = useDispatch();
@@ -32,6 +33,10 @@ const SubscriptionModal = (props) => {
             .post(webAPI.custom_plan, { id: user.id })
             .then((res) => notification("success", res.data.message))
             .catch((err) => {});
+    };
+
+    const handleOpenModal = () => {
+        setIsOpen(!isopen);
     };
 
     useEffect(() => {
@@ -318,14 +323,14 @@ const SubscriptionModal = (props) => {
                         <div className="justify-center flex p-2">
                             {user.role !== 6 ? (
                                 <span
-                                    onClick={handleCustomPlan}
+                                    onClick={handleOpenModal}
                                     className=" text-[#034F75] border border-[--site-main-pricing-color] rounded-lg mt-5 p-5 hover:scale-[1.02] focus:scale-[1.02] active:scale-100 shadow-sm shadow-[--site-card-icon-color]"
                                 >
                                     Custom Plan
                                 </span>
                             ) : (
                                 <span
-                                    onClick={handleCustomPlan}
+                                    onClick={handleOpenModal}
                                     className=" bg-[#034F75] text-white border border-[--site-main-pricing-color] rounded-lg mt-5 p-5 hover:scale-[1.02] focus:scale-[1.02] active:scale-100 shadow-sm shadow-[--site-card-icon-color]"
                                 >
                                     Custom Plan
@@ -335,6 +340,40 @@ const SubscriptionModal = (props) => {
                     </div>
                 )}
             </DialogBody>
+            <Dialog
+                open={isopen}
+                handler={handleOpenModal}
+                className="border-[--site-chat-header-border] border rounded-2xl from-[--site-main-modal-from-color] to-[--site-main-modal-to-color] bg-gradient-to-br shadow-lg shadow-[--site-card-icon-color]"
+            >
+                <DialogHeader>Custom Plan</DialogHeader>
+                <DialogBody divider>
+                    <span className="text-base text-black">
+                        You are now on a Custom Plan. To change your plan please
+                        contact{" "}
+                        <span className="text-[--site-main-pricing-color]">
+                            info@interactive-tutor.com
+                        </span>
+                    </span>
+                </DialogBody>
+                <DialogFooter className="flex items-center justify-end gap-4 pb-8">
+                    <button
+                        onClick={handleOpenModal}
+                        className="bg-transparent border-[--site-card-icon-color] text-[--site-card-icon-color] text-base font-semibold border rounded-md px-4 py-2"
+                    >
+                        cancel
+                    </button>
+
+                    <button
+                        onClick={() => {
+                            handleCustomPlan();
+                            handleOpenModal();
+                        }}
+                        className="px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md"
+                    >
+                        confirm
+                    </button>
+                </DialogFooter>
+            </Dialog>
         </Dialog>
     );
 };
