@@ -484,6 +484,8 @@ def Change_user_limitation():
     user.tutors = tutors
     user.training_words = word
     user.role = 6
+    if user.subscription_id is not None:
+        stripe.Subscription.cancel(user.subscription_id)
     db.session.commit()
     return jsonify({'success': True, 'code': 200, 'message': 'Updated Successfully'})
 
