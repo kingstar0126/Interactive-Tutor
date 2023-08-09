@@ -54,6 +54,7 @@ export default function Example() {
                 .then((res) => {
                     let country = res.data.country_name;
                     data["country"] = country;
+                    console.log(data)
                     setchatbot(dispatch, data);
                 })
                 
