@@ -49,7 +49,14 @@ export default function Example() {
             } else {
                 notification("success", res.data.message);
                 getchat(dispatch, data);
-                setchatbot(dispatch, data);
+                axios
+                .get("https://geolocation-db.com/json/")
+                .then((res) => {
+                    let country = res.data.country_name;
+                    data["country"] = country;
+                    setchatbot(dispatch, data);
+                })
+                
             }
         });
         setUpdateModalOpen(false);
