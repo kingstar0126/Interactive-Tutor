@@ -4,14 +4,16 @@ from flask_jwt_extended import JWTManager
 from flask_mail import Mail
 from flask_cors import CORS
 import os
+import random
 from dotenv import load_dotenv
-
+import time
+import logging
+from sqlalchemy.exc import SQLAlchemyError
 from rich import print, pretty
 pretty.install()
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 load_dotenv()
-
 jwt = JWTManager()
 mail = Mail()
 db = SQLAlchemy()
@@ -21,8 +23,13 @@ def create_app():
     app = Flask(__name__)
     CORS(app)
 
+    handler = logging.FileHandler('application.log')
+    handler.setLevel(logging.ERROR)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    app.logger.addHandler(handler)
     app.config['SECRET_KEY'] = 'key-goes-here'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost/postgres'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:postgres@localhost/postgres'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['MAIL_SERVER'] = 'smtp.gmail.com'
     app.config['MAIL_PORT'] = 587
@@ -30,9 +37,10 @@ def create_app():
     app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
     app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
     app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024
+    app.config['SQLALCHEMY_POOL_TIMEOUT'] = 60
+
 
     db.init_app(app)
-
     jwt.init_app(app)
     mail.init_app(app)
 

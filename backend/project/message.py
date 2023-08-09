@@ -176,7 +176,6 @@ def send_message():
         history.append({"role": "ai", "content": response})
         current_message.message = json.dumps(history)
         current_message.update_date = datetime.datetime.now()
-
         db.session.commit()
         _response = {
             'success': True,

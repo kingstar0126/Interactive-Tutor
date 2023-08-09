@@ -37,9 +37,14 @@ def generate_message(query, history, behavior, temp, model, chat):
 
     template = """ {behavior}
     
+    ==========
     Training data: {examples}
-
+    ==========
+    
+    ==========
     Chathistory: {history}
+    ==========
+    
     Human: {human_input}
     Assistant:"""
 
@@ -56,9 +61,9 @@ def generate_message(query, history, behavior, temp, model, chat):
                          temperature=temp,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "3":
-        llm = ChatOpenAI(model_name="gpt-4-32k",
+        llm = ChatOpenAI(model_name="gpt-4",
                          temperature=temp,
-                         openai_api_key=os.getenv('OPENAI_API_KEY'))
+                         openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
 
     conversation = LLMChain(
         llm=llm,
@@ -92,7 +97,10 @@ def generate_AI_message(query, history, behavior, temp, model):
 
     template = """ {behavior}
 
+    ==========
     {history}
+    ==========
+    
     Human: {human_input}
     Assistant:"""
 
@@ -121,9 +129,9 @@ def generate_AI_message(query, history, behavior, temp, model):
                          temperature=temp,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "3":
-        llm = ChatOpenAI(model_name="gpt-4-32k",
+        llm = ChatOpenAI(model_name="gpt-4",
                          temperature=temp,
-                         openai_api_key=os.getenv('OPENAI_API_KEY'))
+                         openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
     conversation = LLMChain(
         llm=llm,
         verbose=True,

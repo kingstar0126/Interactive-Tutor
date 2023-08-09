@@ -277,8 +277,9 @@ def get_chat_with_pin_organization():
         return jsonify({'success': False, 'code': 404, 'message': 'Organization does not exist.'})
 
     chat = db.session.query(Chat).join(User, User.id == Chat.user_id).join(
-        Organization, Organization.email == User.email).filter(Organization.uuid == organization).first()
-    if pin != str(chat.access):
+        Organization, Organization.email == User.email).filter(Organization.uuid == organization).filter(Chat.access == pin).first()
+
+    if not chat:
         return jsonify({'success': False, 'code': 404, 'message': 'Your PIN or Organization ID is incorrect'})
 
     chat_data = {
