@@ -26,7 +26,6 @@ export const setchatbot = (dispatch, data) => {
     axios
         .post(webAPI.start_message, data)
         .then((res) => {
-            console.log(res);
             if (res.status === 200) {
                 dispatch({ type: SET_CHATBOT, payload: res.data.data });
             } else notification("error", stringConstant.FAILED_GET_DATA);
@@ -38,7 +37,6 @@ export const getchatbot = (dispatch, data) => {
     axios
         .post(webAPI.get_message, data)
         .then((res) => {
-            console.log(res);
             if (res.status === 200)
                 dispatch({ type: GET_CHATBOT, payload: res.data.data });
             else notification("error", stringConstant.FAILED_GET_DATA);

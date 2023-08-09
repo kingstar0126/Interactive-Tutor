@@ -47,7 +47,6 @@ const SubscriptionForm = (props) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("This is the data -> ", city, country, state);
         if (!name || !email) {
             notification("error", "Please input all fields");
         }

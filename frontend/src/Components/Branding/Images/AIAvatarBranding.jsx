@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 const UserAvatarBranding = (props) => {
     const [selectedLogo, setSelectedLogo] = useState(null);
     const [flag, setFlag] = useState(false);
+    const [file, setFile] = useState(null);
     const notification = (type, message) => {
         // To do in here
         if (type === "error") {
@@ -30,17 +31,18 @@ const UserAvatarBranding = (props) => {
             return;
         }
         setFlag(true);
-        setSelectedLogo(files[0]);
+        const imageURL = URL.createObjectURL(files[0]);
+        setFile(files[0]);
+        setSelectedLogo(imageURL);
     };
 
     const handleUpload = () => {
-        if (selectedLogo && flag) {
-            console.log(selectedLogo);
+        if (file && flag) {
             const formData = new FormData();
 
-            const filename = selectedLogo.name.replace(" ", "");
+            const filename = file.name.replace(" ", "");
 
-            formData.append("file", selectedLogo, filename);
+            formData.append("file", file, filename);
             axios
                 .post(webAPI.imageupload, formData)
                 .then((res) => {
@@ -50,7 +52,7 @@ const UserAvatarBranding = (props) => {
                     handleLogo(url);
                 })
                 .catch((err) => console.error(err));
-                setFlag(false);
+            setFlag(false);
         }
     };
 
@@ -60,14 +62,14 @@ const UserAvatarBranding = (props) => {
 
     return (
         <div>
-            <div className="flex flex-col gap-5 p-2">
-                <h1 className="border-b-[1px] border-[--site-card-icon-color] font-semibold pb-2">
+            <div className="flex flex-col gap-5 border border-[--site-chat-header-border] rounded-lg p-4">
+                <h1 className="border-b border-[--site-chat-header-border] font-semibold pb-2">
                     {props.title}
                 </h1>
                 <div className="flex flex-col gap-2">
                     <span>AI avatar URL</span>
                     <div>
-                        <div className="border-[1px] rounded-xl border-[--site-card-icon-color] w-[70px] h-[70px]">
+                        <div className="border-[1px] rounded-xl border-[--site-chat-header-border] w-[70px] h-[70px]">
                             <Dropzone
                                 onDrop={handleFileChange}
                                 multiple={false}
@@ -79,10 +81,11 @@ const UserAvatarBranding = (props) => {
                                     >
                                         <input {...getInputProps()} />
                                         {selectedLogo ? (
-                                            <div>
+                                            <div className="m-1">
                                                 <img
                                                     src={selectedLogo}
                                                     alt="Selected"
+                                                    className="rounded-md"
                                                 />
                                             </div>
                                         ) : (
@@ -95,8 +98,10 @@ const UserAvatarBranding = (props) => {
                             </Dropzone>
                         </div>
                         <button
-                            onClick={(e) => { handleUpload();}}
-                            className="p-2 rounded-xl bg-[--site-logo-text-color] my-2 border-[1px] border-[--site-card-icon-color] font-bold"
+                            onClick={(e) => {
+                                handleUpload();
+                            }}
+                            className="p-2 rounded-xl bg-[--site-logo-text-color] my-2 border border-[--site-chat-header-border]"
                         >
                             Upload
                         </button>

@@ -8,9 +8,12 @@ import { SERVER_URL } from "../../../config/constant";
 
 const LogoBranding = (props) => {
     const [text, setText] = useState("Disable");
-    const [status, setStatus] = useState(props.data.status);
+    const [status, setStatus] = useState(
+        props.data.status === undefined ? true : props.data.status
+    );
     const [selectedLogo, setSelectedLogo] = useState(null);
     const [flag, setFlag] = useState(false);
+    const [file, setFile] = useState(null);
     const notification = (type, message) => {
         // To do in here
         if (type === "error") {
@@ -31,18 +34,19 @@ const LogoBranding = (props) => {
             notification("error", "Maximum image size allowed is 1MB.");
             return;
         }
-        setFlag(true); 
-        setSelectedLogo(files[0]);
+        setFlag(true);
+        const imageURL = URL.createObjectURL(files[0]);
+        setFile(files[0]);
+        setSelectedLogo(imageURL);
     };
 
     const handleUpload = () => {
-        if (selectedLogo && flag) {
-            console.log(selectedLogo);
+        if (file && flag) {
             const formData = new FormData();
 
-            const filename = selectedLogo.name.replace(" ", "");
+            const filename = file.name.replace(" ", "");
 
-            formData.append("file", selectedLogo, filename);
+            formData.append("file", file, filename);
             axios
                 .post(webAPI.imageupload, formData)
                 .then((res) => {
@@ -52,7 +56,7 @@ const LogoBranding = (props) => {
                     setSelectedLogo(url);
                 })
                 .catch((err) => console.error(err));
-                setFlag(false);
+            setFlag(false);
         }
     };
 
@@ -73,10 +77,10 @@ const LogoBranding = (props) => {
 
     return (
         <div>
-            <div className="flex flex-col gap-5 p-2">
-                <h1 className="border-b-[1px] border-[--site-card-icon-color] font-semibold pb-2">
+            <div className="flex flex-col gap-5 border border-[--site-chat-header-border] rounded-lg p-4">
+                <span className="border-b-[1px] border-[--site-chat-header-border] pb-2">
                     {props.title}
-                </h1>
+                </span>
                 <div name="switch" className="gap-2">
                     <span className="font-medium">Status</span>
                     <div className="flex w-full gap-2 font-medium">
@@ -87,8 +91,8 @@ const LogoBranding = (props) => {
                 <div name="input" className="flex flex-col w-full gap-3 p-2">
                     <div className="w-full">
                         <span>Select your Logo</span>
-                        <div>
-                            <div className="border-[1px] rounded-xl border-[--site-card-icon-color] w-[70px] h-[70px]">
+                        <div className="mt-2">
+                            <div className="border rounded-md border-[--site-chat-header-border] w-[70px] h-[70px]">
                                 <Dropzone
                                     onDrop={handleFileChange}
                                     multiple={false}
@@ -100,10 +104,11 @@ const LogoBranding = (props) => {
                                         >
                                             <input {...getInputProps()} />
                                             {selectedLogo ? (
-                                                <div>
+                                                <div className="m-1">
                                                     <img
                                                         src={selectedLogo}
                                                         alt="Selected"
+                                                        className="rounded-md"
                                                     />
                                                 </div>
                                             ) : (
@@ -116,33 +121,35 @@ const LogoBranding = (props) => {
                                 </Dropzone>
                             </div>
                             <button
-                                onClick={(e) => { handleUpload();}}
-                                className="p-2 rounded-xl bg-[--site-logo-text-color] my-2 border-[1px] border-[--site-card-icon-color] font-bold"
+                                onClick={(e) => {
+                                    handleUpload();
+                                }}
+                                className="p-2 rounded-xl bg-[--site-logo-text-color] my-2 border border-[--site-chat-header-border]"
                             >
                                 Upload
                             </button>
                         </div>
                     </div>
                     <div className="flex w-full gap-3">
-                        <div className="flex flex-col w-1/2">
+                        <div className="flex flex-col w-1/2 gap-2">
                             <span>Height (pixel)</span>
                             <input
                                 defaultValue={props.data.height}
                                 onChange={(e) => {
                                     props.data.height = e.target.value;
                                 }}
-                                className="w-full rounded-full p-2 border-[1px] border-[--site-card-icon-color]"
+                                className="w-full p-2 border border-[--site-chat-header-border] rounded-md bg-transparent"
                                 type="number"
                             />
                         </div>
-                        <div className="flex flex-col w-1/2">
+                        <div className="flex flex-col w-1/2 gap-2">
                             <span>Width (pixel)</span>
                             <input
                                 onChange={(e) => {
                                     props.data.width = e.target.value;
                                 }}
                                 defaultValue={props.data.width}
-                                className="w-full rounded-full p-2 border-[1px] border-[--site-card-icon-color]"
+                                className="w-full p-2 border border-[--site-chat-header-border] rounded-md bg-transparent"
                                 type="number"
                             />
                         </div>

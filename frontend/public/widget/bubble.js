@@ -131,7 +131,6 @@
                 throw new Error("Widget not found");
                 return;
             }
-            console.log(response);
             const embedUrl = response && response.data.embed_url;
             const settings = response && response.data;
             const bubble = settings && settings.bubble;

@@ -24,6 +24,10 @@ from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 import csv
+import nltk
+from nltk.corpus import stopwords
+from nltk.tokenize import sent_tokenize, word_tokenize
+from nltk import pos_tag
 
 load_dotenv()
 
@@ -33,6 +37,9 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
 pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
 openai.openai_api_key = OPENAI_API_KEY
+nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
 
 pretty.install()
 
@@ -49,17 +56,11 @@ def compare_token_words(ct, chatbot):
     current_chat = db.session.query(Chat).filter_by(uuid=chatbot).first()
     user = db.session.query(User).filter_by(id=current_chat.user_id).first()
 
-    if user.role == 5 or user.role == 2:
-        if ct >= 100000:
-            return False
-    elif user.role == 3:
-        if ct >= 10000000:
-            return False
-    elif user.role == 4:
-        if ct >= 20000000:
-            return False
-    elif user.role == 1:
+    if user.role == 1:
         return True
+
+    elif ct >= user.training_words:
+        return False
     return True
 
 
@@ -89,6 +90,7 @@ def parse_pdf(file: BytesIO) -> List[str]:
         text = re.sub(r"(?<!\n\s)\n(?!\s\n)", " ", text.strip())
         # Remove multiple newlines
         text = re.sub(r"\n\s*\n", "\n\n", text)
+        text = correct_grammar(text)
         output.append(text)
     return output
 
@@ -96,6 +98,7 @@ def parse_pdf(file: BytesIO) -> List[str]:
 def parse_csv(file):
     data = file.read()
     string_data = str(data)
+    string_data = correct_grammar(string_data)
     text = []
     text.append(string_data)
     return text
@@ -105,7 +108,8 @@ def parse_docx(file):
     doc = docx.Document(file)
     fullText = []
     for para in doc.paragraphs:
-        fullText.append(para.text)
+        text = correct_grammar(para.text)
+        fullText.append(text)
     return '\n'.join(fullText)
 
 # This is that change the .srt, .txt, .json, .md
@@ -113,8 +117,9 @@ def parse_docx(file):
 
 def parse_srt(file):
     lines = file.read().decode("utf-8")
+    string = correct_grammar(lines)
     text = []
-    text.append(lines)
+    text.append(string)
     return text
 
 
@@ -125,8 +130,11 @@ def parse_epub(filename):
         if item.get_type() == ebooklib.ITEM_DOCUMENT:
             bodyContent = item.get_body_content().decode()
             soup = BeautifulSoup(bodyContent, 'html.parser')
-            text_ = [para.get_text(strip=True) for para in soup.find_all(
-                ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'ul', 'ol'])]
+            text_ = set()  # Store unique sentences using a set
+            cleaned_text = soup.get_text()
+            cleaned_text = correct_grammar(cleaned_text)
+            text_.add(cleaned_text)
+
             text.extend(text_)
     return (text)
 
@@ -168,19 +176,50 @@ def text_to_docs(text: str, filename: str, chat: str) -> List[Document]:
     return doc_chunks
 
 
+def correct_grammar(text):
+    # Tokenize the text into sentences
+    sentences = nltk.sent_tokenize(text)
+
+    # Correct each sentence separately
+    corrected_sentences = []
+    for sentence in sentences:
+        # Tokenize the sentence into words and tag their parts of speech
+        words = nltk.word_tokenize(sentence)
+        tagged_words = nltk.pos_tag(words)
+
+        # Perform grammar correction based on POS tags
+        corrected_words = []
+        for word, tag in tagged_words:
+            # Perform grammar correction as needed
+            # Example correction: singularize nouns, use proper verb forms, etc.
+            corrected_word = word  # Placeholder for correction logic
+            corrected_words.append(corrected_word)
+
+        # Reconstruct the corrected sentence
+        corrected_sentence = " ".join(corrected_words)
+        corrected_sentences.append(corrected_sentence)
+
+    # Reconstruct the entire corrected text
+    corrected_text = " ".join(corrected_sentences)
+    return corrected_text
+
+
 def web_scraping(url):
-    response = requests.get(url)
-    if response.status_code != 200:
-        return False
-    soup = BeautifulSoup(response.content, 'html.parser')
-    all_strings = [
-        tag.string
-        for tag in soup.find_all(
-            ['h1', 'h2', 'h3', 'h4', 'h5', 'p', 'span', 'li', 'code']
-        )
-    ]
-    text = [string.strip() for string in all_strings if string is not None]
-    return text
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an exception for 4xx or 5xx status codes
+        soup = BeautifulSoup(response.content, 'html.parser')
+
+        text = set()  # Store unique sentences using a set
+        cleaned_text = soup.get_text()
+        cleaned_text = correct_grammar(cleaned_text)
+        text.add(cleaned_text)
+
+        # Generate the sentences from the set and remove unnecessary repeated text
+        result = list(text)
+        return result
+    except requests.exceptions.RequestException as e:
+        return []
 
 
 def create_train(label, _type, status, chat):
@@ -200,14 +239,8 @@ def compare_role_user(chatbot):
     traindata = json.loads(current_chat.train)
     ct = len(traindata)
     user = db.session.query(User).filter_by(id=current_chat.user_id).first()
-    if user.role == 2 or user.role == 5:
-        if ct >= 1:
-            return False
-    elif user.role == 3:
-        if ct >= 3:
-            return False
-    elif user.role == 4:
-        if ct >= 10:
+    if not user.role == 1:
+        if ct >= user.training_datas:
             return False
     return True
 
@@ -381,6 +414,8 @@ def handle_request_entity_too_large(error):
 def get_traindatas():
     uuid = request.json['uuid']
     chat = db.session.query(Chat).filter_by(uuid=uuid).first()
+    if not chat:
+        return jsonify({'success': False, 'message': 'Not found', 'code': 404})
     train_ids = json.loads(chat.train)
 
     data = []
@@ -388,7 +423,7 @@ def get_traindatas():
         train_data = db.session.query(Train).filter_by(id=id).first()
         data.append({'id': train_data.id, 'label': train_data.label,
                     'type': train_data.type, 'status': train_data.status})
-    return jsonify(data)
+    return jsonify({'data': data, 'success': True})
 
 
 @train.route('/api/data/deletetrain', methods=['POST'])

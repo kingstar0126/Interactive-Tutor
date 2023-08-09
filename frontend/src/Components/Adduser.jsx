@@ -41,11 +41,8 @@ const Adduser = (props) => {
         axios
             .post(webAPI.adduseraccount, data)
             .then((res) => {
-                console.log(res.data);
                 if (res.data.success) {
-                    {
-                        props.handleOk();
-                    }
+                    props.handleOk();
                 } else {
                     notification("error", res.data.message);
                 }

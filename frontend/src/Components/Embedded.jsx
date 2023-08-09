@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { SERVER_URL } from "../config/constant";
+import {
+    DialogHeader,
+    Dialog,
+    DialogBody,
+    DialogFooter,
+} from "@material-tailwind/react";
 import { useSelector } from "react-redux";
+import { Scrollbar } from "react-scrollbars-custom";
 
 const Embedded = (props) => {
     const [chatwindow, setChatwindow] = useState("");
@@ -9,16 +16,14 @@ const Embedded = (props) => {
     const chatbot_window = useRef(null);
     const chatbot_bubble = useRef(null);
     const chatbot_URL = useRef(null);
+    const chatbot_organization = useRef(null);
+    const chatbot_access = useRef(null);
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
-
-    const showHideClassname = props.open
-        ? "fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto"
-        : "hidden";
 
     useEffect(() => {
         setChatURL(`${SERVER_URL}/chatbot/share/url`);
         setChatwindow(
-            `<iframe style="border: 0" frameborder="0" scrolling="no" height="100%" width="100%" src="${SERVER_URL}/chat/embedding/${props.data.uuid}"></iframe>`
+            `<iframe style="border: 0" frameborder="0" scrolling="no" height="600px" width="100%" src="${SERVER_URL}/chat/embedding/${props.data.uuid}"></iframe>`
         );
         setBubble(
             `<script type="text/javascript">window.$icg=[];window.ICG_WIDGET_ID="${props.data.uuid}";(function(){d=document;s=d.createElement("script");s.src="${SERVER_URL}/widget/bubble.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>`
@@ -26,35 +31,91 @@ const Embedded = (props) => {
     }, []);
 
     return (
-        <div className={showHideClassname}>
-            <div className="relative w-3/5 h-auto text-white p-5 mx-auto rounded-md shadow-lg top-10 bg-[--site-card-icon-color]">
-                <div className="mt-3 divide-y text-start">
-                    <h3 className="text-lg font-medium leading-6">
-                        Add provider
-                    </h3>
-                    <div className="py-3 mt-5 px-7">
+        <Dialog
+            open={props.open}
+            size={"lg"}
+            handler={props.handleCancel}
+            className="border-[--site-chat-header-border] border rounded-2xl from-[--site-main-modal-from-color] to-[--site-main-modal-to-color] bg-gradient-to-br shadow-lg shadow-[--site-card-icon-color]"
+        >
+            <DialogHeader className="px-8 pt-8 pb-6">
+                <span className="text-[32px] leading-12 font-semibold text-[--site-card-icon-color]">
+                    Add provider
+                </span>
+            </DialogHeader>
+            <DialogBody className="border-t border-[--site-chat-header-border] text-black text-base font-medium pl-8 py-5 h-[30rem]">
+                <Scrollbar>
+                    <div className="mr-4">
                         <div className="flex flex-col items-center justify-center w-full my-5">
                             <div
                                 name="Window embedding"
-                                className="border-[1px] items-start gap-5 justify-center border-[--site-main-color3] rounded-xl w-full p-5 flex flex-col"
+                                className="border items-start gap-5 justify-center border-[--site-chat-header-border] rounded-xl w-full py-5 flex flex-col"
                             >
-                                <h3 className="border-b-[1px] border-[--site-main-color3] py-5 w-full">
+                                <h3 className="border-b-[1px] border-[--site-chat-header-border] p-5 w-full">
+                                    Your Information
+                                </h3>
+                                <div className="flex flex-col w-full gap-2 px-5">
+                                    <span>Your Organisation ID:</span>
+                                    <input
+                                        ref={chatbot_organization}
+                                        defaultValue={chat.organization}
+                                        readOnly
+                                        className="w-full rounded-xl text-[--site-card-icon-color] p-5 bg-transparent border-[--site-chat-header-border] border"
+                                    />
+                                </div>
+                                <button
+                                    className="bg-[--site-card-icon-color] text-white py-2 px-4 gap-2 rounded-md mx-5"
+                                    onClick={() => {
+                                        chatbot_organization.current.select();
+                                        document.execCommand("copy");
+                                    }}
+                                >
+                                    Copy to clipboard
+                                </button>
+
+                                <div className="flex flex-col w-full gap-2 px-5">
+                                    <span>Your PIN Code:</span>
+                                    <input
+                                        ref={chatbot_access}
+                                        defaultValue={chat.access}
+                                        readOnly
+                                        className="w-full rounded-xl text-[--site-card-icon-color] p-5 bg-transparent border-[--site-chat-header-border] border"
+                                    />
+                                </div>
+                                <button
+                                    className="bg-[--site-card-icon-color] text-white py-2 px-4 gap-2 rounded-md mx-5"
+                                    onClick={() => {
+                                        chatbot_access.current.select();
+                                        document.execCommand("copy");
+                                    }}
+                                >
+                                    Copy to clipboard
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col items-center justify-center w-full my-5">
+                            <div
+                                name="Window embedding"
+                                className="border items-start gap-5 justify-center border-[--site-chat-header-border] rounded-xl w-full py-5 flex flex-col"
+                            >
+                                <h3 className="border-b-[1px] border-[--site-chat-header-border] p-5 w-full">
                                     Share AI Tutor with URL.
                                 </h3>
-                                <div className="flex flex-col w-full">
+                                <div className="flex flex-col w-full gap-2 px-5">
                                     <span>
                                         You can access in this AI Tutor with URL
                                     </span>
                                     <textarea
                                         ref={chatbot_URL}
-                                        rows={4}
+                                        rows={1}
                                         cols={40}
                                         defaultValue={chatURL}
-                                        className="w-full rounded-xl text-[--site-card-icon-color] p-2"
+                                        readOnly
+                                        className="w-full rounded-xl text-[--site-card-icon-color] p-5 bg-transparent border-[--site-chat-header-border] border"
                                     />
                                 </div>
                                 <button
-                                    className="bg-[--site-logo-text-color] text-[--site-card-icon-color] p-2 rounded-xl"
+                                    className="bg-[--site-card-icon-color] text-white py-2 px-4 gap-2 rounded-md mx-5"
                                     onClick={() => {
                                         chatbot_URL.current.select();
                                         document.execCommand("copy");
@@ -63,32 +124,29 @@ const Embedded = (props) => {
                                     Copy to clipboard
                                 </button>
                             </div>
-                            <div
-                                name="bubble embedding"
-                                className="border-[1px] border-[--site-card-icon-color] p-2"
-                            ></div>
                         </div>
 
                         <div className="flex flex-col items-center justify-center w-full my-5">
                             <div
                                 name="Window embedding"
-                                className="border-[1px] items-start gap-5 justify-center border-[--site-main-color3] rounded-xl w-full p-5 flex flex-col"
+                                className="border items-start gap-5 justify-center border-[--site-chat-header-border] rounded-xl w-full py-5 flex flex-col"
                             >
-                                <h3 className="border-b-[1px] border-[--site-main-color3] py-5 w-full">
+                                <h3 className="border-b-[1px] border-[--site-chat-header-border] p-5 w-full">
                                     Embed as an iframe
                                 </h3>
-                                <div className="flex flex-col w-full">
+                                <div className="flex flex-col w-full gap-2 px-5">
                                     <span>Embed everywhere you want</span>
                                     <textarea
                                         ref={chatbot_window}
                                         rows={4}
                                         cols={40}
+                                        readOnly
                                         defaultValue={chatwindow}
-                                        className="w-full rounded-xl text-[--site-card-icon-color] p-2"
+                                        className="w-full rounded-xl text-[--site-card-icon-color] p-5 bg-transparent border-[--site-chat-header-border] border"
                                     />
                                 </div>
                                 <button
-                                    className="bg-[--site-logo-text-color] text-[--site-card-icon-color] p-2 rounded-xl"
+                                    className="bg-[--site-card-icon-color] text-white py-2 px-4 gap-2 rounded-md mx-5"
                                     onClick={() => {
                                         chatbot_window.current.select();
                                         document.execCommand("copy");
@@ -97,32 +155,29 @@ const Embedded = (props) => {
                                     Copy to clipboard
                                 </button>
                             </div>
-                            <div
-                                name="bubble embedding"
-                                className="border-[1px] border-[--site-card-icon-color] p-2"
-                            ></div>
                         </div>
 
                         <div className="flex flex-col items-center justify-center w-full my-5">
                             <div
                                 name="Window embedding"
-                                className="border-[1px] items-start gap-5 justify-center border-[--site-main-color3] rounded-xl w-full p-5 flex flex-col"
+                                className="border items-start gap-5 justify-center border-[--site-chat-header-border] rounded-xl w-full py-5 flex flex-col"
                             >
-                                <h3 className="border-b-[1px] border-[--site-main-color3] py-5 w-full">
+                                <h3 className="border-b-[1px] border-[--site-chat-header-border] p-5 w-full">
                                     Embed as a chat bubble
                                 </h3>
-                                <div className="flex flex-col w-full">
+                                <div className="flex flex-col w-full gap-2 px-5">
                                     <span>Add it in the HTML head section</span>
                                     <textarea
                                         ref={chatbot_bubble}
                                         rows={5}
                                         cols={40}
                                         defaultValue={bubble}
-                                        className="w-full rounded-xl text-[--site-card-icon-color] p-2"
+                                        readOnly
+                                        className="w-full rounded-xl text-[--site-card-icon-color] p-5 bg-transparent border-[--site-chat-header-border] border"
                                     />
                                 </div>
                                 <button
-                                    className="bg-[--site-logo-text-color] text-[--site-card-icon-color] p-2 rounded-xl"
+                                    className="bg-[--site-card-icon-color] text-white py-2 px-4 gap-2 rounded-md mx-5"
                                     onClick={() => {
                                         chatbot_bubble.current.select();
                                         document.execCommand("copy");
@@ -131,29 +186,26 @@ const Embedded = (props) => {
                                     Copy to clipboard
                                 </button>
                             </div>
-                            <div
-                                name="bubble embedding"
-                                className="border-[1px] border-[--site-card-icon-color] p-2"
-                            ></div>
                         </div>
                     </div>
-                    <div className="flex items-center justify-between px-4 py-3">
-                        <button
-                            onClick={props.handleCancel}
-                            className="w-auto px-4 py-2 text-base font-medium text-black border bg-[--site-main-color3] rounded-md shadow-sm hover:bg-[--site-main-color8] focus:outline-none focus:ring-2 focus:ring-green-300"
-                        >
-                            cancel
-                        </button>
-                        <button
-                            onClick={props.handleOk}
-                            className="w-auto px-4 py-2 text-base font-medium text-white bg-[--site-main-form-success1] border rounded-md shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-300"
-                        >
-                            confirm
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
+                </Scrollbar>
+            </DialogBody>
+            <DialogFooter className="flex items-center justify-end gap-4 px-10 pb-8">
+                <button
+                    onClick={props.handleCancel}
+                    className="bg-transparent border-[--site-card-icon-color] text-[--site-card-icon-color] text-base font-semibold border rounded-md px-4 py-2"
+                >
+                    cancel
+                </button>
+
+                <button
+                    onClick={props.handleOk}
+                    className="px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md"
+                >
+                    confirm
+                </button>
+            </DialogFooter>
+        </Dialog>
     );
 };
 

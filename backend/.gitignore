@@ -11,9 +11,11 @@ __pycache__/
 *.crt
 *.key
 *.pem
+*.json
 # Distribution / packaging
 .Python
 build/
+map/
 develop-eggs/
 dist/
 downloads/

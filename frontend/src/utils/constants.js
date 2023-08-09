@@ -45,6 +45,7 @@ export const webAPI = {
     // get_products: SERVER_URL + "/api/getproducts",
     get_all_products: SERVER_URL + "/api/getallproducts",
     update_product: SERVER_URL + "/api/update/product", //user_id, product_id
+    cancel_subscription: SERVER_URL + "/api/cancel/subscription",
     delete_product: SERVER_URL + "/api/delete/product", //user_id, product_id
     delete_all_product: SERVER_URL + "/api/delete/all_products", //user_id
 
@@ -55,6 +56,8 @@ export const webAPI = {
     getaccess_AI_Tutor: SERVER_URL + "/api/getaccess_ai_tutor", //chatbot uuid to get pin code and organization code
     getquery: SERVER_URL + "/api/getquery",
     getChatwithPIN: SERVER_URL + "/api/getchatwithpin",
-
+    change_user_limitation: SERVER_URL + "/api/change_user_limitation",
+    transfer_tutor: SERVER_URL + "/api/transfer_tutor",
     imageupload: SERVER_URL + "/api/imageupload",
+    custom_plan: SERVER_URL + "/api/subscription/custom_plan",
 };

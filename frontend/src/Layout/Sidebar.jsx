@@ -1,12 +1,8 @@
-import { ListItem, ListItemPrefix } from "@material-tailwind/react";
-import {
-    BsDatabaseFillGear,
-    BsFillChatLeftTextFill,
-    BsFillCreditCard2FrontFill,
-} from "react-icons/bs";
-import { HiDocumentReport } from "react-icons/hi";
-import { BiLogOut } from "react-icons/bi";
-import { MdManageAccounts } from "react-icons/md";
+import { BsDatabaseFillGear } from "react-icons/bs";
+//! Sidebar icons
+import { AiOutlineUser, AiOutlineClose, AiOutlineTrophy } from "react-icons/ai";
+import { PiUserCircleGearLight } from "react-icons/pi";
+import { IoLogOutOutline } from "react-icons/io5";
 
 import Logo from "../assets/logo.png";
 import { useLocation, Link } from "react-router-dom";
@@ -14,99 +10,148 @@ import { setlocation } from "../redux/actions/locationAction";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { changeuser } from "../redux/actions/userAction";
-import { useEffect } from "react";
 import { SERVER_URL } from "../config/constant";
+import { useState, useEffect } from "react";
+import { setOpenSidebar } from "../redux/actions/locationAction";
 
 const Sidebar = () => {
     let location = useLocation();
+    const redirections = ["chat", "subscription", "manager", "account"];
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const [selection, setSelection] = useState(1);
+    const [sidebarStyle, setSidebarStyle] = useState("");
+    const user = JSON.parse(useSelector((state) => state.user.user));
+    const isOpenSidebar = useSelector((state) => state.location.openSidebar);
+
     useEffect(() => {
         if (location) {
             setlocation(dispatch, location.pathname);
+            setSidebarStyle(
+                "md:flex hidden flex-col items-center justify-center"
+            );
         }
     }, []);
-    const user = JSON.parse(useSelector((state) => state.user.user));
-    const chat = JSON.parse(useSelector((state) => state.chat.chat));
-    const handleLogout = () => {
-        changeuser(dispatch, null);
-        navigate("/login");
+
+    const handleOpenSidebar = () => {
+        dispatch(setOpenSidebar());
     };
 
+    useEffect(() => {
+        let url = location.pathname.split("/").slice(-1);
+        let index = redirections.indexOf(url[0]) + 1;
+        if (index) {
+            setSelection(index);
+        } else {
+            let url = location.pathname.split("/").slice(-2, -1);
+            let index = redirections.indexOf(url[0]) + 1;
+            setSelection(index);
+        }
+    }, [location]);
+
+    const handleLogout = () => {
+        window.localStorage.clear();
+        window.location.replace(window.location.origin + "/login");
+    };
+
+    useEffect(() => {
+        if (isOpenSidebar) {
+            setSidebarStyle(
+                "md:flex fixed top-0 left-0 h-full w-[266px] flex-col items-center z-[9999] bg-[--site-card-icon-color] justify-start"
+            );
+        } else {
+            setSidebarStyle(
+                "md:flex hidden flex-col items-center justify-start"
+            );
+        }
+    }, [isOpenSidebar]);
+
     return (
-        <div className="flex flex-col items-center justify-center">
-            <div className="container flex items-center justify-center w-1/3 p-1 mt-5">
+        <div className={sidebarStyle}>
+            <div className="hidden md:flex items-center justify-center mt-[40px] mb-[50px] px-[78px]">
                 <Link to="chat">
-                    <img src={`${SERVER_URL}${Logo}`} className="w-[99px] h-full " alt="logo" />
+                    <img
+                        src={`${SERVER_URL}${Logo}`}
+                        className="w-full h-auto"
+                        alt="logo"
+                    />
                 </Link>
             </div>
-            <div className="flex flex-col items-start justify-center py-5 mt-5">
-                <Link to="chat" className="w-full text-white">
-                    <ListItem className="p-2">
-                        <ListItemPrefix>
-                            <BsFillChatLeftTextFill className="w-5 h-5 fill-[--site-logo-text-color]" />
-                        </ListItemPrefix>
-                        Chats
-                    </ListItem>
+            <div className="flex justify-end p-5 md:hidden">
+                <AiOutlineClose
+                    className="w-5 h-5 text-white"
+                    onClick={handleOpenSidebar}
+                />
+            </div>
+            <div className="flex-col items-center justify-start w-full">
+                <Link
+                    to="chat"
+                    className="flex w-full gap-4 px-6 py-4 transition-all duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
+                    style={{
+                        color: selection === 1 ? "#c1ff72" : "#ffffff",
+                        fontWeight: selection === 1 ? 600 : 500,
+                    }}
+                >
+                    <AiOutlineUser className="w-6 h-6" />
+
+                    <span className="flex items-end text-base">Tutor</span>
                 </Link>
-                <Link to="subscription" className="w-full text-white">
-                    <ListItem className="p-2">
-                        <ListItemPrefix>
-                            <BsFillCreditCard2FrontFill className="w-5 h-5 fill-[--site-logo-text-color]" />
-                        </ListItemPrefix>
+                <Link
+                    to="subscription"
+                    className="flex w-full gap-4 px-6 py-4 transition-all duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
+                    style={{
+                        color: selection === 2 ? "#c1ff72" : "#ffffff",
+                        fontWeight: selection === 2 ? 600 : 500,
+                    }}
+                >
+                    <AiOutlineTrophy className="w-6 h-6" />
+                    <span className="flex items-end text-base ">
                         Subscriptions
-                    </ListItem>
+                    </span>
                 </Link>
+                {/* //Todo This is user manager page */}
                 {user.role === 1 ? (
-                    <Link to="manager" className="w-full text-white">
-                        <ListItem className="p-2">
-                            <ListItemPrefix>
-                                <BsDatabaseFillGear className="w-5 h-5 fill-[--site-logo-text-color]" />
-                            </ListItemPrefix>
+                    <Link
+                        to="manager"
+                        className="flex w-full gap-4 px-6 py-4 transition-all duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
+                        style={{
+                            color: selection === 3 ? "#c1ff72" : "#ffffff",
+                            fontWeight: selection === 3 ? 600 : 500,
+                        }}
+                    >
+                        <BsDatabaseFillGear className="w-6 h-6" />
+
+                        <span className="flex items-end text-base ">
                             Manager
-                        </ListItem>
+                        </span>
                     </Link>
                 ) : null}
-                <Link to="account" className="w-full text-white">
-                    <ListItem className="p-2">
-                        <ListItemPrefix>
-                            <MdManageAccounts className="w-5 h-5 fill-[--site-logo-text-color]" />
-                        </ListItemPrefix>
-                        Account
-                    </ListItem>
-                </Link>
-                <Link to="report" className="w-full text-white">
-                    <ListItem className="p-2">
-                        <ListItemPrefix>
-                            <HiDocumentReport className="w-5 h-5 fill-[--site-logo-text-color]" />
-                        </ListItemPrefix>
-                        Report
-                    </ListItem>
+                <Link
+                    to="account"
+                    className="flex w-full gap-4 px-6 py-4 transition-all duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
+                    style={{
+                        color: selection === 4 ? "#c1ff72" : "#ffffff",
+                        fontWeight: selection === 4 ? 600 : 500,
+                    }}
+                >
+                    <PiUserCircleGearLight className="w-6 h-6" />
+                    <span className="flex items-end text-base ">Account</span>
                 </Link>
             </div>
-            {chat && chat.organization && (
-                <div className="flex flex-col items-start justify-center mt-[10] p-2 bg-[--site-warning-text-color] m-2 rounded-xl shadow-2xl">
-                    {chat.organization && (
-                        <p>
-                            <span className="font-bold text-[14px]">
-                                Organization ID:{" "}
-                            </span>
-                            <span className="text-[--site-error-text-color] font-semibold">
-                                {chat.organization}
-                            </span>
-                        </p>
-                    )}
-                </div>
-            )}
-            <div className="fixed bottom-10 left-10">
+
+            <div className="fixed bottom-10 left-3">
                 <div
-                    className="flex items-center justify-center gap-2 hover:scale-110"
+                    className="flex w-full gap-3 p-2 hover:scale-110"
                     onClick={() => {
                         handleLogout();
                     }}
                 >
-                    <BiLogOut className="w-5 h-5 fill-[--site-logo-text-color]" />
-                    <span className="text-[--site-main-color3]">Logout</span>
+                    <div className="w-7 h-7">
+                        <IoLogOutOutline className="w-6 h-6 text-white" />
+                    </div>
+                    <span className="flex items-center text-[--site-main-color3] font-normal text-base">
+                        Logout
+                    </span>
                 </div>
             </div>
         </div>

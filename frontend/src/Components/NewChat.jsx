@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from "react";
-import chatsend from "../assets/chatgpt-send.svg";
+import { BsSendPlus } from "react-icons/bs";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
 import { useSelector, useDispatch } from "react-redux";
-import { setchatbot, getchatbot, getchat } from "../redux/actions/chatAction";
+import { setchatbot, getchat } from "../redux/actions/chatAction";
 import { useNavigate } from "react-router-dom";
 import { Scrollbar } from "react-scrollbars-custom";
 import { dracula, CopyBlock } from "react-code-blocks";
@@ -12,6 +12,7 @@ import { useParams } from "react-router-dom";
 import { getUserState } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
 import { useLocation } from "react-router-dom";
+import ReactLoading from "react-loading";
 
 const NewChat = () => {
     const navigate = useNavigate();
@@ -24,6 +25,7 @@ const NewChat = () => {
         (state) => state.location.current_location
     );
     const dispatch = useDispatch();
+    const backgroundRef = useRef(null);
     const chatbot_logo = useRef(null);
     const chatbot_start = useRef(null);
     const chatbot_copyright = useRef(null);
@@ -39,122 +41,133 @@ const NewChat = () => {
     const messagesEndRef = useRef(null);
     let location = useLocation();
     const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
     const chatbot = useSelector((state) => state.chat.chatbot);
     const chatId = useParams();
-
     const notification = (type, message) => {
         // To do in here
         if (type === "error") {
             toast.error(message);
         }
     };
-    
-    
+
     useEffect(() => {
         const pattern = /\/chat\/embedding\/(\w+)/;
         const result = pattern.exec(location.pathname);
 
         if (previous_location !== current_location && chat) {
-            console.log("The new chatbot created!!!", chat);
+            setLoading(true);
             let new_chat = chat;
-            getUserState(dispatch, { id: chat.user_id });
-            setchatbot(dispatch, new_chat);
-            if (new_chat.conversation !== "") {
-                setChathistory([
-                    ...chathistory,
-                    { role: "ai", content: new_chat.conversation },
-                ]);
-                chatbot_start.current.classList.add("hidden");
-                window_chat.current.classList.remove("hidden");
-            } else {
-                chatbot_start.current.classList.remove("hidden");
-                window_chat.current.classList.add("hidden");
-            }
+            axios
+                .get("https://geolocation-db.com/json/")
+                .then((res) => {
+                    let country = res.data.country_name;
+                    getUserState(dispatch, { id: chat.user_id });
+                    new_chat["country"] = country;
+                    setchatbot(dispatch, new_chat);
+                    setLoading(false);
+                    if (new_chat.conversation !== "") {
+                        setChathistory([
+                            ...chathistory,
+                            { role: "ai", content: new_chat.conversation },
+                        ]);
+                        chatbot_start.current.classList.add("hidden");
+                        window_chat.current.classList.remove("hidden");
+                    } else {
+                        chatbot_start.current.classList.remove("hidden");
+                        window_chat.current.classList.add("hidden");
+                    }
+                })
+                .catch(() => {
+                    setLoading(false);
+                });
         } else if (previous_location === current_location && chat) {
-            console.log("The load chatbot!!!");
             let id = chatbot;
             axios
                 .post(webAPI.getchat, { id: id })
                 .then((res) => {
-                    console.log(res.data);
                     if (res.data.code === 200) {
                         getchat(dispatch, res.data.data);
                     }
-                    // else navigate(-1);
                 })
                 .catch((err) => {
                     console.log(err);
-                    // navigate(-1);
                 });
 
             axios.post(webAPI.get_message, { id }).then((res) => {
-                console.log(res.data);
-                if (res.data.success === "true") {
+                if (res.data.success === true) {
                     if (res.data.data.message) {
                         setChathistory(res.data.data.message);
                     }
+                    if (res.data.data.message.length === 0) {
+                        chatbot_start.current.classList.remove("hidden");
+                        window_chat.current.classList.add("hidden");
+                    } else {
+                        chatbot_start.current.classList.add("hidden");
+                        window_chat.current.classList.remove("hidden");
+                        if (human_background.current) {
+                            human_background.current.style["background-color"] =
+                                chat.chat_logo.user_bg;
+                            human_background.current.style.color =
+                                chat.chat_logo.user_color;
+                            human_background.current.style["font-size"] =
+                                chat.chat_logo.user_size + "px";
+                        }
+                        if (ai_background.current) {
+                            ai_background.current.style["background-color"] =
+                                chat.chat_logo.ai_bg;
+                            ai_background.current.style.color =
+                                chat.chat_logo.ai_color;
+                            ai_background.current.style["font-size"] =
+                                chat.chat_logo.ai_size + "px";
+                        }
+                    }
                 }
             });
-            if (chathistory.length === 0) {
-                console.log("hello, there");
-                chatbot_start.current.classList.remove("hidden");
-                window_chat.current.classList.add("hidden");
-                console.log("hello, there", chat.chat_logo.width + "px");
-            } else {
-                chatbot_start.current.classList.add("hidden");
-                window_chat.current.classList.remove("hidden");
-                if (human_background.current) {
-                    human_background.current.style["background-color"] =
-                        chat.chat_logo.user_bg;
-                    human_background.current.style.color =
-                        chat.chat_logo.user_color;
-                    human_background.current.style["font-size"] =
-                        chat.chat_logo.user_size + "px";
-                }
-                if (ai_background.current) {
-                    ai_background.current.style["background-color"] =
-                        chat.chat_logo.ai_bg;
-                    ai_background.current.style.color = chat.chat_logo.ai_color;
-                    ai_background.current.style["font-size"] =
-                        chat.chat_logo.ai_size + "px";
-                }
-            }
         } else if (!chat || result) {
-            console.log(chatId );
-            console.log("This is embedding")
+            setLoading(true);
             axios
-                .post(webAPI.getchat, chatId)
-                .then(async (res) => {
-                    console.log(res.data);
-                    if (res.data.code === 200) {
-                        getchat(dispatch, res.data.data);
-                        await axios
-                            .post(webAPI.start_message, res.data.data)
-                            .then((res) => {
-                                if (res.status === 200) {
-                                    console.log(res.data.data);
-                                    localStorage.setItem(
-                                        "chatbot",
-                                        res.data.data
-                                    );
-                                }
-                            })
-                            .catch((err) => console.log(err));
-                        window.location.reload();
-                    } else {
-                        // navigate(-1);
-                    }
+                .get("https://geolocation-db.com/json/")
+                .then((res) => {
+                    let country = res.data.country_name;
+                    axios
+                        .post(webAPI.getchat, chatId)
+                        .then(async (res) => {
+                            if (res.data.code === 200) {
+                                getchat(dispatch, res.data.data);
+                                res.data.data["country"] = country;
+                                await axios
+                                    .post(webAPI.start_message, res.data.data)
+                                    .then((res) => {
+                                        if (res.status === 200) {
+                                            localStorage.setItem(
+                                                "chatbot",
+                                                res.data.data
+                                            );
+                                        }
+                                    })
+                                    .catch((err) => console.log(err));
+                                setLoading(false);
+                                window.location.reload();
+                            } else {
+                                navigate(-1);
+                                setLoading(false);
+                            }
+                        })
+                        .catch((err) => {
+                            setLoading(false);
+                            navigate(-1);
+                        });
                 })
                 .catch((err) => {
-                    console.log(err);
-                    // navigate(-1);
+                    setLoading(false);
                 });
         }
     }, []);
 
     useEffect(() => {
-        if (chat) {
+        if (chat && loading === false) {
             if (chathistory.length > 0) {
                 chatbot_start.current.classList.add("hidden");
                 window_chat.current.classList.remove("hidden");
@@ -273,8 +286,9 @@ const NewChat = () => {
         if (event.keyCode === 13) {
             let id = chatbot;
             let _message = message;
-            if (_message === "")
-                {return; }
+            if (_message === "") {
+                return;
+            }
             setChathistory([
                 ...chathistory,
                 { role: "human", content: _message },
@@ -289,21 +303,18 @@ const NewChat = () => {
     const handleSubmitmessage = () => {
         let id = chatbot;
         let _message = message;
-        if (_message === "")
-                {return; }
-        setChathistory([
-            ...chathistory,
-            { role: "human", content: _message },
-        ]);
+        if (_message === "") {
+            return;
+        }
+        setChathistory([...chathistory, { role: "human", content: _message }]);
         sendMessage(id, _message);
 
         setMessage("");
-    }
+    };
 
     const sendMessage = (id, _message) => {
         let { behaviormodel, train, model } = chat;
         if (!id || !_message) {
-            console.log("Error", id, _message);
             return;
         }
         axios
@@ -333,13 +344,32 @@ const NewChat = () => {
     };
 
     return (
-        <div className="w-full h-screen">
+        <div
+        style={{
+            background: `linear-gradient(to bottom right, ${chat?.chat_logo?.bg || '#ffffff00'}, transparent)`,
+        }}
+            className="w-full h-full rounded-xl"
+        >
+            {loading && (
+                <div className="flex flex-col items-center justify-center w-full min-h-[20rem]">
+                    <ReactLoading
+                        type="spin"
+                        color="#FF2fff"
+                        height={40}
+                        width={40}
+                        delay={15}
+                    ></ReactLoading>
+                    <span className="text-[--site-card-icon-color]">
+                        Creating AI Tutor...
+                    </span>
+                </div>
+            )}
             <Toaster />
-            {chat && (
-                <div className="w-full h-screen">
+            {chat && loading === false && (
+                <div className="w-full h-screen lg:py-2">
                     <div
                         ref={newchat}
-                        className="bg-[--site-card-icon-color] w-full px-10 h-full p-5 flex flex-col items-center justify-center"
+                        className="flex flex-col justify-center w-full h-full p-2 lg:items-center lg:px-10 lg:py-0 min-h-max"
                     >
                         <div
                             className="flex flex-col items-center justify-center h-full gap-5"
@@ -360,7 +390,7 @@ const NewChat = () => {
 
                         <div
                             ref={window_chat}
-                            className="w-full h-3/5"
+                            className="w-full pt-10 text-base font-medium h-4/5"
                             name="main_scroll"
                         >
                             <Scrollbar
@@ -373,18 +403,18 @@ const NewChat = () => {
                                         <div
                                             ref={human_background}
                                             name="human_bg"
-                                            className="flex items-center justify-center p-2"
+                                            className="flex items-center justify-start p-2 lg:justify-center"
                                             key={index}
                                         >
-                                            <div className="flex w-2/3">
+                                            <div className="flex justify-start lg:w-4/5">
                                                 <img
                                                     src={chat.chat_logo.user}
                                                     alt="human"
-                                                    className="w-10 h-10"
+                                                    className="w-10 h-10 rounded-full"
                                                 />
                                                 <div
                                                     name="human"
-                                                    className="text-[--site-logo-text-color] whitespace-break-spaces w-full flex p-2"
+                                                    className="flex w-full p-2 whitespace-break-spaces"
                                                 >
                                                     <span>{data.content}</span>
                                                 </div>
@@ -394,18 +424,18 @@ const NewChat = () => {
                                         <div
                                             ref={ai_background}
                                             name="ai_bg"
-                                            className="flex items-center justify-center p-2"
+                                            className="flex items-center justify-start p-2 lg:justify-center"
                                             key={index}
                                         >
-                                            <div className="flex w-2/3">
+                                            <div className="flex justify-start lg:w-4/5">
                                                 <img
                                                     src={chat.chat_logo.ai}
-                                                    className="w-10 h-10"
+                                                    className="w-10 h-10 rounded-full"
                                                     alt="AI"
                                                 />
                                                 <div
                                                     name="ai"
-                                                    className="text-[--site-main-color3] whitespace-break-spaces w-full flex flex-col p-2"
+                                                    className="flex flex-col w-full p-2 whitespace-break-spaces"
                                                 >
                                                     {data.content
                                                         .split("```")
@@ -456,58 +486,66 @@ const NewChat = () => {
                                 })}
                             </Scrollbar>
                         </div>
+                        <div className="flex flex-col items-center justify-center w-full">
+                            <div className="flex items-end justify-center w-full gap-5 p-2 sm:w-3/5">
+                                <a
+                                    href={chat.chat_button.button1_url}
+                                    ref={chatbot_button1}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    {chat.chat_button.button1_text}
+                                </a>
+                                <a
+                                    ref={chatbot_button2}
+                                    href={chat.chat_button.button2_url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    {chat.chat_button.button2_text}
+                                </a>
+                                <a
+                                    ref={chatbot_button3}
+                                    href={chat.chat_button.button3_url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    {chat.chat_button.button3_text}
+                                </a>
+                            </div>
 
-                        <div className="flex items-end justify-center w-3/5 gap-5 p-2 mb-5">
-                            <a
-                                href={chat.chat_button.button1_url}
-                                ref={chatbot_button1}
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                {chat.chat_button.button1_text}
-                            </a>
-                            <a
-                                ref={chatbot_button2}
-                                href={chat.chat_button.button2_url}
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                {chat.chat_button.button2_text}
-                            </a>
-                            <a
-                                ref={chatbot_button3}
-                                href={chat.chat_button.button3_url}
-                                target="_blank"
-                                rel="noreferrer"
-                            >
-                                {chat.chat_button.button3_text}
-                            </a>
-                        </div>
-                        <div className="flex sm:w-2/3 divide-x-2">
-                            <input
-                                type="text"
-                                value={message}
-                                onChange={(e) => setMessage(e.target.value)}
-                                onKeyDown={handleSubmit}
-                                className="rounded-none w-full rounded-l-lg bg-[--site-main-color3] text-[--site-card-icon-color] block text-sm p-2.5 focus:border-[--site-logo-text-color] "
-                                placeholder="Type message"
-                            />
-                            <span className="inline-flex sm:w-[60px] items-center px-3 text-sm text-[--site-card-icon-color] bg-[--site-main-color3] border border-l-0 rounded-r-md hover:cursor-pointer" onClick={() => {handleSubmitmessage()}}>
-                                <img
-                                    src={chatsend}
-                                    alt="send"
-                                    className="w-auto h-auto"
-                                />
-                            </span>
-                        </div>
+                            <div className="flex items-center w-full divide-x-2 sm:w-4/5">
+                                <div className="flex items-center justify-end w-full text-black">
+                                    <input
+                                        type="text"
+                                        value={message}
+                                        onChange={(e) =>
+                                            setMessage(e.target.value)
+                                        }
+                                        onKeyDown={handleSubmit}
+                                        className="w-full rounded-md border border-[--site-chat-header-border] bg-[--site-main-newchat-input-color] text-[--site-card-icon-color] block text-sm p-2.5 pr-9"
+                                        placeholder="Type message"
+                                    />
 
-                        <div className="py-2">
-                            <span
-                                ref={chatbot_copyright}
-                                className="text-[--site-file-upload]"
-                            >
-                                {chat.chat_copyright.description}
-                            </span>
+                                    <span
+                                        onClick={() => {
+                                            handleSubmitmessage();
+                                        }}
+                                        className="absolute pr-4"
+                                    >
+                                        <BsSendPlus />
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-center py-2">
+                                <span
+                                    ref={chatbot_copyright}
+                                    className="text-[--site-file-upload]"
+                                >
+                                    {chat.chat_copyright.description}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>

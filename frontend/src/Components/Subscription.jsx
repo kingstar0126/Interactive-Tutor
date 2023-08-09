@@ -1,222 +1,319 @@
-import { loadStripe } from "@stripe/stripe-js";
-import axios from "axios";
 import { useEffect } from "react";
-import { webAPI } from "../utils/constants";
-import { useLocation } from "react-router-dom";
-import { MdCloudDone } from "react-icons/md";
-import CreateProduct from "./CreateProduct";
 import { useState } from "react";
-import toast, { Toaster } from "react-hot-toast";
-import { useSelector } from "react-redux";
-import EditProduct from "./EditProduct";
-import { BsFillCreditCard2FrontFill } from "react-icons/bs";
+import { Toaster } from "react-hot-toast";
+import { AiOutlineTrophy, AiOutlineMenu } from "react-icons/ai";
 import { getUseraccount } from "../redux/actions/userAction";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { getUserState } from "../redux/actions/userAction";
+import { setquery } from "../redux/actions/queryAction";
+import ReactSpeedometer from "react-d3-speedometer";
+import { MdOutlineUpdate } from "react-icons/md";
+import axios from "axios";
+import { webAPI } from "../utils/constants";
+import Report from "./Report";
+import { Slider, Button } from "@material-tailwind/react";
+import SubscriptionModal from "./SubscriptionModal";
+import { setOpenSidebar } from "../redux/actions/locationAction";
 
 const Subscription = () => {
-    const location = useLocation();
-    const [iscreateModal, setCreateModal] = useState(false);
-    const [iseditModal, setEditModal] = useState(false);
-    const [subscriptions, setSubscriptions] = useState([]);
-    const params = new URLSearchParams(location.search);
-    const [price, setPrice] = useState("");
     const dispatch = useDispatch();
+    const query = useSelector((state) => state.query.query);
     const user = JSON.parse(useSelector((state) => state.user.user));
-    const [state, setState] = useState(false);
-    //success the payment insert the DB for the user role
-
-    const handleCancel = () => {
-        setCreateModal(false);
-        setEditModal(false);
-    };
-    const handleOk = () => {
-        toast.success("Created successfully !");
-        setCreateModal(false);
-        getSubscription();
-    };
-    const getSubscription = () => {
-        axios
-            .post(webAPI.get_all_products, { id: user.id })
-            .then((res) => {
-                console.log("This is the products list ->", res);
-                setSubscriptions(res.data.data.data);
-                if (res.data.data.price_id) {
-                    setPrice(res.data.data.price_id);
-                }
-            })
-            .catch((err) => console.error(err));
-    };
-    const handleEditOk = () => {
-        setEditModal(false);
-        toast.success("Updated successfully !");
-        getSubscription();
-    };
+    const chat = JSON.parse(useSelector((state) => state.chat.chat));
+    const [trial, setTrial] = useState(0);
+    const [datas, setDatas] = useState([]);
+    const [labels, setLabels] = useState(null);
+    const [index_length, setIndex_length] = useState(0);
+    const [datasources, setDataSources] = useState(null);
+    const [isopenModal, setIsOpenModal] = useState(false);
 
     useEffect(() => {
-        getSubscription();
         getUseraccount(dispatch, { id: user.id });
+        getUserState(dispatch, { id: user.id });
+        setquery(dispatch, user.query);
+        if (user.role === 5) {
+            setTrial(user.days);
+        }
+        if (chat) {
+            get_traindata();
+        }
+        axios
+            .post(webAPI.get_report_data, { id: user.id })
+            .then((res) => {
+                const one = res.data.data.slice(0, -1);
+                const two = res.data.data.slice(-1);
+
+                const combineData = (arr1, arr2) => {
+                    return arr1.map((item, index) => [...item, arr2[0][index]]);
+                };
+
+                const datasets = combineData(one, two);
+
+                const currentDate = new Date();
+                const totalDays = new Date(
+                    currentDate.getFullYear(),
+                    currentDate.getMonth() + 1,
+                    0
+                ).getDate();
+                const labels = Array.from(
+                    { length: totalDays + 1 },
+                    (_, i) => `${i}`
+                );
+                setLabels(labels);
+                if (datasets.length > 0 && datasets[0]) {
+                    setIndex_length(datasets[0].length);
+                } else {
+                    setIndex_length(0);
+                }
+                setDatas(datasets);
+            })
+            .catch((err) => console.error(err));
+        if (user.role === undefined || user.role === 0) {
+            handleOpenModel();
+        }
     }, []);
 
-    const handleCreateProduct = () => {
-        setCreateModal(true);
+    const handleOpenModel = () => {
+        setIsOpenModal(!isopenModal);
     };
 
-    const handleDeleteProduct = (data) => {
+    const handleOpenSidebar = () => {
+        dispatch(setOpenSidebar());
+    };
+
+    const get_traindata = () => {
         axios
-            .post(webAPI.delete_product, { user_id: user.id, product_id: data })
+            .post(webAPI.gettraindatas, { uuid: chat.uuid })
             .then((res) => {
-                console.log(res.data);
-                toast.success("Deleted successfully !");
-                getSubscription();
+                if (res.data.success) {
+                    setDataSources(res.data.data.length);
+                }
             })
-            .catch((err) => console.error(err));
+            .catch((error) => console.log(error));
     };
-    const handleDeleteAllProducts = () => {
-        axios
-            .post(webAPI.delete_all_product, { user_id: user.id })
-            .then((res) => {
-                console.log(res.data);
-                getSubscription();
-            })
-            .catch((err) => console.error(err));
-    };
-
-    const initiateSubscriptionCheckout = (data) => {
-        if (price) {
-            if (price === data) {
-                return;
-            }
-            axios
-                .post(webAPI.updateSubscription, {
-                    subscriptionPlanId: data,
-                    id: user.id,
-                })
-                .then(async (res) => {
-                    console.log(res);
-                    // Load Stripe and redirect to the Checkout page
-                    const stripe = await loadStripe(res.data.key);
-                    console.log(stripe);
-
-                    const { error } = stripe.redirectToCheckout({
-                        sessionId: res.data.sessionId,
-                    });
-                    if (error) {
-                        console.error("Error:", error);
-                    }
-                })
-                .catch((err) => {
-                    console.error(err);
-                });
-        } else {
-            axios
-                .post(webAPI.create_checkout, {
-                    subscriptionPlanId: data,
-                    id: user.id,
-                })
-                .then(async (res) => {
-                    console.log(res);
-                    // Load Stripe and redirect to the Checkout page
-                    const stripe = await loadStripe(res.data.key);
-                    console.log(stripe);
-
-                    const { error } = stripe.redirectToCheckout({
-                        sessionId: res.data.sessionId,
-                    });
-                    if (error) {
-                        console.error("Error:", error);
-                    }
-                })
-                .catch((err) => {
-                    console.error(err);
-                });
-        }
-    };
-
     return (
-        <div className="w-full h-full p-4 pl-5 pr-10">
+        <div className="w-full h-full">
             <Toaster />
-            <div className="flex items-center justify-between p-5 bg-[--site-card-icon-color] rounded-full">
-                <div className="flex items-center justify-center gap-2 font-semibold text-[20px] text-white">
-                    <BsFillCreditCard2FrontFill className="fill-[--site-logo-text-color]" />
-                    Subscriptions
+
+            <div className="flex md:items-center items-end justify-between w-full md:h-[100px] md:px-10 from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] md:border-b-[--site-chat-header-border] md:border bg-gradient-to-r px-4 py-2 max-h-min gap-1">
+                <div className="hidden md:flex gap-2 mt-9 mb-8 text-[--site-card-icon-color]">
+                    <AiOutlineTrophy className="w-8 h-8" />
+                    <span className="text-2xl font-semibold">
+                        Subscriptions
+                    </span>
+                </div>
+                <AiOutlineMenu
+                    onClick={handleOpenSidebar}
+                    className="w-6 h-6 mb-1 md:hidden"
+                />
+                <div className="flex items-end justify-end md:mt-[27px] md:mb-[30px] md:pr-[44px] pr-9">
+                    {chat && chat.organization && (
+                        <div className="xl:flex flex-col items-start justify-center mr-2 p-2 bg-[--site-warning-text-color] rounded shadow-2xl hidden">
+                            <p>
+                                <span className="font-bold text-[14px]">
+                                    Organisation ID:{" "}
+                                </span>
+                                <span className="text-[--site-error-text-color] font-semibold">
+                                    {chat.organization}
+                                </span>
+                            </p>
+                        </div>
+                    )}
+                    {query && (
+                        <p className="bg-[--site-logo-text-color] p-2 rounded gap-2 items-center justify-center h-full flex md:mr-0">
+                            <span className="text-[--site-error-text-color] font-semibold text-[12px] md:text-base">
+                                {query}
+                            </span>
+                            <span className="text-[--site-card-icon-color] text-[12px] md:text-base font-medium">
+                                Queries
+                            </span>
+                        </p>
+                    )}
+                    {trial > 0 && (
+                        <div className="flex items-end justify-end md:w-max scale-75 md:scale-100 ml-[-14px] mr-[-20px] translate-y-2 md:translate-y-0">
+                            <ReactSpeedometer
+                                maxSegmentLabels={0}
+                                segments={4}
+                                width={100}
+                                height={58}
+                                ringWidth={10}
+                                value={24 - trial}
+                                needleColor="black"
+                                needleHeightRatio={0.5}
+                                maxValue={24}
+                                startColor={"#f5da42"}
+                                endColor={"#ff0000"}
+                            />
+                        </div>
+                    )}
+                    <button
+                        onClick={() => {
+                            handleOpenModel();
+                        }}
+                        className="flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
+                    >
+                        <MdOutlineUpdate className="w-4 h-4 md:w-6 md:h-6" />
+                        <span className="md:text-base text-[12px] font-medium">
+                            Upgrade
+                        </span>
+                    </button>
                 </div>
             </div>
-            <div className="py-5">
-                {subscriptions && subscriptions.length !== 0 && (
-                    <div className="bg-[--site-card-icon-color] gap-5 w-full h-full rounded-xl flex justify-center items-start container p-10 border border-[--site-card-icon-color]">
-                        {subscriptions.map((item, index) => {
-                            return (
-                                <div
-                                    key={index}
-                                    className="w-1/3 h-[600px] rounded-xl bg-[--site-main-color3] p-5 flex flex-col"
-                                >
-                                    <div
-                                        name="title"
-                                        className="flex flex-col items-center justify-center p-2 h-1/5"
-                                    >
-                                        {price ? (
-                                            price === item.price_id ? (
-                                                <span className="text-[35px] font-bold border-2 border-[--site-card-icon-color] px-2">
-                                                    {item.name}
-                                                </span>
-                                            ) : (
-                                                <span className="text-[35px] font-medium">
-                                                    {item.name}
-                                                </span>
-                                            )
-                                        ) : (
-                                            <span className="text-[35px] font-medium">
-                                                {item.name}
-                                            </span>
-                                        )}
-                                        <span className="text-[45px] font-bold">
-                                            $ {item.price}
-                                            <span className="text-[20px]">
-                                                {" "}
-                                                / month
-                                            </span>
-                                        </span>
-                                    </div>
-                                    <div
-                                        name="body"
-                                        className="flex flex-col items-start justify-start w-full gap-5 pl-5 h-3/5"
-                                    >
-                                        {JSON.parse(item["description"])
-                                            .slice(
-                                                1,
-                                                item["description"].length - 1
-                                            )
-                                            .map((item, index) => {
-                                                return (
-                                                    <div
-                                                        className="flex gap-3"
-                                                        key={index}
-                                                    >
-                                                        <MdCloudDone className="fill-[--site-card-icon-color] w-5 h-5 pointer-events-none" />
-                                                        {item}
-                                                    </div>
-                                                );
-                                            })}
-                                    </div>
-                                    <div className="flex items-center justify-center w-full gap-3 h-1/5">
-                                        <button
-                                            name="button"
-                                            onClick={() =>
-                                                initiateSubscriptionCheckout(
-                                                    item.price_id
-                                                )
-                                            }
-                                            className="items-center justify-center bg-[--site-card-icon-color] flex p-2 my-5 text-[--site-logo-text-color] rounded-xl hover:scale-110 active:ring-[--site-logo-text-color] active:ring-2"
-                                        >
-                                            CheckOut
-                                        </button>
-                                    </div>
-                                </div>
-                            );
-                        })}
+            <div className="flex md:hidden gap-2 text-[--site-card-icon-color] pt-8 px-5">
+                <AiOutlineTrophy className="w-8 h-8" />
+                <span className="text-2xl font-semibold">Subscriptions</span>
+            </div>
+
+            <div className="flex flex-col gap-6 px-5 py-8 md:px-10">
+                {index_length !== 0 && (
+                    <div className="flex flex-col w-[99.33%]  bg-gradient-to-r from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] border-[--site-chat-header-border] border rounded-2xl shadow-xl shadow-[--site-chat-header-border] 2xl:min-h-[20rem] h-auto">
+                        <span className="text-[16px] items-start w-full pt-4 px-4">
+                            Users
+                        </span>
+                        <Report
+                            labels={labels}
+                            datas={datas}
+                            index={index_length}
+                        />
                     </div>
                 )}
+                <div className="flex flex-col w-[99.33%]  bg-gradient-to-r from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] border-[--site-chat-header-border] border rounded-2xl shadow-xl shadow-[--site-chat-header-border] 2xl:min-h-[20rem] h-auto py-8 px-4">
+                    <div className="w-full px-2">
+                        <span className="text-black text-[24px] font-semibold">
+                            Queries
+                        </span>
+                        <div className="flex items-center gap-2 mt-4">
+                            {user.maxquery - query !== 0 ? (
+                                <Slider
+                                    size="lg"
+                                    id="queries"
+                                    value={
+                                        ((user.maxquery - query) /
+                                            user.maxquery) *
+                                        100
+                                    }
+                                    className="text-[#6EAE1C] opacity-50"
+                                    trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
+                                />
+                            ) : (
+                                <Slider
+                                    size="lg"
+                                    id="queries123"
+                                    defaultValue={0}
+                                    className="text-[#6EAE1C] opacity-50"
+                                    trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
+                                />
+                            )}
+                            <Button
+                                variant="outlined"
+                                className="ring-[--site-logo-text-color] border-0 ring-2 text-[12px] sm:text-[16px] font-semibold text-[--site-card-icon-color] rounded-full px-1 py-1 sm:py-3 sm:px-6"
+                                onClick={() => {
+                                    handleOpenModel();
+                                }}
+                            >
+                                Upgrade
+                            </Button>
+                        </div>
+                    </div>
+                    {datas && (
+                        <div className="w-full px-2">
+                            <span className="text-black text-[24px] font-semibold">
+                                Tutors
+                            </span>
+                            <div className="flex items-center gap-2 mt-4">
+                                {datas.length !== 0 ? (
+                                    <Slider
+                                        size="lg"
+                                        id="tutors"
+                                        value={
+                                            (datas.length / user.tutors) * 100
+                                        }
+                                        className="text-[#6EAE1C] opacity-50"
+                                        trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
+                                    />
+                                ) : (
+                                    <Slider
+                                        size="lg"
+                                        id="tutors123"
+                                        defaultValue={0}
+                                        className="text-[#6EAE1C] opacity-50"
+                                        trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
+                                    />
+                                )}
+
+                                <Button
+                                    variant="outlined"
+                                    className="ring-[--site-logo-text-color] border-0 ring-2 sm:text-[16px] font-semibold text-[--site-card-icon-color] rounded-full px-1 py-1 sm:py-3 sm:px-6 text-[12px]"
+                                    onClick={() => {
+                                        handleOpenModel();
+                                    }}
+                                >
+                                    Upgrade
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                    {datasources > 0 ? (
+                        <div className="w-full px-2">
+                            <span className="text-black text-[24px] font-semibold">
+                                Data Sources
+                            </span>
+                            <div className="flex items-center gap-2 mt-4">
+                                <Slider
+                                    size="lg"
+                                    id="datasources"
+                                    value={
+                                        ((datasources < user.training_datas
+                                            ? datasources
+                                            : user.training_datas) /
+                                            user.training_datas) *
+                                        100
+                                    }
+                                    className="text-[#6EAE1C] opacity-50"
+                                    trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
+                                />
+                                <Button
+                                    variant="outlined"
+                                    className="ring-[--site-logo-text-color] border-0 ring-2 font-semibold text-[--site-card-icon-color] rounded-full px-1 py-1 sm:py-3 sm:px-6 text-[12px] sm:text-[16px]"
+                                    onClick={() => {
+                                        handleOpenModel();
+                                    }}
+                                >
+                                    Upgrade
+                                </Button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="w-full px-2">
+                            <span className="text-black text-[24px] font-semibold">
+                                Data Sources
+                            </span>
+                            <div className="flex items-center gap-2 mt-4">
+                                <Slider
+                                    size="lg"
+                                    id="datasources"
+                                    defaultValue={0}
+                                    className="text-[#6EAE1C] opacity-50"
+                                    trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
+                                />
+                                <Button
+                                    variant="outlined"
+                                    className="ring-[--site-logo-text-color] border-0 ring-2 font-semibold text-[--site-card-icon-color] rounded-full px-1 py-1 sm:py-3 sm:px-6 text-[12px] sm:text-[16px]"
+                                    onClick={() => {
+                                        handleOpenModel();
+                                    }}
+                                >
+                                    Upgrade
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
+            <SubscriptionModal
+                open={isopenModal}
+                handleCancel={() => handleOpenModel()}
+            />
         </div>
     );
 };

@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, request, send_file
 from .models import Chat, Message, Train, User, Organization
 from . import db
-from rich import print, pretty
+from collections import Counter
 import json
 import pinecone
 import openai
@@ -10,6 +10,7 @@ import uuid
 from dotenv import load_dotenv
 from .auth import generate_pin_password
 from werkzeug.utils import secure_filename
+import datetime
 
 load_dotenv()
 
@@ -20,7 +21,6 @@ PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
 pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
 openai.openai_api_key = OPENAI_API_KEY
 
-pretty.install()
 
 chat = Blueprint('chat', __name__)
 
@@ -33,14 +33,6 @@ def delete_vectore(source):
         }
     )
 
-# def create_index(uuid):
-#     name = f"{uuid}"
-#     pinecone.create_index(name, dimension=1536)
-
-
-# def delete_index(uuid):
-#     name = f"{uuid}"
-#     pinecone.delete_index(name)
 
 def is_valid_uuid(value):
     try:
@@ -48,6 +40,24 @@ def is_valid_uuid(value):
         return True
     except ValueError:
         return False
+
+
+def generate_final_report_data(source_data):
+    current_date = datetime.datetime.now().date()
+
+    # Count the occurrences of each date in the source data
+    date_counts = Counter(source_data)
+
+    # Generate the final data based on the current day
+    final_data = []
+    cumulative_sum = 0
+
+    for i in range(1, current_date.day + 1):
+        date_str = current_date.replace(day=i).strftime('%Y-%m-%d')
+        cumulative_sum += date_counts[date_str]
+        final_data.append(cumulative_sum)
+
+    return final_data
 
 
 @chat.route('/api/addchat', methods=['POST'])
@@ -66,29 +76,15 @@ def add_chat():
     chat_title = json.dumps({})
     chat_description = json.dumps({})
     chat_copyright = json.dumps(
-        {'description': 'powered by interactive-tutor.com'})
+        {'description': 'powered by interactive-tutor.com', 'status': 'false', 'color': '#ff0000'})
     chat_button = json.dumps({})
     bubble = json.dumps({})
 
     user = db.session.query(User).filter_by(id=user_id).first()
     ct = db.session.query(Chat).filter_by(user_id=user_id).count() + 1
 
-    if user.role == 2 or user.role == 5:
-        if ct > 1:
-            return jsonify({
-                'success': False,
-                'code': 401,
-                'message': "You can no longer create AI Tutors.",
-            })
-    elif user.role == 3:
-        if ct > 3:
-            return jsonify({
-                'success': False,
-                'code': 401,
-                'message': "You can no longer create AI Tutors.",
-            })
-    elif user.role == 4:
-        if ct > 10:
+    if not user.role == 1:
+        if ct > user.tutors:
             return jsonify({
                 'success': False,
                 'code': 401,
@@ -104,7 +100,6 @@ def add_chat():
                     access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button)
     db.session.add(new_chat)
     db.session.commit()
-    # Create index in the pinecone
 
     response = {
         'success': True,
@@ -170,7 +165,7 @@ def update_brandingData():
         response = {
             'success': True,
             'code': 200,
-            'message': 'Your ChatBot was updated successfully'
+            'message': 'Your ChatBot was updated successfully,'
         }
     return jsonify(response)
 
@@ -282,8 +277,9 @@ def get_chat_with_pin_organization():
         return jsonify({'success': False, 'code': 404, 'message': 'Organization does not exist.'})
 
     chat = db.session.query(Chat).join(User, User.id == Chat.user_id).join(
-        Organization, Organization.email == User.email).filter(Organization.uuid == organization).first()
-    if pin != str(chat.access):
+        Organization, Organization.email == User.email).filter(Organization.uuid == organization).filter(Chat.access == pin).first()
+
+    if not chat:
         return jsonify({'success': False, 'code': 404, 'message': 'Your PIN or Organization ID is incorrect'})
 
     chat_data = {
@@ -436,13 +432,19 @@ def delete_chat(id):
 def get_report_data():
     id = request.json['id']
     chats = db.session.query(Chat).filter_by(user_id=id).all()
+    current_month = datetime.datetime.now().month
     messages = []
+    labels = []
     for chat in chats:
         data = []
-        message = db.session.query(Message).filter_by(chat_id=chat.id).all()
+        labels.append(chat.label)
+        message = db.session.query(Message).filter_by(
+            chat_id=chat.id).order_by(Message.create_date).all()
         for msg in message:
-            data.append(msg.create_date.strftime("%Y-%m-%d").split('-')[2])
-        messages.append(data)
+            if msg.create_date.month == current_month:
+                data.append(msg.create_date.strftime("%Y-%m-%d"))
+        messages.append(generate_final_report_data(data))
+    messages.append(labels)
     return jsonify({'success': True, 'data': messages})
 
 
@@ -452,3 +454,14 @@ def get_access_AI_tutor():
     organization_id = db.session.query(
         Organization).filter_by(email=email).first().uuid
     return jsonify({'success': True, 'data': organization_id, 'code': 200})
+
+
+@chat.route('/api/transfer_tutor', methods=['POST'])
+def transfer_tutor_customer():
+    email = request.json['email']
+    id = request.json['id']
+    chat = db.session.query(Chat).filter_by(id=id).first()
+    user = db.session.query(User).filter_by(email=email).first()
+    chat.user_id = user.id
+    db.session.commit()
+    return jsonify({'success': True, 'message': f'You have successfully transferred your tutor to {email}!', 'code': 200})

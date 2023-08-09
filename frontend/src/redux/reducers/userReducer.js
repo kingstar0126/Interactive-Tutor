@@ -10,17 +10,7 @@ const userReducer = (state = initialState, action) => {
 
     switch (type) {
         case SET_USER:
-            localStorage.setItem("user", payload);
-            return {
-                ...state,
-                user: localStorage.getItem("user"),
-            };
         case CHANGE_USER:
-            localStorage.setItem("user", payload);
-            return {
-                ...state,
-                user: localStorage.getItem("user"),
-            };
         case GET_USER_ACCOUNT:
             localStorage.setItem("user", payload);
             return {

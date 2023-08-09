@@ -1,4 +1,3 @@
-from langchain.callbacks import get_openai_callback
 from langchain.chat_models import ChatOpenAI
 from gptcache import Cache
 from gptcache.manager.factory import manager_factory
@@ -29,18 +28,23 @@ def init_gptcache(cache_obj: Cache, llm: str):
     cache_obj.init(
         pre_embedding_func=get_prompt,
         data_manager=manager_factory(
-            manager="map", data_dir=f"map_cache_{hashed_llm}"),
+            manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
     )
 
 
-def generate_message(query, history, behavior, temp, model, chat, trains=[]):
+def generate_message(query, history, behavior, temp, model, chat):
     load_dotenv()
 
     template = """ {behavior}
-
+    
+    ==========
     Training data: {examples}
-
+    ==========
+    
+    ==========
     Chathistory: {history}
+    ==========
+    
     Human: {human_input}
     Assistant:"""
 
@@ -57,9 +61,9 @@ def generate_message(query, history, behavior, temp, model, chat, trains=[]):
                          temperature=temp,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "3":
-        llm = ChatOpenAI(model_name="gpt-4-32k",
+        llm = ChatOpenAI(model_name="gpt-4",
                          temperature=temp,
-                         openai_api_key=os.getenv('OPENAI_API_KEY'))
+                         openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
 
     conversation = LLMChain(
         llm=llm,
@@ -69,28 +73,23 @@ def generate_message(query, history, behavior, temp, model, chat, trains=[]):
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
     docsearch = Pinecone.from_existing_index(
         index_name=PINECONE_INDEX_NAME, embedding=embeddings)
-    docs = docsearch.similarity_search_with_score(query=query, k=10)
+    _query = query
+    docs = docsearch.similarity_search(query=_query, k=10)
 
     examples = ""
-    for doc, _ in docs:
-        for source in trains:
-            if doc.metadata['source'] == source and doc.metadata['chat'] == str(chat):
-                examples += doc.page_content + '\n'
+    for doc in docs:
+        if doc.metadata['chat'] == str(chat):
+            doc.page_content = doc.page_content.replace('\n\n', ' ')
+            examples += doc.page_content + '\n'
 
-    with get_openai_callback() as cb:
+    response = conversation.run(
+        human_input=query,
+        history=history,
+        behavior=behavior,
+        examples=examples
+    )
 
-        chat_history = history
-        chat_history.append({"role": "human", "content": query})
-        response = conversation.run(
-            human_input=query,
-            history=history,
-            behavior=behavior,
-            examples=examples
-        )
-
-        chat_history.append({"role": "ai", "content": response})
-        token = cb.total_tokens
-        return response, chat_history, token
+    return response
 
 
 def generate_AI_message(query, history, behavior, temp, model):
@@ -98,7 +97,10 @@ def generate_AI_message(query, history, behavior, temp, model):
 
     template = """ {behavior}
 
+    ==========
     {history}
+    ==========
+    
     Human: {human_input}
     Assistant:"""
 
@@ -113,7 +115,7 @@ def generate_AI_message(query, history, behavior, temp, model):
         cache_obj.init(
             pre_embedding_func=get_prompt,
             data_manager=manager_factory(
-                manager="map", data_dir=f"map_cache_{hashed_llm}"),
+                manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
         )
 
     langchain.llm_cache = GPTCache(init_gptcache)
@@ -127,33 +129,55 @@ def generate_AI_message(query, history, behavior, temp, model):
                          temperature=temp,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "3":
-        llm = ChatOpenAI(model_name="gpt-4-32k",
+        llm = ChatOpenAI(model_name="gpt-4",
                          temperature=temp,
-                         openai_api_key=os.getenv('OPENAI_API_KEY'))
+                         openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
     conversation = LLMChain(
         llm=llm,
         verbose=True,
         prompt=prompt
     )
 
-    with get_openai_callback() as cb:
+    response = conversation.run(
+        human_input=query,
+        history=history,
+        behavior=behavior,
+    )
 
-        chat_history = history
-        chat_history.append({"role": "human", "content": query})
-        response = conversation.run(
-            human_input=query,
-            history=history,
-            behavior=behavior,
-        )
-
-        chat_history.append({"role": "ai", "content": response})
-        token = cb.total_tokens
-        return response, chat_history, token
+    return response
 
 
 def generate_Bubble_message(query):
     load_dotenv()
-    chat = ChatOpenAI(model_name="gpt-3.5-turbo",
-                      temperature=0.3,
-                      openai_api_key=os.getenv('OPENAI_API_KEY'))
-    return chat.predict(query)
+
+    template = "Generate a title for a fantasy animal, character or fairy in {query}. A title must two words, first is adjective and second is noun. Do not provide any explanations. Do not respond with anything except the output of the title."
+
+    prompt = PromptTemplate(
+        input_variables=["query"], template=template)
+
+    def get_hashed_name(name):
+        return hashlib.sha256(name.encode()).hexdigest()
+
+    def init_gptcache(cache_obj: Cache, llm: str):
+        hashed_llm = get_hashed_name(llm)
+        cache_obj.init(
+            pre_embedding_func=get_prompt,
+            data_manager=manager_factory(
+                manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
+        )
+
+    langchain.llm_cache = GPTCache(init_gptcache)
+
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo",
+                     temperature=1,
+                     openai_api_key=os.getenv('OPENAI_API_KEY'))
+    conversation = LLMChain(
+        llm=llm,
+        verbose=True,
+        prompt=prompt
+    )
+    response = conversation.run(
+        query=query
+    )
+    response = response.replace('"', '')
+    return response

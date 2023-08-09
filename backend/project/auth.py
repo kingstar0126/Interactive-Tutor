@@ -11,9 +11,8 @@ from sqlalchemy import exc
 import stripe
 import os
 from dotenv import load_dotenv
-from datetime import date
+from datetime import datetime, timedelta
 from flask_jwt_extended import create_access_token, decode_token
-from datetime import timedelta
 
 load_dotenv()
 
@@ -40,21 +39,23 @@ def generate_pin_password(length=6):
     return password
 
 
-def calculate_days(day, _date):
-    current_date = date.today()
-    delta = current_date - _date
-    days = day - delta.days
-    return days
+def calculate_days(signup_date):
+    current_time = datetime.utcnow()
+    time_difference = current_time - signup_date
+    hours = 24 - int(time_difference.total_seconds() / 3600)
+    print(hours)
+    return hours
 
 
 def compare_month():
-    today = date.today()
+    today = datetime.today()
     is_new_month = today.day == 1
 
     if is_new_month:
         users = db.session.query(User).all()
         for user in users:
             query = user.query
+            user.usage = 0
             if user.role == 2:
                 user.query = query + 500
             elif user.role == 3:
@@ -100,14 +101,14 @@ def login_post():
             'message': 'You are blocked.',
         })
     if user.role == 5:
-        days = calculate_days(14, user.create_date)
-        if days <= 0:
+        days = calculate_days(user.create_date)
+        if days < 0:
             user.role = 0
             db.session.commit()
             new_user = {
                 'id': user.id,
                 'username': user.username,
-                'query': user.query,
+                'query': user.query - user.usage,
                 'role': user.role,
             }
             response = {
@@ -121,7 +122,7 @@ def login_post():
             'id': user.id,
             'username': user.username,
             'role': user.role,
-            'query': user.query,
+            'query': user.query - user.usage,
             'days': days
         }
     else:
@@ -129,7 +130,7 @@ def login_post():
             'id': user.id,
             'username': user.username,
             'role': user.role,
-            'query': user.query
+            'query': user.query - user.usage
         }
     response = {
         'success': True,
@@ -143,17 +144,25 @@ def login_post():
 def get_user_account():
     id = request.json['id']
     user = db.session.query(User).filter_by(id=id).first()
-    compare_month()
     if user.role == 5:
-        days = calculate_days(14, user.create_date)
-        if days <= 0:
+        days = calculate_days(user.create_date)
+        if days < 0:
             user.role = 0
             db.session.commit()
             new_user = {
                 'id': user.id,
                 'username': user.username,
-                'query': user.query,
+                'email': user.email,
+                'contact': user.contact,
+                'state': user.state,
+                'city': user.city,
                 'role': user.role,
+                'maxquery': user.query,
+                'query': user.query - user.usage,
+                'country': user.country,
+                'tutors': user.tutors,
+                'training_datas': user.training_datas,
+                'training_words': user.training_words
             }
             response = {
                 'success': True,
@@ -165,16 +174,34 @@ def get_user_account():
         new_user = {
             'id': user.id,
             'username': user.username,
+            'email': user.email,
+            'contact': user.contact,
+            'state': user.state,
+            'city': user.city,
             'role': user.role,
-            'query': user.query,
+            'maxquery': user.query,
+            'query': user.query - user.usage,
+            'country': user.country,
+            'tutors': user.tutors,
+            'training_datas': user.training_datas,
+            'training_words': user.training_words,
             'days': days
         }
     else:
         new_user = {
             'id': user.id,
             'username': user.username,
-            'query': user.query,
-            'role': user.role
+            'email': user.email,
+            'contact': user.contact,
+            'state': user.state,
+            'city': user.city,
+            'role': user.role,
+            'maxquery': user.query,
+            'query': user.query - user.usage,
+            'country': user.country,
+            'tutors': user.tutors,
+            'training_datas': user.training_datas,
+            'training_words': user.training_words
         }
     response = {
         'success': True,
@@ -201,8 +228,12 @@ def register_new_user(username, email, password):
     role = 5
     status = 0
     query = 500
+    usage = 0
+    tutors = 1
+    training_datas = 1
+    training_words = 100000
     customer = stripe.Customer.create(name=username, email=email)
-    new_user = User(username=username, query=query, status=status, email=email, role=role, customer_id=customer.id,
+    new_user = User(username=username, query=query, tutors=tutors, training_datas=training_datas, training_words=training_words, status=status, email=email, role=role, customer_id=customer.id, usage=usage,
                     password=generate_password_hash(password, method='sha256'))
     db.session.add(new_user)
     db.session.commit()
@@ -266,15 +297,14 @@ def signup_post():
 
     if user:
         return jsonify({'message': 'Email address already exists', 'success': False})
-
     verification_token = create_access_token(identity={'username': username, 'email': email, 'password': password},
-                                             expires_delta=timedelta(hours=1))
+                                             expires_delta=timedelta(minutes=30))
     verification_link = f"https://app.interactive-tutor.com/verify-email/token={verification_token}"
 
     msg = Message('Welcome to Interactive Tutor', sender=os.getenv('MAIL_USERNAME'),
                   recipients=[email])
     msg.html = render_template(
-        'email_verification.html', username=user.username, url=verification_link, support_email=os.getenv('MAIL_USERNAME'))
+        'email_verification.html', username=username, url=verification_link, support_email=os.getenv('MAIL_USERNAME'))
     mail.send(msg)
 
     return jsonify({'success': True, 'message': 'A message has been sent to your email. Check your message.'})
@@ -292,7 +322,7 @@ def email_verification():
         else:
             return jsonify({'message': 'Something is wrong!', 'success': False})
     except Exception as e:
-        return jsonify({'message': 'Your token had expired!', 'success': False})
+        return jsonify({'message': 'Your token expired', 'success': False})
 
 
 @auth.route('/api/adduseraccount', methods=['POST'])
@@ -303,12 +333,16 @@ def add_user_account():
     role = 5
     status = 0
     query = 500
+    usage = 0
+    tutors = 1
+    training_datas = 1
+    training_words = 100000
     user = db.session.query(User).filter_by(email=email).first()
 
     if user:
         return jsonify({'message': 'Email address already exists', 'success': False})
 
-    new_user = User(username=username, query=query, status=status, email=email, role=role,
+    new_user = User(username=username, query=query, status=status, email=email, usage=usage, tutors=tutors, training_words=training_words, training_datas=training_datas, role=role,
                     password=generate_password_hash(password, method='sha256'))
 
     db.session.add(new_user)
@@ -322,8 +356,8 @@ def get_useraccount():
     id = request.json['id']
     user = db.session.query(User).filter_by(id=id).first()
     if user.role == 5:
-        days = calculate_days(14, user.create_date)
-        if days <= 0:
+        days = calculate_days(user.create_date)
+        if days < 0:
             user.role = 0
             db.session.commit()
             new_user = {
@@ -334,8 +368,12 @@ def get_useraccount():
                 'state': user.state,
                 'city': user.city,
                 'role': user.role,
-                'query': user.query,
-                'country': user.country
+                'maxquery': user.query,
+                'query': user.query - user.usage,
+                'country': user.country,
+                'tutors': user.tutors,
+                'training_datas': user.training_datas,
+                'training_words': user.training_words
             }
             response = {
                 'success': True,
@@ -352,9 +390,13 @@ def get_useraccount():
                 'contact': user.contact,
                 'state': user.state,
                 'city': user.city,
-                'query': user.query,
                 'role': user.role,
+                'maxquery': user.query,
+                'query': user.query - user.usage,
                 'country': user.country,
+                'tutors': user.tutors,
+                'training_datas': user.training_datas,
+                'training_words': user.training_words,
                 'days': days
             }
             return jsonify({'success': True, 'data': new_user, 'code': 200})
@@ -366,9 +408,13 @@ def get_useraccount():
             'contact': user.contact,
             'state': user.state,
             'city': user.city,
+            'maxquery': user.query,
             'role': user.role,
-            'query': user.query,
-            'country': user.country
+            'query': user.query - user.usage,
+            'country': user.country,
+            'tutors': user.tutors,
+            'training_datas': user.training_datas,
+            'training_words': user.training_words
         }
         return jsonify({'success': True, 'data': new_user, 'code': 200})
 
@@ -397,7 +443,14 @@ def get_all_useraccount():
             'state': current_user.state,
             'city': current_user.city,
             'country': current_user.country,
-            'status': current_user.status
+            'status': current_user.status,
+            'query': current_user.query,
+            'usage': current_user.usage,
+            'tutors': current_user.tutors,
+            'role': current_user.role,
+            'training_datas': current_user.training_datas,
+            'training_words': current_user.training_words
+
         }
         current_users.append(new_user)
     return jsonify({'success': True, 'data': current_users, 'code': 200})
@@ -417,25 +470,28 @@ def change_account_status():
         return jsonify({'success': False, 'code': 404, 'message': 'User not found'})
 
 
-@auth.route('/api/deleteaccount', methods=['POST'])
-def delete_account():
-    id = request.json['id']
-    try:
-        user = User.query.get(id)
-        if user:
-            db.session.delete(user)
-            db.session.commit()
-            return jsonify({'success': True, 'code': 200, 'message': 'Deleted successfully'})
-        else:
-            return jsonify({'success': False, 'code': 404, 'message': 'User not found'})
-    except exc.SQLAlchemyError as e:
-        # Handle any potential database errors
-        return jsonify({'success': False, 'code': 500, 'message': 'An error occurred while deleting the user'})
+@auth.route('/api/change_user_limitation', methods=['POST'])
+def Change_user_limitation():
+    email = request.json['email']
+    query = request.json['query']
+    train = request.json['train']
+    tutors = request.json['tutor']
+    word = request.json['word']
+
+    user = db.session.query(User).filter_by(email=email).first()
+    user.query = query
+    user.training_datas = train
+    user.tutors = tutors
+    user.training_words = word
+    user.role = 6
+    if user.subscription_id is not None:
+        stripe.Subscription.cancel(user.subscription_id)
+    db.session.commit()
+    return jsonify({'success': True, 'code': 200, 'message': 'Updated Successfully'})
 
 
 @auth.route('/api/changeaccount', methods=['POST'])
 def change_useraccount():
-
     id = request.json['id']
     username = request.json['username']
     email = request.json['email']
@@ -454,3 +510,15 @@ def change_useraccount():
     db.session.commit()
 
     return jsonify({'success': True, 'code': 200})
+
+
+@auth.route('/api/subscription/custom_plan', methods=['POST'])
+def subscription_custom_plan():
+    id = request.json['id']
+    user = db.session.query(User).filter_by(id=id).first()
+    msg = Message('Customer wants to use custom plan !!!', sender=os.getenv('MAIL_USERNAME'),
+                  recipients=[os.getenv('MAIL_USERNAME')])
+    msg.html = render_template(
+        'send_custom_plan.html', username=user.username, email=user.email, phone=user.contact)
+    mail.send(msg)
+    return jsonify({'success': True, 'code': 200, 'message': 'We have sent your request to the manager.'})

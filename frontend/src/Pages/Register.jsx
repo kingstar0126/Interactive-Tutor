@@ -27,7 +27,6 @@ const Register = () => {
 
     const onSubmit = async (data) => {
         axios.post(webAPI.register, data).then((res) => {
-            console.log(res.data);
             if (res.data.success) {
                 notification("success", res.data.message);
             } else {
@@ -36,7 +35,7 @@ const Register = () => {
         });
     };
     return (
-        <div className="bg-[--site-main-color-home] font-logo h-full md:h-screen pb-10 px-2 flex flex-col">
+        <div className="bg-[--site-main-color-home] font-logo h-screen pb-10 px-2 flex flex-col">
             <Header />
             <Toaster />
             <div className="mt-[100px]">
@@ -159,7 +158,7 @@ const Register = () => {
                                     className="mt-[2px] w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                                 />
                                 <label
-                                    for="link-checkbox"
+                                    htmlFor="link-checkbox"
                                     className="ml-2 text-sm font-thin text-gray-900 dark:text-[--site-card-icon]"
                                 >
                                     By registering for Interactive Tutor you

@@ -1,1 +1,1 @@
-This is AI Tutor project
+This is business chatbot project.

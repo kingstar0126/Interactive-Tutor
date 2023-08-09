@@ -6,9 +6,11 @@ import { useSelector, useDispatch } from "react-redux";
 import { getUser } from "../redux/actions/userAction";
 import { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
+import { setOpenSidebar } from "../redux/actions/locationAction";
 
 const Login = () => {
     const statedata = JSON.parse(useSelector((state) => state.user.user));
+    const isOpenSidebar = useSelector((state) => state.location.openSidebar);
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [status, Setstatus] = useState(1);
@@ -18,6 +20,10 @@ const Login = () => {
         handleSubmit,
     } = useForm();
 
+    const handleOpenSidebar = () => {
+        dispatch(setOpenSidebar());
+    };
+
     useEffect(() => {
         if (statedata && statedata.username) {
             Setstatus(0);
@@ -25,6 +31,9 @@ const Login = () => {
     }, [statedata]);
 
     useEffect(() => {
+        if (isOpenSidebar) {
+            handleOpenSidebar();
+        }
         if (status === 0) {
             navigate("/chatbot/chat");
             Setstatus(1);
@@ -34,7 +43,7 @@ const Login = () => {
         getUser(dispatch, data);
     };
     return (
-        <div className="bg-[--site-main-color-home] font-logo h-full md:h-screen pb-10 px-2 flex flex-col">
+        <div className="bg-[--site-main-color-home] font-logo h-screen pb-10 px-2 flex flex-col">
             <Header />
             <Toaster />
             <div className="mt-[100px]">
@@ -102,7 +111,7 @@ const Login = () => {
                                 to="/changepassword"
                                 className="text-xs text-[--site-card-icon-color] hover:underline justify-end"
                             >
-                                Change passwrod
+                                Change password
                             </Link>
                             <Link
                                 to="/resetpassword"

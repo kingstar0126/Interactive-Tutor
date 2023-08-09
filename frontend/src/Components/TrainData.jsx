@@ -1,43 +1,59 @@
 import { useEffect, useState } from "react";
 import ChatmodalTrain from "./ChatmodalTrain";
-import { CircleStackIcon } from "@heroicons/react/24/solid";
+import { HiOutlineCircleStack } from "react-icons/hi2";
 import { webAPI } from "../utils/constants";
 import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { getchat } from "../redux/actions/chatAction";
 import toast, { Toaster } from "react-hot-toast";
+import { Typography, Chip, Button, Tooltip } from "@material-tailwind/react";
 
 export default function TraindataTable() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [tableData, setTableData] = useState([]);
-    const [reload, setReload] = useState(true);
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
     const dispatch = useDispatch();
+    const TABLE_HEAD = ["LABEL", "TYPE", "STATUS", "ACTION"];
+    const [currentPage, setCurrentPage] = useState(1);
+    const [trainData, setTrainData] = useState([]);
+    const itemsPerPage = 5;
 
-    const notification = (type, message) => {
-        // To do in here
-        if (type === "error") {
-            toast.error(message);
-        }
-        if (type === "success") {
-            toast.success(message);
-        }
-    };
     useEffect(() => {
         get_traindata();
     }, []);
+
+    const getTotalPages = () => {
+        return Math.ceil(trainData.length / itemsPerPage);
+    };
+
+    const getPaginationRange = () => {
+        const lastIndex = currentPage * itemsPerPage;
+        const firstIndex = lastIndex - itemsPerPage;
+        return {
+            firstIndex,
+            lastIndex,
+        };
+    };
+
+    useEffect(() => {
+        setTableData(getCurrentPageData);
+    }, [currentPage]);
+
+    const getCurrentPageData = () => {
+        const { firstIndex, lastIndex } = getPaginationRange();
+        return trainData.slice(firstIndex, lastIndex);
+    };
 
     const get_traindata = () => {
         axios
             .post(webAPI.gettraindatas, { uuid: chat.uuid })
             .then((res) => {
-                console.log(res.data);
-                if (res.data) {
-                    setTableData(res.data);
+                if (res.data.data) {
+                    setTrainData(res.data.data);
+                    setTableData(res.data.data.slice(0, itemsPerPage));
                 }
             })
             .catch((error) => console.log(error));
-        setReload(!reload);
     };
     const showModal = () => {
         setIsModalOpen(true);
@@ -69,68 +85,153 @@ export default function TraindataTable() {
     };
 
     return (
-        <div className="flex flex-col w-full h-full gap-5 p-5">
+        <div className="flex flex-col w-full h-full gap-5 py-5">
             <Toaster />
-            <div className="flex justify-end">
+            <div className="flex justify-end px-5 ">
                 <button
                     type="button"
                     onClick={showModal}
-                    className="text-[--site-card-icon-color] bg-[--site-logo-text-color] hover:bg-[--site-card-icon-color]/90 focus:ring-4 focus:outline-none focus:ring-[--site-card-icon-color]/50 font-medium rounded-xl text-sm px-2 py-1 text-center inline-flex items-center dark:focus:ring-[--site-card-icon-color]/55"
+                    className="text-black bg-[--site-logo-text-color] hover:bg-[--site-card-icon-color]/90 focus:ring-4 focus:outline-none focus:ring-[--site-card-icon-color]/50 font-medium text-base text-center items-center dark:focus:ring-[--site-card-icon-color]/55 gap-2 p-2 flex"
                 >
-                    <CircleStackIcon className="w-[30px] h-[30px] text-xl pointer-events-none" />
-                    Add Data
+                    <HiOutlineCircleStack className="w-[30px] h-[30px] text-xl pointer-events-none" />
+                    <span>Add Data</span>
                 </button>
             </div>
-            <table className="bg-[--site-card-icon-color] text-sm text-left text-[--site-main-Table-Text] flex flex-col w-full">
-                <thead className="text-xs rounded-tl-xl rounded-tr-xl flex w-full uppercase text-[--site-card-icon-color] bg-[--site-logo-text-color]">
-                    <tr className="flex items-center justify-center w-full text-center">
-                        <th className="w-2/5 px-6 py-3">Label</th>
-                        <th className="w-1/5 px-6 py-3">type</th>
-                        <th className="w-1/5 px-6 py-3">status</th>
-                        <th className="w-1/5 px-6 py-3">Action</th>
-                    </tr>
-                </thead>
-
-                <tbody className="flex flex-col w-full h-full text-center">
-                    {tableData.map((data, index) => {
-                        return (
-                            <tr
-                                className="bg-[--site-main-color3] text-[--site-card-icon-color] border-[1px] border-[--site-card-icon-color] flex items-center justify-center w-full"
-                                key={index}
-                            >
+            <div className="flex">
+                <table className="text-left table-fixed sm:w-full min-h-[20rem] w-full">
+                    <thead className="border-b border-[--site-main-modal-input-border-color]">
+                        <tr className="flex sm:grid sm:grid-cols-5">
+                            {TABLE_HEAD.map((head) => (
                                 <th
-                                    scope="row"
-                                    className="px-6 w-2/5 py-4 font-bold text-[--site-card-icon-color] whitespace-nowrap flex items-center justify-center"
+                                    key={head}
+                                    className={
+                                        head === "LABEL"
+                                            ? "sm:py-2 sm:px-5 w-1/4 sm:w-auto pl-2 sm:col-span-2 pb-2"
+                                            : "sm:py-2 sm:px-5 w-1/4 sm:w-auto pl-2 pb-2"
+                                    }
                                 >
-                                    <span className="flex items-center justify-center w-full text-center whitespace-normal">
-                                        {data["label"]}
-                                    </span>
+                                    <Typography
+                                        variant="small"
+                                        className="font-normal leading-none text-[--site-card-icon-color]"
+                                    >
+                                        {head}
+                                    </Typography>
                                 </th>
-                                <td className="w-1/5 px-6 py-4">
-                                    {data["type"]}
-                                </td>
-                                <td className="flex items-center justify-center w-1/5 px-6 py-4">
-                                    <div className="bg-[--site-success-text-color] rounded-full w-1/2">
-                                        {"trained"}
-                                    </div>
-                                </td>
-                                <td className="flex items-center justify-center w-1/5 gap-2 px-6 py-4">
-                                    <div className="flex gap-2">
-                                        <span
-                                            onClick={() => {
-                                                deleteTrain(data);
-                                            }}
-                                            className="text-[--site-card-icon-color] w-[60px] text-center hover:bg-[--site-main-form-error] border-[--site-main-form-error] hover:text-white p-2 border rounded-xl active:bg-[--site-main-form-error1] select-none active:text-white"
-                                        >
-                                            Delete
-                                        </span>
-                                    </div>
-                                </td>
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {tableData.map((data, index) => {
+                            const classes =
+                                "sm:py-2 sm:px-5 w-1/4 sm:w-auto pl-2 pb-2";
+
+                            return (
+                                <tr
+                                    key={data["label"]}
+                                    className="flex sm:grid sm:grid-cols-5"
+                                >
+                                    <td
+                                        className={
+                                            "sm:col-span-2 sm:py-2 sm:px-5 w-1/4 sm:w-auto "
+                                        }
+                                    >
+                                        <div className="flex items-center h-full gap-3 overflow-x-auto">
+                                            <div className="flex flex-col">
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-normal break-words"
+                                                >
+                                                    {data["label"]}
+                                                </Typography>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td className={classes}>
+                                        <div className="flex items-center justify-center h-full w-max">
+                                            <Chip
+                                                variant="ghost"
+                                                size="sm"
+                                                value={data["type"]}
+                                                className="bg-[--site-logo-text-color] text-[--site-card-icon-color] lowercase "
+                                            />
+                                        </div>
+                                    </td>
+                                    <td className={classes}>
+                                        <div className="flex items-center justify-center h-full w-max">
+                                            <Chip
+                                                variant="ghost"
+                                                size="sm"
+                                                value={"trained"}
+                                                className="bg-[--site-logo-text-color] text-[--site-card-icon-color] lowercase "
+                                            />
+                                        </div>
+                                    </td>
+
+                                    <td className={classes}>
+                                        <div className="flex items-center justify-center h-full w-max">
+                                            <Tooltip content="Delete User">
+                                                <Button
+                                                    variant="outlined"
+                                                    color="red"
+                                                    onClick={() => {
+                                                        deleteTrain(data);
+                                                    }}
+                                                    className="text-[--site-card-icon-color] sm:text-base text-medium text-[12px] px-1 py-1"
+                                                >
+                                                    Delete
+                                                </Button>
+                                            </Tooltip>
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
+            {trainData.length > 5 && (
+                <div className="flex justify-between border-t border-[--site-main-modal-input-border-color] p-5">
+                    <Typography
+                        variant="small"
+                        color="black"
+                        className="font-normal"
+                    >
+                        Page {currentPage} of {getTotalPages()}
+                    </Typography>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outlined"
+                            color="blue-gray"
+                            size="sm"
+                            onClick={() =>
+                                setCurrentPage(
+                                    currentPage > 1
+                                        ? currentPage - 1
+                                        : currentPage
+                                )
+                            }
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            color="blue-gray"
+                            size="sm"
+                            onClick={() => {
+                                setCurrentPage(
+                                    currentPage < getTotalPages() - 1
+                                        ? currentPage + 1
+                                        : getTotalPages()
+                                );
+                            }}
+                        >
+                            Next
+                        </Button>
+                    </div>
+                </div>
+            )}
+
             <ChatmodalTrain
                 open={isModalOpen}
                 handleOk={handleOk}

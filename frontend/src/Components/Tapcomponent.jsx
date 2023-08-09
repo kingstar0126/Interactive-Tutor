@@ -26,7 +26,7 @@ export default function Example() {
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
     const [activeTab, setActiveTab] = useState("preview");
     const dispatch = useDispatch();
-    const [messagehistory, setMeessagehistory] = useState([]);
+    const [message_history, setMessage_history] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [updateModalOpen, setUpdateModalOpen] = useState(false);
 
@@ -75,23 +75,22 @@ export default function Example() {
         setIsModalOpen(false);
         setUpdateModalOpen(false);
     };
-    const getMessageHistory = () => {
+    const getMessage_history = () => {
         axios
             .post(webAPI.get_messages, { id: chat.id })
             .then((res) => {
-                console.log(res);
                 let messages = [];
                 res.data.data.map(
                     (item) => item.message.length > 0 && messages.push(item)
                 );
-                setMeessagehistory(messages);
+                setMessage_history(messages);
             })
             .catch((err) => console.error(err));
     };
 
     useEffect(() => {
         if (activeTab === "conversation Explorer") {
-            getMessageHistory();
+            getMessage_history();
         }
     }, [activeTab]);
     const data = [
@@ -99,34 +98,38 @@ export default function Example() {
             label: "Preview",
             value: "preview",
             desc: (
-                <div className="w-full h-full">
+                <div className="w-full h-full rounded-xl border-[--site-chat-header-border] border flex-col flex from-[--site-main-modal-from-color] bg-gradient-to-br">
                     <Toaster />
-                    <div className="flex justify-between">
-                        <div className="gap-5 flex">
+                    <div className="flex flex-col p-5 md:w-full md:z-0">
+                        <div className="flex flex-col justify-between gap-5 text-black md:flex-row md:gap-0">
+                            <div className="flex flex-col gap-5 md:flex-row">
+                                <button
+                                    onClick={handleOpen}
+                                    className="bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2"
+                                >
+                                    <AiFillFolderOpen />
+                                    Open Chat
+                                </button>
+                                <button
+                                    onClick={handleEmbedding}
+                                    className="bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2"
+                                >
+                                    <SiHiveBlockchain />
+                                    Embedded Chat
+                                </button>
+                            </div>
                             <button
-                                onClick={handleOpen}
-                                className="bg-[--site-logo-text-color] p-2 rounded-xl flex items-center justify-center gap-2"
+                                className="bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2"
+                                onClick={handleUpdate}
                             >
-                                <AiFillFolderOpen />
-                                Open Chat
-                            </button>
-                            <button
-                                onClick={handleEmbedding}
-                                className="bg-[--site-logo-text-color] p-2 rounded-xl flex items-center justify-center gap-2"
-                            >
-                                <SiHiveBlockchain />
-                                Embedded Chat
+                                <MdUpdate className="w-6 h-6" />
+                                Update Chat
                             </button>
                         </div>
-                        <button
-                            className="bg-[--site-logo-text-color] p-2 rounded-xl flex items-center justify-center gap-2"
-                            onClick={handleUpdate}
-                        >
-                            <MdUpdate />
-                            Update Chat
-                        </button>
                     </div>
-                    <NewChat />
+                    <div className="h-hull min-h-[430px] flex">
+                        <NewChat />
+                    </div>
                     <Embedded
                         data={chat}
                         open={isModalOpen}
@@ -145,26 +148,38 @@ export default function Example() {
         {
             label: "Branding",
             value: "branding",
-            desc: <Branding />,
+            desc: (
+                <div className="bg-transparent">
+                    <Branding />
+                </div>
+            ),
         },
         {
             label: "Training Data",
             value: "training Data",
-            desc: <TraindataTable />,
+            desc: (
+                <div className="border-[--site-chat-header-border] border rounded-xl from-[--site-main-modal-from-color] bg-gradient-to-br">
+                    <TraindataTable />
+                </div>
+            ),
         },
         {
             label: "Conversation Explorer",
             value: "conversation Explorer",
-            desc: <History data={messagehistory} />,
+            desc: (
+                <div className="border-[--site-chat-header-border] border rounded-xl from-[--site-main-modal-from-color] bg-gradient-to-br">
+                    <History data={message_history} />
+                </div>
+            ),
         },
     ];
     return (
         <Tabs value={activeTab} id="custom-animation">
             <TabsHeader
-                className="p-2"
+                className="md:px-6 md:py-4 bg-transparent border-b rounded-none border-[--site-chat-header-border] flex xl:flex-row flex-col gap-2 xl:gap-0"
                 indicatorProps={{
                     className:
-                        "bg-transparent border-b-[3px] pb-0 border-[--site-card-icon-color] shadow-none rounded-none",
+                        "bg-[--site-card-icon-color] shadow-none text-white py-3 px-20",
                 }}
             >
                 {data.map(({ label, value }) => (
@@ -176,8 +191,8 @@ export default function Example() {
                         }}
                         className={
                             activeTab === value
-                                ? "text-[--site-card-icon-color] pb-0 font-bold"
-                                : ""
+                                ? "text-white w-full flex justify-center"
+                                : "flex justify-center xl:border-none border w-full border-black rounded-md"
                         }
                     >
                         {label}
@@ -190,12 +205,13 @@ export default function Example() {
                     mount: { y: 0 },
                     unmount: { y: 250 },
                 }}
+                className="mt-6"
             >
                 {data.map(({ value, desc }) => (
                     <TabPanel
                         key={value}
                         value={value}
-                        className="flex justify-center bg-[--site-card-icon-color] rounded-xl min-h-[800px]"
+                        className="p-0 rounded-2xl"
                     >
                         {desc}
                     </TabPanel>

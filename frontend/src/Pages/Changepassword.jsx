@@ -30,7 +30,7 @@ const Register = () => {
         }
     };
     return (
-        <div className="bg-[--site-main-color-home] font-logo h-full pb-10">
+        <div className="bg-[--site-main-color-home] font-logo h-screen pb-10 px-2">
             <Header />
             <Toaster />
             <div className="mt-[100px]">
