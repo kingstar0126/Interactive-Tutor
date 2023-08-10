@@ -38,8 +38,10 @@ def create_app():
     app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
     app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024
     app.config['SQLALCHEMY_POOL_TIMEOUT'] = 60
-    app.config['SQLALCHEMY_POOL_RECYCLE'] = 299
+    app.config['SQLALCHEMY_POOL_SIZE'] = 20
+    app.config['SQLALCHEMY_POOL_RECYCLE'] = 1
     app.config['SQLALCHEMY_POOL_PRE_PING'] = True
+    
 
     db.init_app(app)
     jwt.init_app(app)
