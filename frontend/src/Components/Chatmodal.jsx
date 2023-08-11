@@ -41,7 +41,7 @@ const Chatmodal = (props) => {
     const [gptmodel, SetGPTmodel] = useState(models);
     const [Creativity, SetCreativity] = useState(0.3);
     const [behaviormodel, SetBehaviormodel] = useState(
-        `If there is relevant training data available, please utilize it to generate responses using the provided information. However, if no training data exists for the specific query, you may respond with "I don't know."`
+        `If there is relevant training data available, please utilize it to generate responses using the provided information. However, if no training data exists, you must respond with "I don't know." and Do not respond with anything except 'I don't know.'`
     );
     const [behavior, SetBehavior] = useState("You are a helpful assistant");
 
@@ -60,7 +60,7 @@ const Chatmodal = (props) => {
             SetConversation("Hello friends! How can I help you today?");
             SetCreativity(0.3);
             SetBehaviormodel(
-                `If there is relevant training data available, please utilize it to generate responses using the provided information. However, if no training data exists for the specific query, you may respond with "I don't know."`
+                `If there is relevant training data available, please utilize it to generate responses using the provided information. However, if no training data exists, you must respond with "I don't know."`
             );
             SetBehavior("You are a helpful assistant");
         }
@@ -294,12 +294,12 @@ const Chatmodal = (props) => {
                                             }}
                                             defaultValue={{
                                                 value: "1",
-                                                label: `Given contextual information from training data, generate responses using training information as much as possible. If no training data is available, respond with "I don't know".`,
+                                                label: `Given contextual information from training data, generate responses using training information as much as possible. If no training data is available, respond with "I don't know"`,
                                             }}
                                             options={[
                                                 {
                                                     value: "1",
-                                                    label: `If there is relevant training data available, please utilize it to generate responses using the provided information. However, if no training data exists for the specific query, you may respond with "I don't know."`,
+                                                    label: `If there is relevant training data available, please utilize it to generate responses using the provided information. However, if no training data exists, you must respond with "I don't know."`,
                                                 },
                                                 {
                                                     value: "2",

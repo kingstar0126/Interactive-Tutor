@@ -170,7 +170,7 @@ export default function TraindataTable() {
 
                                     <td className={classes}>
                                         <div className="flex items-center justify-center h-full w-max">
-                                            <Tooltip content="Delete User">
+                                            <Tooltip content="Delete training data">
                                                 <Button
                                                     variant="outlined"
                                                     color="red"

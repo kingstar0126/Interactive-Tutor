@@ -169,7 +169,7 @@ def send_message():
             response = generate_AI_message(
                 query, last_history, behavior, temp, model)
         else:
-            behavior = current_message.behavior + "\n" + behaviormodel
+            behavior = current_message.behavior + "\n\n" + behaviormodel
             response = generate_message(
                 query, last_history, behavior, temp, model, chat.uuid)
         history.append({"role": "human", "content": query})
