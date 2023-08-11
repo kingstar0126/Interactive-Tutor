@@ -74,7 +74,7 @@ def generate_message(query, history, behavior, temp, model, chat):
     docsearch = Pinecone.from_existing_index(
         index_name=PINECONE_INDEX_NAME, embedding=embeddings)
     _query = query
-    docs = docsearch.similarity_search(query=_query, k=10)
+    docs = docsearch.similarity_search(query=_query, k=20)
 
     examples = ""
     for doc in docs:

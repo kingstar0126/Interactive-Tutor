@@ -29,7 +29,7 @@ def create_app():
     handler.setFormatter(formatter)
     app.logger.addHandler(handler)
     app.config['SECRET_KEY'] = 'key-goes-here'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:postgres@localhost/postgres'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:postgres@interactive-tutor.crzdypgejusl.eu-west-2.rds.amazonaws.com/postgres'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['MAIL_SERVER'] = 'smtp.gmail.com'
     app.config['MAIL_PORT'] = 587
@@ -38,7 +38,10 @@ def create_app():
     app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
     app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024
     app.config['SQLALCHEMY_POOL_TIMEOUT'] = 60
-
+    app.config['SQLALCHEMY_POOL_SIZE'] = 20
+    app.config['SQLALCHEMY_POOL_RECYCLE'] = 1
+    app.config['SQLALCHEMY_POOL_PRE_PING'] = True
+    
 
     db.init_app(app)
     jwt.init_app(app)
