@@ -55,14 +55,17 @@ def generate_message(query, history, behavior, temp, model, chat):
     if model == "1":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo",
                          temperature=temp,
+                         streaming=True,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "2":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k",
                          temperature=temp,
+                         streaming=True,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "3":
         llm = ChatOpenAI(model_name="gpt-4",
                          temperature=temp,
+                         streaming=True,
                          openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
 
     conversation = LLMChain(
@@ -123,14 +126,17 @@ def generate_AI_message(query, history, behavior, temp, model):
     if model == "1":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo",
                          temperature=temp,
+                         streaming=True,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "2":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k",
                          temperature=temp,
+                         streaming=True,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "3":
         llm = ChatOpenAI(model_name="gpt-4",
                          temperature=temp,
+                         streaming=True,
                          openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
     conversation = LLMChain(
         llm=llm,
@@ -170,6 +176,7 @@ def generate_Bubble_message(query):
 
     llm = ChatOpenAI(model_name="gpt-3.5-turbo",
                      temperature=1,
+                     streaming=True,
                      openai_api_key=os.getenv('OPENAI_API_KEY'))
     conversation = LLMChain(
         llm=llm,

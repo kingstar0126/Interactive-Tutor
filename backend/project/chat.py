@@ -72,7 +72,7 @@ def add_chat():
     behavior = request.json['behavior']
     behaviormodel = request.json['behaviormodel']
     train = json.dumps([])
-    chat_logo = json.dumps({})
+    chat_logo = json.dumps({"user": "https://app.interactive-tutor.com/api/imageupload/default_user.png", "ai": "https://app.interactive-tutor.com/api/imageupload/default_ai.png"})
     chat_title = json.dumps({})
     chat_description = json.dumps({})
     chat_copyright = json.dumps(
@@ -144,7 +144,6 @@ def update_brandingData():
     chat_copyright = request.json['chat_copyright']
     chat_button = request.json['chat_button']
     bubble = request.json['bubble']
-
     chat = db.session.query(Chat).filter_by(id=id).first()
     if chat is None:
         # If no such chat exists, return an error response
