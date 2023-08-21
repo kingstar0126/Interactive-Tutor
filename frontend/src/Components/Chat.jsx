@@ -179,7 +179,11 @@ const Chat = () => {
         };
 
         axios.post(webAPI.getchats, data).then((res) => {
-            SetChat(res.data.data);
+            if (res.data.success) {
+                SetChat(res.data.data);
+            } else {
+                notification("error", res.data.message);
+            }
         });
     };
 
