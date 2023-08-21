@@ -78,7 +78,7 @@ def add_chat():
     chat_copyright = json.dumps(
         {'description': 'powered by interactive-tutor.com', 'status': 'false', 'color': '#ff0000'})
     chat_button = json.dumps({})
-    bubble = json.dumps({})
+    bubble = json.dumps({"position": {"value": 0, "label": "Right"}})
 
     user = db.session.query(User).filter_by(id=user_id).first()
     ct = db.session.query(Chat).filter_by(user_id=user_id).count() + 1
