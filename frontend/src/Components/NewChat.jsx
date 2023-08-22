@@ -13,6 +13,7 @@ import { getUserState } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
 import { useLocation } from "react-router-dom";
 import ReactLoading from "react-loading";
+import { Grid } from  'react-loader-spinner'
 
 const NewChat = () => {
     const navigate = useNavigate();
@@ -42,6 +43,7 @@ const NewChat = () => {
     let location = useLocation();
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
+    const [spinner, setSpinner] = useState(false);
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
     const chatbot = useSelector((state) => state.chat.chatbot);
     const chatId = useParams();
@@ -312,12 +314,13 @@ const NewChat = () => {
         setMessage("");
     };
 
-    const sendMessage = (id, _message) => {
+    const sendMessage = async (id, _message) => {
         let { behaviormodel, train, model } = chat;
         if (!id || !_message) {
             return;
         }
-        axios
+        setSpinner(true)
+        await axios
             .post(webAPI.sendchat, {
                 id,
                 _message,
@@ -332,8 +335,9 @@ const NewChat = () => {
                     setquery(dispatch, res.data.query);
                     receiveMessage(res.data.data);
                 }
+                setSpinner(false)
             })
-            .catch((err) => console.error(err));
+            .catch((err) => setSpinner(false));
     };
 
     const receiveMessage = (message) => {
@@ -484,6 +488,34 @@ const NewChat = () => {
                                         </div>
                                     ) : null;
                                 })}
+                                {spinner === true && <div
+                                    ref={ai_background}
+                                    name="ai_bg"
+                                    className="flex items-center justify-start p-2 lg:justify-center"
+                                >
+                                    <div className="flex justify-start lg:w-4/5">
+                                        <img
+                                            src={chat.chat_logo.ai}
+                                            className="w-10 h-10 rounded-full"
+                                            alt="AI"
+                                        />
+                                        <div
+                                            name="ai"
+                                            className="flex flex-col w-full p-2 whitespace-break-spaces"
+                                        >
+                                            <Grid
+                                                height="50"
+                                                width="50"
+                                                color="#4fa94d"
+                                                ariaLabel="grid-loading"
+                                                radius="12.5"
+                                                wrapperStyle={{}}
+                                                wrapperClass=""
+                                                visible={true}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>}
                             </Scrollbar>
                         </div>
                         <div className="flex flex-col items-center justify-center w-full">
