@@ -7,6 +7,7 @@ import {
     Dialog,
     DialogBody,
     DialogFooter,
+    Spinner,
     Button,
 } from "@material-tailwind/react";
 import Select from "react-select";
@@ -14,6 +15,9 @@ import { useSelector } from "react-redux";
 import { RiArrowDownSLine, RiArrowUpSLine } from "react-icons/ri";
 import { Scrollbar } from "react-scrollbars-custom";
 import { Link } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
+import axios from "axios";
+import { webAPI } from "../utils/constants";
 
 const Chatmodal = (props) => {
     const [label, SetLabel] = useState("");
@@ -27,6 +31,8 @@ const Chatmodal = (props) => {
         "Hello friends! How can I help you today?"
     );
     const [type, setType] = useState(false);
+    const [role, setRole] = useState('');
+    const [loading, setLoading] = useState(false);
     const models = [
         {
             value: "1",
@@ -134,6 +140,16 @@ const Chatmodal = (props) => {
         context: 3
     }]
 
+    const notification = (type, message) => {
+        // To do in here
+        if (type === "error") {
+            toast.error(message);
+        }
+        if (type === "success") {
+            toast.success(message);
+        }
+    };
+
     useEffect(() => {
         if (user.role === 2 || user.role === 5) {
             SetGPTmodel([models[0]]);
@@ -152,11 +168,13 @@ const Chatmodal = (props) => {
                 behaviorModelTheme[TutorThemes[0].context].label
             );
             SetBehavior(TutorThemes[0].prompt);
+            setType(false);
         }
         if (props.chat && props.chat.label) {
             SetLabel(props.chat["label"]);
             SetChatdescription(props.chat["description"]);
             setOpen(0);
+            setType(true);
             SetConversation(props.chat["conversation"]);
             SetChatmodel(props.chat["model"]);
             SetCreativity(props.chat["creativity"]);
@@ -211,6 +229,28 @@ const Chatmodal = (props) => {
         );
     }
     
+    const generateAiTutor = (e) => {
+        e.preventDefault()
+        if (role) {
+            setLoading(true)
+            axios
+            .post(webAPI.get_system_prompt, {role})
+            .then(res => {
+                console.log(res.data, typeof(res.data));
+                SetBehavior(res.data.behaviour_prompt
+                    )
+                SetLabel(res.data.title);
+                SetChatdescription(res.data.name)
+                SetConversation(res.data.startmessage)
+                setLoading(false);
+            })
+            .catch((err) => 
+                {console.error(err);
+                setLoading(false);}
+            )
+        }
+    }
+
     const customStyles = {
         control: (provided) => ({
             ...provided,
@@ -487,14 +527,37 @@ const Chatmodal = (props) => {
                                         </Button>    
                                 })}
                             </div>
-                            <textarea className="w-full mt-5 px-5 py-3 bg-transparent border-[--site-main-pricing-color] border rounded-md placeholder:text-black" 
-                                rows="5"
-                                cols="50"
-                                value={behavior}
-                                onChange={(e) => {
-                                    SetBehavior(e.target.value);
-                                }}
-                            />
+                            <div className="mt-5 gap-3 flex-col flex border border-[--site-main-pricing-color] rounded-lg h-full relative">
+                                <div className={`absolute w-full h-full bg-white/70 top-0 left-0 right-0 bottom-0 rounded-xl z-20 ${loading ? 'block' : 'hidden'}`}>
+                                    <div className="absolute right-[calc(50%-72px)] top-[calc(50%-72px)] ">
+                                        <div className="flex flex-col items-center justify-center w-full p-2">
+                                            <Spinner
+                                                color="indigo"
+                                                className="w-32 h-32 text-transparent"
+                                            />
+                                            <span className="absolute">
+                                                <div className="flex">
+                                                    <span className="h-full">
+                                                        Generating
+                                                    </span>
+                                                </div>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="px-5 py-5 gap-3 flex-col flex">
+                                    <span className="text-red-600 text-[12px]">If you can't find Ai Tutor, please enter ai tutor role here.</span>
+                                    <textarea className="w-full px-5 py-3 bg-transparent border-[--site-main-pricing-color] border rounded-md placeholder:text-black" 
+                                        rows="3"
+                                        cols="50"
+                                        value={role}
+                                        onChange={(e) => {
+                                            setRole(e.target.value);
+                                        }}
+                                    />
+                                    <Button className="normal-case bg-transparent border-[--site-card-icon-color] text-[--site-card-icon-color] text-base font-semibold border rounded-md px-4 py-2" onClick={generateAiTutor}>Generate</Button>
+                                </div>
+                            </div>
                         </div>}
                     </div>
                 </Scrollbar>
