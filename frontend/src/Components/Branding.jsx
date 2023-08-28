@@ -16,6 +16,7 @@ import UserMessage from "./Branding/Message/UserMessage";
 import ButtonBranding1 from "./Branding/Button/ButtonBranding1";
 import ButtonBranding2 from "./Branding/Button/ButtonBranding2";
 import ButtonBranding3 from "./Branding/Button/ButtonBranding3";
+import { Button } from "@material-tailwind/react";
 
 const Branding = () => {
     const dispatch = useDispatch();
@@ -46,14 +47,14 @@ const Branding = () => {
         <div className="flex flex-col w-full h-full gap-5 py-5">
             <Toaster />
             <div className="flex justify-end">
-                <button
+                <Button
                     type="button"
                     onClick={handleConfirm}
-                    className="text-[--site-card-icon-color] bg-[--site-logo-text-color] hover:bg-[--site-card-icon-color]/90 focus:ring-4 focus:outline-none focus:ring-[--site-card-icon-color]/50 font-semibold rounded-md text-base px-2 py-1 text-center inline-flex items-center"
+                    className="normal-case text-[--site-card-icon-color] bg-[--site-logo-text-color] hover:bg-[--site-card-icon-color]/90 focus:ring-4 focus:outline-none focus:ring-[--site-card-icon-color]/50 font-semibold rounded-md text-base px-2 py-1 text-center inline-flex items-center text-black"
                 >
                     <BiCheckCircle className="w-[30px] h-[30px] text-xl pointer-events-none p-1 text-[--site-success-text-color]" />
                     Confirm
-                </button>
+                </Button>
             </div>
 
             <div className="flex flex-col gap-8">

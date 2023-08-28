@@ -5,6 +5,7 @@ import {
     TabsBody,
     Tab,
     TabPanel,
+    Button,
 } from "@material-tailwind/react";
 import NewChat from "./NewChat";
 import Branding from "./Branding";
@@ -111,28 +112,28 @@ export default function Example() {
                     <div className="flex flex-col p-5 md:w-full md:z-0">
                         <div className="flex flex-col justify-between gap-5 text-black md:flex-row md:gap-0">
                             <div className="flex flex-col gap-5 md:flex-row">
-                                <button
+                                <Button
                                     onClick={handleOpen}
-                                    className="bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2"
+                                    className="normal-case bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2 text-black text-base"
                                 >
                                     <AiFillFolderOpen />
                                     Open Chat
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     onClick={handleEmbedding}
-                                    className="bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2"
+                                    className="normal-case bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2 text-black text-base"
                                 >
                                     <SiHiveBlockchain />
                                     Embedded Chat
-                                </button>
+                                </Button>
                             </div>
-                            <button
-                                className="bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2"
+                            <Button
+                                className="normal-case bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2 text-black text-base"
                                 onClick={handleUpdate}
                             >
                                 <MdUpdate className="w-6 h-6" />
                                 Update Chat
-                            </button>
+                            </Button>
                         </div>
                     </div>
                     <div className="h-hull min-h-[430px] flex">
