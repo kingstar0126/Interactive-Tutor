@@ -31,6 +31,7 @@ export const webAPI = {
     delete_message: SERVER_URL + "/api/deletemessage",
     get_all_messages: SERVER_URL + "/api/getallmessages",
     get_report_data: SERVER_URL + "/api/getreportdata",
+    get_system_prompt: SERVER_URL + "/api/generate_system_prompt",
     //THis is the send traindata to server
 
     sendurl: SERVER_URL + "/api/data/sendurl",
