@@ -10,6 +10,7 @@ import uuid
 from dotenv import load_dotenv
 from .auth import generate_pin_password
 from werkzeug.utils import secure_filename
+from .generate_response import generate_system_prompt_role
 import datetime
 
 load_dotenv()
@@ -464,3 +465,9 @@ def transfer_tutor_customer():
     chat.user_id = user.id
     db.session.commit()
     return jsonify({'success': True, 'message': f'You have successfully transferred your tutor to {email}!', 'code': 200})
+
+@chat.route('/api/generate_system_prompt', methods=['POST'])
+def generate_system_prompt():
+    role = request.json['role']
+    print('\n\n', role)
+    return generate_system_prompt_role(role)

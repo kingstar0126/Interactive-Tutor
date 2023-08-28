@@ -188,3 +188,53 @@ def generate_Bubble_message(query):
     )
     response = response.replace('"', '')
     return response
+
+def generate_system_prompt_role(role):
+    load_dotenv()
+
+    template = '''I want to make the assistant using ai. When I enter the AI assistant role, it must respond with a JSON form. All values in the json object must be filled and not empty.
+{{
+"title": "",
+"name": "",
+"behaviour_prompt": "",
+"startmessage: "",
+}}
+
+To make the behaviour_prompt, using this prompt.
+
+Craft a paragraph of how chatgpt (address as you) supposed to act based on the role stated. 
+              Provide expectation of the required scope, skillset and knowledge. Make the best possible use of training material and create the best prompts to avoid hallucinating the AI.
+              If there is no specific role found, use relative reference if necessary. 
+              The role is "". Maximium 5 sentences. 
+              Start the paragraph with "I want you to act as a 
+=========================
+role: {role}
+'''
+
+    prompt = PromptTemplate(
+        input_variables=["role"], template=template)
+
+    def get_hashed_name(name):
+        return hashlib.sha256(name.encode()).hexdigest()
+
+    def init_gptcache(cache_obj: Cache, llm: str):
+        hashed_llm = get_hashed_name(llm)
+        cache_obj.init(
+            pre_embedding_func=get_prompt,
+            data_manager=manager_factory(
+                manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
+        )
+
+    langchain.llm_cache = GPTCache(init_gptcache)
+
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo",
+                     temperature=1,
+                     openai_api_key=os.getenv('OPENAI_API_KEY'))
+    conversation = LLMChain(
+        llm=llm,
+        prompt=prompt
+    )
+    response = conversation.run(
+        role=role
+    )
+    return response

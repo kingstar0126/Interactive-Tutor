@@ -155,7 +155,7 @@ def text_to_docs(text: str, filename: str, chat: str) -> List[Document]:
 
     for i, doc in enumerate(page_docs):
         text_splitter = RecursiveCharacterTextSplitter(
-            separators=["\n\n"],
+            separators=["\n\n", "\n"],
             chunk_size=1000,
             chunk_overlap=200,
         )
