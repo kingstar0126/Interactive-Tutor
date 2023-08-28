@@ -469,5 +469,4 @@ def transfer_tutor_customer():
 @chat.route('/api/generate_system_prompt', methods=['POST'])
 def generate_system_prompt():
     role = request.json['role']
-    print('\n\n', role)
     return generate_system_prompt_role(role)

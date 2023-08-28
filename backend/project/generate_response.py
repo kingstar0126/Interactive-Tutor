@@ -192,23 +192,18 @@ def generate_Bubble_message(query):
 def generate_system_prompt_role(role):
     load_dotenv()
 
-    template = '''I want to make the assistant using ai. When I enter the AI assistant role, it must respond with a JSON form. All values in the json object must be filled and not empty.
+    template = '''You are a OpenAI GPT system role expert. Your job is to analyze the needs of users and generate system roles for users' 'Interactive Tutors' that they embed to change the role of the 'tutor' powered by OpenAI API to deliver on what they need. The user will give you details on what they need the system behavior prompt to deliver. 
+
+Once you have this information, do not ask any further questions and please provide json form: A short name for the tutor, a conversation starter and the system role written out in full.
 {{
-"title": "",
 "name": "",
-"behaviour_prompt": "",
-"startmessage: "",
+"system_role": "",
+"starter" : "",
 }}
 
-To make the behaviour_prompt, using this prompt.
-
-Craft a paragraph of how chatgpt (address as you) supposed to act based on the role stated. 
-              Provide expectation of the required scope, skillset and knowledge. Make the best possible use of training material and create the best prompts to avoid hallucinating the AI.
-              If there is no specific role found, use relative reference if necessary. 
-              The role is "". Maximium 5 sentences. 
-              Start the paragraph with "I want you to act as a 
+The system role should be well detailed, clearly detail what steps the AI should take and to use British English if communicating in English.
 =========================
-role: {role}
+user: {role}
 '''
 
     prompt = PromptTemplate(
@@ -228,7 +223,7 @@ role: {role}
     langchain.llm_cache = GPTCache(init_gptcache)
 
     llm = ChatOpenAI(model_name="gpt-3.5-turbo",
-                     temperature=1,
+                     temperature=0.2,
                      openai_api_key=os.getenv('OPENAI_API_KEY'))
     conversation = LLMChain(
         llm=llm,
