@@ -240,10 +240,15 @@ const Chatmodal = (props) => {
             axios
             .post(webAPI.get_system_prompt, {role})
             .then(res => {
-                SetBehavior(res.data.system_role)
-                SetLabel(res.data.name);
-                SetChatdescription(res.data.description);
-                SetConversation(res.data.starter)
+                let data = res.data;
+                if (!res.data.name)
+                {
+                    data = JSON.parse(res.data)
+                }
+                SetBehavior(data.system_role)
+                SetLabel(data.name);
+                SetChatdescription(data.description);
+                SetConversation(data.starter)
                 setLoading(false);
                 notification('success', "Created a Tutor successfully");
             })
