@@ -14,6 +14,7 @@ import { setquery } from "../redux/actions/queryAction";
 import { useLocation } from "react-router-dom";
 import ReactLoading from "react-loading";
 import { Grid } from  'react-loader-spinner'
+import { Button } from "@material-tailwind/react";
 
 const NewChat = () => {
     const navigate = useNavigate();
@@ -525,6 +526,7 @@ const NewChat = () => {
                                     ref={chatbot_button1}
                                     target="_blank"
                                     rel="noreferrer"
+                                    className="normal-case"
                                 >
                                     {chat.chat_button.button1_text}
                                 </a>
@@ -533,6 +535,7 @@ const NewChat = () => {
                                     href={chat.chat_button.button2_url}
                                     target="_blank"
                                     rel="noreferrer"
+                                    className="normal-case"
                                 >
                                     {chat.chat_button.button2_text}
                                 </a>
@@ -541,6 +544,7 @@ const NewChat = () => {
                                     href={chat.chat_button.button3_url}
                                     target="_blank"
                                     rel="noreferrer"
+                                    className="normal-case"
                                 >
                                     {chat.chat_button.button3_text}
                                 </a>

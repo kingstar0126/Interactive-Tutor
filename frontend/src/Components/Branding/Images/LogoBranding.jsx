@@ -5,6 +5,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { webAPI } from "../../../utils/constants";
 import { SERVER_URL } from "../../../config/constant";
+import { Button } from "@material-tailwind/react";
 
 const LogoBranding = (props) => {
     const [text, setText] = useState("Disable");
@@ -120,14 +121,14 @@ const LogoBranding = (props) => {
                                     )}
                                 </Dropzone>
                             </div>
-                            <button
+                            <Button
                                 onClick={(e) => {
                                     handleUpload();
                                 }}
-                                className="p-2 rounded-xl bg-[--site-logo-text-color] my-2 border border-[--site-chat-header-border]"
+                                className="normal-case p-2 rounded-xl bg-[--site-logo-text-color] my-2 border border-[--site-chat-header-border] text-black text-base"
                             >
                                 Upload
-                            </button>
+                            </Button>
                         </div>
                     </div>
                     <div className="flex w-full gap-3">

@@ -146,17 +146,17 @@ const Subscription = () => {
                             />
                         </div>
                     )}
-                    <button
+                    <Button
                         onClick={() => {
                             handleOpenModel();
                         }}
-                        className="flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
+                        className="normal-case flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
                     >
                         <MdOutlineUpdate className="w-4 h-4 md:w-6 md:h-6" />
                         <span className="md:text-base text-[12px] font-medium">
                             Upgrade
                         </span>
-                    </button>
+                    </Button>
                 </div>
             </div>
             <div className="flex md:hidden gap-2 text-[--site-card-icon-color] pt-8 px-5">
