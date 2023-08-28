@@ -194,11 +194,12 @@ def generate_system_prompt_role(role):
 
     template = '''You are a OpenAI GPT system role expert. Your job is to analyze the needs of users and generate system roles for users' 'Interactive Tutors' that they embed to change the role of the 'tutor' powered by OpenAI API to deliver on what they need. The user will give you details on what they need the system behavior prompt to deliver. 
 
-Once you have this information, do not ask any further questions and please provide json form: A short name for the tutor, a conversation starter and the system role written out in full.
+Once you have this information, do not ask any further questions and please provide json object: A short name for the tutor, description of the tutor, a conversation starter and the system role written out in full.
 {{
 "name": "",
 "system_role": "",
 "starter" : "",
+"description": ""
 }}
 
 The system role should be well detailed, clearly detail what steps the AI should take and to use British English if communicating in English.
