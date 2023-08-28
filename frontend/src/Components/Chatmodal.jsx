@@ -245,6 +245,7 @@ const Chatmodal = (props) => {
                 {
                     data = JSON.parse(res.data)
                 }
+                console.log(res.data)
                 SetBehavior(data.system_role)
                 SetLabel(data.name);
                 SetChatdescription(data.description);
@@ -546,7 +547,7 @@ const Chatmodal = (props) => {
                                             <span className="absolute">
                                                 <div className="flex">
                                                     <span className="h-full">
-                                                        building your tutor
+                                                        generating
                                                     </span>
                                                 </div>
                                             </span>
