@@ -237,12 +237,11 @@ const Chatmodal = (props) => {
             .post(webAPI.get_system_prompt, {role})
             .then(res => {
                 console.log(res.data, typeof(res.data));
-                SetBehavior(res.data.behaviour_prompt
-                    )
-                SetLabel(res.data.title);
-                SetChatdescription(res.data.name)
-                SetConversation(res.data.startmessage)
+                SetBehavior(res.data.system_role)
+                SetLabel(res.data.name);
+                SetConversation(res.data.starter)
                 setLoading(false);
+                notification('success', "Created a Tutor successfully");
             })
             .catch((err) => 
                 {console.error(err);
@@ -275,6 +274,7 @@ const Chatmodal = (props) => {
             handler={props.handleCancel}
             className=" border-[--site-chat-header-border] border rounded-2xl from-[--site-main-modal-from-color] to-[--site-main-modal-to-color] bg-gradient-to-br shadow-lg shadow-[--site-card-icon-color]"
         >
+            <Toaster/>
             <DialogHeader className="px-8 pt-8 pb-6">
                 <span className="text-[32px] leading-12 font-semibold text-[--site-card-icon-color]">
                     Build New Tutor
