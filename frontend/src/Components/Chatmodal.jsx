@@ -159,10 +159,8 @@ const Chatmodal = (props) => {
             SetGPTmodel(models);
         }
         if (!props.chat) {
-            SetLabel(TutorThemes[0].title);
-            SetChatdescription(TutorThemes[0].name);
+            SetLabel("")
             setOpen(0);
-            SetConversation(TutorThemes[0].conversation);
             SetCreativity(0.3);
             SetBehaviormodel(
                 behaviorModelTheme[TutorThemes[0].context].label
@@ -181,10 +179,16 @@ const Chatmodal = (props) => {
             SetBehaviormodel(props.chat["behaviormodel"]);
             SetBehavior(props.chat["behavior"]);
         }
-        setSelected(0)
     }, [props.open, props.chat]);
 
+    useEffect(() => {
+        if(loading === false)
+            {onOK()}
+    }, [loading])
+
     const onOK = () => {
+        if (!label || !chatdescription || !Conversation)
+            return;
         if (!props.chat) {
             props.handleOk({
                 label,
@@ -236,9 +240,9 @@ const Chatmodal = (props) => {
             axios
             .post(webAPI.get_system_prompt, {role})
             .then(res => {
-                console.log(res.data, typeof(res.data));
                 SetBehavior(res.data.system_role)
                 SetLabel(res.data.name);
+                SetChatdescription(res.data.description);
                 SetConversation(res.data.starter)
                 setLoading(false);
                 notification('success', "Created a Tutor successfully");
@@ -280,7 +284,7 @@ const Chatmodal = (props) => {
                     Build New Tutor
                 </span>
             </DialogHeader>
-            <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium pl-8 pt-6 h-[30rem]">
+            <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium pl-8 pt-6 h-[25rem]">
                 <Scrollbar>
                     <div className="mr-4">
                         {type ? <div>
@@ -519,15 +523,14 @@ const Chatmodal = (props) => {
                         </div>: 
                         <div className="flex flex-col gap-2">
                             <span className="text-2xl font-semibold text-[--site-card-icon-color]">What role do you want the AI to perform?</span>
-                            <span className="text-base font-medium text-[--site-card-icon-color]">Pick one of the options below:</span>
                             <div className="flex flex-wrap gap-4">
                                 {TutorThemes.map((item, index) => {
-                                    return <Button className={` normal-case px-6 py-2 border border-[--site-main-pricing-color] rounded-lg  ${ selected === index ? 'bg-[--site-main-pricing-color]' : 'bg-transparent'}`} onClick={() => handleTutorSeleted(item, index)} key={item.name}>
-                                        <span className={`text-2xl font-semibold ${ selected === index ? 'text-white' : 'text-[--site-main-pricing-color]'}`}>{item.title}</span>
+                                    return <Button className={` normal-case px-3 py-1 border border-[--site-main-pricing-color] rounded-lg  ${ selected === index ? 'bg-[--site-main-pricing-color]' : 'bg-transparent'}`} onClick={() => handleTutorSeleted(item, index)} key={item.name}>
+                                        <span className={`text-base font-semibold ${ selected === index ? 'text-white' : 'text-[--site-main-pricing-color]'}`}>{item.title}</span>
                                         </Button>    
                                 })}
                             </div>
-                            <div className="mt-5 gap-3 flex-col flex border border-[--site-main-pricing-color] rounded-lg h-full relative">
+                            <div className="mt-2 gap-2 flex-col flex border border-[--site-main-pricing-color] rounded-lg h-full relative">
                                 <div className={`absolute w-full h-full bg-white/70 top-0 left-0 right-0 bottom-0 rounded-xl z-20 ${loading ? 'block' : 'hidden'}`}>
                                     <div className="absolute right-[calc(50%-72px)] top-[calc(50%-72px)] ">
                                         <div className="flex flex-col items-center justify-center w-full p-2">
@@ -538,7 +541,7 @@ const Chatmodal = (props) => {
                                             <span className="absolute">
                                                 <div className="flex">
                                                     <span className="h-full">
-                                                        Generating
+                                                        building your tutor
                                                     </span>
                                                 </div>
                                             </span>
@@ -546,7 +549,7 @@ const Chatmodal = (props) => {
                                     </div>
                                 </div>
                                 <div className="px-5 py-5 gap-3 flex-col flex">
-                                    <span className="text-red-600 text-[12px]">If you can't find Ai Tutor, please enter ai tutor role here.</span>
+                                    <span className="text-red-600 text-[12px]">Can’t see a match, no problem. Just type in here what you want the AI to do for you in as much detail as possible.</span>
                                     <textarea className="w-full px-5 py-3 bg-transparent border-[--site-main-pricing-color] border rounded-md placeholder:text-black" 
                                         rows="3"
                                         cols="50"
