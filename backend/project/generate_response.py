@@ -202,7 +202,7 @@ Once you have this information, do not ask any further questions and please prov
 "description": ""
 }}
 
-The system role should be well detailed, clearly detail what steps the AI should take and to use British English if communicating in English.
+The system role should be well detailed, clearly detail what steps the AI should take and to use British English if communicating in English. Most importantly, the system role's maximum character length must be less than 65500.
 =========================
 user: {role}
 '''
