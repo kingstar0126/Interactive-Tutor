@@ -1,7 +1,7 @@
 from flask import request
 from flask import Blueprint, jsonify, request
 from . import db
-from .models import User, Production, Organization
+from .models import User, Production, Organization, Invite
 import stripe
 from rich import print, pretty
 import json
@@ -237,6 +237,9 @@ def stripe_webhook():
         user.tutors = tutors
         user.training_datas = training_datas
         user.training_words = training_words
+        invite_user = db.session.query(Invite).filter_by(email=user.email).first()
+        if invite_user:
+            invite_user.status = True
         db.session.commit()
     elif payload["type"] == "customer.subscription.deleted":
         customer_id = payload["data"]["object"]["customer"]
