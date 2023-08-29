@@ -420,7 +420,8 @@ def get_traindatas():
     data = []
     for id in train_ids:
         train_data = db.session.query(Train).filter_by(id=id).first()
-        data.append({'id': train_data.id, 'label': train_data.label,
+        if train_data:
+            data.append({'id': train_data.id, 'label': train_data.label,
                     'type': train_data.type, 'status': train_data.status})
     return jsonify({'data': data, 'success': True})
 

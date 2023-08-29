@@ -15,7 +15,6 @@ const InviteEmailItem = (props) => {
 
     useEffect(() => {
         if (props.data) {
-            console.log(props.data)
             setData(props.data);
             setIndex(props.data.index);
             setEmail(props.data.email);
@@ -25,6 +24,7 @@ const InviteEmailItem = (props) => {
             setData('');
             setIndex(0);
         }
+        console.log(props.data)
     }, [props])
 
     const handleChange = (e) => {
