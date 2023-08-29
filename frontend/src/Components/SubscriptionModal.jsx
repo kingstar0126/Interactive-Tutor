@@ -368,7 +368,7 @@ const SubscriptionModal = (props) => {
                 ): <div className="flex flex-col gap-5">
                         <span className="text-2xl font-semibold text-[--site-card-icon-color]">Invite 5 subscribers to get 50% off your subscription</span>
                         <div className="flex flex-col gap-2">
-                            
+                            {console.log('HIHIHI', inviteEmails)}
                             {inviteEmails.map((item, id) => {
                                 return <InviteEmailItem data={item} InviteConfirm={handleInvite} key={id}/>
                             })}

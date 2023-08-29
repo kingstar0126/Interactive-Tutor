@@ -20,11 +20,25 @@ const InviteEmailItem = (props) => {
             setIndex(props.data.index);
             setEmail(props.data.email);
         }
+        else {
+            setEmail('');
+            setData('');
+            setIndex(0);
+        }
     }, [props])
 
     const handleChange = (e) => {
         let {value} = e.target
         setEmail(value);
+    }
+
+    const handleRemove = (e) => {
+        e.preventDefault()
+        axios
+        .post(webAPI.remove_invite, {id: user.id, email:email})
+        .then(res => props.InviteConfirm('success', res.data.message))
+        .catch(err => console.error(err));
+        
     }
 
     const handleOk = (e) => {
@@ -50,7 +64,7 @@ const InviteEmailItem = (props) => {
                 <div className="flex flex-col w-1/2 relative items-center m-auto">
                     <input className="border-[--site-chat-header-border] border bg-transparent pl-4 pr-6 py-2 rounded-md w-full" placeholder="Enter email address" onChange={handleChange} defaultValue={email}/>
                     <div className="absolute right-0 top-1/2 transform -translate-y-1/2 -translate-x-1">
-                        <RiDeleteBin6Line className="active:fill-[--site-error-text-color] fill-[--site-card-icon-color]" onClick={() => setEmail('')}/>
+                        <RiDeleteBin6Line className="active:fill-[--site-error-text-color] fill-[--site-card-icon-color]" onClick={handleRemove}/>
                     </div>
                 </div>
 

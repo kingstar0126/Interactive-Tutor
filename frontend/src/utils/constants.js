@@ -62,5 +62,6 @@ export const webAPI = {
     imageupload: SERVER_URL + "/api/imageupload",
     custom_plan: SERVER_URL + "/api/subscription/custom_plan",
     inviteEmail: SERVER_URL + "/api/inviteEmail",
-    getinviteEmails: SERVER_URL + "/api/getInviteEmails"
+    getinviteEmails: SERVER_URL + "/api/getInviteEmails",
+    remove_invite: SERVER_URL + "/api/removeInvite"
 };
