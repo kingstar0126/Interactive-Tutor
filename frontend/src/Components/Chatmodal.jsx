@@ -187,7 +187,7 @@ const Chatmodal = (props) => {
     }, [loading])
 
     const onOK = () => {
-        if (!label || !chatdescription || !Conversation)
+        if (!label)
             return;
         if (!props.chat) {
             props.handleOk({
