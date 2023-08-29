@@ -66,7 +66,7 @@ const NewChat = () => {
                 .get("https://geolocation-db.com/json/")
                 .then((res) => {
                     let country = res.data.country_name;
-                    getUserState(dispatch, { id: chat.user_id });
+                    // getUserState(dispatch, { id: chat.user_id });
                     new_chat["country"] = country;
                     setchatbot(dispatch, new_chat);
                     setLoading(false);
