@@ -573,7 +573,7 @@ const Chatmodal = (props) => {
             </DialogBody>
             <DialogFooter className="flex items-center justify-between gap-4 px-10 pb-8">
                 <div>
-                    <Link onClick={() => {setType(!type)}} className="bg-transparent text-[--site-card-icon-color] text-base font-semibold hover:text-[--site-main-slider-thumb-color]">Build Manually</Link>
+                    <Link onClick={() => {setType(!type)}} className="bg-transparent text-[--site-card-icon-color] text-base font-semibold hover:text-[--site-main-slider-thumb-color]">Build Manually/Automatic</Link>
                 </div>
                 <div className="flex gap-4">
                     <Button
