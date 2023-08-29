@@ -37,9 +37,9 @@ const AccessChatbot = () => {
             toast.success(message);
         }
     };
-    useEffect(() => {
-        localStorage.clear();
-    }, []);
+    // useEffect(() => {
+    //     localStorage.clear();
+    // }, []);
 
     const submit = async (pin) => {
         await axios
