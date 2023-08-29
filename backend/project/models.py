@@ -27,6 +27,7 @@ class User(UserMixin, db.Model):
     city = db.Column(db.String(255))
     country = db.Column(db.String(255))
     status = db.Column(db.Integer)
+    discount = db.Column(db.Boolean)
     create_date = db.Column(db.DateTime, default=datetime.utcnow)
     update_date = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -147,6 +148,16 @@ class Production(UserMixin, db.Model):
     update_date = db.Column(
         db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+class Invite(UserMixin, db.Model):
+    __tablename__ = 'invite'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer)
+    email = db.Column(db.String(255))
+    status = db.Column(db.Boolean)
+    index = db.Column(db.Integer)
+    create_date = db.Column(db.Date, default=datetime.utcnow)
+    update_date = db.Column(
+        db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class OAuth(OAuthConsumerMixin, db.Model):
     __table_args__ = (db.UniqueConstraint("provider", "provider_user_id"),)
