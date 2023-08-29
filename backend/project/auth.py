@@ -575,3 +575,13 @@ def get_invite_emails():
         'data': response
     }
     return jsonify(data)
+
+@auth.route('/api/removeInvite', methods=['POST'])
+def remove_invite_email():
+    id = request.json['id']
+    email = request.json['email']
+    query = db.session.query(Invite).filter_by(user_id=id, email=email)
+    if query:
+        query.delete()
+        db.session.commit()
+    return jsonify({'success': True, 'code': 200, 'message': 'Email successfully removed'})
