@@ -10,6 +10,7 @@ import {
     Typography,
     Button,
 } from "@material-tailwind/react";
+import { Link } from "react-router-dom";
 import React, { Fragment } from "react";
 import { useState, useEffect } from "react";
 import toast, { Toaster } from "react-hot-toast";
@@ -19,12 +20,15 @@ import { GoCheckCircle } from "react-icons/go";
 import axios from "axios";
 import { getUseraccount } from "../redux/actions/userAction";
 import { useSelector, useDispatch } from "react-redux";
+import InviteEmailItem from "./InviteEmailItem";
 
 const SubscriptionModal = (props) => {
     const [subscriptions, setSubscriptions] = useState([]);
     const [price, setPrice] = useState("");
     const [isopen, setIsOpen] = useState(false);
     const [description, setDescription] = useState([]);
+    const [type, setType] = useState(true);
+    const [inviteEmails, setInviteEmails] = useState([]);
     const user = JSON.parse(useSelector((state) => state.user.user));
     const dispatch = useDispatch();
 
@@ -41,7 +45,9 @@ const SubscriptionModal = (props) => {
 
     useEffect(() => {
         getSubscription();
+        getInviteEmails();
         getUseraccount(dispatch, { id: user.id });
+        setType(true);
     }, []);
 
     const getClientReferenceId = () => {
@@ -136,6 +142,24 @@ const SubscriptionModal = (props) => {
         setDescription(newDescription);
     }, [subscriptions]);
 
+    const getInviteEmails = () => {
+        axios.post(webAPI.getinviteEmails, {id: user.id})
+        .then(res => {
+            if(res.data.success) {
+                let invite_email = [...res.data.data]
+                while (invite_email.length < 8) {
+                    invite_email.push(null);
+                }
+                setInviteEmails(invite_email)
+                console.log(invite_email)
+            }})
+        .catch(err => console.error(err));
+    }
+    const handleInvite = (type, message) => {
+        notification(type, message);
+        getInviteEmails();
+    }
+
     return (
         <Dialog
             open={props.open}
@@ -143,14 +167,17 @@ const SubscriptionModal = (props) => {
             handler={props.handleCancel}
             className="border-[--site-chat-header-border] border rounded-2xl from-[--site-main-modal-from-color] to-[--site-main-modal-to-color] bg-gradient-to-br shadow-lg shadow-[--site-card-icon-color]"
         >
-            <DialogHeader className="px-8 pt-8 pb-6">
+            <DialogHeader className="px-8 pt-8 pb-6 flex justify-between flex-col md:flex-row">
                 <span className="text-[32px] leading-12 font-semibold text-[--site-card-icon-color]">
                     Subscription
                 </span>
+                <Link>
+                    <span onClick={() => {setType(!type)}} className="bg-transparent text-[--site-card-icon-color] text-base font-semibold hover:text-[--site-main-slider-thumb-color]">Invite others for a 50% discount</span>
+                </Link>
             </DialogHeader>
-            <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium md:px-12 md:pb-20 md:h-[42rem] h-[30rem] overflow-y-auto">
+            <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium md:px-12 md:pb-20 md:h-[42rem] h-[25rem] overflow-y-auto">
                 <Toaster />
-                {subscriptions && subscriptions.length !== 0 && (
+                {type ? subscriptions && subscriptions.length !== 0 && (
                     <div>
                         <div className="flex flex-col items-start justify-center w-full gap-12 py-4 md:flex-row">
                             {subscriptions.map((item, index) => {
@@ -338,7 +365,16 @@ const SubscriptionModal = (props) => {
                             )}
                         </div>
                     </div>
-                )}
+                ): <div className="flex flex-col gap-5">
+                        <span className="text-2xl font-semibold text-[--site-card-icon-color]">Invite 5 subscribers to get 50% off your subscription</span>
+                        <div className="flex flex-col gap-2">
+                            
+                            {inviteEmails.map((item, id) => {
+                                return <InviteEmailItem data={item} InviteConfirm={handleInvite} key={id}/>
+                            })}
+                        </div>
+                        
+                    </div>}
             </DialogBody>
             <Dialog
                 open={isopen}
