@@ -5,7 +5,7 @@ import { store } from "./redux/store";
 import "./App.css";
 
 function App() {
-  const pages = useRoutes(window.localStorage.getItem('user') === null ? AppRoutes_login : AppRoutes);
+  const pages = useRoutes(AppRoutes);
   return (
     <Provider className="App" store={store}>
       {pages}

@@ -15,6 +15,7 @@ import ReactSpeedometer from "react-d3-speedometer";
 import { MdOutlineUpdate } from "react-icons/md";
 import { setOpenSidebar } from "../redux/actions/locationAction";
 import SubscriptionModal from "./SubscriptionModal";
+import { Button } from "@material-tailwind/react";
 
 const ManageAccount = () => {
     const [username, setUsername] = useState("");
@@ -164,17 +165,17 @@ const ManageAccount = () => {
                             />
                         </div>
                     )}
-                    <button
+                    <Button
                         onClick={() => {
                             handleSubscriptionOpenModel();
                         }}
-                        className="flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
+                        className="normal-case flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
                     >
                         <MdOutlineUpdate className="w-4 h-4 md:w-6 md:h-6" />
                         <span className="md:text-base text-[12px] font-medium">
                             Upgrade
                         </span>
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -266,19 +267,19 @@ const ManageAccount = () => {
                         />
                     </div>
                     <div className="flex flex-col justify-end w-full gap-3 md:flex-row">
-                        <button
-                            className="px-4 py-2 text-base font-semibold text-[--site-card-icon-color] border bg-transparent border-[--site-card-icon-color] rounded-md"
+                        <Button
+                            className="normal-case px-4 py-2 text-base font-semibold text-[--site-card-icon-color] border bg-transparent border-[--site-card-icon-color] rounded-md"
                             onClick={() => handleCancelSubscription()}
                         >
                             Manage Subscription
-                        </button>
+                        </Button>
 
-                        <button
-                            className="px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md"
+                        <Button
+                            className="normal-case px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md"
                             onClick={() => handleChange()}
                         >
                             Confirm
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>

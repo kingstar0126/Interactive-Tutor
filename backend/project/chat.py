@@ -10,6 +10,7 @@ import uuid
 from dotenv import load_dotenv
 from .auth import generate_pin_password
 from werkzeug.utils import secure_filename
+from .generate_response import generate_system_prompt_role
 import datetime
 
 load_dotenv()
@@ -72,13 +73,13 @@ def add_chat():
     behavior = request.json['behavior']
     behaviormodel = request.json['behaviormodel']
     train = json.dumps([])
-    chat_logo = json.dumps({})
+    chat_logo = json.dumps({"user": "https://app.interactive-tutor.com/api/imageupload/default_user.png", "ai": "https://app.interactive-tutor.com/api/imageupload/default_ai.png"})
     chat_title = json.dumps({})
     chat_description = json.dumps({})
     chat_copyright = json.dumps(
         {'description': 'powered by interactive-tutor.com', 'status': 'false', 'color': '#ff0000'})
     chat_button = json.dumps({})
-    bubble = json.dumps({})
+    bubble = json.dumps({"position": {"value": 0, "label": "Right"}})
 
     user = db.session.query(User).filter_by(id=user_id).first()
     ct = db.session.query(Chat).filter_by(user_id=user_id).count() + 1
@@ -144,7 +145,6 @@ def update_brandingData():
     chat_copyright = request.json['chat_copyright']
     chat_button = request.json['chat_button']
     bubble = request.json['bubble']
-
     chat = db.session.query(Chat).filter_by(id=id).first()
     if chat is None:
         # If no such chat exists, return an error response
@@ -465,3 +465,8 @@ def transfer_tutor_customer():
     chat.user_id = user.id
     db.session.commit()
     return jsonify({'success': True, 'message': f'You have successfully transferred your tutor to {email}!', 'code': 200})
+
+@chat.route('/api/generate_system_prompt', methods=['POST'])
+def generate_system_prompt():
+    role = request.json['role']
+    return generate_system_prompt_role(role)

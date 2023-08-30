@@ -27,6 +27,7 @@ class User(UserMixin, db.Model):
     city = db.Column(db.String(255))
     country = db.Column(db.String(255))
     status = db.Column(db.Integer)
+    discount = db.Column(db.Boolean)
     create_date = db.Column(db.DateTime, default=datetime.utcnow)
     update_date = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -58,14 +59,14 @@ class Chat(UserMixin, db.Model):
     __tablename__ = 'chat'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, nullable=False)
-    label = db.Column(db.String(255), nullable=False)
-    description = db.Column(db.String(255))
-    model = db.Column(db.String(255))
-    conversation = db.Column(db.String(255))
+    label = db.Column(db.String(65535), nullable=False)
+    description = db.Column(db.String(65535))
+    model = db.Column(db.String(65535))
+    conversation = db.Column(db.String(65535))
     access = db.Column(db.Integer)
     creativity = db.Column(db.Float)
     behavior = db.Column(db.String(65535))
-    behaviormodel = db.Column(db.String(255))
+    behaviormodel = db.Column(db.String(65535))
     train = db.Column(db.JSON)
     chat_logo = db.Column(db.JSON)
     chat_title = db.Column(db.JSON)
@@ -92,7 +93,7 @@ class Message(UserMixin, db.Model):
     chat_id = db.Column(db.Integer, nullable=False)
     message = db.Column(db.JSON)
     behavior = db.Column(db.String(65535))
-    name = db.Column(db.String(255))
+    name = db.Column(db.String(65535))
     creativity = db.Column(db.Float)
     create_date = db.Column(db.Date, default=datetime.utcnow)
     update_date = db.Column(
@@ -147,6 +148,16 @@ class Production(UserMixin, db.Model):
     update_date = db.Column(
         db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+class Invite(UserMixin, db.Model):
+    __tablename__ = 'invite'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer)
+    email = db.Column(db.String(255))
+    status = db.Column(db.Boolean)
+    index = db.Column(db.Integer)
+    create_date = db.Column(db.Date, default=datetime.utcnow)
+    update_date = db.Column(
+        db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class OAuth(OAuthConsumerMixin, db.Model):
     __table_args__ = (db.UniqueConstraint("provider", "provider_user_id"),)

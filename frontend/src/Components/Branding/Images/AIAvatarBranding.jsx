@@ -4,6 +4,7 @@ import toast from "react-hot-toast";
 import { webAPI } from "../../../utils/constants";
 import { SERVER_URL } from "../../../config/constant";
 import { useState, useEffect } from "react";
+import { Button } from "@material-tailwind/react";
 
 const UserAvatarBranding = (props) => {
     const [selectedLogo, setSelectedLogo] = useState(null);
@@ -97,14 +98,14 @@ const UserAvatarBranding = (props) => {
                                 )}
                             </Dropzone>
                         </div>
-                        <button
+                        <Button
                             onClick={(e) => {
                                 handleUpload();
                             }}
-                            className="p-2 rounded-xl bg-[--site-logo-text-color] my-2 border border-[--site-chat-header-border]"
+                            className="normal-case p-2 rounded-xl bg-[--site-logo-text-color] my-2 border border-[--site-chat-header-border] text-black text-base"
                         >
                             Upload
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </div>

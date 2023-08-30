@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Message
-from .models import User, Organization
+from .models import User, Organization, Invite
 from . import db, mail
 import os
 import string
@@ -522,3 +522,66 @@ def subscription_custom_plan():
         'send_custom_plan.html', username=user.username, email=user.email, phone=user.contact)
     mail.send(msg)
     return jsonify({'success': True, 'code': 200, 'message': 'We have sent your request to the manager.'})
+
+@auth.route('/api/inviteEmail', methods=['POST'])
+def invite_email():
+    id = request.json['id']
+    email = request.json['email']
+    index = request.json['index']
+    user = db.session.query(User).filter_by(id=id).first()
+    invite_user = db.session.query(User).filter_by(email=email).first()
+    if invite_user:
+        return jsonify({'success': False, 'code': 409, 'message': 'Email address already exists!'})
+    new_invite = Invite(user_id=id, email=email, index=index, status=False)
+
+    db.session.add(new_invite)
+    db.session.commit()
+    msg = Message('Invite to the interactive tutor', sender=os.getenv('MAIL_USERNAME'), recipients=[email])
+    msg.html = render_template(
+        'invite.html', username=user.username, url="https://app.interactive-tutor.com"
+    )
+    mail.send(msg)
+    return jsonify({'success': True, 'code': 200, 'message': 'You have successfully sent the invitation!'})
+
+
+@auth.route('/api/getInviteEmails', methods=['POST'])
+def get_invite_emails():
+    id = request.json['id']
+    invite_emails = db.session.query(Invite).filter_by(user_id=id).all()
+    user = db.session.query(User).filter_by(id=id).first()
+    response = []
+    count = 0
+    for invite_email in invite_emails:
+        item = {
+            'email': invite_email.email,
+            'index': invite_email.index,
+            'status': invite_email.status
+        }
+        if invite_email.status:
+            count += 1
+        response.append(item)
+    if count >= 5:
+        if not user.discount:
+            user.discount = True
+            db.session.commit()
+            msg = Message('Discount of Interactive tutor', sender=os.getenv('MAIL_USERNAME'), recipients=[user.email])
+            msg.html = render_template(
+                'discount.html', username=user.username, coupon=os.getenv('COUPON')
+            )
+            mail.send(msg)
+    data = {
+        'success': True,
+        'code': 200, 
+        'data': response
+    }
+    return jsonify(data)
+
+@auth.route('/api/removeInvite', methods=['POST'])
+def remove_invite_email():
+    id = request.json['id']
+    email = request.json['email']
+    query = db.session.query(Invite).filter_by(user_id=id, email=email)
+    if query:
+        query.delete()
+        db.session.commit()
+    return jsonify({'success': True, 'code': 200, 'message': 'Email successfully removed'})

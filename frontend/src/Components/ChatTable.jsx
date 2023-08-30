@@ -108,15 +108,15 @@ const ChatTable = (props) => {
         <div className="relative overflow-x-auto rounded-xl">
             <Toaster />
             <div className="flex xl:hidden justify-end pt-3 px-2">
-                <button
-                    className="px-4 py-2 rounded-md gap-2 inline-flex items-center justify-center bg-[--site-card-icon-color] w-1/2 text-[--site-main-Table-Text]"
+                <Button
+                    className="normal-case px-4 py-2 rounded-md gap-2 inline-flex items-center justify-center bg-[--site-card-icon-color] w-1/2 text-[--site-main-Table-Text]"
                     onClick={() => {
                         props.handleAdd();
                     }}
                 >
                     <span className="text-base">Add Tutors</span>
                     <AiOutlinePlus className="w-5 h-5" />
-                </button>
+                </Button>
             </div>
             <table className="w-full table-fixed text-start">
                 <thead>
@@ -143,8 +143,8 @@ const ChatTable = (props) => {
                                         </th>
                                     ) : (
                                         <th className={classes}>
-                                            <button
-                                                className="px-4 py-2 rounded-md gap-2 hidden xl:inline-flex items-center justify-center bg-[--site-card-icon-color] w-full text-[--site-main-Table-Text]"
+                                            <Button
+                                                className="normal-case px-4 py-2 rounded-md gap-2 hidden xl:inline-flex items-center justify-center bg-[--site-card-icon-color] w-full text-[--site-main-Table-Text]"
                                                 onClick={() => {
                                                     props.handleAdd();
                                                 }}
@@ -153,7 +153,7 @@ const ChatTable = (props) => {
                                                     Add Tutors
                                                 </span>
                                                 <AiOutlinePlus className="w-8 h-8" />
-                                            </button>
+                                            </Button>
                                             <Typography
                                                 variant="small"
                                                 className="text-base xl:hidden font-medium text-[--site-card-icon-color] text-start"

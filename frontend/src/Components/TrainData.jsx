@@ -88,14 +88,14 @@ export default function TraindataTable() {
         <div className="flex flex-col w-full h-full gap-5 py-5">
             <Toaster />
             <div className="flex justify-end px-5 ">
-                <button
+                <Button
                     type="button"
                     onClick={showModal}
-                    className="text-black bg-[--site-logo-text-color] hover:bg-[--site-card-icon-color]/90 focus:ring-4 focus:outline-none focus:ring-[--site-card-icon-color]/50 font-medium text-base text-center items-center dark:focus:ring-[--site-card-icon-color]/55 gap-2 p-2 flex"
+                    className=" normal-case text-black bg-[--site-logo-text-color] font-medium text-base text-center items-center gap-2 p-2 flex"
                 >
                     <HiOutlineCircleStack className="w-[30px] h-[30px] text-xl pointer-events-none" />
                     <span>Add Data</span>
-                </button>
+                </Button>
             </div>
             <div className="flex">
                 <table className="text-left table-fixed sm:w-full min-h-[20rem] w-full">
@@ -170,7 +170,7 @@ export default function TraindataTable() {
 
                                     <td className={classes}>
                                         <div className="flex items-center justify-center h-full w-max">
-                                            <Tooltip content="Delete User">
+                                            <Tooltip content="Delete training data">
                                                 <Button
                                                     variant="outlined"
                                                     color="red"

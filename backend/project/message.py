@@ -185,7 +185,13 @@ def send_message():
             'data': response
         }
         return jsonify(_response)
-
+    else:
+        response = {
+            'success': False,
+            'code': 404,
+            'message': 'Not found your Tutor. Pelase recreate Tutor.',
+        }
+        return jsonify(response)
 
 @message.route('/api/sendchatbubble', methods=['POST'])
 def send_chat_bubble():

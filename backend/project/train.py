@@ -47,9 +47,8 @@ train = Blueprint('train', __name__)
 
 
 def count_tokens(string):
-    pattern = r'\b\w+\b'  # Matches any word character
-    tokens = re.findall(pattern, string)
-    return len(tokens)
+    words = string.split()
+    return len(words)
 
 
 def compare_token_words(ct, chatbot):
@@ -156,8 +155,9 @@ def text_to_docs(text: str, filename: str, chat: str) -> List[Document]:
 
     for i, doc in enumerate(page_docs):
         text_splitter = RecursiveCharacterTextSplitter(
+            separators=["\n\n", "\n"],
             chunk_size=1000,
-            chunk_overlap=100,
+            chunk_overlap=200,
         )
         if doc.page_content == "":
             continue
@@ -420,7 +420,8 @@ def get_traindatas():
     data = []
     for id in train_ids:
         train_data = db.session.query(Train).filter_by(id=id).first()
-        data.append({'id': train_data.id, 'label': train_data.label,
+        if train_data:
+            data.append({'id': train_data.id, 'label': train_data.label,
                     'type': train_data.type, 'status': train_data.status})
     return jsonify({'data': data, 'success': True})
 

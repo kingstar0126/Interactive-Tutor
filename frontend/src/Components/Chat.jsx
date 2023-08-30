@@ -18,7 +18,7 @@ import {
     MdArrowDropDown,
     MdArrowDropUp,
 } from "react-icons/md";
-import { Carousel, IconButton } from "@material-tailwind/react";
+import { Button, Carousel, IconButton } from "@material-tailwind/react";
 import {
     Dialog,
     DialogHeader,
@@ -179,7 +179,11 @@ const Chat = () => {
         };
 
         axios.post(webAPI.getchats, data).then((res) => {
-            SetChat(res.data.data);
+            if (res.data.success) {
+                SetChat(res.data.data);
+            } else {
+                notification("error", res.data.message);
+            }
         });
     };
 
@@ -235,17 +239,17 @@ const Chat = () => {
                             />
                         </div>
                     )}
-                    <button
+                    <Button
                         onClick={handleOpenModel}
-                        className="flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
+                        className="normal-case flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
                     >
                         <MdOutlineUpdate className="w-4 h-4 md:w-6 md:h-6" />
                         <span className="md:text-base text-[12px] font-medium">
                             Upgrade
                         </span>
-                    </button>
+                    </Button>
 
-                    <button
+                    <Button
                         className="p-2 flex justify-center items-center bg-[--site-card-icon-color] rounded text-[--site-logo-text-color] pt-3 ml-2 opacity-100"
                         onClick={() => setIsOpen(!isOpen)}
                     >
@@ -254,7 +258,7 @@ const Chat = () => {
                         ) : (
                             <MdArrowDropDown className="w-3 h-3 md:w-5 md:h-5 hover:scale-105" />
                         )}
-                    </button>
+                    </Button>
                 </div>
             </div>
             <div className="flex md:hidden gap-2 text-[--site-card-icon-color] pt-8 px-10">

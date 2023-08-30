@@ -55,14 +55,17 @@ def generate_message(query, history, behavior, temp, model, chat):
     if model == "1":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo",
                          temperature=temp,
+                         streaming=True,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "2":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k",
                          temperature=temp,
+                         streaming=True,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "3":
-        llm = ChatOpenAI(model_name="gpt-4",
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k",
                          temperature=temp,
+                         streaming=True,
                          openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
 
     conversation = LLMChain(
@@ -123,14 +126,17 @@ def generate_AI_message(query, history, behavior, temp, model):
     if model == "1":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo",
                          temperature=temp,
+                         streaming=True,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "2":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k",
                          temperature=temp,
+                         streaming=True,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "3":
-        llm = ChatOpenAI(model_name="gpt-4",
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k",
                          temperature=temp,
+                         streaming=True,
                          openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
     conversation = LLMChain(
         llm=llm,
@@ -170,6 +176,7 @@ def generate_Bubble_message(query):
 
     llm = ChatOpenAI(model_name="gpt-3.5-turbo",
                      temperature=1,
+                     streaming=True,
                      openai_api_key=os.getenv('OPENAI_API_KEY'))
     conversation = LLMChain(
         llm=llm,
@@ -180,4 +187,50 @@ def generate_Bubble_message(query):
         query=query
     )
     response = response.replace('"', '')
+    return response
+
+def generate_system_prompt_role(role):
+    load_dotenv()
+
+    template = '''You are a OpenAI GPT system role expert. Your job is to analyze the needs of users and generate system roles for users' 'Interactive Tutors' that they embed to change the role of the 'tutor' powered by OpenAI API to deliver on what they need. The user will give you details on what they need the system behavior prompt to deliver. 
+
+Once you have this information, do not ask any further questions and please provide json object: A short name for the tutor, description of the tutor, a conversation starter and the system role written out in full.
+{{
+"name": "",
+"system_role": "",
+"starter" : "",
+"description": ""
+}}
+
+The system role should be well detailed, clearly detail what steps the AI should take and to use British English if communicating in English. Most importantly, the system role's maximum character length must be less than 65500.
+=========================
+user: {role}
+'''
+
+    prompt = PromptTemplate(
+        input_variables=["role"], template=template)
+
+    def get_hashed_name(name):
+        return hashlib.sha256(name.encode()).hexdigest()
+
+    def init_gptcache(cache_obj: Cache, llm: str):
+        hashed_llm = get_hashed_name(llm)
+        cache_obj.init(
+            pre_embedding_func=get_prompt,
+            data_manager=manager_factory(
+                manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
+        )
+
+    langchain.llm_cache = GPTCache(init_gptcache)
+
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo",
+                     temperature=0.2,
+                     openai_api_key=os.getenv('OPENAI_API_KEY'))
+    conversation = LLMChain(
+        llm=llm,
+        prompt=prompt
+    )
+    response = conversation.run(
+        role=role
+    )
     return response

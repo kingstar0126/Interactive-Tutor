@@ -12,6 +12,7 @@ import {
     DialogBody,
     DialogFooter,
     Spinner,
+    Button,
 } from "@material-tailwind/react";
 
 const ChatmodalTrain = (props) => {
@@ -331,29 +332,19 @@ const ChatmodalTrain = (props) => {
                 </Scrollbar>
             </DialogBody>
             <DialogFooter className="flex items-center justify-end gap-4 px-10 pb-8">
-                <button
+                <Button
                     onClick={props.handleCancel}
-                    className="bg-transparent border-[--site-card-icon-color] text-[--site-card-icon-color] text-base font-semibold border rounded-md px-4 py-2"
+                    className=" normal-case bg-transparent border-[--site-card-icon-color] text-[--site-card-icon-color] text-base font-semibold border rounded-md px-4 py-2"
                 >
                     cancel
-                </button>
-                {label && (
-                    <button
-                        onClick={onOK}
-                        className="px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md"
-                    >
-                        confirm
-                    </button>
-                )}
-                {!label && (
-                    <button
-                        disabled
-                        onClick={onOK}
-                        className="px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md disabled:opacity-75"
-                    >
-                        confirm
-                    </button>
-                )}
+                </Button>
+                <Button
+                disabled={ !label }
+                    onClick={onOK}
+                    className=" normal-case px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md disabled:opacity-75"
+                >
+                    confirm
+                </Button>
             </DialogFooter>
         </Dialog>
     );
