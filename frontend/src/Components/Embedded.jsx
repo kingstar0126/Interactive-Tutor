@@ -18,7 +18,8 @@ const Embedded = (props) => {
     const chatbot_URL = useRef(null);
     const chatbot_organization = useRef(null);
     const chatbot_access = useRef(null);
-    const chat = JSON.parse(useSelector((state) => state.chat.chat));
+    const chatState = useSelector((state) => state.chat.chat);
+    const chat = chatState && JSON.parse(chatState) || {};
 
     useEffect(() => {
         setChatURL(`${SERVER_URL}/chatbot/share/url`);

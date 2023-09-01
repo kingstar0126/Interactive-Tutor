@@ -13,6 +13,7 @@ import { getUserState } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
 import ReactSpeedometer from "react-d3-speedometer";
 import { setOpenSidebar } from "../redux/actions/locationAction";
+import { getchat } from "../redux/actions/chatAction";
 import {
     MdOutlineUpdate,
     MdArrowDropDown,
@@ -42,7 +43,8 @@ const Chat = () => {
     const [chat, SetChat] = useState([]);
     const user = JSON.parse(useSelector((state) => state.user.user));
     const query = useSelector((state) => state.query.query);
-    const _chat = JSON.parse(useSelector((state) => state.chat.chat));
+    const chatState = useSelector((state) => state.chat.chat);
+    const _chat = chatState && JSON.parse(chatState) || {};
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isOpen, setIsOpen] = useState(true);
     const [trial, setTrial] = useState(0);
@@ -161,26 +163,32 @@ const Chat = () => {
         setIsPlaying(!video.paused);
     };
     useEffect(() => {
-        getUserState(dispatch, { id: user.id });
-        setquery(dispatch, user.query);
-        if (user.role === 5) {
-            setTrial(user.days);
-            getChats();
-        } else if (user.role === undefined || user.role === 0) {
-            setOpen(true);
-        } else {
-            getChats();
-        }
+        const fetchData = async () => {
+            getUserState(dispatch, { id: user.id });
+            setquery(dispatch, user.query);
+            if (user.role === 5) {
+                setTrial(user.days);
+                await getChats();
+            } else if (user.role === undefined || user.role === 0) {
+                setOpen(true);
+            } else {
+                await getChats();
+            }
+        };
+    
+        fetchData();
+    
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-    const getChats = () => {
+    const getChats = async () => {
         let data = {
             user_id: user.id,
         };
 
-        axios.post(webAPI.getchats, data).then((res) => {
+        await axios.post(webAPI.getchats, data).then((res) => {
             if (res.data.success) {
                 SetChat(res.data.data);
+                getchat(dispatch, res.data.data)
             } else {
                 notification("error", res.data.message);
             }

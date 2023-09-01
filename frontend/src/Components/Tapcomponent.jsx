@@ -24,13 +24,13 @@ import { setchatbot, getchat } from "../redux/actions/chatAction";
 import { useDispatch } from "react-redux";
 
 export default function Example() {
-    const chat = JSON.parse(useSelector((state) => state.chat.chat));
+    const chatState = useSelector((state) => state.chat.chat);
+    const chat = chatState && JSON.parse(chatState) || {};
     const [activeTab, setActiveTab] = useState("preview");
     const dispatch = useDispatch();
     const [message_history, setMessage_history] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [updateModalOpen, setUpdateModalOpen] = useState(false);
-
     const notification = (type, message) => {
         // To do in here
         if (type === "error") {

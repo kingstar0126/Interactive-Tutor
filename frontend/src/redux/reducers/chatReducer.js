@@ -4,8 +4,8 @@ import { SET_CHATBOT } from "../type";
 import { GET_CHATBOT } from "../type";
 
 const initialState = {
-    chat: localStorage.getItem("chat"),
-    chatbot: localStorage.getItem("chatbot"),
+    chat: JSON.stringify({}),
+    chatbot: '',
     chatmessage: localStorage.getItem("chatmessage"),
 };
 
@@ -14,22 +14,19 @@ const chatReducer = (state = initialState, action) => {
 
     switch (type) {
         case ADD_CHAT:
-            localStorage.setItem("chat", payload);
             return {
                 ...state,
-                chat: localStorage.getItem("chat"),
+                chat: JSON.stringify(payload),
             };
         case GET_CHAT:
-            localStorage.setItem("chat", payload);
             return {
                 ...state,
-                chat: localStorage.getItem("chat"),
+                chat: payload,
             };
         case SET_CHATBOT:
-            localStorage.setItem("chatbot", payload);
             return {
                 ...state,
-                chatbot: localStorage.getItem("chatbot"),
+                chatbot: payload,
             };
         case GET_CHATBOT:
             localStorage.setItem("chatmessage", payload);
