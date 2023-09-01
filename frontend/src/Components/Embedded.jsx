@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { SERVER_URL } from "../config/constant";
+import { EMBED_SERVER_URL } from "../config/constant";
 import {
     DialogHeader,
     Dialog,
@@ -21,12 +21,12 @@ const Embedded = (props) => {
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
 
     useEffect(() => {
-        setChatURL(`${SERVER_URL}/chatbot/share/url`);
+        setChatURL(`${EMBED_SERVER_URL}/chatbot/share/url`);
         setChatwindow(
-            `<iframe style="border: 0" frameborder="0" scrolling="no" height="600px" width="100%" src="${SERVER_URL}/chat/embedding/${props.data.uuid}"></iframe>`
+            `<iframe style="border: 0" frameborder="0" scrolling="no" height="600px" width="100%" src="${EMBED_SERVER_URL}/chat/embedding/${props.data.uuid}"></iframe>`
         );
         setBubble(
-            `<script type="text/javascript">window.$icg=[];window.ICG_WIDGET_ID="${props.data.uuid}";(function(){d=document;s=d.createElement("script");s.src="${SERVER_URL}/widget/bubble.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>`
+            `<script type="text/javascript">window.$icg=[];window.ICG_WIDGET_ID="${props.data.uuid}";(function(){d=document;s=d.createElement("script");s.src="${EMBED_SERVER_URL}/widget/bubble.js";s.async=1;d.getElementsByTagName("head")[0].appendChild(s);})();</script>`
         );
     }, []);
 

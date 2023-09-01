@@ -552,8 +552,10 @@ const NewChat = () => {
 
                             <div className="flex items-center w-full divide-x-2 sm:w-4/5">
                                 <div className="flex items-center justify-end w-full text-black">
-                                    <input
+                                    <textarea
                                         type="text"
+                                        rows="3"
+                                        cols="50"
                                         value={message}
                                         onChange={(e) =>
                                             setMessage(e.target.value)
