@@ -229,7 +229,7 @@ const NewChat = () => {
     }, [chathistory]);
 
     const handleSubmit = (event) => {
-        if (event.keyCode === 13) {
+        if (!event.shiftKey && event.keyCode === 13) {
             let id = chatbot;
             let _message = message;
             if (_message === "") {
