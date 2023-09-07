@@ -67,4 +67,6 @@ export const webAPI = {
 
     userInvite: SERVER_URL + "/api/userInvite",
     userInviteRemove: SERVER_URL + "/api/userInviteRemove",
+    setTutors: SERVER_URL + "/api/setTutors",
+    resendInvitation: SERVER_URL + "/api/resendInvitation",
 };
