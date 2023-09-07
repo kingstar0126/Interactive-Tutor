@@ -109,13 +109,13 @@ const ChatTable = (props) => {
             <Toaster />
             <div className="flex xl:hidden justify-end pt-3 px-2">
                 <Button
-                    className="normal-case px-4 py-2 rounded-md gap-2 inline-flex items-center justify-center bg-[--site-card-icon-color] w-1/2 text-[--site-main-Table-Text]"
+                    className="normal-case px-4 py-2 rounded-md gap-1 text-sm inline-flex items-center justify-center bg-[--site-card-icon-color] w-1/2 text-[--site-main-Table-Text]"
                     onClick={() => {
                         props.handleAdd();
                     }}
                 >
-                    <span className="text-base">Add Tutors</span>
-                    <AiOutlinePlus className="w-5 h-5" />
+                    Add Tutors
+                    <AiOutlinePlus className="w-4 h-4" />
                 </Button>
             </div>
             <table className="w-full table-fixed text-start">
@@ -144,15 +144,15 @@ const ChatTable = (props) => {
                                     ) : (
                                         <th className={classes}>
                                             <Button
-                                                className="normal-case px-4 py-2 rounded-md gap-2 hidden xl:inline-flex items-center justify-center bg-[--site-card-icon-color] w-full text-[--site-main-Table-Text]"
+                                                className="normal-case px-4 py-2 rounded-md gap-1 hidden xl:inline-flex items-center justify-center bg-[--site-card-icon-color] w-full text-[--site-main-Table-Text]"
                                                 onClick={() => {
                                                     props.handleAdd();
                                                 }}
                                             >
-                                                <span className="text-2xl">
+                                                <span className="text-xl">
                                                     Add Tutors
                                                 </span>
-                                                <AiOutlinePlus className="w-8 h-8" />
+                                                <AiOutlinePlus className="w-6 h-6" />
                                             </Button>
                                             <Typography
                                                 variant="small"
@@ -220,42 +220,44 @@ const ChatTable = (props) => {
                                                 Open
                                             </span>
                                         </button>
-                                        <button
-                                            className="w-full h-full xl:p-2 px-1 bg-[#153144]/25 rounded-md text-[#153144] hover:bg-[#153144]/75 hover:text-white transition-color duration-150 ease-out active:bg-white active:ring active:ring-[#153144] active:text-[#153144]"
-                                            onClick={() => {
-                                                SetCurrentchat(data);
-                                                showModal();
-                                            }}
-                                        >
-                                            <span className="xl:text-base text-sm font-medium">
-                                                Edit
-                                            </span>
-                                        </button>
-                                        {user.role === 1 && (
-                                            <button
-                                                className="w-full h-full xl:p-2 px-1 bg-[#5f3f4f]/25 rounded-md text-[#5f3f4f] hover:bg-[#5f3f4f]/75 hover:text-white transition-color duration-150 ease-out active:bg-white active:ring active:ring-[#5f3f4f] active:text-[#5f3f4f]"
-                                                onClick={() => {
-                                                    handleOpenTransModal();
-                                                    setId(data["id"]);
-                                                }}
-                                            >
-                                                <span className="xl:text-base text-sm font-medium">
-                                                    Transfer
-                                                </span>
-                                            </button>
-                                        )}
+                                        { data['inviteId'] === null ? (
+                                            <>
+                                                <button
+                                                    className="w-full h-full xl:p-2 px-1 bg-[#153144]/25 rounded-md text-[#153144] hover:bg-[#153144]/75 hover:text-white transition-color duration-150 ease-out active:bg-white active:ring active:ring-[#153144] active:text-[#153144]"
+                                                    onClick={() => {
+                                                        SetCurrentchat(data);
+                                                        showModal();
+                                                    }}
+                                                >
+                                                    <span className="xl:text-base text-sm font-medium">Edit</span>
+                                                </button>
+                                                {user.role === 1 && (
+                                                    <button
+                                                        className="w-full h-full xl:p-2 px-1 bg-[#5f3f4f]/25 rounded-md text-[#5f3f4f] hover:bg-[#5f3f4f]/75 hover:text-white transition-color duration-150 ease-out active:bg-white active:ring active:ring-[#5f3f4f] active:text-[#5f3f4f]"
+                                                        onClick={() => {
+                                                            handleOpenTransModal();
+                                                            setId(data["id"]);
+                                                        }}
+                                                    >
+                                                        <span className="xl:text-base text-sm font-medium">
+                                                            Transfer
+                                                        </span>
+                                                    </button>
+                                                )}
 
-                                        <button
-                                            className="w-full h-full xl:p-2 px-1 bg-[#FF2121]/25 rounded-md text-[#FF2121] hover:bg-[#FF2121]/75 hover:text-white transition-color duration-150 ease-out active:bg-white active:ring active:ring-[#FF2121] active:text-[#FF2121]"
-                                            onClick={() => {
-                                                handleOpen();
-                                                setId(data["id"]);
-                                            }}
-                                        >
-                                            <span className="xl:text-base text-sm font-medium">
-                                                Delete
-                                            </span>
-                                        </button>
+                                                <button
+                                                    className="w-full h-full xl:p-2 px-1 bg-[#FF2121]/25 rounded-md text-[#FF2121] hover:bg-[#FF2121]/75 hover:text-white transition-color duration-150 ease-out active:bg-white active:ring active:ring-[#FF2121] active:text-[#FF2121]"
+                                                    onClick={() => {
+                                                        handleOpen();
+                                                        setId(data["id"]);
+                                                    }}
+                                                >
+                                                    <span className="xl:text-base text-sm font-medium">
+                                                        Delete
+                                                    </span>
+                                                </button>
+                                            </>
+                                        ) : null }
                                     </div>
                                 </td>
                             </tr>

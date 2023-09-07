@@ -7,8 +7,9 @@ import Chat from "./Components/Chat";
 import Subscription from "./Components/Subscription";
 import Tapcomponent from "./Components/Tapcomponent";
 import NewChat from "./Components/NewChat";
-import Chatbubble from "./Components/Chatbubble";
+import Thankyou from "./Pages/Thankyou";
 import Notfound from "./Pages/Notfound";
+import Enterprise from "./Components/Enterprise";
 import Manager from "./Components/Manager";
 import ManageAccount from "./Components/ManageAccount";
 import Report from "./Components/Report";
@@ -38,6 +39,10 @@ const AppRoutes = [
             {
                 path: "manager",
                 element: <Manager />,
+            },
+            {
+                path: "enterprise",
+                element: <Enterprise />,
             },
             {
                 path: "account",
@@ -71,6 +76,10 @@ const AppRoutes = [
             {
                 path: "/changepassword",
                 element: <Changepassword />,
+            },
+            {
+                path: "/thankyou",
+                element: < Thankyou />
             },
             {
                 path: "/chatbot/share/url",

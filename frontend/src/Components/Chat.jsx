@@ -75,11 +75,11 @@ const Chat = () => {
     ];
     const videos = [
         {
-            src: "https://video.wixstatic.com/video/4d69d5_460d6c1987694c569ea62b7f32b51bf1/1080p/mp4/file.mp4",
+            src: "https://video.wixstatic.com/video/4d69d5_623a228db02a4e718fff7c7a2c491460/1080p/mp4/file.mp4",
             type: "video/mp4",
         },
         {
-            src: "https://video.wixstatic.com/video/4d69d5_ca127d9db93c4475bb3cf55781f88b70/720p/mp4/file.mp4",
+            src: "https://video.wixstatic.com/video/4d69d5_14f7d61c484a4a5fbf28b7323d1391e1/1080p/mp4/file.mp4",
             type: "video/mp4",
         },
         {

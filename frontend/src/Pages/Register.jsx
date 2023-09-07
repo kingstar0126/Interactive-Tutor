@@ -6,6 +6,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { webAPI } from "../utils/constants";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
     const {
@@ -24,11 +25,13 @@ const Register = () => {
             toast.success(message);
         }
     };
-
+    const navigate = useNavigate();
     const onSubmit = async (data) => {
+        console.log(data)
         axios.post(webAPI.register, data).then((res) => {
             if (res.data.success) {
                 notification("success", res.data.message);
+                navigate("/thankyou");
             } else {
                 notification("error", res.data.message);
             }
@@ -177,12 +180,12 @@ const Register = () => {
                         </div>
                         <div className="mt-6">
                             {checkbox ? (
-                                <button className="w-full px-4 py-2 tracking-wide text-[--site-main-color3] transition-colors duration-200 transform bg-[--site-main-Login] rounded-md hover:bg-[--site-main-Login1] focus:outline-none focus:bg-[--site-main-Login1]">
+                                <button className="normal-case w-full px-4 py-2 tracking-wide text-[--site-main-color3] transition-colors duration-200 transform bg-[--site-main-Login] rounded-md hover:bg-[--site-main-Login1] focus:outline-none focus:bg-[--site-main-Login1]">
                                     Register
                                 </button>
                             ) : (
                                 <button
-                                    className="w-full px-4 py-2 tracking-wide text-[--site-main-color3] transition-colors duration-200 transform bg-[--site-main-Login] rounded-md opacity-50 cursor-not-allowed"
+                                    className="normal-case w-full px-4 py-2 tracking-wide text-[--site-main-color3] transition-colors duration-200 transform bg-[--site-main-Login] rounded-md opacity-50 cursor-not-allowed"
                                     disabled
                                 >
                                     Register
