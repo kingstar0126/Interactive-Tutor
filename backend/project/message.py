@@ -108,12 +108,12 @@ def init_message():
     country = request.json['country']
     response = generate_Bubble_message(country)
     name = f"{response}, {country}"
-    messages = db.session.query(Message).all()
-    for row in messages:
-        _messages = json.loads(row.message)
-        if len(_messages) < 2:
-            db.session.delete(row)
-    db.session.commit()
+    # messages = db.session.query(Message).all()
+    # for row in messages:
+    #     _messages = json.loads(row.message)
+    #     if len(_messages) < 2:
+    #         db.session.delete(row)
+    # db.session.commit()
     if conversation == "":
         message = json.dumps([])
     else:

@@ -63,5 +63,8 @@ export const webAPI = {
     custom_plan: SERVER_URL + "/api/subscription/custom_plan",
     inviteEmail: SERVER_URL + "/api/inviteEmail",
     getinviteEmails: SERVER_URL + "/api/getInviteEmails",
-    remove_invite: SERVER_URL + "/api/removeInvite"
+    remove_invite: SERVER_URL + "/api/removeInvite",
+
+    userInvite: SERVER_URL + "/api/userInvite",
+    userInviteRemove: SERVER_URL + "/api/userInviteRemove",
 };

@@ -19,15 +19,7 @@ import { Button } from "@material-tailwind/react";
 const NewChat = () => {
     const navigate = useNavigate();
     const [chathistory, setChathistory] = useState([]);
-
-    const previous_location = useSelector(
-        (state) => state.location.previous_location
-    );
-    const current_location = useSelector(
-        (state) => state.location.current_location
-    );
     const dispatch = useDispatch();
-    const backgroundRef = useRef(null);
     const chatbot_logo = useRef(null);
     const chatbot_start = useRef(null);
     const chatbot_copyright = useRef(null);
@@ -45,7 +37,8 @@ const NewChat = () => {
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
     const [spinner, setSpinner] = useState(false);
-    const chat = JSON.parse(useSelector((state) => state.chat.chat));
+    const chatState = useSelector((state) => state.chat.chat);
+    const chat = chatState && JSON.parse(chatState) || {};
     const chatbot = useSelector((state) => state.chat.chatbot);
     const chatId = useParams();
     const notification = (type, message) => {
@@ -58,119 +51,76 @@ const NewChat = () => {
     useEffect(() => {
         const pattern = /\/chat\/embedding\/(\w+)/;
         const result = pattern.exec(location.pathname);
-
-        if (previous_location !== current_location && chat) {
-            setLoading(true);
-            let new_chat = chat;
-            axios
-                .get("https://geolocation-db.com/json/")
-                .then((res) => {
-                    let country = res.data.country_name;
-                    // getUserState(dispatch, { id: chat.user_id });
-                    new_chat["country"] = country;
-                    setchatbot(dispatch, new_chat);
-                    setLoading(false);
-                    if (new_chat.conversation !== "") {
-                        setChathistory([
-                            ...chathistory,
-                            { role: "ai", content: new_chat.conversation },
-                        ]);
-                        chatbot_start.current.classList.add("hidden");
-                        window_chat.current.classList.remove("hidden");
-                    } else {
-                        chatbot_start.current.classList.remove("hidden");
-                        window_chat.current.classList.add("hidden");
-                    }
-                })
-                .catch(() => {
-                    setLoading(false);
-                });
-        } else if (previous_location === current_location && chat) {
-            let id = chatbot;
-            axios
-                .post(webAPI.getchat, { id: id })
-                .then((res) => {
-                    if (res.data.code === 200) {
-                        getchat(dispatch, res.data.data);
-                    }
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
-
-            axios.post(webAPI.get_message, { id }).then((res) => {
-                if (res.data.success === true) {
-                    if (res.data.data.message) {
-                        setChathistory(res.data.data.message);
-                    }
-                    if (res.data.data.message.length === 0) {
-                        chatbot_start.current.classList.remove("hidden");
-                        window_chat.current.classList.add("hidden");
-                    } else {
-                        chatbot_start.current.classList.add("hidden");
-                        window_chat.current.classList.remove("hidden");
-                        if (human_background.current) {
-                            human_background.current.style["background-color"] =
-                                chat.chat_logo.user_bg;
-                            human_background.current.style.color =
-                                chat.chat_logo.user_color;
-                            human_background.current.style["font-size"] =
-                                chat.chat_logo.user_size + "px";
+        const fetchData = async () => {
+            if (chat.access) {
+                setLoading(true);
+                let new_chat = chat;
+                await axios
+                    .get("https://geolocation-db.com/json/")
+                    .then((res) => {
+                        let country = res.data.country_name;
+                        // getUserState(dispatch, { id: chat.user_id });
+                        new_chat["country"] = country;
+                        setchatbot(dispatch, new_chat);
+                        setLoading(false);
+                        if (new_chat.conversation !== "") {
+                            setChathistory([
+                                ...chathistory,
+                                { role: "ai", content: new_chat.conversation },
+                            ]);
+                            chatbot_start.current.classList.add("hidden");
+                            window_chat.current.classList.remove("hidden");
+                        } else {
+                            chatbot_start.current.classList.remove("hidden");
+                            window_chat.current.classList.add("hidden");
                         }
-                        if (ai_background.current) {
-                            ai_background.current.style["background-color"] =
-                                chat.chat_logo.ai_bg;
-                            ai_background.current.style.color =
-                                chat.chat_logo.ai_color;
-                            ai_background.current.style["font-size"] =
-                                chat.chat_logo.ai_size + "px";
-                        }
-                    }
-                }
-            });
-        } else if (!chat || result) {
-            setLoading(true);
-            axios
-                .get("https://geolocation-db.com/json/")
-                .then((res) => {
-                    let country = res.data.country_name;
-                    axios
-                        .post(webAPI.getchat, chatId)
-                        .then(async (res) => {
-                            if (res.data.code === 200) {
-                                getchat(dispatch, res.data.data);
-                                res.data.data["country"] = country;
-                                await axios
-                                    .post(webAPI.start_message, res.data.data)
-                                    .then((res) => {
-                                        if (res.status === 200) {
-                                            localStorage.setItem(
-                                                "chatbot",
-                                                res.data.data
-                                            );
-                                        }
-                                    })
-                                    .catch((err) => console.log(err));
+                    })
+                    .catch(() => {
+                        setLoading(false);
+                    });
+            } else if (!chat.access || result) {
+                setLoading(true);
+                await axios
+                    .get("https://geolocation-db.com/json/")
+                    .then((res) => {
+                        let country = res.data.country_name;
+                        axios
+                            .post(webAPI.getchat, chatId)
+                            .then(async (res) => {
+                                if (res.data.code === 200) {
+                                    getchat(dispatch, res.data.data);
+                                    res.data.data["country"] = country;
+                                    setchatbot(dispatch, res.data.data)
+                                    setLoading(false);
+                                } else {
+                                    navigate(-1);
+                                    setLoading(false);
+                                }
+                            })
+                            .catch((err) => {
                                 setLoading(false);
-                                window.location.reload();
-                            } else {
                                 navigate(-1);
-                                setLoading(false);
-                            }
-                        })
-                        .catch((err) => {
-                            setLoading(false);
-                            navigate(-1);
-                        });
-                })
-                .catch((err) => {
-                    setLoading(false);
-                });
+                            });
+                    })
+                    .catch((err) => {
+                        setLoading(false);
+                    });
+            }
         }
+        fetchData();
     }, []);
 
     useEffect(() => {
-        if (chat && loading === false) {
+        if (chat.access && loading === false) {
+            if (chat.conversation !== "" && chathistory.length == 0) {
+                setChathistory([
+                    ...chathistory,
+                    { role: "ai", content: chat.conversation },
+                ]);
+                chatbot_start.current.classList.add("hidden");
+                window_chat.current.classList.remove("hidden");
+            }
+
             if (chathistory.length > 0) {
                 chatbot_start.current.classList.add("hidden");
                 window_chat.current.classList.remove("hidden");
@@ -263,10 +213,10 @@ const NewChat = () => {
             chatbot_button3.current.style.padding = "10px";
             chatbot_button3.current.style["border-radius"] = "0.75rem";
         }
-    }, [chat]);
+    }, [chat])
 
     useEffect(() => {
-        if (chat) {
+        if (chat.access && messagesEndRef.current) {
             messagesEndRef.current.scrollToBottom();
         }
         if (human_background.current) {
@@ -286,9 +236,9 @@ const NewChat = () => {
     }, [chathistory]);
 
     const handleSubmit = (event) => {
-        if (event.keyCode === 13) {
+        if (!event.shiftKey && event.keyCode === 13 && spinner === false) {
             let id = chatbot;
-            let _message = message;
+            let _message = message.trim();
             if (_message === "") {
                 return;
             }
@@ -370,7 +320,7 @@ const NewChat = () => {
                 </div>
             )}
             <Toaster />
-            {chat && loading === false && (
+            {chat.access && loading === false && (
                 <div className="w-full h-screen lg:py-2">
                     <div
                         ref={newchat}
@@ -552,8 +502,10 @@ const NewChat = () => {
 
                             <div className="flex items-center w-full divide-x-2 sm:w-4/5">
                                 <div className="flex items-center justify-end w-full text-black">
-                                    <input
+                                    <textarea
                                         type="text"
+                                        rows="3"
+                                        cols="50"
                                         value={message}
                                         onChange={(e) =>
                                             setMessage(e.target.value)

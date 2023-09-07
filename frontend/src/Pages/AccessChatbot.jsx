@@ -9,21 +9,20 @@ import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getchat } from "../redux/actions/chatAction";
 import ReactLoading from "react-loading";
 import { useLocation } from "react-router-dom";
 import { setlocation } from "../redux/actions/locationAction";
+import { setchatbot, getchat } from "../redux/actions/chatAction";
 
 const AccessChatbot = () => {
-    const chat = JSON.parse(useSelector((state) => state.chat.chat));
+    const chatState = useSelector((state) => state.chat.chat);
+    const chat = chatState && JSON.parse(chatState) || {};
     const [error, SetError] = useState(false);
     const navigate = useNavigate();
     const [organization, setOrganization] = useState("");
     const [validate, SetValidate] = useState(false);
     let location = useLocation();
-    const previous_location = useSelector(
-        (state) => state.location.previous_location
-    );
+    const chatbot = useSelector((state) => state.chat.chatbot);
     const dispatch = useDispatch();
     const pinField = useRef(null);
     const [status, setStatus] = useState(false);
@@ -37,9 +36,6 @@ const AccessChatbot = () => {
             toast.success(message);
         }
     };
-    // useEffect(() => {
-    //     localStorage.clear();
-    // }, []);
 
     const submit = async (pin) => {
         await axios
@@ -47,52 +43,23 @@ const AccessChatbot = () => {
                 organization: organization,
                 pin: pin,
             })
-            .then((res) => {
+            .then(async (res) => {
                 if (res.data.success === false) {
                     notification("error", res.data.message);
                     setLoadindg(false);
                     setStatus(false);
+                    alert('Failed')
                 } else {
+                    alert('Success')
                     getchat(dispatch, res.data.data);
                     let chat = res.data.data;
-                    axios
-                        .get("https://geolocation-db.com/json/")
-                        .then((res) => {
-                            let country = res.data.country_name;
-                            chat["country"] = country;
-                            axios
-                                .post(webAPI.start_message, chat)
-                                .then((res) => {
-                                    if (res.status === 200) {
-                                        localStorage.setItem(
-                                            "chatbot",
-                                            res.data.data
-                                        );
-                                        setStatus(true);
-                                        setlocation(
-                                            dispatch,
-                                            location.pathname
-                                        );
-                                        navigate("newchat");
-                                    } else {
-                                        pinField.current.forEach(
-                                            (input) => (input.value = "")
-                                        );
-                                        pinField.current[0].focus();
-                                    }
-                                    setLoadindg(false);
-                                })
-                                .catch(() => {
-                                    setLoadindg(false);
-                                    pinField.current.forEach(
-                                        (input) => (input.value = "")
-                                    );
-                                    pinField.current[0].focus();
-                                });
-                        })
-                        .catch(() => {
-                            setLoadindg(false);
-                        });
+                    let response = await axios.get("https://geolocation-db.com/json/")
+                    alert(response.data.country_name)
+                    let country = response.data.country_name || ''
+                    chat["country"] = country;
+                    setchatbot(dispatch, chat);
+                    setStatus(true);
+                    navigate("newchat");
                 }
             });
     };

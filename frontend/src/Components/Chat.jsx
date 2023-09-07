@@ -13,6 +13,7 @@ import { getUserState } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
 import ReactSpeedometer from "react-d3-speedometer";
 import { setOpenSidebar } from "../redux/actions/locationAction";
+import { getchat } from "../redux/actions/chatAction";
 import {
     MdOutlineUpdate,
     MdArrowDropDown,
@@ -42,7 +43,8 @@ const Chat = () => {
     const [chat, SetChat] = useState([]);
     const user = JSON.parse(useSelector((state) => state.user.user));
     const query = useSelector((state) => state.query.query);
-    const _chat = JSON.parse(useSelector((state) => state.chat.chat));
+    const chatState = useSelector((state) => state.chat.chat);
+    const _chat = chatState && JSON.parse(chatState) || {};
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isOpen, setIsOpen] = useState(true);
     const [trial, setTrial] = useState(0);
@@ -73,11 +75,11 @@ const Chat = () => {
     ];
     const videos = [
         {
-            src: "https://video.wixstatic.com/video/4d69d5_460d6c1987694c569ea62b7f32b51bf1/1080p/mp4/file.mp4",
+            src: "https://video.wixstatic.com/video/4d69d5_623a228db02a4e718fff7c7a2c491460/1080p/mp4/file.mp4",
             type: "video/mp4",
         },
         {
-            src: "https://video.wixstatic.com/video/4d69d5_ca127d9db93c4475bb3cf55781f88b70/720p/mp4/file.mp4",
+            src: "https://video.wixstatic.com/video/4d69d5_14f7d61c484a4a5fbf28b7323d1391e1/1080p/mp4/file.mp4",
             type: "video/mp4",
         },
         {
@@ -161,26 +163,32 @@ const Chat = () => {
         setIsPlaying(!video.paused);
     };
     useEffect(() => {
-        getUserState(dispatch, { id: user.id });
-        setquery(dispatch, user.query);
-        if (user.role === 5) {
-            setTrial(user.days);
-            getChats();
-        } else if (user.role === undefined || user.role === 0) {
-            setOpen(true);
-        } else {
-            getChats();
-        }
+        const fetchData = async () => {
+            getUserState(dispatch, { id: user.id });
+            setquery(dispatch, user.query);
+            if (user.role === 5) {
+                setTrial(user.days);
+                await getChats();
+            } else if (user.role === undefined || user.role === 0) {
+                setOpen(true);
+            } else {
+                await getChats();
+            }
+        };
+    
+        fetchData();
+    
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-    const getChats = () => {
+    const getChats = async () => {
         let data = {
             user_id: user.id,
         };
 
-        axios.post(webAPI.getchats, data).then((res) => {
+        await axios.post(webAPI.getchats, data).then((res) => {
             if (res.data.success) {
                 SetChat(res.data.data);
+                getchat(dispatch, res.data.data)
             } else {
                 notification("error", res.data.message);
             }

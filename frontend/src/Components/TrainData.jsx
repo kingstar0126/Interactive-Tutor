@@ -11,7 +11,8 @@ import { Typography, Chip, Button, Tooltip } from "@material-tailwind/react";
 export default function TraindataTable() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [tableData, setTableData] = useState([]);
-    const chat = JSON.parse(useSelector((state) => state.chat.chat));
+    const chatState = useSelector((state) => state.chat.chat);
+    const chat = chatState && JSON.parse(chatState) || {};
     const dispatch = useDispatch();
     const TABLE_HEAD = ["LABEL", "TYPE", "STATUS", "ACTION"];
     const [currentPage, setCurrentPage] = useState(1);

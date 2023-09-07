@@ -18,18 +18,17 @@ jwt = JWTManager()
 mail = Mail()
 db = SQLAlchemy()
 
-
 def create_app():
     app = Flask(__name__)
     CORS(app)
-
+    
     handler = logging.FileHandler('application.log')
     handler.setLevel(logging.ERROR)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     app.logger.addHandler(handler)
     app.config['SECRET_KEY'] = 'key-goes-here'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:postgres@interactive-tutor.crzdypgejusl.eu-west-2.rds.amazonaws.com/postgres'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:postgres@interactive-tutor-1.crzdypgejusl.eu-west-2.rds.amazonaws.com/postgres'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['MAIL_SERVER'] = 'smtp.gmail.com'
     app.config['MAIL_PORT'] = 587
@@ -80,5 +79,5 @@ def create_app():
     from .production import product as product_blueprint
     product_blueprint.db = db
     app.register_blueprint(product_blueprint)
-
+    
     return app

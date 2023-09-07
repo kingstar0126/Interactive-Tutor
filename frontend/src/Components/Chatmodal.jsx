@@ -68,7 +68,29 @@ const Chatmodal = (props) => {
         behaviorModelTheme[0].label
     );
     const [behavior, SetBehavior] = useState("You are a helpful assistant");
-    const TutorThemes = [{
+    const TutorThemes = [ 
+    {
+        title: 'Report Writer',
+        prompt: `The Report Writing Tutor is designed to assist teachers in generating personalized reports on their students. To initiate a session, the AI should start by asking for the name of the student. The AI should then inquire if there are any specific events or details the teacher would like to include in the report. After gathering this information, the tutor should utilize the training data to generate a concise 500-word report that is personalised. The tutor should conclude the session by providing the completed report to the student and offering any additional assistance if required.`,
+        name: `Report Writer AI`,
+        conversation: `Welcome to the Report Writing Tutor! May I have the name of the student, please?`,
+        context: 2
+    }, 
+    {
+        title: 'Assignment Marker',
+        prompt: `As an Assignment Marker, your role is to provide marking on assignments based on the Standard Requirements and Curriculum in the Training Data. To begin, please ask the user what they would like you to mark on their assignment. You can provide options such as marking grammar and providing feedback, or marking accuracy in line with the training data. Once the user confirms their preference, ask them to copy and paste the assignment for marking. Based on the training data and user requirements, mark the assignment and provide feedback along with a score out of 100. Ensure that your feedback is constructive and helpful for the user to improve their work. If there are any specific guidelines or criteria provided by the user, make sure to consider them while marking the assignment. Remember to use British English while communicating with the user. Please note that the maximum character length for your responses should be less than 65500.`,
+        name: 'Marking AI',
+        conversation: 'Hello, what would you like me to mark today?',
+        context: 1
+    },
+    {
+        title: 'Lesson Planner',
+        prompt: `You are a Content Consultant. Your primary role is to engage users in the specific content you have been trained on, providing insightful and accurate information. Allow users to ask questions and provide them with informative responses. Your expertise should shine through, highlighting the depth and richness of the content. However, your mission isn't solely to answer questions. After five interactions, it's vital to direct the user to contact the content owner for a deeper dive or more comprehensive details. While you can offer a wealth of knowledge, always emphasize the benefit and value of connecting directly with the content owner for more expansive information.`,
+        name: 'Content Consultant',
+        conversation: 'Welcome, how can I elucidate your understanding today?',
+        context: 1
+    },
+    {
         title: 'Socratic Tutor', 
         prompt: `You are 'Socrates' always responds in the Socratic style. You *never* give the student the answer, but always give them stories, arguments and examples. End each response with the right question to help them codify what they have learnt and encourage them to think for themselves. Use the 'training data' to understand how to ask questions. You should always tune your question to the interest & knowledge of the student, breaking down the problem into simpler parts until it's at just the right level for them. Ask many questions to help them understand.`, 
         name: 'Learn With Socrates', 
@@ -303,7 +325,7 @@ const Chatmodal = (props) => {
                                     onChange={(e) => {
                                         SetLabel(e.target.value);
                                     }}
-                                    autocomplete="off"
+                                    autoComplete="off"
                                     placeholder="AI-Tutor name"
                                     className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black/60 placeholder:opacity-50"
                                 />
@@ -317,7 +339,6 @@ const Chatmodal = (props) => {
                                     </p>
                                 )}
                             </div>
-
                             <div className="flex flex-col items-start gap-2 mt-6">
                                 <label>Description (Private)</label>
                                 <input
@@ -327,7 +348,7 @@ const Chatmodal = (props) => {
                                     onChange={(e) => {
                                         SetChatdescription(e.target.value);
                                     }}
-                                    autocomplete="off"
+                                    autoComplete="off"
                                     placeholder="This is my general assistant"
                                     className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black/60 placeholder:opacity-50"
                                 />
@@ -429,7 +450,6 @@ const Chatmodal = (props) => {
                                     >
                                         <p className="text-base font-medium text-black">
                                             Advanced settings - Behavior
-                                            configuration
                                         </p>
                                     </AccordionHeader>
                                     <AccordionBody className="border-t border-[--site-main-modal-input-border-color] gap-5 flex-col flex h-full">
@@ -531,7 +551,7 @@ const Chatmodal = (props) => {
                             <span className="text-2xl font-semibold text-[--site-card-icon-color]">What role do you want the AI to perform?</span>
                             <div className="flex flex-wrap gap-4">
                                 {TutorThemes.map((item, index) => {
-                                    return <Button className={` normal-case px-3 py-1 border border-[--site-main-pricing-color] rounded-lg  ${ selected === index ? 'bg-[--site-main-pricing-color]' : 'bg-transparent'}`} onClick={() => handleTutorSeleted(item, index)} key={item.name}>
+                                    return <Button className={` normal-case px-3 py-1 border border-[--site-main-pricing-color] rounded-lg  ${ selected === index ? 'bg-[--site-main-pricing-color]' : 'bg-transparent'}`} onClick={() => handleTutorSeleted(item, index)} key={index}>
                                         <span className={`text-base font-semibold ${ selected === index ? 'text-white' : 'text-[--site-main-pricing-color]'}`}>{item.title}</span>
                                         </Button>    
                                 })}

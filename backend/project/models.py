@@ -74,6 +74,7 @@ class Chat(UserMixin, db.Model):
     chat_copyright = db.Column(db.JSON)
     chat_button = db.Column(db.JSON)
     bubble = db.Column(db.JSON)
+    inviteId = db.Column(db.Integer)
     create_date = db.Column(db.Date, default=datetime.utcnow)
     update_date = db.Column(
         db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
