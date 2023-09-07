@@ -91,12 +91,6 @@ def add_chat():
                 'code': 401,
                 'message': "You can no longer create AI Tutors.",
             })
-    if chat := db.session.query(Chat).filter_by(label=label).first():
-        return jsonify({
-            'success': False,
-            'code': 401,
-            'message': 'A chart with the same name already exists. Please change the Name and description',
-        })
     new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
                     access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button)
     db.session.add(new_chat)
