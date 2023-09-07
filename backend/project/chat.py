@@ -182,7 +182,6 @@ def update_chat():
     behaviormodel = request.json['behaviormodel']
 
     chat = db.session.query(Chat).filter_by(id=id).first()
-
     if chat is None:
         # If no such chat exists, return an error response
         response = {
@@ -192,14 +191,24 @@ def update_chat():
         }
     else:
         # Update the chat's properties with the new values
-        chat.label = label
+
+        chats = db.session.query(Chat).filter_by(inviteId=chat.user_id).all()
+        for item in chats:
+            if item.label == chat.label and item.description == chat.description and item.model == chat.model and item.conversation == chat.conversation and item.creativity == chat.creativity and item.behavior == chat.behavior:
+                item.label = label
+                item.description = description
+                item.model = model
+                item.conversation = conversation
+                item.creativity = creativity
+                item.behavior = behavior
+                item.behaviormodel = behaviormodel
+                chat.label = label
         chat.description = description
         chat.model = model
         chat.conversation = conversation
         chat.creativity = creativity
         chat.behavior = behavior
         chat.behaviormodel = behaviormodel
-
         # Save the updated chat to the database
         db.session.commit()
 
@@ -225,6 +234,12 @@ def get_chats():
             user = db.session.query(User).filter_by(id=chat.user_id).first()
             organization = db.session.query(Organization).filter_by(
                 email=user.email).first().uuid
+            messages = db.session.query(Message).filter_by(chat_id=chat.id).all()
+            for row in messages:
+                _messages = json.loads(row.message)
+                if len(_messages) < 2:
+                    db.session.delete(row)
+            db.session.commit()
             chat_data = {
                 'id': chat.id,
                 'label': chat.label,
@@ -245,7 +260,8 @@ def get_chats():
                 'chat_button': json.loads(chat.chat_button),
                 'bubble': json.loads(chat.bubble),
                 'organization': organization,
-                'role': user.role
+                'role': user.role,
+                'inviteId': chat.inviteId
             }
             response.append(chat_data)
 
@@ -348,7 +364,8 @@ def get_chat():
             'chat_button': json.loads(chat.chat_button),
             'bubble': json.loads(chat.bubble),
             'organization': organization,
-            'role': user.role
+            'role': user.role,
+            'inviteId': chat.inviteId
         }
 
         data = {

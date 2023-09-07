@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Message
-from .models import User, Organization, Invite
+from .models import User, Organization, Invite, Chat
 from . import db, mail
 import os
 import string
@@ -13,6 +13,7 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from flask_jwt_extended import create_access_token, decode_token
+from sqlalchemy.sql import text
 
 load_dotenv()
 
@@ -42,7 +43,7 @@ def generate_pin_password(length=6):
 def calculate_days(signup_date):
     current_time = datetime.utcnow()
     time_difference = current_time - signup_date
-    hours = 24 - int(time_difference.total_seconds() / 3600)
+    hours = 24 * 7 - int(time_difference.total_seconds() / 3600)
     print(hours)
     return hours
 
@@ -423,36 +424,50 @@ def get_useraccount():
 def get_all_useraccount():
     id = request.json['id']
     user = db.session.query(User).filter_by(id=id).first()
-    if user.role != 1:
+    if user.role != 1 and user.role != 7:
         return jsonify({
             'success': False,
             'code': 405,
             'message': "You have not permission"
         })
     current_users = []
+    seen_users = []
     users = db.session.query(User).all()
     for current_user in users:
         if current_user.id == id:
             continue
-
-        new_user = {
-            'id': current_user.id,
-            'username': current_user.username,
-            'email': current_user.email,
-            'contact': current_user.contact,
-            'state': current_user.state,
-            'city': current_user.city,
-            'country': current_user.country,
-            'status': current_user.status,
-            'query': current_user.query,
-            'usage': current_user.usage,
-            'tutors': current_user.tutors,
-            'role': current_user.role,
-            'training_datas': current_user.training_datas,
-            'training_words': current_user.training_words
-
-        }
-        current_users.append(new_user)
+        if user.role == 1:
+            new_user = {
+                'id': current_user.id,
+                'username': current_user.username,
+                'email': current_user.email,
+                'contact': current_user.contact,
+                'state': current_user.state,
+                'city': current_user.city,
+                'country': current_user.country,
+                'status': current_user.status,
+                'query': current_user.query,
+                'usage': current_user.usage,
+                'tutors': current_user.tutors,
+                'role': current_user.role,
+                'training_datas': current_user.training_datas,
+                'training_words': current_user.training_words
+            }
+            current_users.append(new_user)
+        else:
+            chats = db.session.query(Chat).filter_by(inviteId=id).all()
+            for chat in chats:
+                _user = db.session.query(User).filter_by(id=chat.user_id).first()
+                if _user.id not in seen_users:
+                    seen_users.append(_user.id)
+                    new_user = {
+                        'id': _user.id,
+                        'username': _user.username,
+                        'email': _user.email,
+                        'query': _user.query,
+                        'usage': _user.usage
+                    }
+                    current_users.append(new_user)
     return jsonify({'success': True, 'data': current_users, 'code': 200})
 
 
@@ -477,15 +492,16 @@ def Change_user_limitation():
     train = request.json['train']
     tutors = request.json['tutor']
     word = request.json['word']
+    role = request.json['role']
 
     user = db.session.query(User).filter_by(email=email).first()
     user.query = query
     user.training_datas = train
     user.tutors = tutors
     user.training_words = word
-    user.role = 6
-    if user.subscription_id is not None:
-        stripe.Subscription.cancel(user.subscription_id)
+    user.role = int(role)
+    # if user.subscription_id is not None:
+    #     stripe.Subscription.cancel(user.subscription_id)
     db.session.commit()
     return jsonify({'success': True, 'code': 200, 'message': 'Updated Successfully'})
 
@@ -585,3 +601,33 @@ def remove_invite_email():
         query.delete()
         db.session.commit()
     return jsonify({'success': True, 'code': 200, 'message': 'Email successfully removed'})
+
+@auth.route('/api/userInvite', methods=['POST'])
+def sendUserInvite():
+    id = request.json['id']
+    email = request.json['email']
+    user = db.session.query(User).filter_by(email=email).first()
+    if user is None:
+        return jsonify({ 'success': False, 'message': "Not found User." })
+    chats = db.session.query(Chat).filter_by(user_id=id).all()
+    for chat in chats:
+        chat_dict = {c.name: getattr(chat, c.name) for c in chat.__table__.columns if c.name != 'id'}
+        chat_dict['user_id'] = user.id
+        chat_dict['inviteId'] = id
+        new_chat = Chat(**chat_dict)
+        db.session.add(new_chat)
+    db.session.commit()
+    return jsonify({ 'success': True, 'message': 'Successfully sent invitation' })
+
+@auth.route('/api/userInviteRemove', methods=['POST'])
+def removeUserInvite():
+    id = request.json['id']
+    userId = request.json['userId']
+    user = db.session.query(User).filter_by(id=userId).first()
+    if user is None:
+        return jsonify({ 'success': False, 'message': "Not found User." })
+    chats = Chat.query.filter((Chat.user_id==userId) & (Chat.inviteId==id)).all()
+    for chat in chats:
+        db.session.delete(chat)
+    db.session.commit()
+    return jsonify({ 'success': True, 'message': 'Successfully removed invitation User' })

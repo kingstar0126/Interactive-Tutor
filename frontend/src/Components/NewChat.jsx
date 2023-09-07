@@ -229,9 +229,9 @@ const NewChat = () => {
     }, [chathistory]);
 
     const handleSubmit = (event) => {
-        if (!event.shiftKey && event.keyCode === 13) {
+        if (!event.shiftKey && event.keyCode === 13 && spinner === false) {
             let id = chatbot;
-            let _message = message;
+            let _message = message.trim();
             if (_message === "") {
                 return;
             }

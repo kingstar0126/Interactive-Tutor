@@ -18,11 +18,10 @@ jwt = JWTManager()
 mail = Mail()
 db = SQLAlchemy()
 
-
 def create_app():
     app = Flask(__name__)
     CORS(app)
-
+    
     handler = logging.FileHandler('application.log')
     handler.setLevel(logging.ERROR)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -80,5 +79,5 @@ def create_app():
     from .production import product as product_blueprint
     product_blueprint.db = db
     app.register_blueprint(product_blueprint)
-
+    
     return app
