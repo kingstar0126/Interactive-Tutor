@@ -127,13 +127,13 @@ export default function Example() {
                                     Embedded Chat
                                 </Button>
                             </div>
-                            <Button
+                            {chat && chat.inviteId === null && <Button
                                 className="normal-case bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2 text-black text-base"
                                 onClick={handleUpdate}
                             >
                                 <MdUpdate className="w-6 h-6" />
                                 Update Chat
-                            </Button>
+                            </Button>}
                         </div>
                     </div>
                     <div className="h-hull min-h-[430px] flex">

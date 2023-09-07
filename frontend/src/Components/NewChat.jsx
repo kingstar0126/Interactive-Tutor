@@ -20,7 +20,6 @@ const NewChat = () => {
     const navigate = useNavigate();
     const [chathistory, setChathistory] = useState([]);
     const dispatch = useDispatch();
-    const backgroundRef = useRef(null);
     const chatbot_logo = useRef(null);
     const chatbot_start = useRef(null);
     const chatbot_copyright = useRef(null);
@@ -109,11 +108,19 @@ const NewChat = () => {
             }
         }
         fetchData();
-
     }, []);
 
     useEffect(() => {
         if (chat.access && loading === false) {
+            if (chat.conversation !== "" && chathistory.length == 0) {
+                setChathistory([
+                    ...chathistory,
+                    { role: "ai", content: chat.conversation },
+                ]);
+                chatbot_start.current.classList.add("hidden");
+                window_chat.current.classList.remove("hidden");
+            }
+
             if (chathistory.length > 0) {
                 chatbot_start.current.classList.add("hidden");
                 window_chat.current.classList.remove("hidden");

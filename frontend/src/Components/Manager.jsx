@@ -5,10 +5,10 @@ import { useSelector, useDispatch } from "react-redux";
 import toast, { Toaster } from "react-hot-toast";
 import { BsPersonFillAdd } from "react-icons/bs";
 import { BsDatabaseFillGear } from "react-icons/bs";
-import StripeCard from "./StripeCard";
 import { AiOutlineMenu } from "react-icons/ai";
 import { setOpenSidebar } from "../redux/actions/locationAction";
 import { MdOutlineUpdate } from "react-icons/md";
+import { Select, Option, Button } from "@material-tailwind/react";
 import { useNavigate } from "react-router-dom";
 import {
     DialogHeader,
@@ -21,25 +21,19 @@ import ReactSpeedometer from "react-d3-speedometer";
 
 const Manager = () => {
     const [data, setData] = useState([]);
-    const [isOpenModal, setIsOpenModal] = useState(false);
     const [open, setOpen] = useState(false);
     const [userEmail, setUserEmail] = useState("");
     const [userQueryCount, setUserQueryCount] = useState(0);
+    const [role, setRole] = useState(1);
     const [userTutorCount, setUserTutorCount] = useState(0);
     const [userTrainCount, setUserTrainCount] = useState(0);
     const [userWordCount, setUserWordCount] = useState(0);
-    const _chat = JSON.parse(useSelector((state) => state.chat.chat));
+    const chatState = useSelector((state) => state.chat.chat);
+    const _chat = chatState && JSON.parse(chatState) || {};
     const query = useSelector((state) => state.query.query);
     const [trial, setTrial] = useState(0);
-    const handleOk = () => {
-        getAlluser();
-        setIsOpenModal(false);
-    };
     const navigate = useNavigate();
     const [item, setItem] = useState({});
-    const handleCancel = () => {
-        setIsOpenModal(false);
-    };
     const dispatch = useDispatch();
     const user = JSON.parse(useSelector((state) => state.user.user));
 
@@ -56,6 +50,9 @@ const Manager = () => {
     useEffect(() => {
         if (user.role === 5) {
             setTrial(user.days);
+        }
+        if (user.role !== 1 ) {
+            navigate(-1)
         }
         getAlluser();
     }, []);
@@ -132,6 +129,12 @@ const Manager = () => {
                         Customer
                     </span>
                 );
+            case 7:
+                return (
+                    <span className="px-2 py-1 font-semibold leading-tight rounded-lg bg-[#89ee45] text-[white]">
+                        Enter Prise
+                    </span>
+                );
             default:
                 throw new Error("Invalid role encountered.");
         }
@@ -142,7 +145,8 @@ const Manager = () => {
             userQueryCount &&
             userTrainCount &&
             userWordCount &&
-            userTutorCount
+            userTutorCount &&
+            role
         ) {
             axios
                 .post(webAPI.change_user_limitation, {
@@ -151,6 +155,7 @@ const Manager = () => {
                     query: userQueryCount,
                     train: userTrainCount,
                     word: userWordCount,
+                    role: role
                 })
                 .then((res) => {
                     getAlluser();
@@ -160,8 +165,40 @@ const Manager = () => {
                 .catch((err) => console.error(err));
         } else {
             setOpen(false);
+            notification("error", "Please fill all values")
         }
     };
+
+    const OptionRoles = [
+        {
+            value: "1",
+            label: "Manager",
+        },
+        {
+            value: "2",
+            label: "Starter",
+        },
+        {
+            value: "3",
+            label: "Standard",
+        },
+        {
+            value: "4",
+            label: "Pro",
+        },
+        {
+            value: "5",
+            label: "Free trial",
+        },
+        {
+            value: "6",
+            label: "Customer",
+        },
+        {
+            value: "7",
+            label: "EnterPrise",
+        }
+    ]
 
     return (
         <div className="w-full h-full">
@@ -215,17 +252,17 @@ const Manager = () => {
                             />
                         </div>
                     )}
-                    <button
+                    <Button
                         onClick={() => {
                             navigate("/chatbot/subscription");
                         }}
-                        className="flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
+                        className=" normal-case flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
                     >
                         <MdOutlineUpdate className="w-4 h-4 md:w-6 md:h-6" />
                         <span className="md:text-base text-[12px] font-medium">
                             Upgrade
                         </span>
-                    </button>
+                    </Button>
                 </div>
             </div>
 
@@ -234,7 +271,7 @@ const Manager = () => {
                 <span className="text-2xl font-semibold">Manager</span>
             </div>
 
-            <div className="bg-gradient-to-r from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] border-[--site-chat-header-border] border rounded-xl md:m-10 m-5 flex flex-col gap-5 shadow-xl shadow-[--site-chat-header-border]">
+            <div className="bg-gradient-to-r from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] border-[--site-chat-header-border] border rounded-xl md:m-10 m-5 flex flex-col gap-5 shadow-xl shadow-[--site-chat-header-border] overflow-x-auto">
                 <div className="w-full h-full rounded-xl p-2">
                     {/* <div className="flex items-center justify-end w-full p-2">
                         <button
@@ -253,6 +290,7 @@ const Manager = () => {
                                 <th className="px-4 py-3 ">Email</th>
                                 <th className="px-4 py-3 ">Tutors</th>
                                 <th className="px-4 py-3 ">query</th>
+                                {/* <th className="px-4 py-3 ">usage</th> */}
                                 <th className="px-4 py-3 ">Data Sources</th>
                                 <th className="px-4 py-3 ">Subscription</th>
                                 <th className="px-4 py-3 ">Status</th>
@@ -260,7 +298,7 @@ const Manager = () => {
                             </tr>
                         </thead>
                         <tbody className="text-center bg-white">
-                            {data.map((item, index) => {
+                            {data && data.map((item, index) => {
                                 return (
                                     <tr className="text-gray-700" key={index}>
                                         <td className="px-4 py-3 border">
@@ -280,6 +318,9 @@ const Manager = () => {
                                         <td className="px-4 py-3 font-semibold border text-ms">
                                             {item.query}
                                         </td>
+                                        {/* <td className="px-4 py-3 font-semibold border text-ms">
+                                            {item.usage}
+                                        </td> */}
                                         <td className="px-4 py-3 font-semibold border text-ms">
                                             {item.training_datas}
                                         </td>
@@ -298,12 +339,13 @@ const Manager = () => {
                                             )}
                                         </td>
                                         <td className="px-4 py-3 font-semibold border text-ms">
-                                            <button
+                                            <Button
                                                 onClick={() => {
                                                     setUserEmail(item.email);
                                                     setUserTutorCount(
                                                         item.tutors
                                                     );
+                                                    setRole(item.role);
                                                     setUserQueryCount(
                                                         item.query
                                                     );
@@ -316,21 +358,23 @@ const Manager = () => {
                                                     setItem(item);
                                                     setOpen(true);
                                                 }}
-                                                className="mr-5 p-2 bg-[--site-logo-text-color] w-[80px] text-[--site-card-icon-color] rounded-lg hover:scale-110"
+                                                variant="outlined"
+                                                className="normal-case mr-5 p-2 border-[#0f6d09] w-[80px] text-[#0f6d09] rounded-lg hover:scale-110"
                                             >
                                                 Change
-                                            </button>
-                                            <button
+                                            </Button>
+                                            <Button
+                                                variant="outlined"
                                                 onClick={() =>
                                                     handleChange(
                                                         item.id,
                                                         item.status
                                                     )
                                                 }
-                                                className="p-2 rounded-lg hover:scale-110 bg-[--site-error-text-color] text-white"
+                                                className=" normal-case p-2 rounded-lg hover:scale-110 border-[--site-error-text-color] text-[--site-error-text-color]"
                                             >
                                                 Block
-                                            </button>
+                                            </Button>
                                         </td>
                                     </tr>
                                 );
@@ -411,7 +455,16 @@ const Manager = () => {
                                     className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black/60 placeholder:opacity-50"
                                 />
                             </div>
-
+                            <div className="flex flex-col">
+                                <label>User Account</label>
+                                <Select
+                                    className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black/60 placeholder:opacity-50"
+                                    onChange={e => setRole(e)}
+                                    value={role.toString()}
+                                >
+                                {OptionRoles.map((role, index) => <Option value={role.value} key={index}>{role.label}</Option>)}
+                                </Select>
+                            </div>
                             <div className="flex flex-col">
                                 <label>User Training words</label>
                                 <input
@@ -428,26 +481,20 @@ const Manager = () => {
                     </Scrollbar>
                 </DialogBody>
                 <DialogFooter className="flex items-center justify-end gap-4 px-10 pb-8">
-                    <button
+                    <Button
                         onClick={() => setOpen(false)}
-                        className="bg-transparent border-[--site-card-icon-color] text-[--site-card-icon-color] text-base font-semibold border rounded-md px-4 py-2"
+                        className=" normal-case bg-transparent border-[--site-card-icon-color] text-[--site-card-icon-color] text-base font-semibold border rounded-md px-4 py-2"
                     >
                         cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         onClick={() => handleConfirm()}
-                        className="px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md"
+                        className=" normal-case px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md"
                     >
                         confirm
-                    </button>
+                    </Button>
                 </DialogFooter>
             </Dialog>
-
-            <StripeCard
-                open={isOpenModal}
-                handleOk={handleOk}
-                handleCancel={handleCancel}
-            />
         </div>
     );
 };

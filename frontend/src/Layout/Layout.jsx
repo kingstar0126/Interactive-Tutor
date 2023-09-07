@@ -2,7 +2,6 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import { useLocation } from "react-router-dom";
 import Chatbubble from "../Components/Chatbubble";
-import { setlocation } from "../redux/actions/locationAction";
 import { useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setOpenSidebar } from "../redux/actions/locationAction";
@@ -14,7 +13,6 @@ const Layout = () => {
     const isOpenSidebar = useSelector((state) => state.location.openSidebar);
     const sidebarRef = useRef(null);
     const dispatch = useDispatch();
-    setlocation(dispatch, location.pathname);
     useEffect(() => {
         if (isOpenSidebar === true) {
             const handleClick = (event) => {

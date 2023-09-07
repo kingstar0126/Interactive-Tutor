@@ -8,17 +8,14 @@ import Logo from "../assets/logo.png";
 import { useLocation, Link } from "react-router-dom";
 import { setlocation } from "../redux/actions/locationAction";
 import { useSelector, useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { changeuser } from "../redux/actions/userAction";
 import { SERVER_URL } from "../config/constant";
 import { useState, useEffect } from "react";
 import { setOpenSidebar } from "../redux/actions/locationAction";
 
 const Sidebar = () => {
     let location = useLocation();
-    const redirections = ["chat", "subscription", "manager", "account"];
+    const redirections = ["chat", "subscription", "manager", "enterprise", "account"];
     const dispatch = useDispatch();
-    const navigate = useNavigate();
     const [selection, setSelection] = useState(1);
     const [sidebarStyle, setSidebarStyle] = useState("");
     const user = JSON.parse(useSelector((state) => state.user.user));
@@ -125,13 +122,27 @@ const Sidebar = () => {
                             Manager
                         </span>
                     </Link>
-                ) : null}
+                ) : user.role === 7 ? 
                 <Link
-                    to="account"
+                    to="enterprise"
                     className="flex w-full gap-4 px-6 py-4 transition-all duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
                     style={{
                         color: selection === 4 ? "#c1ff72" : "#ffffff",
                         fontWeight: selection === 4 ? 600 : 500,
+                    }}
+                >
+                    <BsDatabaseFillGear className="w-6 h-6" />
+
+                    <span className="flex items-end text-base ">
+                        Enterprise
+                    </span>
+                </Link> : null}
+                <Link
+                    to="account"
+                    className="flex w-full gap-4 px-6 py-4 transition-all duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
+                    style={{
+                        color: selection === 5 ? "#c1ff72" : "#ffffff",
+                        fontWeight: selection === 5 ? 600 : 500,
                     }}
                 >
                     <PiUserCircleGearLight className="w-6 h-6" />
