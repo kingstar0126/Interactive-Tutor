@@ -5,6 +5,7 @@ from .models import User, Organization, Invite, Chat
 from . import db, mail
 import os
 import string
+import json
 import secrets
 from rich import print, pretty
 from sqlalchemy import exc
@@ -44,7 +45,6 @@ def calculate_days(signup_date):
     current_time = datetime.utcnow()
     time_difference = current_time - signup_date
     hours = 24 * 7 - int(time_difference.total_seconds() / 3600)
-    print(hours)
     return hours
 
 
@@ -240,6 +240,10 @@ def register_new_user(username, email, password):
     db.session.commit()
     new_organization = Organization(email=email)
     db.session.add(new_organization)
+    invite_users = db.session.query(Invite).filter_by(email=email).all()
+    if invite_users:
+        for invite_user in invite_users:
+            invite_user.status = True
     db.session.commit()
     msg = Message('Welcome to Interactive Tutor', sender=os.getenv('MAIL_USERNAME'),
                   recipients=[email])
@@ -431,44 +435,79 @@ def get_all_useraccount():
             'message': "You have not permission"
         })
     current_users = []
-    seen_users = []
-    users = db.session.query(User).all()
-    for current_user in users:
-        if current_user.id == id:
-            continue
-        if user.role == 1:
-            new_user = {
-                'id': current_user.id,
-                'username': current_user.username,
-                'email': current_user.email,
-                'contact': current_user.contact,
-                'state': current_user.state,
-                'city': current_user.city,
-                'country': current_user.country,
-                'status': current_user.status,
-                'query': current_user.query,
-                'usage': current_user.usage,
-                'tutors': current_user.tutors,
-                'role': current_user.role,
-                'training_datas': current_user.training_datas,
-                'training_words': current_user.training_words
-            }
-            current_users.append(new_user)
-        else:
-            chats = db.session.query(Chat).filter_by(inviteId=id).all()
-            for chat in chats:
-                _user = db.session.query(User).filter_by(id=chat.user_id).first()
-                if _user.id not in seen_users:
-                    seen_users.append(_user.id)
-                    new_user = {
-                        'id': _user.id,
-                        'username': _user.username,
-                        'email': _user.email,
-                        'query': _user.query,
-                        'usage': _user.usage
+    if user.role == 1:
+        users = db.session.query(User).all()
+        for current_user in users:
+            if current_user.id == id:
+                continue
+            if user.role == 1:
+                new_user = {
+                    'id': current_user.id,
+                    'username': current_user.username,
+                    'email': current_user.email,
+                    'contact': current_user.contact,
+                    'state': current_user.state,
+                    'city': current_user.city,
+                    'country': current_user.country,
+                    'status': current_user.status,
+                    'query': current_user.query,
+                    'usage': current_user.usage,
+                    'tutors': current_user.tutors,
+                    'role': current_user.role,
+                    'training_datas': current_user.training_datas,
+                    'training_words': current_user.training_words
+                }
+                current_users.append(new_user)
+        return jsonify({'success': True, 'data': current_users, 'code': 200})
+    else:
+        invite_users = db.session.query(Invite).filter_by(user_id=id).all()
+        for invite_user in invite_users:
+            if invite_user.status: #already signed up user
+                _user = db.session.query(User).filter_by(email=invite_user.email).first()
+                _chat = []
+                chats = db.session.query(Chat).filter_by(inviteId=id, user_id=_user.id).all()
+                for chat in chats:
+                    chat_data = {
+                        'id': chat.id,
+                        'label': chat.label,
+                        'description': chat.description,
+                        'model': chat.model,
+                        'user_id': chat.user_id,
+                        'access': chat.access,
+                        'uuid': chat.uuid,
                     }
-                    current_users.append(new_user)
-    return jsonify({'success': True, 'data': current_users, 'code': 200})
+                    _chat.append(chat_data)
+                new_user = {
+                    'email': _user.email,
+                    'query': _user.query,
+                    'usage': _user.usage,
+                    'chats': _chat,
+                    'status': invite_user.status
+                }
+                current_users.append(new_user)
+            else:                   # not sign up user
+                new_user = {
+                    'email': invite_user.email,
+                    'query': 0,
+                    'usage': 0,
+                    'chats': [],
+                    'status': invite_user.status
+                }
+                current_users.append(new_user)
+        # chats = db.session.query(Chat).filter_by(inviteId=id).all()
+        # for chat in chats:
+        #     _user = db.session.query(User).filter_by(id=chat.user_id).first()
+        #     if _user.id not in seen_users:
+        #         seen_users.append(_user.id)
+        #         new_user = {
+        #             'id': _user.id,
+        #             'username': _user.username,
+        #             'email': _user.email,
+        #             'query': _user.query,
+        #             'usage': _user.usage
+        #         }
+                # current_users.append(new_user)
+        return jsonify({'success': True, 'data': current_users, 'code': 200})
 
 
 @auth.route('/api/changeaccountstatus', methods=['POST'])
@@ -545,7 +584,7 @@ def invite_email():
     email = request.json['email']
     index = request.json['index']
     user = db.session.query(User).filter_by(id=id).first()
-    invite_user = db.session.query(User).filter_by(email=email).first()
+    invite_user = db.session.query(User).filter(email=email).first()
     if invite_user:
         return jsonify({'success': False, 'code': 409, 'message': 'Email address already exists!'})
     new_invite = Invite(user_id=id, email=email, index=index, status=False)
@@ -596,38 +635,104 @@ def get_invite_emails():
 def remove_invite_email():
     id = request.json['id']
     email = request.json['email']
-    query = db.session.query(Invite).filter_by(user_id=id, email=email)
-    if query:
-        query.delete()
+    invite = db.session.query(Invite).filter_by(user_id=id, email=email)
+    if invite:
+        invite.delete()
         db.session.commit()
     return jsonify({'success': True, 'code': 200, 'message': 'Email successfully removed'})
+
+@auth.route('/api/resendInvitation', methods=['POST'])
+def resendInvitation():
+    id = request.json['id']
+    user = db.session.query(User).filter_by(id=id).first()
+    email = request.json['email']
+    msg = Message('Invite to the interactive tutor', sender=os.getenv('MAIL_USERNAME'), recipients=[email])
+    msg.html = render_template(
+        'enterprise.html', username=user.username, url="https://app.interactive-tutor.com"
+    )
+    mail.send(msg)
+    return jsonify({'success': True, 'code': 200, 'message': 'You have successfully Resent the invitation!'})
 
 @auth.route('/api/userInvite', methods=['POST'])
 def sendUserInvite():
     id = request.json['id']
     email = request.json['email']
+    enterpriseUser = db.session.query(User).filter_by(id=id).first()
     user = db.session.query(User).filter_by(email=email).first()
     if user is None:
-        return jsonify({ 'success': False, 'message': "Not found User." })
-    chats = db.session.query(Chat).filter_by(user_id=id).all()
-    for chat in chats:
-        chat_dict = {c.name: getattr(chat, c.name) for c in chat.__table__.columns if c.name != 'id'}
-        chat_dict['user_id'] = user.id
-        chat_dict['inviteId'] = id
-        new_chat = Chat(**chat_dict)
-        db.session.add(new_chat)
+        new_invite = Invite(user_id=id, email=email, index=0, status=False)
+    else:
+        new_invite = Invite(user_id=id, email=email, index=0, status=True)
+    db.session.add(new_invite)
     db.session.commit()
-    return jsonify({ 'success': True, 'message': 'Successfully sent invitation' })
+    msg = Message('Invite to the interactive tutor', sender=os.getenv('MAIL_USERNAME'), recipients=[email])
+    msg.html = render_template(
+        'enterprise.html', username=enterpriseUser.username, url="https://app.interactive-tutor.com"
+    )
+    mail.send(msg)
+    return jsonify({'success': True, 'code': 200, 'message': 'You have successfully sent the invitation!'})
+
+    # chats = db.session.query(Chat).filter_by(user_id=id).all()
+    # for chat in chats:
+    #     chat_dict = {c.name: getattr(chat, c.name) for c in chat.__table__.columns if c.name != 'id'}
+    #     chat_dict['user_id'] = user.id
+    #     chat_dict['inviteId'] = id
+    #     new_chat = Chat(**chat_dict)
+    #     db.session.add(new_chat)
+    # return jsonify({ 'success': True, 'message': 'Successfully sent invitation' })
 
 @auth.route('/api/userInviteRemove', methods=['POST'])
 def removeUserInvite():
     id = request.json['id']
-    userId = request.json['userId']
-    user = db.session.query(User).filter_by(id=userId).first()
-    if user is None:
-        return jsonify({ 'success': False, 'message': "Not found User." })
-    chats = Chat.query.filter((Chat.user_id==userId) & (Chat.inviteId==id)).all()
-    for chat in chats:
-        db.session.delete(chat)
+    email = request.json['email']
+    user = db.session.query(User).filter_by(email=email).first()
+    if user:
+        chats = db.session.query(Chat).filter_by(user_id=user.id, inviteId=id).all()
+        if chats:
+            for chat in chats:
+                db.session.delete(chat)
+    invite = db.session.query(Invite).filter_by(user_id=id, email=email)
+    if invite:
+        invite.delete()
     db.session.commit()
     return jsonify({ 'success': True, 'message': 'Successfully removed invitation User' })
+
+@auth.route('/api/setTutors', methods=['POST'])
+def setTutors():
+    id = request.json['id']
+    email = request.json['email']
+    chats = request.json['chats']
+    user = db.session.query(User).filter_by(id=id).first()
+    invite_user = db.session.query(User).filter_by(email=email).first()
+    if user is None and user.role == 7:
+        return jsonify({ 'success': False, 'message': 'User Not Found or Not Authorized' })
+    originalChats = db.session.query(Chat).filter_by(user_id=invite_user.id, inviteId=id).all()
+    if originalChats:
+        for chat in originalChats:
+            db.session.delete(chat)
+    for chat in chats:
+        print('\n\n', chat)
+        user_id = invite_user.id
+        inviteId = id
+        label = chat['label']
+        description = chat['description']
+        model = chat['model']
+        conversation = chat['conversation']
+        access = generate_pin_password()
+        creativity = chat['creativity']
+        behavior = chat['behavior']
+        behaviormodel = chat['behaviormodel']
+        train = json.dumps(chat['train'])
+        chat_copyright = json.dumps(chat['chat_copyright'])
+        chat_button = json.dumps(chat['chat_button'])
+        bubble = json.dumps(chat['bubble'])
+        chat_logo = json.dumps(chat['chat_logo'])
+        chat_title = json.dumps(chat['chat_title'])
+        chat_description = json.dumps(chat['chat_description'])
+
+
+        new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
+                    access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button, inviteId=inviteId)
+        db.session.add(new_chat)
+        db.session.commit()
+    return jsonify({ 'success': True, 'message': 'Successfully set Tutors' })
