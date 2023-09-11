@@ -51,6 +51,7 @@ const Chat = () => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [open, setOpen] = useState(false);
     const [isopenModal, setIsOpenModal] = useState(false);
+    const [check, setCheck] = useState(true);
     const descroption = [
         {
             title: "Welcome to Interactive Tutor",
@@ -163,6 +164,17 @@ const Chat = () => {
         setIsPlaying(!video.paused);
     };
     useEffect(() => {
+        axios
+            .post(webAPI.checkUserInvite, { id: user.id })
+            .then(res => {
+                if (res.data.success) {
+                    setCheck(false)
+                }
+                else {
+                    setCheck(true)
+                }
+            })
+            .catch(err => console.error(err))
         const fetchData = async () => {
             getUseraccount(dispatch, { id: user.id });
             setquery(dispatch, user.query);
@@ -207,7 +219,7 @@ const Chat = () => {
                     onClick={handleOpenSidebar}
                     className="w-6 h-6 mb-1 md:hidden"
                 />
-                <div className="flex items-end justify-end md:mt-[27px] md:mb-[30px]">
+                {check && <div className="flex items-end justify-end md:mt-[27px] md:mb-[30px]">
                     {_chat && _chat.organization && (
                         <div className="xl:flex flex-col items-start justify-center mr-2 p-2 bg-[--site-warning-text-color] rounded shadow-2xl hidden">
                             <p>
@@ -267,7 +279,7 @@ const Chat = () => {
                             <MdArrowDropDown className="w-3 h-3 md:w-5 md:h-5 hover:scale-105" />
                         )}
                     </Button>
-                </div>
+                </div>}
             </div>
             <div className="flex md:hidden gap-2 text-[--site-card-icon-color] pt-8 px-10">
                 <AiOutlineUser className="w-8 h-8" />
