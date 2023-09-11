@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from .models import Message, Train, User, Chat
+from .models import Message, Train, User, Chat, Invite
 from bs4 import BeautifulSoup
 import requests
 from . import db
@@ -130,8 +130,13 @@ def init_message():
 @message.route('/api/getquery', methods=['POST'])
 def get_query():
     uuid = request.json['id']
+    chat = db.session.query(Chat).join(Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
+    if chat and chat.inviteId:
+        user = db.session.query(User).filter_by(id=chat.inviteId).first()
+        if user and user.role == 7:
+            return jsonify({'query': user.query, 'usage': user.usage})
     user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
-        Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
+    Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
     return jsonify({'query': user.query, 'usage': user.usage})
 
 
@@ -141,57 +146,56 @@ def send_message():
     query = request.json['_message']
     behaviormodel = request.json['behaviormodel']
     model = request.json['model']
+
     current_message = db.session.query(Message).filter_by(uuid=uuid).first()
-    if current_message is not None:
-        chat = db.session.query(Chat).filter_by(
-            id=current_message.chat_id).first()
-
-        user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
-            Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
-        if user.query - user.usage != 0:
-            user.usage += 1
-        else:
-            return jsonify({
-                'success': False,
-                'code': 401,
-                'message': 'Insufficient queries remaining!',
-            })
-
-        temp = current_message.creativity
-        history = json.loads(current_message.message)
-        if len(history) > 6:
-            last_history = history[-6:]
-        else:
-            last_history = history
-        behavior = ""
-        if behaviormodel == "Behave like the default ChatGPT":
-            behavior = current_message.behavior
-            response = generate_AI_message(
-                query, last_history, behavior, temp, model)
-        else:
-            behavior = current_message.behavior + "\n\n" + behaviormodel
-            response = generate_message(
-                query, last_history, behavior, temp, model, chat.uuid)
-        history.append({"role": "human", "content": query})
-        history.append({"role": "ai", "content": response})
-        current_message.message = json.dumps(history)
-        current_message.update_date = datetime.datetime.now()
-        db.session.commit()
-        _response = {
-            'success': True,
-            'code': 200,
-            'query': user.query - user.usage,
-            'message': 'Your messageBot created generated!!!',
-            'data': response
-        }
-        return jsonify(_response)
-    else:
-        response = {
+    if current_message is None:
+        return jsonify({
             'success': False,
             'code': 404,
-            'message': 'Not found your Tutor. Pelase recreate Tutor.',
-        }
-        return jsonify(response)
+            'message': 'Not found your Tutor. Please recreate Tutor.',
+        })
+
+    chat = db.session.query(Chat).filter_by(id=current_message.chat_id).first()
+    user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
+            Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
+
+    invite_account = db.session.query(Invite).filter_by(email=user.email).first()
+    user_check = db.session.query(User).filter_by(id=invite_account.user_id).first() if invite_account else None
+    user = user_check if user_check and user_check.role == 7 else user
+
+    if user and user.query - user.usage == 0:
+        return jsonify({
+            'success': False,
+            'code': 401,
+            'message': 'Insufficient queries remaining!',
+        })
+
+    user.usage += 1
+
+    temp = current_message.creativity
+    history = json.loads(current_message.message)
+    last_history = history[-6:] if len(history) > 6 else history
+    behavior = current_message.behavior if behaviormodel == "Behave like the default ChatGPT" \
+        else current_message.behavior + "\n\n" + behaviormodel
+    response = generate_message(
+        query, last_history, behavior, temp, model, chat.uuid) if behaviormodel != "Behave like the default ChatGPT" \
+        else generate_AI_message(query, last_history, behavior, temp, model)
+
+    history.append({"role": "human", "content": query})
+    history.append({"role": "ai", "content": response})
+    current_message.message = json.dumps(history)
+    current_message.update_date = datetime.datetime.now()
+    db.session.commit()
+
+    _response = {
+        'success': True,
+        'code': 200,
+        'query': user.query - user.usage,
+        'message': 'Your messageBot created generated!!!',
+        'data': response
+    }
+
+    return jsonify(_response)
 
 @message.route('/api/sendchatbubble', methods=['POST'])
 def send_chat_bubble():

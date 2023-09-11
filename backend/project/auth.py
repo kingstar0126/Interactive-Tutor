@@ -141,77 +141,6 @@ def login_post():
     return jsonify(response)
 
 
-@auth.route('/api/getuseraccount', methods=['POST'])
-def get_user_account():
-    id = request.json['id']
-    user = db.session.query(User).filter_by(id=id).first()
-    if user.role == 5:
-        days = calculate_days(user.create_date)
-        if days < 0:
-            user.role = 0
-            db.session.commit()
-            new_user = {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'contact': user.contact,
-                'state': user.state,
-                'city': user.city,
-                'role': user.role,
-                'maxquery': user.query,
-                'query': user.query - user.usage,
-                'country': user.country,
-                'tutors': user.tutors,
-                'training_datas': user.training_datas,
-                'training_words': user.training_words
-            }
-            response = {
-                'success': True,
-                'code': 200,
-                'data': new_user,
-                'message': 'Your free trial has ended.'
-            }
-            return jsonify(response)
-        new_user = {
-            'id': user.id,
-            'username': user.username,
-            'email': user.email,
-            'contact': user.contact,
-            'state': user.state,
-            'city': user.city,
-            'role': user.role,
-            'maxquery': user.query,
-            'query': user.query - user.usage,
-            'country': user.country,
-            'tutors': user.tutors,
-            'training_datas': user.training_datas,
-            'training_words': user.training_words,
-            'days': days
-        }
-    else:
-        new_user = {
-            'id': user.id,
-            'username': user.username,
-            'email': user.email,
-            'contact': user.contact,
-            'state': user.state,
-            'city': user.city,
-            'role': user.role,
-            'maxquery': user.query,
-            'query': user.query - user.usage,
-            'country': user.country,
-            'tutors': user.tutors,
-            'training_datas': user.training_datas,
-            'training_words': user.training_words
-        }
-    response = {
-        'success': True,
-        'code': 200,
-        'data': new_user
-    }
-    return jsonify(response)
-
-
 def send_email(user):
     token = User.get_reset_token(user)
 
@@ -226,6 +155,11 @@ def send_email(user):
 
 
 def register_new_user(username, email, password):
+    db.session.add(Organization(email=email))
+
+    invite_user = db.session.query(Invite).filter_by(email=email).first()
+    
+    # Setting default values for new user
     role = 5
     status = 0
     query = 500
@@ -233,22 +167,45 @@ def register_new_user(username, email, password):
     tutors = 1
     training_datas = 1
     training_words = 100000
+
+    if invite_user:
+        invite_user.status = True
+        user = db.session.query(User).filter_by(id=invite_user.user_id).first()
+        if user and user.role == 7:  # Ensure user exists and has role 7
+            # Updating values for user with role 7
+            role = 4
+            query = 10000
+            tutors = 100
+            training_datas = 100
+            training_words = 20000000
+
+    # Create stripe customer
     customer = stripe.Customer.create(name=username, email=email)
-    new_user = User(username=username, query=query, tutors=tutors, training_datas=training_datas, training_words=training_words, status=status, email=email, role=role, customer_id=customer.id, usage=usage,
-                    password=generate_password_hash(password, method='sha256'))
+    
+    # Create new user
+    new_user = User(
+        username=username, 
+        query=query, 
+        tutors=tutors, 
+        training_datas=training_datas, 
+        training_words=training_words, 
+        status=status, 
+        email=email, 
+        role=role, 
+        customer_id=customer.id, 
+        usage=usage,
+        password=generate_password_hash(password, method='sha256')
+    )
+
     db.session.add(new_user)
     db.session.commit()
-    new_organization = Organization(email=email)
-    db.session.add(new_organization)
-    invite_users = db.session.query(Invite).filter_by(email=email).all()
-    if invite_users:
-        for invite_user in invite_users:
-            invite_user.status = True
-    db.session.commit()
-    msg = Message('Welcome to Interactive Tutor', sender=os.getenv('MAIL_USERNAME'),
-                  recipients=[email])
-    msg.html = render_template(
-        'welcome.html', username=username)
+
+    msg = Message(
+        'Welcome to Interactive Tutor', 
+        sender=os.getenv('MAIL_USERNAME'),
+        recipients=[email]
+    )
+    msg.html = render_template('welcome.html', username=username)
     mail.send(msg)
 
     return True
@@ -360,6 +317,7 @@ def add_user_account():
 def get_useraccount():
     id = request.json['id']
     user = db.session.query(User).filter_by(id=id).first()
+    invite_account = db.session.query(Invite).filter_by(email=user.email).first()
     if user.role == 5:
         days = calculate_days(user.create_date)
         if days < 0:
@@ -406,23 +364,41 @@ def get_useraccount():
             }
             return jsonify({'success': True, 'data': new_user, 'code': 200})
     else:
+        if invite_account:
+            invite_user = db.session.query(User).filter_by(id=invite_account.user_id).first()
+            if invite_user and invite_user.role == 7:
+                new_user = {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'contact': user.contact,
+                    'state': user.state,
+                    'city': user.city,
+                    'maxquery': user.query,
+                    'role': user.role,
+                    'query': invite_user.query - invite_user.usage,
+                    'country': user.country,
+                    'tutors': user.tutors,
+                    'training_datas': user.training_datas,
+                    'training_words': user.training_words
+                }
+                return jsonify({'success': True, 'data': new_user, 'code': 200})
         new_user = {
-            'id': user.id,
-            'username': user.username,
-            'email': user.email,
-            'contact': user.contact,
-            'state': user.state,
-            'city': user.city,
-            'maxquery': user.query,
-            'role': user.role,
-            'query': user.query - user.usage,
-            'country': user.country,
-            'tutors': user.tutors,
-            'training_datas': user.training_datas,
-            'training_words': user.training_words
-        }
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'contact': user.contact,
+                'state': user.state,
+                'city': user.city,
+                'maxquery': user.query,
+                'role': user.role,
+                'query': user.query - user.usage,
+                'country': user.country,
+                'tutors': user.tutors,
+                'training_datas': user.training_datas,
+                'training_words': user.training_words
+            }
         return jsonify({'success': True, 'data': new_user, 'code': 200})
-
 
 @auth.route('/api/getallaccounts', methods=['POST'])
 def get_all_useraccount():
@@ -584,7 +560,7 @@ def invite_email():
     email = request.json['email']
     index = request.json['index']
     user = db.session.query(User).filter_by(id=id).first()
-    invite_user = db.session.query(User).filter(email=email).first()
+    invite_user = db.session.query(User).filter_by(email=email).first()
     if invite_user:
         return jsonify({'success': False, 'code': 409, 'message': 'Email address already exists!'})
     new_invite = Invite(user_id=id, email=email, index=index, status=False)
@@ -593,7 +569,7 @@ def invite_email():
     db.session.commit()
     msg = Message('Invite to the interactive tutor', sender=os.getenv('MAIL_USERNAME'), recipients=[email])
     msg.html = render_template(
-        'invite.html', username=user.username, url="https://app.interactive-tutor.com"
+        'invite.html', username=user.username, url=f"https://app.interactive-tutor.com/register?email={email}"
     )
     mail.send(msg)
     return jsonify({'success': True, 'code': 200, 'message': 'You have successfully sent the invitation!'})
@@ -648,7 +624,7 @@ def resendInvitation():
     email = request.json['email']
     msg = Message('Invite to the interactive tutor', sender=os.getenv('MAIL_USERNAME'), recipients=[email])
     msg.html = render_template(
-        'enterprise.html', username=user.username, url="https://app.interactive-tutor.com"
+        'enterprise.html', username=user.username, url=f"https://app.interactive-tutor.com/register?email={email}"
     )
     mail.send(msg)
     return jsonify({'success': True, 'code': 200, 'message': 'You have successfully Resent the invitation!'})
@@ -659,6 +635,10 @@ def sendUserInvite():
     email = request.json['email']
     enterpriseUser = db.session.query(User).filter_by(id=id).first()
     user = db.session.query(User).filter_by(email=email).first()
+    invite_count = db.session.query(Invite).filter_by(user_id=id).all()
+    if invite_count and len(invite_count) > 50:
+        return jsonify({'success': False, 'code': 405, 'message': 'Your limitation is full'})
+
     if user is None:
         new_invite = Invite(user_id=id, email=email, index=0, status=False)
     else:
@@ -667,7 +647,7 @@ def sendUserInvite():
     db.session.commit()
     msg = Message('Invite to the interactive tutor', sender=os.getenv('MAIL_USERNAME'), recipients=[email])
     msg.html = render_template(
-        'enterprise.html', username=enterpriseUser.username, url="https://app.interactive-tutor.com"
+        'enterprise.html', username=enterpriseUser.username, url=f"https://app.interactive-tutor.com/register?email={email}"
     )
     mail.send(msg)
     return jsonify({'success': True, 'code': 200, 'message': 'You have successfully sent the invitation!'})
@@ -736,3 +716,14 @@ def setTutors():
         db.session.add(new_chat)
         db.session.commit()
     return jsonify({ 'success': True, 'message': 'Successfully set Tutors' })
+
+@auth.route('/api/checkUserInvite', methods=['POST'])
+def checkUserInvite():
+    id = request.json['id']
+    user = db.session.query(User).filter_by(id=id).first()
+    invite_account = db.session.query(Invite).filter_by(email=user.email).first()
+    if invite_account:
+            invite_user = db.session.query(User).filter_by(id=invite_account.user_id).first()
+            if invite_user and invite_user.role == 7:
+                return jsonify({'success': True})
+    return jsonify({'success': False})
