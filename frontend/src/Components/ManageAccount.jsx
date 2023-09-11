@@ -23,6 +23,7 @@ const ManageAccount = () => {
     const [phone, setPhone] = useState("");
     const [state, setState] = useState("");
     const [city, setCity] = useState("");
+    const [check, setCheck] = useState(true);
     const [isSubscriptionOpenModal, setIsSubscriptionOpenModal] =
         useState(false);
     const [country, setCountry] = useState("");
@@ -98,6 +99,17 @@ const ManageAccount = () => {
             setTrial(user.days);
         }
         axios
+            .post(webAPI.checkUserInvite, { id: user.id })
+            .then(res => {
+                if (res.data.success) {
+                    setCheck(false)
+                }
+                else {
+                    setCheck(true)
+                }
+            })
+            .catch(err => console.error(err))
+        axios
             .post(webAPI.getuser, { id: user.id })
             .then((res) => {
                 setUsername(res.data.data.username);
@@ -125,7 +137,7 @@ const ManageAccount = () => {
                     onClick={handleOpenSidebar}
                     className="w-6 h-6 mb-1 md:hidden"
                 />
-                <div className="flex items-end justify-end md:mt-[27px] md:mb-[30px] md:pr-[44px] pr-9">
+                {check && <div className="flex items-end justify-end md:mt-[27px] md:mb-[30px] md:pr-[44px] pr-9">
                     {_chat && _chat.organization && (
                         <div className="xl:flex flex-col items-start justify-center mr-2 p-2 bg-[--site-warning-text-color] rounded shadow-2xl hidden">
                             <p>
@@ -176,7 +188,7 @@ const ManageAccount = () => {
                             Upgrade
                         </span>
                     </Button>
-                </div>
+                </div>}
             </div>
 
             <div className="flex md:hidden gap-2 text-[--site-card-icon-color] pt-8 px-5">
