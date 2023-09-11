@@ -6,7 +6,6 @@ export const getquery = (dispatch, data) => {
     axios
         .post(webAPI.getquery, data)
         .then((res) => {
-            console.log(res.data.query - res.data.usage);
             dispatch({
                 type: SET_QUERY,
                 payload: res.data.query - res.data.usage,

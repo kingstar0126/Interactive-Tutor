@@ -4,7 +4,6 @@ import { Toaster } from "react-hot-toast";
 import { AiOutlineTrophy, AiOutlineMenu } from "react-icons/ai";
 import { getUseraccount } from "../redux/actions/userAction";
 import { useSelector, useDispatch } from "react-redux";
-import { getUserState } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
 import ReactSpeedometer from "react-d3-speedometer";
 import { MdOutlineUpdate } from "react-icons/md";
@@ -14,6 +13,7 @@ import Report from "./Report";
 import { Slider, Button } from "@material-tailwind/react";
 import SubscriptionModal from "./SubscriptionModal";
 import { setOpenSidebar } from "../redux/actions/locationAction";
+import { useNavigate } from "react-router-dom";
 
 const Subscription = () => {
     const dispatch = useDispatch();
@@ -26,10 +26,14 @@ const Subscription = () => {
     const [index_length, setIndex_length] = useState(0);
     const [datasources, setDataSources] = useState(null);
     const [isopenModal, setIsOpenModal] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
+        axios
+            .post(webAPI.checkUserInvite, { id: user.id })
+            .then(res => {if (res.data.success) {navigate(-1)}})
+            .catch(err => console.error(err))
         getUseraccount(dispatch, { id: user.id });
-        getUserState(dispatch, { id: user.id });
         setquery(dispatch, user.query);
         if (user.role === 5) {
             setTrial(user.days);
@@ -82,14 +86,16 @@ const Subscription = () => {
     };
 
     const get_traindata = () => {
-        axios
-            .post(webAPI.gettraindatas, { uuid: chat.uuid })
-            .then((res) => {
-                if (res.data.success) {
-                    setDataSources(res.data.data.length);
-                }
-            })
-            .catch((error) => console.log(error));
+        if (chat.uuid) {
+            axios
+                .post(webAPI.gettraindatas, { uuid: chat.uuid })
+                .then((res) => {
+                    if (res.data.success) {
+                        setDataSources(res.data.data.length);
+                    }
+                })
+                .catch((error) => console.log(error));
+        }
     };
     return (
         <div className="w-full h-full">

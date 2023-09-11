@@ -9,7 +9,6 @@ import { Scrollbar } from "react-scrollbars-custom";
 import { dracula, CopyBlock } from "react-code-blocks";
 import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
-import { getUserState } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
 import { useLocation } from "react-router-dom";
 import ReactLoading from "react-loading";
@@ -59,7 +58,6 @@ const NewChat = () => {
                     .get("https://geolocation-db.com/json/")
                     .then((res) => {
                         let country = res.data.country_name;
-                        // getUserState(dispatch, { id: chat.user_id });
                         new_chat["country"] = country;
                         setchatbot(dispatch, new_chat);
                         setLoading(false);

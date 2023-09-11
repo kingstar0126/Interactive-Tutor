@@ -5,11 +5,11 @@ export const stringConstant = {
 
 export const webAPI = {
     email_verification: SERVER_URL + "/api/email_verification",
-    getuseraccount: SERVER_URL + "/api/getuseraccount",
     register: SERVER_URL + "/api/signup",
     adduseraccount: SERVER_URL + "/api/adduseraccount",
     getuser: SERVER_URL + "/api/getaccount",
     getallusers: SERVER_URL + "/api/getallaccounts",
+    checkUserInvite: SERVER_URL + "/api/checkUserInvite",
     changeuser: SERVER_URL + "/api/changeaccount",
     changeuserstatus: SERVER_URL + "/api/changeaccountstatus",
     deleteuser: SERVER_URL + "/api/deleteaccount",

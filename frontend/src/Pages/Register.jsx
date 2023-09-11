@@ -7,14 +7,9 @@ import { Link } from "react-router-dom";
 import { webAPI } from "../utils/constants";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 const Register = () => {
-    const {
-        register,
-        getValues,
-        formState: { errors },
-        handleSubmit,
-    } = useForm();
     const [checkbox, setCheckbox] = useState(0);
     const notification = (type, message) => {
         // To do in here
@@ -25,7 +20,23 @@ const Register = () => {
             toast.success(message);
         }
     };
+    const location = useLocation();
     const navigate = useNavigate();
+    const searchParams = new URLSearchParams(location.search);
+    const email = searchParams.get('email');
+    const {
+        register,
+        formState: { errors },
+        handleSubmit,
+        getValues,
+      } = useForm({
+        defaultValues: {
+          username: '', // Example initial value for the username field
+          email: `${email}`, // Example initial value for the email field
+          password: '', // Example initial value for the password field
+          confirm: '', // Example initial value for the confirm field
+      },
+    });
     const onSubmit = async (data) => {
         console.log(data)
         axios.post(webAPI.register, data).then((res) => {

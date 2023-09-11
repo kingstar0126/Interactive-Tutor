@@ -96,9 +96,18 @@ const Enterprise = () => {
                 email: userEmail
             })
             .then((res) => {
-                getAlluser();
-                setOpen(false);
-                notification("success", res.data.message);
+                {
+                    if (res.data.success) {
+                        getAlluser();
+                        setOpen(false);
+                        notification("success", res.data.message);
+                    }
+                    else {
+                        setOpen(false);
+                        getAlluser();
+                        notification("error", res.data.message);
+                    }
+                }
             })
             .catch((err) => console.error(err));
     };
@@ -275,8 +284,6 @@ const Enterprise = () => {
                                 <th className="px-4 py-3 w-[50px]">No</th>
                                 <th className="px-4 py-3 ">Name</th>
                                 <th className="px-4 py-3 ">Email</th>
-                                <th className="px-4 py-3 ">query</th>
-                                <th className="px-4 py-3 ">usage</th>
                                 <th className="px-4 py-3 ">Tutors</th>
                                 <th className="px-4 py-3 ">Status</th>
                                 <th className="px-4 py-3 ">Action</th>
@@ -296,12 +303,6 @@ const Enterprise = () => {
                                         </td>
                                         <td className="px-4 py-3 font-medium border text-ms">
                                             {item.email}
-                                        </td>
-                                        <td className="px-4 py-3 font-semibold border text-ms">
-                                            {item.query}
-                                        </td>
-                                        <td className="px-4 py-3 font-semibold border text-ms">
-                                            {item.usage}
                                         </td>
                                         <td className="px-4 py-3 font-semibold border text-ms">
                                             {item.chats.map((item, index) => {return <Chip

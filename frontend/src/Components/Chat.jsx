@@ -9,7 +9,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { webAPI } from "../utils/constants";
 import { useNavigate } from "react-router-dom";
 import { Outlet, useLocation } from "react-router-dom";
-import { getUserState } from "../redux/actions/userAction";
+import { getUseraccount } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
 import ReactSpeedometer from "react-d3-speedometer";
 import { setOpenSidebar } from "../redux/actions/locationAction";
@@ -164,7 +164,7 @@ const Chat = () => {
     };
     useEffect(() => {
         const fetchData = async () => {
-            getUserState(dispatch, { id: user.id });
+            getUseraccount(dispatch, { id: user.id });
             setquery(dispatch, user.query);
             if (user.role === 5) {
                 setTrial(user.days);

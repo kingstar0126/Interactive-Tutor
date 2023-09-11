@@ -24,25 +24,6 @@ export const getUser = (dispatch, data) => {
         .catch((err) => console.log(err));
 };
 //This is to get the free trial account days and choose the user's role !
-export const getUserState = (dispatch, data) => {
-    axios
-        .post(webAPI.getuseraccount, data)
-        .then((res) => {
-            if (res.status === 200) {
-                if (res.data.success) {
-                    dispatch({
-                        type: SET_USER,
-                        payload: JSON.stringify(res.data.data),
-                    });
-                } else {
-                    notification("error", res.data.message);
-                }
-            } else {
-                notification("error", stringConstant.FAILED_GET_DATA);
-            }
-        })
-        .catch((err) => console.log(err));
-};
 
 export const getUseraccount = (dispatch, data) => {
     axios

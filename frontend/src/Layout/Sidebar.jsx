@@ -9,13 +9,16 @@ import { useLocation, Link } from "react-router-dom";
 import { setlocation } from "../redux/actions/locationAction";
 import { useSelector, useDispatch } from "react-redux";
 import { SERVER_URL } from "../config/constant";
+import { webAPI } from "../utils/constants";
 import { useState, useEffect } from "react";
 import { setOpenSidebar } from "../redux/actions/locationAction";
+import axios from "axios";
 
 const Sidebar = () => {
     let location = useLocation();
     const redirections = ["chat", "subscription", "manager", "enterprise", "account"];
     const dispatch = useDispatch();
+    const [check, setCheck] = useState(true);
     const [selection, setSelection] = useState(1);
     const [sidebarStyle, setSidebarStyle] = useState("");
     const user = JSON.parse(useSelector((state) => state.user.user));
@@ -28,6 +31,17 @@ const Sidebar = () => {
                 "md:flex hidden flex-col items-center justify-center"
             );
         }
+        axios
+            .post(webAPI.checkUserInvite, { id: user.id })
+            .then(res => {
+                if (res.data.success) {
+                    setCheck(false)
+                }
+                else {
+                    setCheck(true)
+                }
+            })
+            .catch(err => console.error(err))
     }, []);
 
     const handleOpenSidebar = () => {
@@ -93,7 +107,7 @@ const Sidebar = () => {
 
                     <span className="flex items-end text-base">Tutor</span>
                 </Link>
-                <Link
+                {check && <Link
                     to="subscription"
                     className="flex w-full gap-4 px-6 py-4 transition-all duration-300 ease-in-out hover:bg-black hover:bg-opacity-25"
                     style={{
@@ -105,7 +119,7 @@ const Sidebar = () => {
                     <span className="flex items-end text-base ">
                         Subscriptions
                     </span>
-                </Link>
+                </Link>}
                 {/* //Todo This is user manager page */}
                 {user.role === 1 ? (
                     <Link
