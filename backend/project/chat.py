@@ -442,7 +442,10 @@ def delete_chat(id):
 @chat.route('/api/getreportdata', methods=['POST'])
 def get_report_data():
     id = request.json['id']
+
+    user = db.session.query(User).filter_by(id=id).first()
     chats = db.session.query(Chat).filter_by(user_id=id).all()
+
     current_month = datetime.datetime.now().month
     messages = []
     labels = []
@@ -451,6 +454,11 @@ def get_report_data():
         labels.append(chat.label)
         message = db.session.query(Message).filter_by(
             chat_id=chat.id).order_by(Message.create_date).all()
+        if user.role == 7:
+            invite_chat = db.session.query(Chat).filter_by(inviteId=id, label=chat.label).first()
+            if invite_chat:
+                invite_message = db.session.query(Message).filter_by( chat_id=invite_chat.id ).order_by(Message.create_date).all()
+                message.extend(invite_message)
         for msg in message:
             if msg.create_date.month == current_month:
                 data.append(msg.create_date.strftime("%Y-%m-%d"))
