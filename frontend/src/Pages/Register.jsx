@@ -23,7 +23,7 @@ const Register = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const searchParams = new URLSearchParams(location.search);
-    const email = searchParams.get('email');
+    const email = searchParams.get('email') || '';
     const {
         register,
         formState: { errors },
