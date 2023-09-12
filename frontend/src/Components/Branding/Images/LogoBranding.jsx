@@ -79,9 +79,9 @@ const LogoBranding = (props) => {
     return (
         <div>
             <div className="flex flex-col gap-5 border border-[--site-chat-header-border] rounded-lg p-4">
-                <span className="border-b-[1px] border-[--site-chat-header-border] pb-2">
+                <h1 className="border-b-[1px] border-[--site-card-icon-color] font-semibold pb-2">
                     {props.title}
-                </span>
+                </h1>
                 <div name="switch" className="gap-2">
                     <span className="font-medium">Status</span>
                     <div className="flex w-full gap-2 font-medium">

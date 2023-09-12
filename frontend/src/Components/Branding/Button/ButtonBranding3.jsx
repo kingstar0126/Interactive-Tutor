@@ -23,7 +23,7 @@ const ButtonBranding3 = (props) => {
     return (
         <div>
             <div className="flex flex-col border border-[--site-chat-header-border] rounded-lg p-4 gap-5">
-                <h1 className="border-b-[1px] border-[--site-chat-header-border] font-semibold pb-2">
+                <h1 className="border-b-[1px] border-[--site-card-icon-color] font-semibold pb-2">
                     {props.title}
                 </h1>
                 <div name="switch" className="flex flex-col gap-2">
