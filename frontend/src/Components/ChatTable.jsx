@@ -114,7 +114,7 @@ const ChatTable = (props) => {
                         props.handleAdd();
                     }}
                 >
-                    Add Tutors
+                    Add AI Tutors
                     <AiOutlinePlus className="w-4 h-4" />
                 </Button>
             </div>
@@ -150,7 +150,7 @@ const ChatTable = (props) => {
                                                 }}
                                             >
                                                 <span className="text-xl">
-                                                    Add Tutors
+                                                    Add AI Tutors
                                                 </span>
                                                 <AiOutlinePlus className="w-6 h-6" />
                                             </Button>

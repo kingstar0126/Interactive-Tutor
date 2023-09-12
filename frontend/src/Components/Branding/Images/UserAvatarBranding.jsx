@@ -64,9 +64,9 @@ const UserAvatarBranding = (props) => {
     return (
         <div>
             <div className="flex flex-col gap-5 border border-[--site-chat-header-border] rounded-lg p-4">
-                <span className="border-b border-[--site-chat-header-border] pb-2">
+                <h1 className="border-b-[1px] border-[--site-card-icon-color] font-semibold pb-2">
                     {props.title}
-                </span>
+                </h1>
                 <div className="flex flex-col gap-2">
                     <span>User avatar URL</span>
                     <div>

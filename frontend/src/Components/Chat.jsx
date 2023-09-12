@@ -213,7 +213,7 @@ const Chat = () => {
             <div className="flex md:items-center items-end justify-between w-full md:h-[100px] md:px-10 from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] md:border-b-[--site-chat-header-border] md:border bg-gradient-to-r px-4 py-2 max-h-min gap-1">
                 <div className="hidden md:flex gap-2 mt-9 mb-8 text-[--site-card-icon-color]">
                     <AiOutlineUser className="w-8 h-8" />
-                    <span className="text-2xl font-semibold">Tutors</span>
+                    <span className="text-2xl font-semibold">AI Tutors</span>
                 </div>
                 <AiOutlineMenu
                     onClick={handleOpenSidebar}
@@ -283,7 +283,7 @@ const Chat = () => {
             </div>
             <div className="flex md:hidden gap-2 text-[--site-card-icon-color] pt-8 px-10">
                 <AiOutlineUser className="w-8 h-8" />
-                <span className="text-2xl font-semibold">Tutors</span>
+                <span className="text-2xl font-semibold">AI Tutors</span>
             </div>
             <div className="flex flex-col w-full px-5 pt-8 pb-16 md:gap-8 md:px-10">
                 <div className={showDescription}>
