@@ -96,7 +96,7 @@ const Enterprise = () => {
         axios
             .post(webAPI.userInvite, {
                 id: user.id,
-                email: userEmail
+                email: [userEmail]
             })
             .then((res) => {
                 {
@@ -190,7 +190,45 @@ const Enterprise = () => {
     };
 
     const handleFileUpload = () => {
-        console.log(file)
+        if (file && file.name) {
+            let data = new FormData();
+            const filename = file.name.replaceAll(" ", "");
+            data.append("file", file, filename);
+            axios
+                .post(webAPI.uploadInviteFile, data)
+                .then((res) => {
+                    if (!res.data.success) {
+                        notification("error", res.data.message);
+                    } else {
+                        notification("success", res.data.message);
+                        axios
+                        .post(webAPI.userInvite, {
+                            id: user.id,
+                            email: res.data.data
+                        })
+                        .then((res) => {
+                            {
+                                if (res.data.success) {
+                                    getAlluser();
+                                    setOpen(false);
+                                    notification("success", res.data.message);
+                                }
+                                else {
+                                    setOpen(false);
+                                    getAlluser();
+                                    notification("error", res.data.message);
+                                }
+                            }
+                        })
+                        .catch((err) => console.error(err));
+                    }
+                    setImportOpen(false)
+                })
+                .catch((err) => {
+                    notification("error", "Failed Uploading File");
+                    setImportOpen(false)
+                });
+        }
     }
 
 
@@ -467,7 +505,7 @@ const Enterprise = () => {
                 </DialogBody>
                 <DialogFooter className="flex items-center justify-end px-8 gap-4">
                     <Button
-                            onClick={() => setOpen(false)}
+                            onClick={() => setImportOpen(false)}
                             className=" normal-case bg-transparent border-[--site-card-icon-color] text-[--site-card-icon-color] text-base font-semibold border rounded-md px-4 py-2"
                         >
                             cancel
