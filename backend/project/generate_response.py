@@ -63,7 +63,7 @@ def generate_message(query, history, behavior, temp, model, chat):
                          streaming=True,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "3":
-        llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k",
+        llm = ChatOpenAI(model_name="gpt-4",
                          temperature=temp,
                          streaming=True,
                          openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
@@ -134,7 +134,7 @@ def generate_AI_message(query, history, behavior, temp, model):
                          streaming=True,
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "3":
-        llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k",
+        llm = ChatOpenAI(model_name="gpt-4",
                          temperature=temp,
                          streaming=True,
                          openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))

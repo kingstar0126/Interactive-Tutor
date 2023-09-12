@@ -3,7 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Message
 from .models import User, Organization, Invite, Chat
 from . import db, mail
-import os
+import re
 import string
 import json
 import secrets
@@ -12,9 +12,11 @@ from sqlalchemy import exc
 import stripe
 import os
 from dotenv import load_dotenv
+from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from flask_jwt_extended import create_access_token, decode_token
 from sqlalchemy.sql import text
+import csv
 
 load_dotenv()
 
@@ -259,6 +261,14 @@ def signup_post():
 
     if user:
         return jsonify({'message': 'Email address already exists', 'success': False})
+    
+    invite_account = db.session.query(Invite).filter_by(email=email).first()
+    if invite_account:
+        invite_user = db.session.query(User).filter_by(id=invite_account.user_id).first()
+        if invite_user.role == 7:
+            register_new_user(username, email, password)
+            return jsonify({'success': True, 'message': 'You have registered successfully!'})
+
     verification_token = create_access_token(identity={'username': username, 'email': email, 'password': password},
                                              expires_delta=timedelta(minutes=30))
     verification_link = f"https://app.interactive-tutor.com/verify-email/token={verification_token}"
@@ -455,6 +465,7 @@ def get_all_useraccount():
                     _chat.append(chat_data)
                 new_user = {
                     'email': _user.email,
+                    'username': _user.username,
                     'query': _user.query,
                     'usage': _user.usage,
                     'chats': _chat,
@@ -632,34 +643,26 @@ def resendInvitation():
 @auth.route('/api/userInvite', methods=['POST'])
 def sendUserInvite():
     id = request.json['id']
-    email = request.json['email']
-    enterpriseUser = db.session.query(User).filter_by(id=id).first()
-    user = db.session.query(User).filter_by(email=email).first()
-    invite_count = db.session.query(Invite).filter_by(user_id=id).all()
-    if invite_count and len(invite_count) > 50:
-        return jsonify({'success': False, 'code': 405, 'message': 'Your limitation is full'})
-
-    if user is None:
-        new_invite = Invite(user_id=id, email=email, index=0, status=False)
-    else:
-        new_invite = Invite(user_id=id, email=email, index=0, status=True)
-    db.session.add(new_invite)
-    db.session.commit()
-    msg = Message('Invite to the interactive tutor', sender=os.getenv('MAIL_USERNAME'), recipients=[email])
-    msg.html = render_template(
-        'enterprise.html', username=enterpriseUser.username, url=f"https://app.interactive-tutor.com/register?email={email}"
-    )
-    mail.send(msg)
+    emails = request.json['email']
+    for email in emails:
+        enterpriseUser = db.session.query(User).filter_by(id=id).first()
+        user = db.session.query(User).filter_by(email=email).first()
+        invite_count = db.session.query(Invite).filter_by(user_id=id).all()
+        if invite_count and len(invite_count) > 50:
+            return jsonify({'success': False, 'code': 405, 'message': 'Your limitation is full'})
+        if user is None:
+            new_invite = Invite(user_id=id, email=email, index=0, status=False)
+        else:
+            new_invite = Invite(user_id=id, email=email, index=0, status=True)
+        db.session.add(new_invite)
+        db.session.commit()
+        msg = Message('Invite to the interactive tutor', sender=os.getenv('MAIL_USERNAME'), recipients=[email])
+        msg.html = render_template(
+            'enterprise.html', username=enterpriseUser.username, url=f"https://app.interactive-tutor.com/register?email={email}"
+        )
+        mail.send(msg)
     return jsonify({'success': True, 'code': 200, 'message': 'You have successfully sent the invitation!'})
 
-    # chats = db.session.query(Chat).filter_by(user_id=id).all()
-    # for chat in chats:
-    #     chat_dict = {c.name: getattr(chat, c.name) for c in chat.__table__.columns if c.name != 'id'}
-    #     chat_dict['user_id'] = user.id
-    #     chat_dict['inviteId'] = id
-    #     new_chat = Chat(**chat_dict)
-    #     db.session.add(new_chat)
-    # return jsonify({ 'success': True, 'message': 'Successfully sent invitation' })
 
 @auth.route('/api/userInviteRemove', methods=['POST'])
 def removeUserInvite():
@@ -671,11 +674,16 @@ def removeUserInvite():
         if chats:
             for chat in chats:
                 db.session.delete(chat)
+        db.session.delete(user)
+    organization = db.session.query(Organization).filter_by(email=email).first()
+    if organization:
+        db.session.delete(organization)
     invite = db.session.query(Invite).filter_by(user_id=id, email=email)
     if invite:
         invite.delete()
     db.session.commit()
     return jsonify({ 'success': True, 'message': 'Successfully removed invitation User' })
+
 
 @auth.route('/api/setTutors', methods=['POST'])
 def setTutors():
@@ -691,7 +699,6 @@ def setTutors():
         for chat in originalChats:
             db.session.delete(chat)
     for chat in chats:
-        print('\n\n', chat)
         user_id = invite_user.id
         inviteId = id
         label = chat['label']
@@ -714,8 +721,9 @@ def setTutors():
         new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
                     access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button, inviteId=inviteId)
         db.session.add(new_chat)
-        db.session.commit()
+    db.session.commit()
     return jsonify({ 'success': True, 'message': 'Successfully set Tutors' })
+
 
 @auth.route('/api/checkUserInvite', methods=['POST'])
 def checkUserInvite():
@@ -727,3 +735,32 @@ def checkUserInvite():
             if invite_user and invite_user.role == 7:
                 return jsonify({'success': True})
     return jsonify({'success': False})
+
+
+@auth.route('/api/uploadInviteFile', methods=['POST'])
+def uploadInviteFile():
+    file = request.files.get('file', None)
+    if not file:
+        return {"success": False, "message": "Invalid file data"}, 400
+    filename = secure_filename(file.filename)
+    file.save(filename)
+    with open(filename, 'r') as f:
+        data = parse_csv(f)
+    os.remove(filename)
+    return {"success": True, "data": data,"message": "Successfully"}, 200
+
+
+def parse_csv(file):
+    data = csv.reader(file)
+    email = []
+    for row in data:
+        print (row)
+        for col in row:
+            print(col)
+            if is_email(col):
+                email.append(col)
+    return email
+
+def is_email(s):
+    pattern = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
+    return bool(re.match(pattern, s))
