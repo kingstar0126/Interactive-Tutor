@@ -40,7 +40,7 @@ const Embedded = (props) => {
         >
             <DialogHeader className="px-8 pt-8 pb-6">
                 <span className="text-[32px] leading-12 font-semibold text-[--site-card-icon-color]">
-                    Add provider
+                    Embed or Share
                 </span>
             </DialogHeader>
             <DialogBody className="border-t border-[--site-chat-header-border] text-black text-base font-medium pl-8 py-5 h-[30rem]">

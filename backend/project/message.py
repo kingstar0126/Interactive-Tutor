@@ -248,7 +248,7 @@ def get_messages():
             'uuid': _message.uuid,
             'name': _message.name,
             'message': json.loads(_message.message),
-            'update_data': _message.update_date.strftime('%Y-%m-%d')
+            'update_data': _message.update_date.strftime('%d-%m-%Y')
         }
         response.append(message_data)
 
