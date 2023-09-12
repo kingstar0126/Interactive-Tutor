@@ -259,6 +259,14 @@ def signup_post():
 
     if user:
         return jsonify({'message': 'Email address already exists', 'success': False})
+    
+    invite_account = db.session.query(Invite).filter_by(email=email).first()
+    if invite_account:
+        invite_user = db.session.query(User).filter_by(id=invite_account.user_id).first()
+        if invite_user.role == 7:
+            register_new_user(username, email, password)
+            return jsonify({'success': True, 'message': 'You have registered successfully!'})
+
     verification_token = create_access_token(identity={'username': username, 'email': email, 'password': password},
                                              expires_delta=timedelta(minutes=30))
     verification_link = f"https://app.interactive-tutor.com/verify-email/token={verification_token}"
@@ -455,6 +463,7 @@ def get_all_useraccount():
                     _chat.append(chat_data)
                 new_user = {
                     'email': _user.email,
+                    'username': _user.username,
                     'query': _user.query,
                     'usage': _user.usage,
                     'chats': _chat,
@@ -691,7 +700,6 @@ def setTutors():
         for chat in originalChats:
             db.session.delete(chat)
     for chat in chats:
-        print('\n\n', chat)
         user_id = invite_user.id
         inviteId = id
         label = chat['label']
@@ -714,7 +722,7 @@ def setTutors():
         new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
                     access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button, inviteId=inviteId)
         db.session.add(new_chat)
-        db.session.commit()
+    db.session.commit()
     return jsonify({ 'success': True, 'message': 'Successfully set Tutors' })
 
 @auth.route('/api/checkUserInvite', methods=['POST'])

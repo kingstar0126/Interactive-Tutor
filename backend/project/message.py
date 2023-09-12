@@ -175,10 +175,10 @@ def send_message():
     temp = current_message.creativity
     history = json.loads(current_message.message)
     last_history = history[-6:] if len(history) > 6 else history
-    behavior = current_message.behavior if behaviormodel == "Behave like the default ChatGPT" \
+    behavior = current_message.behavior if behaviormodel == "Remove training data ring fencing and perform like ChatGPT" \
         else current_message.behavior + "\n\n" + behaviormodel
     response = generate_message(
-        query, last_history, behavior, temp, model, chat.uuid) if behaviormodel != "Behave like the default ChatGPT" \
+        query, last_history, behavior, temp, model, chat.uuid) if behaviormodel != "Remove training data ring fencing and perform like ChatGPT" \
         else generate_AI_message(query, last_history, behavior, temp, model)
 
     history.append({"role": "human", "content": query})
@@ -241,15 +241,14 @@ def get_message():
 @message.route('/api/getmessages', methods=['POST'])
 def get_messages():
     chat_id = request.json['id']
-    current_messages = db.session.query(
-        Message).filter_by(chat_id=chat_id).all()
+    current_messages = db.session.query(Message).filter_by(chat_id=chat_id).order_by(Message.update_date.desc()).all()
     response = []
     for _message in current_messages:
         message_data = {
             'uuid': _message.uuid,
             'name': _message.name,
             'message': json.loads(_message.message),
-            'update_data': _message.update_date.strftime('%Y-%m-%d %H:%M:%S.%f')
+            'update_data': _message.update_date.strftime('%Y-%m-%d')
         }
         response.append(message_data)
 
