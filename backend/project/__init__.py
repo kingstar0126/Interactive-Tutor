@@ -10,6 +10,7 @@ import time
 import logging
 from sqlalchemy.exc import SQLAlchemyError
 from rich import print, pretty
+
 pretty.install()
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'

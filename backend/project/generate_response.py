@@ -1,4 +1,13 @@
 from langchain.chat_models import ChatOpenAI
+
+from threading import Thread
+from queue import Queue, Empty
+from threading import Thread
+from collections.abc import Generator
+from langchain.llms import OpenAI
+from langchain.callbacks.base import BaseCallbackHandler
+from typing import Any, Callable
+
 from gptcache import Cache
 from gptcache.manager.factory import manager_factory
 from gptcache.processor.pre import get_prompt
@@ -31,9 +40,66 @@ def init_gptcache(cache_obj: Cache, llm: str):
             manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
     )
 
+class QueueCallback(BaseCallbackHandler):
+    """Callback handler for streaming LLM responses to a queue."""
+
+    def __init__(self, q):
+        self.q = q
+
+    def on_llm_new_token(self, token: str, **kwargs: Any) -> None:
+        self.q.put(token)
+
+    def on_llm_end(self, *args, **kwargs: Any) -> None:
+        return self.q.empty()
+
+def stream(input_text) -> Generator:
+
+    # Create a Queue
+    q = Queue()
+    job_done = object()
+
+    # Initialize the LLM we'll be using
+    llm = ChatOpenAI(
+        model_name="gpt-4",
+        streaming=True, 
+        callbacks=[QueueCallback(q)], 
+        temperature=0
+    )
+
+    # llm = ChatOpenAI(model_name="gpt-4",
+    #                      temperature=0,
+    #                      streaming=True,
+    #                      callbacks=[QueueCallback(q)],
+    #                      openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
+
+    # Create a funciton to call - this will run in a thread
+    def task():
+        resp = llm.run(input_text)
+        q.put(job_done)
+
+    # Create a thread and start the function
+    t = Thread(target=task)
+    t.start()
+
+    content = ""
+
+    # Get each new token from the queue and yield for our generator
+    while True:
+        try:
+            next_token = q.get(True, timeout=1)
+            if next_token is job_done:
+                break
+            content += next_token
+            yield next_token, content
+        except Empty:
+            continue
+
 
 def generate_message(query, history, behavior, temp, model, chat):
     load_dotenv()
+
+    q = Queue()
+    job_done = object()
 
     template = """ {behavior}
     
@@ -52,20 +118,24 @@ def generate_message(query, history, behavior, temp, model, chat):
         input_variables=["history", "examples", "human_input", "behavior"], template=template)
 
     langchain.llm_cache = GPTCache(init_gptcache)
+
     if model == "1":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo",
                          temperature=temp,
                          streaming=True,
+                         callbacks=[QueueCallback(q)],
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "2":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k",
                          temperature=temp,
                          streaming=True,
+                         callbacks=[QueueCallback(q)],
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "3":
         llm = ChatOpenAI(model_name="gpt-4",
                          temperature=temp,
                          streaming=True,
+                         callbacks=[QueueCallback(q)],
                          openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
 
     conversation = LLMChain(
@@ -73,6 +143,7 @@ def generate_message(query, history, behavior, temp, model, chat):
         verbose=True,
         prompt=prompt
     )
+
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
     docsearch = Pinecone.from_existing_index(
         index_name=PINECONE_INDEX_NAME, embedding=embeddings)
@@ -85,18 +156,37 @@ def generate_message(query, history, behavior, temp, model, chat):
             doc.page_content = doc.page_content.replace('\n\n', ' ')
             examples += doc.page_content + '\n'
 
-    response = conversation.run(
-        human_input=query,
-        history=history,
-        behavior=behavior,
-        examples=examples
-    )
+    def task():
+        conversation.run(
+            human_input=query,
+            history=history,
+            behavior=behavior,
+            examples=examples
+        )
+        q.put(job_done)
 
-    return response
+    t = Thread(target=task)
+    t.start()
+
+    content = ""
+
+    # Get each new token from the queue and yield for our generator
+    while True:
+        try:
+            next_token = q.get(True, timeout=1)
+            if next_token is job_done:
+                break
+            content += next_token
+            yield next_token, content
+        except Empty:
+            continue
 
 
 def generate_AI_message(query, history, behavior, temp, model):
     load_dotenv()
+
+    q = Queue()
+    job_done = object()
 
     template = """ {behavior}
 
@@ -127,16 +217,19 @@ def generate_AI_message(query, history, behavior, temp, model):
         llm = ChatOpenAI(model_name="gpt-3.5-turbo",
                          temperature=temp,
                          streaming=True,
+                         callbacks=[QueueCallback(q)],
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "2":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k",
                          temperature=temp,
                          streaming=True,
+                         callbacks=[QueueCallback(q)],
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "3":
         llm = ChatOpenAI(model_name="gpt-4",
                          temperature=temp,
                          streaming=True,
+                         callbacks=[QueueCallback(q)],
                          openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
     conversation = LLMChain(
         llm=llm,
@@ -144,13 +237,29 @@ def generate_AI_message(query, history, behavior, temp, model):
         prompt=prompt
     )
 
-    response = conversation.run(
-        human_input=query,
-        history=history,
-        behavior=behavior,
-    )
+    def task():
+        response = conversation.run(
+            human_input=query,
+            history=history,
+            behavior=behavior,
+        )
+        q.put(job_done)
 
-    return response
+    t = Thread(target=task)
+    t.start()
+
+    content = ""
+
+    # Get each new token from the queue and yield for our generator
+    while True:
+        try:
+            next_token = q.get(True, timeout=1)
+            if next_token is job_done:
+                break
+            content += next_token
+            yield next_token, content
+        except Empty:
+            continue
 
 
 def generate_Bubble_message(query):
@@ -194,18 +303,18 @@ def generate_system_prompt_role(role):
 
     template = '''You are a OpenAI GPT system role expert. Your job is to analyze the needs of users and generate system roles for users' 'Interactive Tutors' that they embed to change the role of the 'tutor' powered by OpenAI API to deliver on what they need. The user will give you details on what they need the system behavior prompt to deliver. 
 
-Once you have this information, do not ask any further questions and please provide json object: A short name for the tutor, description of the tutor, a conversation starter and the system role written out in full.
-{{
-"name": "",
-"system_role": "",
-"starter" : "",
-"description": ""
-}}
+            Once you have this information, do not ask any further questions and please provide json object: A short name for the tutor, description of the tutor, a conversation starter and the system role written out in full.
+            {{
+            "name": "",
+            "system_role": "",
+            "starter" : "",
+            "description": ""
+            }}
 
-The system role should be well detailed, clearly detail what steps the AI should take and to use British English if communicating in English. Most importantly, the system role's maximum character length must be less than 65500.
-=========================
-user: {role}
-'''
+            The system role should be well detailed, clearly detail what steps the AI should take and to use British English if communicating in English. Most importantly, the system role's maximum character length must be less than 65500.
+            =========================
+            user: {role}
+            '''
 
     prompt = PromptTemplate(
         input_variables=["role"], template=template)

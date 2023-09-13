@@ -1,14 +1,17 @@
 from flask import Blueprint, jsonify, request
+from flask import Response,stream_with_context
 from .models import Message, Train, User, Chat, Invite
 from bs4 import BeautifulSoup
 import requests
+import uuid
 from . import db
+import io
 import datetime
 from rich import print, pretty
 import time
 import os
 import json
-from .generate_response import generate_message, generate_AI_message, generate_Bubble_message
+from .generate_response import generate_message, generate_AI_message, generate_Bubble_message, stream
 import re
 import nltk
 from nltk.corpus import stopwords
@@ -139,13 +142,33 @@ def get_query():
     Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
     return jsonify({'query': user.query, 'usage': user.usage})
 
+BUFFER_SIZE = 1024 * 2
+
+
+@message.route('/api/testStreaming', methods=['POST'])
+def testStreaming():
+    id = request.form.get('id')
+    _message = request.form.get('_message')
+    behaviormodel = request.form.get('behaviormodel')
+    train = request.form.get('train')
+    model = request.form.get('model')
+    def generate():
+        for next_token, content in generate_AI_message(_message, [], '', 0.5, "3"):
+            data_chunk = content
+            yield (data_chunk).encode('utf-8')
+        final_data = json.dumps({"success": True, "data": content})
+        final_chunk = "FINAL:" + final_data
+        yield (final_chunk + "\n").encode('utf-8')
+    
+    return Response(stream_with_context(generate()), mimetype="text/event-stream", direct_passthrough=True, headers={'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
+
 
 @message.route('/api/sendchat', methods=['POST'])
 def send_message():
-    uuid = request.json['id']
-    query = request.json['_message']
-    behaviormodel = request.json['behaviormodel']
-    model = request.json['model']
+    uuid = request.form.get('id')
+    query = request.form.get('_message')
+    behaviormodel = request.form.get('behaviormodel')
+    model = request.form.get('model')
 
     current_message = db.session.query(Message).filter_by(uuid=uuid).first()
     if current_message is None:
@@ -181,21 +204,18 @@ def send_message():
         query, last_history, behavior, temp, model, chat.uuid) if behaviormodel != "Remove training data ring fencing and perform like ChatGPT" \
         else generate_AI_message(query, last_history, behavior, temp, model)
 
-    history.append({"role": "human", "content": query})
-    history.append({"role": "ai", "content": response})
-    current_message.message = json.dumps(history)
-    current_message.update_date = datetime.datetime.now()
-    db.session.commit()
-
-    _response = {
-        'success': True,
-        'code': 200,
-        'query': user.query - user.usage,
-        'message': 'Your messageBot created generated!!!',
-        'data': response
-    }
-
-    return jsonify(_response)
+    def generate():
+        for next_token, content in response:
+            data_chunk = next_token
+            yield (data_chunk).encode('utf-8')
+        
+        history.append({"role": "human", "content": query})
+        history.append({"role": "ai", "content": content})
+        current_message.message = json.dumps(history)
+        current_message.update_date = datetime.datetime.now()
+        db.session.commit()
+    
+    return Response(stream_with_context(generate()), mimetype="text/event-stream", direct_passthrough=True, headers={'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
 
 @message.route('/api/sendchatbubble', methods=['POST'])
 def send_chat_bubble():
