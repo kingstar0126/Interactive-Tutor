@@ -479,7 +479,7 @@ const NewChat = () => {
                                             className="flex flex-col w-full p-2 whitespace-break-spaces"
                                         >
                                             {streamData}
-                                            {/* <Grid
+                                            <Grid
                                                 height="50"
                                                 width="50"
                                                 color="#4fa94d"
@@ -488,7 +488,7 @@ const NewChat = () => {
                                                 wrapperStyle={{}}
                                                 wrapperClass=""
                                                 visible={true}
-                                            /> */}
+                                            />
                                         </div>
                                     </div>
                                 </div>}
