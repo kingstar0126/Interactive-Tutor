@@ -63,11 +63,12 @@ def compare_token_words(ct, chatbot):
     return True
 
 
-def delete_vectore(source):
+def delete_vectore(source, chat):
     index = pinecone.Index(PINECONE_INDEX_NAME)
     return index.delete(
         filter={
             "source": f"{source}",
+            "chat": f"{chat}"
         }
     )
 
@@ -222,9 +223,6 @@ def web_scraping(url):
 
 
 def create_train(label, _type, status, chat):
-
-    if train := db.session.query(Train).filter_by(label=label, chat=chat).first():
-        return False
     new_train = Train(label=label, type=_type, status=status, chat=chat)
     db.session.add(new_train)
     db.session.flush()
@@ -434,9 +432,9 @@ def delete_traindatas():
     train_ids = json.loads(chat.train)
     train_ids.remove(id)
     chat.train = json.dumps(train_ids)
-    source = db.session.query(Train).filter_by(id=id).first().label
+    source = db.session.query(Train).filter_by(id=id).first()
     # delete vectors in the pinecone
-    delete_vectore(source)
+    delete_vectore(source.label, uuid)
     db.session.query(Train).filter_by(id=id).delete()
     db.session.commit()
     chat_data = {

@@ -207,6 +207,7 @@ def send_message():
     def generate():
         for next_token, content in response:
             data_chunk = next_token
+            print(next_token)
             yield (data_chunk).encode('utf-8')
         
         history.append({"role": "human", "content": query})

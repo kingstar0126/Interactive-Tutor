@@ -66,11 +66,11 @@ def stream(input_text) -> Generator:
         temperature=0
     )
 
-    # llm = ChatOpenAI(model_name="gpt-4",
-    #                      temperature=0,
-    #                      streaming=True,
-    #                      callbacks=[QueueCallback(q)],
-    #                      openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
+    llm = ChatOpenAI(model_name="gpt-4",
+                         temperature=0,
+                         streaming=True,
+                         callbacks=[QueueCallback(q)],
+                         openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
 
     # Create a funciton to call - this will run in a thread
     def task():
@@ -148,10 +148,10 @@ def generate_message(query, history, behavior, temp, model, chat):
     docsearch = Pinecone.from_existing_index(
         index_name=PINECONE_INDEX_NAME, embedding=embeddings)
     _query = query
-    docs = docsearch.similarity_search(query=_query, k=20)
+    docs = docsearch.similarity_search_with_score(_query, filter={"chat": str(chat)})
 
     examples = ""
-    for doc in docs:
+    for doc, _ in docs:
         if doc.metadata['chat'] == str(chat):
             doc.page_content = doc.page_content.replace('\n\n', ' ')
             examples += doc.page_content + '\n'

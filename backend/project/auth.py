@@ -754,9 +754,7 @@ def parse_csv(file):
     data = csv.reader(file)
     email = []
     for row in data:
-        print (row)
         for col in row:
-            print(col)
             if is_email(col):
                 email.append(col)
     return email
