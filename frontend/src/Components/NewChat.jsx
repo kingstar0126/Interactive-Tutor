@@ -297,10 +297,9 @@ const NewChat = () => {
                 if (done) {
                     setStreamData('')
                     receiveMessage(res);
-                    setSpinner(false);
                     return;
                 }
-
+                setSpinner(false);
                 let data = decoder.decode(value);
                 res += data;
                 setStreamData(res);
