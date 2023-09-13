@@ -70,4 +70,6 @@ export const webAPI = {
     setTutors: SERVER_URL + "/api/setTutors",
     resendInvitation: SERVER_URL + "/api/resendInvitation",
     uploadInviteFile: SERVER_URL + "/api/uploadInviteFile",
+
+    streamingTest: SERVER_URL + "/api/testStreaming",
 };

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { BsSendPlus } from "react-icons/bs";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
+import { SERVER_URL } from "../config/constant";
 import { useSelector, useDispatch } from "react-redux";
 import { setchatbot, getchat } from "../redux/actions/chatAction";
 import { useNavigate } from "react-router-dom";
@@ -9,10 +10,10 @@ import { Scrollbar } from "react-scrollbars-custom";
 import { dracula, CopyBlock } from "react-code-blocks";
 import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
-import { setquery } from "../redux/actions/queryAction";
+import { getquery } from "../redux/actions/queryAction";
 import { useLocation } from "react-router-dom";
 import ReactLoading from "react-loading";
-import { Grid } from  'react-loader-spinner'
+import { Grid } from 'react-loader-spinner'
 import { Button } from "@material-tailwind/react";
 
 const NewChat = () => {
@@ -34,6 +35,7 @@ const NewChat = () => {
     const messagesEndRef = useRef(null);
     let location = useLocation();
     const [message, setMessage] = useState("");
+    const [streamData, setStreamData] = useState('');
     const [loading, setLoading] = useState(false);
     const [spinner, setSpinner] = useState(false);
     const chatState = useSelector((state) => state.chat.chat);
@@ -46,7 +48,6 @@ const NewChat = () => {
             toast.error(message);
         }
     };
-
     useEffect(() => {
         const pattern = /\/chat\/embedding\/(\w+)/;
         const result = pattern.exec(location.pathname);
@@ -269,24 +270,49 @@ const NewChat = () => {
             return;
         }
         setSpinner(true)
-        await axios
-            .post(webAPI.sendchat, {
-                id,
-                _message,
-                behaviormodel,
-                train,
-                model,
-            })
-            .then((res) => {
-                if (!res.data.success) {
-                    notification("error", res.data.message);
-                } else {
-                    setquery(dispatch, res.data.query);
-                    receiveMessage(res.data.data);
+    
+        // Create a new FormData to send the necessary data
+        const formData = new FormData();
+        formData.append('id', id);
+        formData.append('_message', _message);
+        formData.append('behaviormodel', behaviormodel);
+        formData.append('train', train);
+        formData.append('model', model);
+    
+        // Send the formData to the streaming API
+        fetch(webAPI.sendchat, {
+            method: 'POST',
+            body: formData
+        })
+        .then(async (response) => {
+            let res = ''
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            // Read the response stream
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+    
+            await reader.read().then(function process({ done, value }) {
+                if (done) {
+                    setStreamData('')
+                    receiveMessage(res);
+                    setSpinner(false);
+                    return;
                 }
-                setSpinner(false)
-            })
-            .catch((err) => setSpinner(false));
+
+                let data = decoder.decode(value);
+                res += data;
+                setStreamData(res);
+
+                return reader.read().then(process);
+            });
+            getquery(dispatch, {id: chatbot})
+        })
+        .catch((error) => {
+            console.error('There has been a problem with your fetch operation:', error);
+            setSpinner(false);
+        });
     };
 
     const receiveMessage = (message) => {
@@ -298,9 +324,9 @@ const NewChat = () => {
 
     return (
         <div
-        style={{
-            background: `linear-gradient(to bottom right, ${chat?.chat_logo?.bg || '#ffffff00'}, transparent)`,
-        }}
+            style={{
+                background: `linear-gradient(to bottom right, ${chat?.chat_logo?.bg || '#ffffff00'}, transparent)`,
+            }}
             className="w-full h-full rounded-xl"
         >
             {loading && (
@@ -452,7 +478,8 @@ const NewChat = () => {
                                             name="ai"
                                             className="flex flex-col w-full p-2 whitespace-break-spaces"
                                         >
-                                            <Grid
+                                            {streamData}
+                                            {/* <Grid
                                                 height="50"
                                                 width="50"
                                                 color="#4fa94d"
@@ -461,7 +488,7 @@ const NewChat = () => {
                                                 wrapperStyle={{}}
                                                 wrapperClass=""
                                                 visible={true}
-                                            />
+                                            /> */}
                                         </div>
                                     </div>
                                 </div>}
