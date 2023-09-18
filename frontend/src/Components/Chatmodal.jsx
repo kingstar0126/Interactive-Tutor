@@ -203,9 +203,9 @@ const Chatmodal = (props) => {
         }
     }, [props.open, props.chat]);
 
-    useEffect(() => {
-        if (loading === false) { onOK() }
-    }, [loading])
+    // useEffect(() => {
+    //     if (loading === false) { onOK() }
+    // }, [loading])
 
     const onOK = () => {
         if (!label)
