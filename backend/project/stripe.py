@@ -8,6 +8,7 @@ import json
 import os
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
+from . import add_email_to_sendgrid_marketing, get_sendgrid_list_ids, delete_email_to_sendgrid_marketing
 
 load_dotenv()
 pretty.install()
@@ -218,6 +219,10 @@ def stripe_webhook():
         user.role = db.session.query(Production).filter_by(
             price_id=price_id).first().role
         query = user.query
+
+        delete_email_to_sendgrid_marketing(os.getenv('SENDGRID_FREE_TRIAL_LIST_ID'), user.email)
+        add_email_to_sendgrid_marketing(os.getenv('SENDGRID_SUBSCRIPTION_USERS_LIST_ID'), user.username, user.email)
+        
         if user.role == 2:
             query = 500
             tutors = 1

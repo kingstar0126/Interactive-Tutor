@@ -26,11 +26,12 @@ openai.openai_api_key = OPENAI_API_KEY
 chat = Blueprint('chat', __name__)
 
 
-def delete_vectore(source):
+def delete_vectore(source, chat):
     index = pinecone.Index(PINECONE_INDEX_NAME)
     return index.delete(
         filter={
             "source": f"{source}",
+            "chat": f"{chat}"
         }
     )
 
@@ -420,8 +421,8 @@ def delete_chat(id):
         # delete index in the pinecone
 
         for id in train_ids:
-            source = db.session.query(Train).filter_by(id=id).first().label
-            delete_vectore(source)
+            source = db.session.query(Train).filter_by(id=id).first()
+            delete_vectore(source.label, chat.uuid)
             db.session.query(Train).filter_by(id=id).delete()
         db.session.delete(chat)
         db.session.commit()

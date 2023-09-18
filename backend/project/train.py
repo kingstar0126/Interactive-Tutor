@@ -28,6 +28,12 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk import pos_tag
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
 
 load_dotenv()
 
@@ -206,9 +212,19 @@ def correct_grammar(text):
 
 def web_scraping(url):
     try:
-        response = requests.get(url)
-        response.raise_for_status()  # Raise an exception for 4xx or 5xx status codes
-        soup = BeautifulSoup(response.content, 'html.parser')
+        # Setup webdriver
+        options = webdriver.ChromeOptions()
+        options.add_argument("--headless")  # Run in headless mode
+        options.add_argument("--no-sandbox")  # Bypass OS security model
+        options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
+        driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+
+        driver.get(url)
+        
+        # Wait for a specific element to load
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
+        
+        soup = BeautifulSoup(driver.page_source, 'html.parser')
 
         text = set()  # Store unique sentences using a set
         cleaned_text = soup.get_text()
@@ -217,8 +233,13 @@ def web_scraping(url):
 
         # Generate the sentences from the set and remove unnecessary repeated text
         result = list(text)
+
+        # Quit driver
+        driver.quit()
+
         return result
-    except requests.exceptions.RequestException as e:
+    except Exception as e:
+        print(f"An error occurred: {e}")
         return []
 
 
@@ -410,18 +431,21 @@ def handle_request_entity_too_large(error):
 @train.route('/api/data/gettraindatas', methods=['POST'])
 def get_traindatas():
     uuid = request.json['uuid']
-    chat = db.session.query(Chat).filter_by(uuid=uuid).first()
-    if not chat:
-        return jsonify({'success': False, 'message': 'Not found', 'code': 404})
-    train_ids = json.loads(chat.train)
+    if uuid:
+        chat = db.session.query(Chat).filter_by(uuid=uuid).first()
+        if not chat:
+            return jsonify({'success': False, 'message': 'Not found', 'code': 404})
+        train_ids = json.loads(chat.train)
 
-    data = []
-    for id in train_ids:
-        train_data = db.session.query(Train).filter_by(id=id).first()
-        if train_data:
-            data.append({'id': train_data.id, 'label': train_data.label,
-                    'type': train_data.type, 'status': train_data.status})
-    return jsonify({'data': data, 'success': True})
+        data = []
+        for id in train_ids:
+            train_data = db.session.query(Train).filter_by(id=id).first()
+            if train_data:
+                data.append({'id': train_data.id, 'label': train_data.label,
+                        'type': train_data.type, 'status': train_data.status})
+        return jsonify({'data': data, 'success': True})
+    else:
+        return jsonify({'success': False, 'message': 'Not found', 'code': 404})
 
 
 @train.route('/api/data/deletetrain', methods=['POST'])

@@ -270,6 +270,7 @@ const Chatmodal = (props) => {
                     SetChatdescription(data.description);
                     SetConversation(data.starter)
                     setLoading(false);
+                    onOK();
                     notification('success', "Created a Tutor successfully");
                 })
                 .catch((err) => {

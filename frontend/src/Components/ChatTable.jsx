@@ -205,7 +205,7 @@ const ChatTable = (props) => {
                                     <Typography
                                         variant="small"
                                         color="blue-gray"
-                                        className="font-normal"
+                                        className="font-normal truncate"
                                     >
                                         {data["behavior"]}
                                     </Typography>

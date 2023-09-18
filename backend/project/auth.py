@@ -18,6 +18,8 @@ from flask_jwt_extended import create_access_token, decode_token
 from sqlalchemy.sql import text
 import csv
 
+from . import add_email_to_sendgrid_marketing, get_sendgrid_list_ids, delete_email_to_sendgrid_marketing
+
 load_dotenv()
 
 pretty.install()
@@ -140,6 +142,7 @@ def login_post():
         'code': 200,
         'data': new_user
     }
+
     return jsonify(response)
 
 
@@ -183,6 +186,17 @@ def register_new_user(username, email, password):
 
     # Create stripe customer
     customer = stripe.Customer.create(name=username, email=email)
+
+    if role == 5:
+        add_email_to_sendgrid_marketing(os.getenv('SENDGRID_FREE_TRIAL_LIST_ID'), username, email)
+    elif role == 7:
+        add_email_to_sendgrid_marketing(os.getenv('SENDGRID_ENTERPRISE_USERS_LIST_ID'), username, email)
+    elif invite_user:
+        user = db.session.query(User).filter_by(id=invite_user.user_id).first()
+        if user and user.role == 7:
+            add_email_to_sendgrid_marketing(os.getenv('SENDGRID_ENTERPRISE_USERS_LIST_ID'), username, email)
+    else:
+        add_email_to_sendgrid_marketing(os.getenv('SENDGRID_SUBSCRIPTION_USERS_LIST_ID'), username, email)
     
     # Create new user
     new_user = User(
@@ -272,7 +286,6 @@ def signup_post():
     verification_token = create_access_token(identity={'username': username, 'email': email, 'password': password},
                                              expires_delta=timedelta(minutes=30))
     verification_link = f"https://app.interactive-tutor.com/verify-email/token={verification_token}"
-
     msg = Message('Welcome to Interactive Tutor', sender=os.getenv('MAIL_USERNAME'),
                   recipients=[email])
     msg.html = render_template(
@@ -526,8 +539,13 @@ def Change_user_limitation():
     user.tutors = tutors
     user.training_words = word
     user.role = int(role)
-    # if user.subscription_id is not None:
-    #     stripe.Subscription.cancel(user.subscription_id)
+    if role == 7 or role == 6:
+        if role == 7:
+            delete_email_to_sendgrid_marketing(os.getenv('SENDGRID_FREE_TRIAL_LIST_ID'), user.email)
+            delete_email_to_sendgrid_marketing(os.getenv('SENDGRID_SUBSCRIPTION_USERS_LIST_ID'), user.email)
+            add_email_to_sendgrid_marketing(os.getenv('SENDGRID_ENTERPRISE_USERS_LIST_ID'), user.username, user.email)
+        if user.subscription_id is not None:
+            stripe.Subscription.cancel(user.subscription_id)
     db.session.commit()
     return jsonify({'success': True, 'code': 200, 'message': 'Updated Successfully'})
 
@@ -562,6 +580,17 @@ def subscription_custom_plan():
                   recipients=[os.getenv('MAIL_USERNAME')])
     msg.html = render_template(
         'send_custom_plan.html', username=user.username, email=user.email, phone=user.contact)
+    mail.send(msg)
+    return jsonify({'success': True, 'code': 200, 'message': 'We have sent your request to the manager.'})
+
+@auth.route('/api/subscription/upgrade_query', methods=['POST'])
+def upgrade_custom_plan():
+    id = request.json['id']
+    user = db.session.query(User).filter_by(id=id).first()
+    msg = Message('Customer wants to upgrade Query !!!', sender=os.getenv('MAIL_USERNAME'),
+                  recipients=[os.getenv('MAIL_USERNAME')])
+    msg.html = render_template(
+        'send_query_upgrade.html', username=user.username, email=user.email, phone=user.contact)
     mail.send(msg)
     return jsonify({'success': True, 'code': 200, 'message': 'We have sent your request to the manager.'})
 

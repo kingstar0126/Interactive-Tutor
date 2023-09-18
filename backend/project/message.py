@@ -137,12 +137,13 @@ def get_query():
     if chat and chat.inviteId:
         user = db.session.query(User).filter_by(id=chat.inviteId).first()
         if user and user.role == 7:
-            return jsonify({'query': user.query, 'usage': user.usage})
+            return jsonify({'query': user.query, 'usage': user.usage, 'success': True})
     user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
     Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
-    return jsonify({'query': user.query, 'usage': user.usage})
-
-BUFFER_SIZE = 1024 * 2
+    if user:
+        return jsonify({'query': user.query, 'usage': user.usage, 'success': True})
+    else:
+        return jsonify({'success': False, 'code': 404})
 
 
 @message.route('/api/testStreaming', methods=['POST'])
@@ -200,14 +201,31 @@ def send_message():
     last_history = history[-6:] if len(history) > 6 else history
     behavior = current_message.behavior if behaviormodel == "Remove training data ring fencing and perform like ChatGPT" \
         else current_message.behavior + "\n\n" + behaviormodel
+
+    prompt_content = """==========
+    Context: {context}
+    ========== """
+    
+    prompt_input = """
+    Human: {question}
+    Assistant:"""
+
+    template = f""" {behavior}
+    {prompt_content}
+
+    ===============
+    ChatHistory: {str(last_history).replace('{', '"').replace('}', '"')}
+    ===============
+    {prompt_input}
+    """
+
     response = generate_message(
-        query, last_history, behavior, temp, model, chat.uuid) if behaviormodel != "Remove training data ring fencing and perform like ChatGPT" \
+        query, behavior, temp, model, chat.uuid, template) if behaviormodel != "Remove training data ring fencing and perform like ChatGPT" \
         else generate_AI_message(query, last_history, behavior, temp, model)
 
     def generate():
         for next_token, content in response:
             data_chunk = next_token
-            print(next_token)
             yield (data_chunk).encode('utf-8')
         
         history.append({"role": "human", "content": query})
