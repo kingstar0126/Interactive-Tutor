@@ -279,12 +279,12 @@ const ManageAccount = () => {
                         />
                     </div>
                     <div className="flex flex-col justify-end w-full gap-3 md:flex-row">
-                        <Button
+                        {check && user.role !== 7 && <Button
                             className="normal-case px-4 py-2 text-base font-semibold text-[--site-card-icon-color] border bg-transparent border-[--site-card-icon-color] rounded-md"
                             onClick={() => handleCancelSubscription()}
                         >
                             Manage Subscription
-                        </Button>
+                        </Button>}
 
                         <Button
                             className="normal-case px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md"

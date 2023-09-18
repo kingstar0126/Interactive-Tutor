@@ -175,11 +175,11 @@ const SubscriptionModal = (props) => {
                     <span onClick={() => {setType(!type)}} className="bg-transparent text-[--site-card-icon-color] text-base font-semibold hover:text-[--site-main-slider-thumb-color]">Invite others for a 50% discount</span>
                 </Link>
             </DialogHeader>
-            <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium md:px-12 md:pb-20 md:h-[42rem] h-[25rem] overflow-y-auto">
+            <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium md:px-12 md:pb-20 md:max-h-[42rem] max-h-[25rem] overflow-y-auto">
                 <Toaster />
                 {type ? subscriptions && subscriptions.length !== 0 && (
                     <div>
-                        <div className="flex flex-col items-start justify-center w-full gap-12 py-4 md:flex-row">
+                        {user.role !== 7 && <div className="flex flex-col items-start justify-center w-full gap-12 py-4 md:flex-row">
                             {subscriptions.map((item, index) => {
                                 return (
                                     <React.Fragment key={item.price_id}>
@@ -346,7 +346,7 @@ const SubscriptionModal = (props) => {
                                     </React.Fragment>
                                 );
                             })}
-                        </div>
+                        </div>}
                         <div className="justify-center flex p-2">
                             {user.role !== 6 ? (
                                 <span
