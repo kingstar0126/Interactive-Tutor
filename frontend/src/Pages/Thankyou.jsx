@@ -1,13 +1,21 @@
 import React from "react";
 import Header from "../Layout/Header";
 import { FiCheckCircle } from "react-icons/fi"
+import Confetti from 'react-confetti'
+import useWindowSize from 'react-use/lib/useWindowSize'
 
 const ThankYou = () => {
-
+    const { width, height } = useWindowSize()
+    
     return (
         <div className="bg-[--site-main-color-home] font-logo h-screen pb-10 px-2 flex flex-col">
-            <div className="">
-                <Header /></div>
+            <div>
+                <Header />
+            </div>
+            <Confetti
+            width={width}
+            height={height}
+            />
             <div className=" flex-1 h-full flex flex-col justify-center items-center bg-no-repeat bg-cover bg-[--site-card-icon-color] relative text-center">
                 <FiCheckCircle className="text-[rgba(0,255,8,0.75)] text-[400px] top-[calc(50%-200px)] md:left-[calc(50%-400px)] left-[calc(50%-200px)] opacity-75 absolute" />
                 <h1 className="mb-5 font-bold text-white text-7xl drop-shadow-lg">
