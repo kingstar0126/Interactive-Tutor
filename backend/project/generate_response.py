@@ -100,7 +100,7 @@ def generate_message(query, behavior, temp, model, chat, template):
     
 
     # examples = ""
-    # for doc, _ in docs:
+    # for doc, _ in docs:dqa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=docsearch.as_retriever(search_kwargs={'filter': {"chat": str(chat)}}), chain_type_kwargs=chain_type_kwargs)
     #     if doc.metadata['chat'] == str(chat):
     #         doc.page_content = doc.page_content.replace('\n\n', ' ')
     #         examples += doc.page_content + '\n'
