@@ -5,18 +5,22 @@ import { CodeBlock, dracula } from "react-code-blocks";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
 import { BsSendPlus } from "react-icons/bs";
+import { Grid } from 'react-loader-spinner'
 
 const Chatbubble = () => {
     const bubbleWidget = useRef(null);
     const dialogWidget = useRef(null);
     const messagesEndRef = useRef(null);
+    const [streamData, setStreamData] = useState('');
     const [click, setClick] = useState(true);
     const [chathistory, setChathistory] = useState([]);
     const [message, setMessage] = useState("");
     const [chat, setChat] = useState({});
+    const [spinner, setSpinner] = useState(false);
+    const [state, setState] = useState(false);
 
     const handleSubmit = (event) => {
-        if (event.keyCode === 13) {
+        if (!event.shiftKey && event.keyCode === 13 && spinner === false) {
             let _message = message;
 
             setChathistory([
@@ -59,16 +63,64 @@ const Chatbubble = () => {
         }
     }, [click]);
 
-    const sendMessage = (_message) => {
-        if (_message) {
-            axios.post(webAPI.send_bubble_chat, { _message }).then((res) => {
-                if (!res.data.success) {
-                    console.log("error");
-                } else {
-                    receiveMessage(res.data.data);
-                }
-            });
+
+    const sendMessage = async ( _message) => {
+        if (!_message) {
+            return;
         }
+        setSpinner(true)
+        setState(true)
+        // Create a new FormData to send the necessary data
+        const formData = new FormData();
+        formData.append('_message', _message);
+    
+        // Send the formData to the streaming API
+        fetch(webAPI.send_bubble_chat, {
+            method: 'POST',
+            body: formData
+        })
+        .then(async (response) => {
+            let res = ''
+            if (!response.ok) {
+                if (response.status === 404) {
+                    // Handle 404 error (Not found)
+                    notification("error", "Not found tutor!")
+                } else if (response.status === 401) {
+                    // Handle 401 error (Unauthorized)
+                    notification("error", "Insufficient queries remaining!")
+                } else if (response.status === 500) {
+                    // Handle 500 error (Internal server error)
+                    notification("error", "The response is too long for this model. Please upgrade your model or enter a different prompt!")
+                } else {
+                    // Handle other error cases
+                    notification("error", "The response is too long for this model. Please upgrade your model or enter a different prompt!")
+                }
+                throw new Error(`Network response was not ok - ${response.status}`);
+            }
+            // Read the response stream
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+    
+            await reader.read().then(function process({ done, value }) {
+                if (done) {
+                    setStreamData('')
+                    receiveMessage(res);
+                    setSpinner(false);
+                    return;
+                }
+                setState(false);
+                let data = decoder.decode(value);
+                res += data;
+                setStreamData(res);
+
+                return reader.read().then(process);
+            });
+            getquery(dispatch, {id: chatbot})
+        })
+        .catch((error) => {
+            console.error('There has been a problem with your fetch operation:', error);
+            setSpinner(false);
+        });
     };
 
     const receiveMessage = (message) => {
@@ -161,6 +213,35 @@ const Chatbubble = () => {
                                 </div>
                             ) : null;
                         })}
+                        {spinner === true && <div
+                                    ref={ai_background}
+                                    name="ai_bg"
+                                    className="flex items-center justify-start p-2 lg:justify-center"
+                                >
+                                    <div className="flex justify-start lg:w-4/5">
+                                        <img
+                                            src={chat.chat_logo.ai}
+                                            className="w-10 h-10 rounded-full"
+                                            alt="AI"
+                                        />
+                                        <div
+                                            name="ai"
+                                            className="flex flex-col w-full p-2 whitespace-break-spaces"
+                                        >
+                                            {streamData}
+                                            {state && <Grid
+                                                height="50"
+                                                width="50"
+                                                color="#4fa94d"
+                                                ariaLabel="grid-loading"
+                                                radius="12.5"
+                                                wrapperStyle={{}}
+                                                wrapperClass=""
+                                                visible={true}
+                                            />}
+                                        </div>
+                                    </div>
+                                </div>}
                     </Scrollbars>
                 </div>
 

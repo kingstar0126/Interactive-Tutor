@@ -34,6 +34,7 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
+from urllib.parse import urljoin
 
 load_dotenv()
 
@@ -53,8 +54,8 @@ train = Blueprint('train', __name__)
 
 
 def count_tokens(string):
-    words = string.split()
-    return len(words)
+    tokens = nltk.word_tokenize(string)
+    return len(tokens)
 
 
 def compare_token_words(ct, chatbot):
@@ -169,11 +170,10 @@ def text_to_docs(text: str, filename: str, chat: str) -> List[Document]:
         if doc.page_content == "":
             continue
         chunks = text_splitter.split_text(doc.page_content)
-
+        
         for i, chunk in enumerate(chunks):
             doc = Document(
-                page_content=chunk, metadata={
-                    "page": doc.metadata["page"], "chunk": i}
+                page_content=chunk
             )
             # Add sources a metadata
             doc.metadata["source"] = f"{filename}"
@@ -205,13 +205,28 @@ def correct_grammar(text):
         corrected_sentence = " ".join(corrected_words)
         corrected_sentences.append(corrected_sentence)
 
-    # Reconstruct the entire corrected text
-    corrected_text = " ".join(corrected_sentences)
-    return corrected_text
+    correct_text = ""
+    tokens = 0
+    for sentence in corrected_sentences:
+        tokens += len(nltk.word_tokenize(sentence))
+        if tokens < 5000:
+            correct_text += ". " + sentence
+        else:
+            tokens = 0
+            correct_text += "\n" + sentence
+    return correct_text
 
 
-def web_scraping(url):
+
+def web_scraping(url, max_depth=2, depth=0, visited_urls=set()):
+    if depth > max_depth:  # Limit the depth to prevent infinite recursion
+        return []
     try:
+        # If we have already visited the url, we skip it
+        if url in visited_urls:
+            return []
+        visited_urls.add(url)
+
         # Setup webdriver
         options = webdriver.ChromeOptions()
         options.add_argument("--headless")  # Run in headless mode
@@ -230,13 +245,22 @@ def web_scraping(url):
         cleaned_text = soup.get_text()
         cleaned_text = correct_grammar(cleaned_text)
         text.add(cleaned_text)
+        
+        # Get all links within the page
+        links = soup.find_all("a")
 
+        # Traverse each link
+        for link in links:
+            href = link.get('href')
+            if href is not None:
+                # Create full url if href is relative
+                full_url = urljoin(url, href)
+                text.update(web_scraping(full_url, max_depth, depth + 1, visited_urls))
+        
         # Generate the sentences from the set and remove unnecessary repeated text
         result = list(text)
-
         # Quit driver
         driver.quit()
-
         return result
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -296,7 +320,7 @@ def create_train_url():
     url = request.json['url']
     chatbot = request.json['chatbot']
     if compare_role_user(chatbot):
-        data = web_scraping(url)
+        data = web_scraping(url, 1)
         if data == False:
             return jsonify({
                 'success': False,
@@ -304,24 +328,33 @@ def create_train_url():
                 'message': 'Invalid URL.',
             })
 
-        trainid = create_train(url, 'url', True, chatbot)
+        ct = 0
+        for text in data:
+            ct += count_tokens(text)
+        if compare_token_words(ct, chatbot):
+            trainid = create_train(url, 'url', True, chatbot)
+            result = text_to_docs(data, url, chatbot)
 
-        result = text_to_docs(data, url, chatbot)
-
-        if (trainid == False):
+            if (trainid == False):
+                return jsonify({
+                    'success': False,
+                    'code': 405,
+                    'message': 'Training data already exist.',
+                })
+            create_vector(result)
+            chat = insert_train_chat(chatbot, trainid)
+            return jsonify({
+                'success': True,
+                'code': 200,
+                'data': chat,
+                'message': "create train successfully",
+            })
+        else:
             return jsonify({
                 'success': False,
-                'code': 405,
-                'message': 'Training data already exist.',
+                'code': 401,
+                'message': "Training word limit exceeded. Please reduce the number of training words.",
             })
-        create_vector(result)
-        chat = insert_train_chat(chatbot, trainid)
-        return jsonify({
-            'success': True,
-            'code': 200,
-            'data': chat,
-            'message': "create train successfully",
-        })
     else:
         return jsonify({
             'success': False,

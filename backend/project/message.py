@@ -224,32 +224,66 @@ def send_message():
         else generate_AI_message(query, last_history, behavior, temp, model)
 
     def generate():
+        content = None
         for next_token, content in response:
             data_chunk = next_token
             yield (data_chunk).encode('utf-8')
         
-        history.append({"role": "human", "content": query})
-        history.append({"role": "ai", "content": content})
-        current_message.message = json.dumps(history)
-        current_message.update_date = datetime.datetime.now()
-        db.session.commit()
+        if content is not None:
+            history.append({"role": "human", "content": query})
+            history.append({"role": "ai", "content": content})  # Use the assigned value of content
+            current_message.message = json.dumps(history)
+            current_message.update_date = datetime.datetime.now()
+            db.session.commit()
+        else:
+            raise Exception("The text is too long! Please upgrade your model or enter a different prompt.")
     
-    return Response(stream_with_context(generate()), mimetype="text/event-stream", direct_passthrough=True, headers={'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
+    try:
+        return Response(stream_with_context(generate()), mimetype="text/event-stream", direct_passthrough=True, headers={'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'code': 500,
+            'message': str(e),
+        })
+
 
 @message.route('/api/sendchatbubble', methods=['POST'])
 def send_chat_bubble():
-    message = request.json['_message']
+    message = request.form.get('_message')
     chat = db.session.query(Chat).filter_by(
         uuid='83137bf2-a589-476b-b9ad-43f63f4a7574').first()
-    chat.train = eval(chat.train)
+    
+    prompt_content = """==========
+    Context: {context}
+    ========== """
+    
+    prompt_input = """
+    Human: {question}
+    Assistant:"""
+
+    template = f""" {chat.behavior}
+    {prompt_content}
+    ===============
+    {prompt_input}
+    """
+
     response = generate_message(
-        message, [], chat.behavior, chat.creativity, '2', chat.uuid)
-    data = {
-        'success': True,
-        'code': 200,
-        'data': response
-    }
-    return jsonify(data)
+        message, chat.behavior, chat.creativity, '2', chat.uuid, template)
+
+    def generate():
+        content = None
+        for next_token, content in response:
+            data_chunk = next_token
+            yield (data_chunk).encode('utf-8')    
+    try:
+        return Response(stream_with_context(generate()), mimetype="text/event-stream", direct_passthrough=True, headers={'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'code': 500,
+            'message': str(e),
+        })
 
 
 @message.route('/api/getchatmessage', methods=['POST'])

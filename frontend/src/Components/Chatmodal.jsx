@@ -270,8 +270,30 @@ const Chatmodal = (props) => {
                     SetChatdescription(data.description);
                     SetConversation(data.starter)
                     setLoading(false);
-                    onOK();
                     notification('success', "Created a Tutor successfully");
+
+                    if (!props.chat) {
+                        props.handleOk({
+                            label: data.name,
+                            chatdescription: data.description,
+                            chatmodel,
+                            Conversation: data.starter,
+                            Creativity,
+                            behaviormodel,
+                            behavior: data.system_role,
+                        });
+                    }
+                    if (props.chat && props.chat.label) {
+                        let new_chat = props.chat;
+                        new_chat["label"] = data.name;
+                        new_chat["description"] = data.description;
+                        new_chat["model"] = chatmodel;
+                        new_chat["conversation"] = data.starter;
+                        new_chat["creativity"] = Creativity;
+                        new_chat["behaviormodel"] = behaviormodel;
+                        new_chat["behavior"] = data.system_role;
+                        props.handleOk(new_chat);
+                    }
                 })
                 .catch((err) => {
                     console.error(err);
