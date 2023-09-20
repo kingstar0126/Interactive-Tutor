@@ -231,7 +231,7 @@ const NewChat = () => {
             ai_background.current.style["font-size"] =
                 chat.chat_logo.ai_size + "px";
         }
-    }, [chathistory]);
+    }, [chathistory, streamData]);
 
     const handleSubmit = (event) => {
         if (!event.shiftKey && event.keyCode === 13 && spinner === false) {
@@ -280,12 +280,14 @@ const NewChat = () => {
     
         // Send the formData to the streaming API
         fetch(webAPI.sendchat, {
+            // mode: 'no-cors',
             method: 'POST',
             body: formData
         })
         .then(async (response) => {
             let res = ''
             if (!response.ok) {
+                console.log(response)
                 if (response.status === 404) {
                     // Handle 404 error (Not found)
                     notification("error", "Not found tutor!")

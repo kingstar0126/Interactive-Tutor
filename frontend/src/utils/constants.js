@@ -61,6 +61,7 @@ export const webAPI = {
     transfer_tutor: SERVER_URL + "/api/transfer_tutor",
     imageupload: SERVER_URL + "/api/imageupload",
     custom_plan: SERVER_URL + "/api/subscription/custom_plan",
+    upgrade_query: SERVER_URL + "/api/subscription/upgrade_query",
     inviteEmail: SERVER_URL + "/api/inviteEmail",
     getinviteEmails: SERVER_URL + "/api/getInviteEmails",
     remove_invite: SERVER_URL + "/api/removeInvite",

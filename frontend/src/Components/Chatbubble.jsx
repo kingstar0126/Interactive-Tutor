@@ -5,7 +5,8 @@ import { CodeBlock, dracula } from "react-code-blocks";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
 import { BsSendPlus } from "react-icons/bs";
-import { Grid } from 'react-loader-spinner'
+import { Grid } from 'react-loader-spinner';
+import toast, { Toaster } from "react-hot-toast";
 
 const Chatbubble = () => {
     const bubbleWidget = useRef(null);
@@ -18,6 +19,12 @@ const Chatbubble = () => {
     const [chat, setChat] = useState({});
     const [spinner, setSpinner] = useState(false);
     const [state, setState] = useState(false);
+    const notification = (type, message) => {
+        // To do in here
+        if (type === "error") {
+            toast.error(message);
+        }
+    };
 
     const handleSubmit = (event) => {
         if (!event.shiftKey && event.keyCode === 13 && spinner === false) {
@@ -115,13 +122,18 @@ const Chatbubble = () => {
 
                 return reader.read().then(process);
             });
-            getquery(dispatch, {id: chatbot})
         })
         .catch((error) => {
             console.error('There has been a problem with your fetch operation:', error);
             setSpinner(false);
         });
     };
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      };
+
+    useEffect(scrollToBottom, [chathistory, streamData]);
 
     const receiveMessage = (message) => {
         setChathistory((prevHistory) => [
@@ -137,7 +149,7 @@ const Chatbubble = () => {
                 className="fixed right-[40px] bottom-[115px] rounded-xl bg-[--site-main-color10] border border-[--site-card-icon-color] flex flex-col items-center justify-center w-[400px] h-[600px] py-10 divide-y drop-shadow-xl"
             >
                 <div className="w-full h-full from-[--site-main-modal-from-color] bg-gradient-to-br border border-[--site-main-modal-input-border-color] border-x-0">
-                    <Scrollbars ref={messagesEndRef}>
+                    <Scrollbars >
                         {chathistory.map((data, index) => {
                             return data.role === "human" && data.content ? (
                                 <div
@@ -214,8 +226,6 @@ const Chatbubble = () => {
                             ) : null;
                         })}
                         {spinner === true && <div
-                                    ref={ai_background}
-                                    name="ai_bg"
                                     className="flex items-center justify-start p-2 lg:justify-center"
                                 >
                                     <div className="flex justify-start lg:w-4/5">
@@ -242,6 +252,7 @@ const Chatbubble = () => {
                                         </div>
                                     </div>
                                 </div>}
+                        <div ref={messagesEndRef} />
                     </Scrollbars>
                 </div>
 
