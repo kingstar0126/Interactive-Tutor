@@ -45,7 +45,7 @@ const ChatTable = (props) => {
     };
 
     useEffect(() => {
-        if (props.chat.length) {
+        if (props.chat) {
             setChatData(props.chat);
             setCurrentPage(1);
         }
