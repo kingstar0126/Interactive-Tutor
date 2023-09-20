@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "react";
 import { BsSendPlus } from "react-icons/bs";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
-import { SERVER_URL } from "../config/constant";
 import { useSelector, useDispatch } from "react-redux";
 import { setchatbot, getchat } from "../redux/actions/chatAction";
 import { useNavigate } from "react-router-dom";
@@ -14,7 +13,6 @@ import { getquery } from "../redux/actions/queryAction";
 import { useLocation } from "react-router-dom";
 import ReactLoading from "react-loading";
 import { Grid } from 'react-loader-spinner'
-import { Button } from "@material-tailwind/react";
 
 const NewChat = () => {
     const navigate = useNavigate();
@@ -233,7 +231,7 @@ const NewChat = () => {
             ai_background.current.style["font-size"] =
                 chat.chat_logo.ai_size + "px";
         }
-    }, [chathistory]);
+    }, [chathistory, streamData]);
 
     const handleSubmit = (event) => {
         if (!event.shiftKey && event.keyCode === 13 && spinner === false) {
@@ -282,13 +280,28 @@ const NewChat = () => {
     
         // Send the formData to the streaming API
         fetch(webAPI.sendchat, {
+            // mode: 'no-cors',
             method: 'POST',
             body: formData
         })
         .then(async (response) => {
             let res = ''
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                console.log(response)
+                if (response.status === 404) {
+                    // Handle 404 error (Not found)
+                    notification("error", "Not found tutor!")
+                } else if (response.status === 401) {
+                    // Handle 401 error (Unauthorized)
+                    notification("error", "Insufficient queries remaining!")
+                } else if (response.status === 500) {
+                    // Handle 500 error (Internal server error)
+                    notification("error", "The response is too long for this model. Please upgrade your model or enter a different prompt!")
+                } else {
+                    // Handle other error cases
+                    notification("error", "The response is too long for this model. Please upgrade your model or enter a different prompt!")
+                }
+                throw new Error(`Network response was not ok - ${response.status}`);
             }
             // Read the response stream
             const reader = response.body.getReader();
