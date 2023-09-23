@@ -13,6 +13,11 @@ import { getquery } from "../redux/actions/queryAction";
 import { useLocation } from "react-router-dom";
 import ReactLoading from "react-loading";
 import { Grid } from 'react-loader-spinner'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeMathjax from 'rehype-mathjax';
+import remarkMath from 'remark-math';
+import rehypeRaw from 'rehype-raw'
 
 const NewChat = () => {
     const navigate = useNavigate();
@@ -277,56 +282,56 @@ const NewChat = () => {
         formData.append('behaviormodel', behaviormodel);
         formData.append('train', train);
         formData.append('model', model);
-    
+
         // Send the formData to the streaming API
         fetch(webAPI.sendchat, {
             // mode: 'no-cors',
             method: 'POST',
             body: formData
         })
-        .then(async (response) => {
-            let res = ''
-            if (!response.ok) {
-                console.log(response)
-                if (response.status === 404) {
-                    // Handle 404 error (Not found)
-                    notification("error", "Not found tutor!")
-                } else if (response.status === 401) {
-                    // Handle 401 error (Unauthorized)
-                    notification("error", "Insufficient queries remaining!")
-                } else if (response.status === 500) {
-                    // Handle 500 error (Internal server error)
-                    notification("error", "The response is too long for this model. Please upgrade your model or enter a different prompt!")
-                } else {
-                    // Handle other error cases
-                    notification("error", "The response is too long for this model. Please upgrade your model or enter a different prompt!")
+            .then(async (response) => {
+                let res = ''
+                if (!response.ok) {
+                    console.log(response)
+                    if (response.status === 404) {
+                        // Handle 404 error (Not found)
+                        notification("error", "Not found tutor!")
+                    } else if (response.status === 401) {
+                        // Handle 401 error (Unauthorized)
+                        notification("error", "Insufficient queries remaining!")
+                    } else if (response.status === 500) {
+                        // Handle 500 error (Internal server error)
+                        notification("error", "The response is too long for this model. Please upgrade your model or enter a different prompt!")
+                    } else {
+                        // Handle other error cases
+                        notification("error", "The response is too long for this model. Please upgrade your model or enter a different prompt!")
+                    }
+                    throw new Error(`Network response was not ok - ${response.status}`);
                 }
-                throw new Error(`Network response was not ok - ${response.status}`);
-            }
-            // Read the response stream
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-    
-            await reader.read().then(function process({ done, value }) {
-                if (done) {
-                    setStreamData('')
-                    receiveMessage(res);
-                    setSpinner(false);
-                    return;
-                }
-                setState(false);
-                let data = decoder.decode(value);
-                res += data;
-                setStreamData(res);
+                // Read the response stream
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
 
-                return reader.read().then(process);
+                await reader.read().then(function process({ done, value }) {
+                    if (done) {
+                        setStreamData('')
+                        receiveMessage(res);
+                        setSpinner(false);
+                        return;
+                    }
+                    setState(false);
+                    let data = decoder.decode(value);
+                    res += data;
+                    setStreamData(res);
+
+                    return reader.read().then(process);
+                });
+                getquery(dispatch, { id: chatbot })
+            })
+            .catch((error) => {
+                console.error('There has been a problem with your fetch operation:', error);
+                setSpinner(false);
             });
-            getquery(dispatch, {id: chatbot})
-        })
-        .catch((error) => {
-            console.error('There has been a problem with your fetch operation:', error);
-            setSpinner(false);
-        });
     };
 
     const receiveMessage = (message) => {
@@ -430,48 +435,64 @@ const NewChat = () => {
                                                     name="ai"
                                                     className="flex flex-col w-full p-2 whitespace-break-spaces"
                                                 >
-                                                    {data.content
-                                                        .split("```")
-                                                        .map((item, index) => {
-                                                            if (
-                                                                index === 0 ||
-                                                                index % 2 === 0
-                                                            ) {
+                                                    <ReactMarkdown
+                                                        remarkPlugins={[remarkGfm, remarkMath]}
+                                                        rehypePlugins={[rehypeMathjax, rehypeRaw]}
+                                                        children={data.content}
+                                                        components={{
+                                                            code({ inline, className, children, ...props }) {
+                                                                const match = /language-(\w+)/.exec(className || '')
+                                                                if (!inline && match) {
+                                                                    // remove the newline character at the end of children, if it exists
+                                                                    const codeString = String(children).replace(/\n$/, '');
+
+                                                                    return (
+                                                                        <CopyBlock
+                                                                            text={codeString}
+                                                                            language={match[1]}
+                                                                            showLineNumbers={false}
+                                                                            wrapLongLines
+                                                                            theme={dracula}
+                                                                            {...props}
+                                                                        />
+                                                                    );
+                                                                }
+                                                                return <code className={className} {...props}>{children}</code>;
+                                                            },
+                                                            table({ children, ...props }) {
                                                                 return (
-                                                                    <span
-                                                                        key={
-                                                                            index
-                                                                        }
-                                                                    >
-                                                                        {item}
-                                                                    </span>
+                                                                    <table style={{ borderCollapse: 'collapse', width: '100%', fontFamily: 'Arial, sans-serif', fontSize: '14px' }} {...props}>
+                                                                        {children}
+                                                                    </table>
                                                                 );
-                                                            } else {
+                                                            },
+                                                            // Add CSS styles to the table row
+                                                            tr({ children, ...props }) {
+                                                                return <tr style={{ backgroundColor: '#f8f8f8' }} {...props}>{children}</tr>;
+                                                            },
+                                                            // Add CSS styles to the table cell
+                                                            td({ children, ...props }) {
+                                                                return <td style={{ padding: '8px', border: '1px solid #ddd' }} {...props}>{children}</td>;
+                                                            },
+                                                            th({ children, ...props }) {
+                                                                return <th style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold', textAlign: 'left' }} {...props}>{children}</th>;
+                                                            },
+                                                            a({ href, children, ...props }) {
                                                                 return (
-                                                                    <CopyBlock
-                                                                        key={
-                                                                            index
-                                                                        }
-                                                                        text={
-                                                                            item
-                                                                        }
-                                                                        language={
-                                                                            "javascript"
-                                                                        }
-                                                                        showLineNumbers={
-                                                                            false
-                                                                        }
-                                                                        wrapLongLines={
-                                                                            true
-                                                                        }
-                                                                        theme={
-                                                                            dracula
-                                                                        }
-                                                                        wrapLines
-                                                                    />
+                                                                    <a style={{ color: '#007bff', textDecoration: 'none' }} href={href} target="_blank" rel="noopener noreferrer" {...props}>
+                                                                        {children}
+                                                                    </a>
                                                                 );
-                                                            }
-                                                        })}
+                                                            },
+                                                            li({ children, ...props }) {
+                                                                // If children is a string, apply the transformation
+                                                                if (typeof children === 'string') {
+                                                                    children = children.replace(/(\d+\.)\s*\n\s*/g, "$1 ").trim();
+                                                                }
+                                                                return <li style={{ marginBottom: '0.25em' }} {...props}>{children}</li>;
+                                                            },
+                                                        }}
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
@@ -492,7 +513,64 @@ const NewChat = () => {
                                             name="ai"
                                             className="flex flex-col w-full p-2 whitespace-break-spaces"
                                         >
-                                            {streamData}
+                                            <ReactMarkdown
+                                                remarkPlugins={[remarkGfm, remarkMath]}
+                                                rehypePlugins={[rehypeMathjax]}
+                                                children={streamData}
+                                                components={{
+                                                    code({ inline, className, children, ...props }) {
+                                                        const match = /language-(\w+)/.exec(className || '')
+                                                        if (!inline && match) {
+                                                            // remove the newline character at the end of children, if it exists
+                                                            const codeString = String(children).replace(/\n$/, '');
+
+                                                            return (
+                                                                <CopyBlock
+                                                                    text={codeString}
+                                                                    language={match[1]}
+                                                                    showLineNumbers={false}
+                                                                    wrapLongLines
+                                                                    theme={dracula}
+                                                                    {...props}
+                                                                />
+                                                            );
+                                                        }
+                                                        return <code className={className} {...props}>{children}</code>;
+                                                    },
+                                                    table({ children, ...props }) {
+                                                        return (
+                                                            <table style={{ borderCollapse: 'collapse', width: '100%', fontFamily: 'Arial, sans-serif', fontSize: '14px' }} {...props}>
+                                                                {children}
+                                                            </table>
+                                                        );
+                                                    },
+                                                    // Add CSS styles to the table row
+                                                    tr({ children, ...props }) {
+                                                        return <tr style={{ backgroundColor: '#f8f8f8' }} {...props}>{children}</tr>;
+                                                    },
+                                                    // Add CSS styles to the table cell
+                                                    td({ children, ...props }) {
+                                                        return <td style={{ padding: '8px', border: '1px solid #ddd' }} {...props}>{children}</td>;
+                                                    },
+                                                    th({ children, ...props }) {
+                                                        return <th style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold', textAlign: 'left' }} {...props}>{children}</th>;
+                                                    },
+                                                    a({ href, children, ...props }) {
+                                                        return (
+                                                            <a style={{ color: '#007bff', textDecoration: 'none' }} href={href} target="_blank" rel="noopener noreferrer" {...props}>
+                                                                {children}
+                                                            </a>
+                                                        );
+                                                    },
+                                                    li({ children, ...props }) {
+                                                        // If children is a string, apply the transformation
+                                                        if (typeof children === 'string') {
+                                                            children = children.replace(/(\d+\.)\s*\n\s*/g, "$1 ").trim();
+                                                        }
+                                                        return <li style={{ marginBottom: '0.25em' }} {...props}>{children}</li>;
+                                                    },
+                                                }}
+                                            />
                                             {state && <Grid
                                                 height="50"
                                                 width="50"
