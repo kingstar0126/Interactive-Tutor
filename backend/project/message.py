@@ -11,7 +11,7 @@ from rich import print, pretty
 import time
 import os
 import json
-from .generate_response import generate_message, generate_AI_message, generate_Bubble_message, stream
+from .generate_response import generate_message, generate_AI_message, generate_Bubble_message
 import re
 import nltk
 from nltk.corpus import stopwords

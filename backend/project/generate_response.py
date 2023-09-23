@@ -28,17 +28,17 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
 
 
-# def get_hashed_name(name):
-#     return hashlib.sha256(name.encode()).hexdigest()
+def get_hashed_name(name):
+    return hashlib.sha256(name.encode()).hexdigest()
 
 
-# def init_gptcache(cache_obj: Cache, llm: str):
-#     hashed_llm = get_hashed_name(llm)
-#     cache_obj.init(
-#         pre_embedding_func=get_prompt,
-#         data_manager=manager_factory(
-#             manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
-#     )
+def init_gptcache(cache_obj: Cache, llm: str):
+    hashed_llm = get_hashed_name(llm)
+    cache_obj.init(
+        pre_embedding_func=get_prompt,
+        data_manager=manager_factory(
+            manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
+    )
 
 class QueueCallback(BaseCallbackHandler):
     """Callback handler for streaming LLM responses to a queue."""
@@ -52,49 +52,6 @@ class QueueCallback(BaseCallbackHandler):
     def on_llm_end(self, *args, **kwargs: Any) -> None:
         return self.q.empty()
 
-def stream(input_text) -> Generator:
-
-    # Create a Queue
-    q = Queue()
-    job_done = object()
-
-    # Initialize the LLM we'll be using
-    llm = ChatOpenAI(
-        model_name="gpt-4",
-        streaming=True, 
-        callbacks=[QueueCallback(q)], 
-        temperature=0
-    )
-
-    llm = ChatOpenAI(model_name="gpt-4",
-                         temperature=0,
-                         streaming=True,
-                         callbacks=[QueueCallback(q)],
-                         openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
-
-    # Create a funciton to call - this will run in a thread
-    def task():
-        resp = llm.run(input_text)
-        q.put(job_done)
-
-    # Create a thread and start the function
-    t = Thread(target=task)
-    t.start()
-
-    content = ""
-
-    # Get each new token from the queue and yield for our generator
-    while True:
-        try:
-            next_token = q.get(True, timeout=1)
-            if next_token is job_done:
-                break
-            content += next_token
-            yield next_token, content
-        except Empty:
-            continue
-
-
 def generate_message(query, behavior, temp, model, chat, template):
     load_dotenv()
     q = Queue()
@@ -104,24 +61,27 @@ def generate_message(query, behavior, temp, model, chat, template):
         input_variables=["context", "question"], template=template)
     chain_type_kwargs = {"prompt": prompt}
 
-    # langchain.llm_cache = GPTCache(init_gptcache)
+    langchain.llm_cache = GPTCache(init_gptcache)
 
     if model == "1":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo",
                          temperature=temp,
                          streaming=True,
+                         max_tokens=500,
                          callbacks=[QueueCallback(q)],
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "2":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k",
                          temperature=temp,
                          streaming=True,
+                         max_tokens=3000,
                          callbacks=[QueueCallback(q)],
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "3":
         llm = ChatOpenAI(model_name="gpt-4",
                          temperature=temp,
                          streaming=True,
+                         max_tokens=3000,
                          callbacks=[QueueCallback(q)],
                          openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
 
@@ -143,7 +103,7 @@ def generate_message(query, behavior, temp, model, chat, template):
     
 
     # examples = ""
-    # for doc, _ in docs:
+    # for doc, _ in docs:dqa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=docsearch.as_retriever(search_kwargs={'filter': {"chat": str(chat)}}), chain_type_kwargs=chain_type_kwargs)
     #     if doc.metadata['chat'] == str(chat):
     #         doc.page_content = doc.page_content.replace('\n\n', ' ')
     #         examples += doc.page_content + '\n'
@@ -191,18 +151,18 @@ def generate_AI_message(query, history, behavior, temp, model):
     prompt = PromptTemplate(
         input_variables=["history", "human_input", "behavior"], template=template)
 
-    # def get_hashed_name(name):
-    #     return hashlib.sha256(name.encode()).hexdigest()
+    def get_hashed_name(name):
+        return hashlib.sha256(name.encode()).hexdigest()
 
-    # def init_gptcache(cache_obj: Cache, llm: str):
-    #     hashed_llm = get_hashed_name(llm)
-    #     cache_obj.init(
-    #         pre_embedding_func=get_prompt,
-    #         data_manager=manager_factory(
-    #             manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
-    #     )
+    def init_gptcache(cache_obj: Cache, llm: str):
+        hashed_llm = get_hashed_name(llm)
+        cache_obj.init(
+            pre_embedding_func=get_prompt,
+            data_manager=manager_factory(
+                manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
+        )
 
-    # langchain.llm_cache = GPTCache(init_gptcache)
+    langchain.llm_cache = GPTCache(init_gptcache)
 
     if model == "1":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo",

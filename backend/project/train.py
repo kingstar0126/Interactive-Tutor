@@ -35,6 +35,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from urllib.parse import urljoin
+from urllib.parse import urlparse
 
 load_dotenv()
 
@@ -218,14 +219,21 @@ def correct_grammar(text):
 
 
 
-def web_scraping(url, max_depth=2, depth=0, visited_urls=set()):
+def web_scraping(url, max_depth=0, depth=0, visited_urls=set()):
     if depth > max_depth:  # Limit the depth to prevent infinite recursion
         return []
+
     try:
         # If we have already visited the url, we skip it
         if url in visited_urls:
             return []
         visited_urls.add(url)
+
+        # Avoid unnecessary pages
+        unnecessary_pages = ['contact', 'about', 'faq']
+        parsed_url = urlparse(url)
+        if any(page in parsed_url.path for page in unnecessary_pages):
+            return []
 
         # Setup webdriver
         options = webdriver.ChromeOptions()
@@ -237,7 +245,7 @@ def web_scraping(url, max_depth=2, depth=0, visited_urls=set()):
         driver.get(url)
         
         # Wait for a specific element to load
-        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
+        WebDriverWait(driver, 3).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
         
         soup = BeautifulSoup(driver.page_source, 'html.parser')
 
@@ -255,10 +263,12 @@ def web_scraping(url, max_depth=2, depth=0, visited_urls=set()):
             if href is not None:
                 # Create full url if href is relative
                 full_url = urljoin(url, href)
-                text.update(web_scraping(full_url, max_depth, depth + 1, visited_urls))
+                if urlparse(full_url).netloc == urlparse(url).netloc:  # Check if the link is internal
+                    text.update(web_scraping(full_url, max_depth, depth + 1, visited_urls))
         
         # Generate the sentences from the set and remove unnecessary repeated text
         result = list(text)
+        
         # Quit driver
         driver.quit()
         return result
