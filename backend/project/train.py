@@ -165,7 +165,7 @@ def text_to_docs(text: str, filename: str, chat: str) -> List[Document]:
     for i, doc in enumerate(page_docs):
         text_splitter = RecursiveCharacterTextSplitter(
             separators=["\n\n", "\n"],
-            chunk_size=1000,
+            chunk_size=3000,
             chunk_overlap=200,
         )
         if doc.page_content == "":
@@ -434,6 +434,7 @@ def create_train_file():
             if compare_role_user(chatbot):
                 if compare_token_words(ct, chatbot):
                     result = text_to_docs(output, filename, chatbot)
+                    print(result)
                     trainid = create_train(filename, 'file', True, chatbot)
                     if (trainid == False):
                         return jsonify({
