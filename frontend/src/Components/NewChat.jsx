@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { BsSendPlus } from "react-icons/bs";
+import { BsSendPlus, BsFillImageFill } from "react-icons/bs";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
 import { useSelector, useDispatch } from "react-redux";
@@ -18,6 +18,7 @@ import remarkGfm from 'remark-gfm'
 import rehypeMathjax from 'rehype-mathjax';
 import remarkMath from 'remark-math';
 import rehypeRaw from 'rehype-raw'
+import { Dialog, DialogBody } from "@material-tailwind/react";
 
 const NewChat = () => {
     const navigate = useNavigate();
@@ -36,12 +37,15 @@ const NewChat = () => {
     const ai_background = useRef(null);
     const newchat = useRef(null);
     const messagesEndRef = useRef(null);
+    const imageInput = useRef(null);
     let location = useLocation();
     const [message, setMessage] = useState("");
     const [streamData, setStreamData] = useState('');
     const [loading, setLoading] = useState(false);
     const [spinner, setSpinner] = useState(false);
+    const [image, setImage] = useState(false);
     const [state, setState] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const chatState = useSelector((state) => state.chat.chat);
     const chat = chatState && JSON.parse(chatState) || {};
     const chatbot = useSelector((state) => state.chat.chatbot);
@@ -52,6 +56,11 @@ const NewChat = () => {
             toast.error(message);
         }
     };
+
+    const handleImageClick = () => {
+        setIsModalOpen(!isModalOpen);
+    };
+
     useEffect(() => {
         const pattern = /\/chat\/embedding\/(\w+)/;
         const result = pattern.exec(location.pathname);
@@ -238,18 +247,24 @@ const NewChat = () => {
         }
     }, [chathistory, streamData]);
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         if (!event.shiftKey && event.keyCode === 13 && spinner === false) {
             let id = chatbot;
             let _message = message.trim();
             if (_message === "") {
                 return;
             }
-            setChathistory([
-                ...chathistory,
-                { role: "human", content: _message },
-            ]);
-            sendMessage(id, _message);
+            let human = { role: "human", content: _message };
+            if (image) {
+
+                human = { role: "human", content: _message, image: URL.createObjectURL(image) };
+                setChathistory((prevHistory) => [...prevHistory, human]);
+
+            } else {
+                setChathistory((prevHistory) => [...prevHistory, human]);
+            }
+
+            await sendMessage(id, _message);
 
             event.preventDefault();
             setMessage("");
@@ -282,6 +297,11 @@ const NewChat = () => {
         formData.append('behaviormodel', behaviormodel);
         formData.append('train', train);
         formData.append('model', model);
+        if (image) {
+            formData.append('image', image);
+            console.log(image);
+            setImage(null);
+        }
 
         // Send the formData to the streaming API
         fetch(webAPI.sendchat, {
@@ -341,6 +361,20 @@ const NewChat = () => {
         ]);
     };
 
+    const handleImageUploadClick = (e) => {
+        console.log("Uploading image...");
+        e.preventDefault();
+        imageInput.current?.click();
+    };
+
+    const handleUploadImage = (e) => {
+        if (e.target.files) {
+            const file = e.target.files[0];
+            setImage(file)
+        }
+        e.target.value = null;
+    };
+
     return (
         <div
             style={{
@@ -358,7 +392,7 @@ const NewChat = () => {
                         delay={15}
                     ></ReactLoading>
                     <span className="text-[--site-card-icon-color]">
-                        Creating AI Tutor...
+                        loading ...
                     </span>
                 </div>
             )}
@@ -412,8 +446,26 @@ const NewChat = () => {
                                                 />
                                                 <div
                                                     name="human"
-                                                    className="flex w-full p-2 whitespace-break-spaces"
+                                                    className="flex flex-col w-full p-2 whitespace-break-spaces"
                                                 >
+
+                                                    {data.image ? <>
+                                                        <img
+                                                            src={data.image}
+                                                            alt="image"
+                                                            className="w-[100px] h-[100px]"
+                                                            onClick={handleImageClick}
+                                                        />
+                                                        <Dialog size="lg" open={isModalOpen} handler={handleImageClick}>
+                                                            <DialogBody className="h-[30rem] flex items-center justify-center">
+                                                                <img
+                                                                    src={data.image}
+                                                                    alt="image"
+                                                                    className={`${isModalOpen ? 'max-h-[28rem] max-w-[28rem]' : ''}`}
+                                                                />
+                                                            </DialogBody>
+                                                        </Dialog>
+                                                    </> : <></>}
                                                     <span>{data.content}</span>
                                                 </div>
                                             </div>
@@ -618,10 +670,16 @@ const NewChat = () => {
                             </div>
 
                             <div className="flex items-center w-full divide-x-2 sm:w-4/5">
+                                <div className="flex justify-center items-center p-2 cursor-pointer hover:scale-105 transition-transform duration-200">
+                                    <span onClick={handleImageUploadClick}>
+                                        <BsFillImageFill className="hover:scale-125 transition-transform duration-200" />
+                                    </span>
+                                    <input type="file" className="hidden" ref={imageInput} onChange={handleUploadImage} accept=".jpg,.jpeg,.png" />
+                                </div>
                                 <div className="flex items-center justify-end w-full text-black">
                                     <textarea
                                         type="text"
-                                        rows="3"
+                                        rows="2"
                                         cols="50"
                                         value={message}
                                         onChange={(e) =>
@@ -634,11 +692,11 @@ const NewChat = () => {
 
                                     <span
                                         onClick={() => {
-                                            handleSubmitmessage();
+                                            handleSubmitmessage()
                                         }}
                                         className="absolute pr-4"
                                     >
-                                        <BsSendPlus />
+                                        <BsSendPlus className="hover:scale-125 transition-transform duration-200" />
                                     </span>
                                 </div>
                             </div>
