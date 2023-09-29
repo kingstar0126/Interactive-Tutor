@@ -44,6 +44,7 @@ const NewChat = () => {
     const [loading, setLoading] = useState(false);
     const [spinner, setSpinner] = useState(false);
     const [image, setImage] = useState(false);
+    const [imagesrc, setImagesrc] = useState(false);
     const [state, setState] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const chatState = useSelector((state) => state.chat.chat);
@@ -454,12 +455,12 @@ const NewChat = () => {
                                                             src={data.image}
                                                             alt="image"
                                                             className="w-[100px] h-[100px]"
-                                                            onClick={handleImageClick}
+                                                            onClick={() => {setImagesrc(data.image); handleImageClick();}}
                                                         />
                                                         <Dialog size="lg" open={isModalOpen} handler={handleImageClick}>
                                                             <DialogBody className="h-[30rem] flex items-center justify-center">
                                                                 <img
-                                                                    src={data.image}
+                                                                    src={imagesrc}
                                                                     alt="image"
                                                                     className={`${isModalOpen ? 'max-h-[28rem] max-w-[28rem]' : ''}`}
                                                                 />
