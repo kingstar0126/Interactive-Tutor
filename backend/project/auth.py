@@ -423,10 +423,14 @@ def get_useraccount():
             }
         return jsonify({'success': True, 'data': new_user, 'code': 200})
 
+from sqlalchemy import or_
+
 @auth.route('/api/getallaccounts', methods=['POST'])
 def get_all_useraccount():
     id = request.json['id']
+    search = request.json['search']
     user = db.session.query(User).filter_by(id=id).first()
+    
     if user.role != 1 and user.role != 7:
         return jsonify({
             'success': False,
@@ -435,36 +439,60 @@ def get_all_useraccount():
         })
     current_users = []
     if user.role == 1:
-        users = db.session.query(User).all()
+        if search:
+            users = db.session.query(User).filter(
+                or_(
+                    User.username.ilike(f"%{search}%"),
+                    User.email.ilike(f"%{search}%")
+                )
+            ).all()
+        else:
+            users = db.session.query(User).all()
+            
         for current_user in users:
             if current_user.id == id:
                 continue
-            if user.role == 1:
-                new_user = {
-                    'id': current_user.id,
-                    'username': current_user.username,
-                    'email': current_user.email,
-                    'contact': current_user.contact,
-                    'state': current_user.state,
-                    'city': current_user.city,
-                    'country': current_user.country,
-                    'status': current_user.status,
-                    'query': current_user.query,
-                    'usage': current_user.usage,
-                    'tutors': current_user.tutors,
-                    'role': current_user.role,
-                    'training_datas': current_user.training_datas,
-                    'training_words': current_user.training_words
-                }
-                current_users.append(new_user)
+
+            new_user = {
+                'id': current_user.id,
+                'username': current_user.username,
+                'email': current_user.email,
+                'contact': current_user.contact,
+                'state': current_user.state,
+                'city': current_user.city,
+                'country': current_user.country,
+                'status': current_user.status,
+                'query': current_user.query,
+                'usage': current_user.usage,
+                'tutors': current_user.tutors,
+                'role': current_user.role,
+                'training_datas': current_user.training_datas,
+                'training_words': current_user.training_words
+            }
+            current_users.append(new_user)
+
         return jsonify({'success': True, 'data': current_users, 'code': 200})
+    
     else:
         invite_users = db.session.query(Invite).filter_by(user_id=id).all()
         for invite_user in invite_users:
             if invite_user.status: #already signed up user
                 _user = db.session.query(User).filter_by(email=invite_user.email).first()
                 _chat = []
-                chats = db.session.query(Chat).filter_by(inviteId=id, user_id=_user.id).all()
+                
+                if search:
+                    chats = db.session.query(Chat).filter(
+                        Chat.inviteId == id, 
+                        Chat.user_id == _user.id, 
+                        or_(
+                            Chat.label.ilike(f"%{search}%"),
+                            Chat.description.ilike(f"%{search}%"),
+                            Chat.model.ilike(f"%{search}%")
+                        )
+                    ).all()
+                else:
+                    chats = db.session.query(Chat).filter_by(inviteId=id, user_id=_user.id).all()
+                
                 for chat in chats:
                     chat_data = {
                         'id': chat.id,
@@ -494,6 +522,7 @@ def get_all_useraccount():
                     'status': invite_user.status
                 }
                 current_users.append(new_user)
+        return jsonify({'success': True, 'data': current_users, 'code': 200})
         # chats = db.session.query(Chat).filter_by(inviteId=id).all()
         # for chat in chats:
         #     _user = db.session.query(User).filter_by(id=chat.user_id).first()

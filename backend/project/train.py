@@ -90,16 +90,19 @@ def create_vector(docs):
 def parse_pdf(file: BytesIO) -> List[str]:
     pdf = PdfReader(file)
     output = []
+    full_text = ""
     for page in pdf.pages:
         text = page.extract_text()
-        # Merge hyphenated words
-        text = re.sub(r"(\w+)-\n(\w+)", r"\1\2", text)
-        # Fix newlines in the middle of sentences
-        text = re.sub(r"(?<!\n\s)\n(?!\s\n)", " ", text.strip())
-        # Remove multiple newlines
-        text = re.sub(r"\n\s*\n", "\n\n", text)
-        text = correct_grammar(text)
-        output.append(text)
+        print(text)
+        # # Merge hyphenated words
+        # text = re.sub(r"(\w+)-\n(\w+)", r"\1\2", text)
+        # # Fix newlines in the middle of sentences
+        # text = re.sub(r"(?<!\n\s)\n(?!\s\n)", " ", text.strip())
+        # # Remove multiple newlines
+        # text = re.sub(r"\n\s*\n", "\n\n", text)
+        # text = correct_grammar(text)
+        full_text += text + "\n"
+    output.append(full_text)
     return output
 
 
@@ -108,6 +111,7 @@ def parse_csv(file):
     string_data = str(data)
     string_data = correct_grammar(string_data)
     text = []
+    print(string_data)
     text.append(string_data)
     return text
 

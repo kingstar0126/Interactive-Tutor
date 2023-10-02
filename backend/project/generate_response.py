@@ -27,7 +27,6 @@ PINECONE_ENV = os.getenv('PINECONE_ENV')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
 
-
 def get_hashed_name(name):
     return hashlib.sha256(name.encode()).hexdigest()
 
@@ -61,7 +60,7 @@ def generate_message(query, behavior, temp, model, chat, template):
         input_variables=["context", "question"], template=template)
     chain_type_kwargs = {"prompt": prompt}
 
-    langchain.llm_cache = GPTCache(init_gptcache)
+    # langchain.llm_cache = GPTCache(init_gptcache)
 
     if model == "1":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo",
@@ -97,8 +96,8 @@ def generate_message(query, behavior, temp, model, chat, template):
     docsearch = Pinecone.from_existing_index(
         index_name=PINECONE_INDEX_NAME, embedding=embeddings)
     # _query = query
-    # docs = docsearch.similarity_search_with_score(_query, filter={"chat": str(chat)})
-
+    # docs = docsearch.similarity_search_with_score(query, filter={"chat": str(chat)})
+    # print(docs)
     qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=docsearch.as_retriever(search_kwargs={'filter': {"chat": str(chat)}}), chain_type_kwargs=chain_type_kwargs)
     
 
@@ -151,18 +150,18 @@ def generate_AI_message(query, history, behavior, temp, model):
     prompt = PromptTemplate(
         input_variables=["history", "human_input", "behavior"], template=template)
 
-    def get_hashed_name(name):
-        return hashlib.sha256(name.encode()).hexdigest()
+    # def get_hashed_name(name):
+    #     return hashlib.sha256(name.encode()).hexdigest()
 
-    def init_gptcache(cache_obj: Cache, llm: str):
-        hashed_llm = get_hashed_name(llm)
-        cache_obj.init(
-            pre_embedding_func=get_prompt,
-            data_manager=manager_factory(
-                manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
-        )
+    # def init_gptcache(cache_obj: Cache, llm: str):
+    #     hashed_llm = get_hashed_name(llm)
+    #     cache_obj.init(
+    #         pre_embedding_func=get_prompt,
+    #         data_manager=manager_factory(
+    #             manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
+    #     )
 
-    langchain.llm_cache = GPTCache(init_gptcache)
+    # langchain.llm_cache = GPTCache(init_gptcache)
 
     if model == "1":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo",

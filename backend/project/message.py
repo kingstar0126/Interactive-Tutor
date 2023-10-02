@@ -17,9 +17,25 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk import pos_tag
+from typing import Sequence
+from google.cloud import vision
 
-pretty.install()
+
 message = Blueprint('message', __name__)
+
+
+def analyze_image_from_bytes(
+    image_bytes: bytes,
+    feature_types: Sequence,
+) -> vision.AnnotateImageResponse:
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "interactive-tutor-4400973b0735.json"
+    client = vision.ImageAnnotatorClient()
+
+    image = vision.Image(content=image_bytes)
+    features = [vision.Feature(type_=feature_type) for feature_type in feature_types]
+    request = vision.AnnotateImageRequest(image=image, features=features)
+
+    return client.annotate_image(request=request)
 
 
 def correct_grammar(text):
@@ -170,7 +186,18 @@ def send_message():
     query = request.form.get('_message')
     behaviormodel = request.form.get('behaviormodel')
     model = request.form.get('model')
+    text = "No text detected"
 
+    if 'image' in request.files:
+        image = request.files['image']
+        image_bytes = image.read()
+        feature_types = [
+            vision.Feature.Type.TEXT_DETECTION
+        ]
+        response = analyze_image_from_bytes(image_bytes, feature_types)
+        if response.text_annotations:
+            text = response.text_annotations[0].description
+    print("\n\n", text)
     current_message = db.session.query(Message).filter_by(uuid=uuid).first()
     if current_message is None:
         return jsonify({
@@ -202,26 +229,29 @@ def send_message():
     behavior = current_message.behavior if behaviormodel == "Remove training data ring fencing and perform like ChatGPT" \
         else current_message.behavior + "\n\n" + behaviormodel
 
-    prompt_content = """==========
+    prompt_content = """
     Context: {context}
-    ========== """
+    ===============
+    """
     
     prompt_input = """
     Human: {question}
     Assistant:"""
 
     template = f""" {behavior}
-    {prompt_content}
 
     ===============
-    ChatHistory: {str(last_history).replace('{', '"').replace('}', '"')}
+    Context: {text}
+
+    {prompt_content}
+
     ===============
     {prompt_input}
     """
 
     response = generate_message(
         query, behavior, temp, model, chat.uuid, template) if behaviormodel != "Remove training data ring fencing and perform like ChatGPT" \
-        else generate_AI_message(query, last_history, behavior, temp, model)
+        else generate_AI_message(query, last_history, f"{behavior} \n\n======================\n\n Context: {text}", temp, model)
 
     def generate():
         content = None
@@ -235,9 +265,6 @@ def send_message():
             current_message.message = json.dumps(history)
             current_message.update_date = datetime.datetime.now()
             db.session.commit()
-        else:
-            raise Exception("The text is too long! Please upgrade your model or enter a different prompt.")
-    
     try:
         return Response(stream_with_context(generate()), mimetype="text/event-stream", direct_passthrough=True, headers={'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
     except Exception as e:
