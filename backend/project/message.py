@@ -189,15 +189,18 @@ def send_message():
     text = "No text detected"
 
     if 'image' in request.files:
-        image = request.files['image']
-        image_bytes = image.read()
-        feature_types = [
-            vision.Feature.Type.TEXT_DETECTION
-        ]
-        response = analyze_image_from_bytes(image_bytes, feature_types)
-        if response.text_annotations:
-            text = response.text_annotations[0].description
+        images = request.files.getlist('image')  # Get all files under 'image' key
+        text = ""  # Initialize text
+        for index, image in enumerate(images):
+            image_bytes = image.read()
+            feature_types = [
+                vision.Feature.Type.TEXT_DETECTION
+            ]
+            response = analyze_image_from_bytes(image_bytes, feature_types)
+            if response.text_annotations:
+                text += f"Image{index+1}: " + response.text_annotations[0].description + "\n"
     print("\n\n", text)
+        
     current_message = db.session.query(Message).filter_by(uuid=uuid).first()
     if current_message is None:
         return jsonify({
@@ -241,7 +244,7 @@ def send_message():
     template = f""" {behavior}
 
     ===============
-    Context: {text}
+    Image Text: {text}
 
     {prompt_content}
 
@@ -251,7 +254,7 @@ def send_message():
 
     response = generate_message(
         query, behavior, temp, model, chat.uuid, template) if behaviormodel != "Remove training data ring fencing and perform like ChatGPT" \
-        else generate_AI_message(query, last_history, f"{behavior} \n\n======================\n\n Context: {text}", temp, model)
+        else generate_AI_message(query, last_history, f"{behavior} \n\n======================\n\n Image Text: {text}", temp, model)
 
     def generate():
         content = None
