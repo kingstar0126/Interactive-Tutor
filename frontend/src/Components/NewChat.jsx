@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { BsSendPlus, BsFillImageFill } from "react-icons/bs";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
@@ -455,7 +455,7 @@ const NewChat = () => {
                                                             src={data.image}
                                                             alt="image"
                                                             className="w-[100px] h-[100px]"
-                                                            onClick={() => {setImagesrc(data.image); handleImageClick();}}
+                                                            onClick={() => { setImagesrc(data.image); handleImageClick(); }}
                                                         />
                                                         <Dialog size="lg" open={isModalOpen} handler={handleImageClick}>
                                                             <DialogBody className="h-[30rem] flex items-center justify-center">
@@ -574,9 +574,7 @@ const NewChat = () => {
                                                     code({ inline, className, children, ...props }) {
                                                         const match = /language-(\w+)/.exec(className || '')
                                                         if (!inline && match) {
-                                                            // remove the newline character at the end of children, if it exists
                                                             const codeString = String(children).replace(/\n$/, '');
-
                                                             return (
                                                                 <CopyBlock
                                                                     text={codeString}
@@ -597,11 +595,9 @@ const NewChat = () => {
                                                             </table>
                                                         );
                                                     },
-                                                    // Add CSS styles to the table row
                                                     tr({ children, ...props }) {
                                                         return <tr style={{ backgroundColor: '#f8f8f8' }} {...props}>{children}</tr>;
                                                     },
-                                                    // Add CSS styles to the table cell
                                                     td({ children, ...props }) {
                                                         return <td style={{ padding: '8px', border: '1px solid #ddd' }} {...props}>{children}</td>;
                                                     },
@@ -614,14 +610,7 @@ const NewChat = () => {
                                                                 {children}
                                                             </a>
                                                         );
-                                                    },
-                                                    li({ children, ...props }) {
-                                                        // If children is a string, apply the transformation
-                                                        if (typeof children === 'string') {
-                                                            children = children.replace(/(\d+\.)\s*\n\s*/g, "$1 ").trim();
-                                                        }
-                                                        return <li style={{ marginBottom: '0.25em' }} {...props}>{children}</li>;
-                                                    },
+                                                    }
                                                 }}
                                             />
                                             {state && <Grid
