@@ -43,8 +43,8 @@ const NewChat = () => {
     const [streamData, setStreamData] = useState('');
     const [loading, setLoading] = useState(false);
     const [spinner, setSpinner] = useState(false);
-    const [image, setImage] = useState(false);
-    const [imagesrc, setImagesrc] = useState(false);
+    const [image, setImage] = useState([]);
+    const [imagesrc, setImagesrc] = useState(null);
     const [state, setState] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const chatState = useSelector((state) => state.chat.chat);
@@ -256,11 +256,10 @@ const NewChat = () => {
                 return;
             }
             let human = { role: "human", content: _message };
-            if (image) {
-
-                human = { role: "human", content: _message, image: URL.createObjectURL(image) };
+            if (image.length) {
+                const imagesrc = image.map(item => URL.createObjectURL(item));
+                const human = { role: "human", content: _message, images: imagesrc };
                 setChathistory((prevHistory) => [...prevHistory, human]);
-
             } else {
                 setChathistory((prevHistory) => [...prevHistory, human]);
             }
@@ -270,18 +269,6 @@ const NewChat = () => {
             event.preventDefault();
             setMessage("");
         }
-    };
-
-    const handleSubmitmessage = () => {
-        let id = chatbot;
-        let _message = message;
-        if (_message === "") {
-            return;
-        }
-        setChathistory([...chathistory, { role: "human", content: _message }]);
-        sendMessage(id, _message);
-
-        setMessage("");
     };
 
     const sendMessage = async (id, _message) => {
@@ -298,10 +285,11 @@ const NewChat = () => {
         formData.append('behaviormodel', behaviormodel);
         formData.append('train', train);
         formData.append('model', model);
-        if (image) {
-            formData.append('image', image);
-            console.log(image);
-            setImage(null);
+        if (image.length) {
+            image.map(item => {
+                formData.append('image', item);
+            });
+            setImage([]);
         }
 
         // Send the formData to the streaming API
@@ -313,7 +301,6 @@ const NewChat = () => {
             .then(async (response) => {
                 let res = ''
                 if (!response.ok) {
-                    console.log(response)
                     if (response.status === 404) {
                         // Handle 404 error (Not found)
                         notification("error", "Not found tutor!")
@@ -363,17 +350,26 @@ const NewChat = () => {
     };
 
     const handleImageUploadClick = (e) => {
-        console.log("Uploading image...");
         e.preventDefault();
         imageInput.current?.click();
     };
 
     const handleUploadImage = (e) => {
         if (e.target.files) {
-            const file = e.target.files[0];
-            setImage(file)
+            const files = Array.from(e.target.files);
+            setImage(files)
         }
         e.target.value = null;
+    };
+
+    const handleRemoveImage = (index) => {
+        setImage((prevState) => {
+            if (prevState.length === 1) {
+                return [];
+            } else {
+                return prevState.filter((img, imgIndex) => imgIndex !== index);
+            }
+        });
     };
 
     return (
@@ -450,23 +446,25 @@ const NewChat = () => {
                                                     className="flex flex-col w-full p-2 whitespace-break-spaces"
                                                 >
 
-                                                    {data.image ? <>
-                                                        <img
-                                                            src={data.image}
-                                                            alt="image"
-                                                            className="w-[100px] h-[100px]"
-                                                            onClick={() => { setImagesrc(data.image); handleImageClick(); }}
-                                                        />
-                                                        <Dialog size="lg" open={isModalOpen} handler={handleImageClick}>
-                                                            <DialogBody className="h-[30rem] flex items-center justify-center">
-                                                                <img
-                                                                    src={imagesrc}
-                                                                    alt="image"
-                                                                    className={`${isModalOpen ? 'max-h-[28rem] max-w-[28rem]' : ''}`}
-                                                                />
-                                                            </DialogBody>
-                                                        </Dialog>
-                                                    </> : <></>}
+                                                    {data.images && data.images.length ? <div className="flex flex-wrap">{data.images.map((item) => {
+                                                        return <>
+                                                            <img
+                                                                src={item}
+                                                                alt="image"
+                                                                className="w-[100px] h-[100px]"
+                                                                onClick={() => { setImagesrc(item); handleImageClick(); }}
+                                                            />
+                                                            <Dialog size="lg" open={isModalOpen} handler={handleImageClick}>
+                                                                <DialogBody className="h-[30rem] flex items-center justify-center">
+                                                                    <img
+                                                                        src={imagesrc}
+                                                                        alt="image"
+                                                                        className={`${isModalOpen ? 'max-h-[28rem] max-w-[28rem]' : ''}`}
+                                                                    />
+                                                                </DialogBody>
+                                                            </Dialog>
+                                                        </>
+                                                    })}</div> : <></>}
                                                     <span>{data.content}</span>
                                                 </div>
                                             </div>
@@ -658,33 +656,54 @@ const NewChat = () => {
                                     {chat.chat_button.button3_text}
                                 </a>
                             </div>
-
+                            <input type="file" className="hidden" multiple ref={imageInput} onChange={handleUploadImage} accept=".jpg,.jpeg,.png" />
                             <div className="flex items-center w-full divide-x-2 sm:w-4/5">
-                                <div className="flex justify-center items-center p-2 cursor-pointer hover:scale-105 transition-transform duration-200">
+                                {/* <div className="flex justify-center items-center p-2 cursor-pointer hover:scale-105 transition-transform duration-200">
                                     <span onClick={handleImageUploadClick}>
                                         <BsFillImageFill className="hover:scale-125 transition-transform duration-200" />
                                     </span>
                                     <input type="file" className="hidden" ref={imageInput} onChange={handleUploadImage} accept=".jpg,.jpeg,.png" />
-                                </div>
-                                <div className="flex items-center justify-end w-full text-black">
-                                    <textarea
-                                        type="text"
-                                        rows="2"
-                                        cols="50"
-                                        value={message}
-                                        onChange={(e) =>
-                                            setMessage(e.target.value)
-                                        }
-                                        onKeyDown={handleSubmit}
-                                        className="w-full rounded-md border border-[--site-chat-header-border] bg-[--site-main-newchat-input-color] text-[--site-card-icon-color] block text-sm p-2.5 pr-9"
-                                        placeholder="Type message"
-                                    />
+                                </div> */}
+                                <div className="flex items-center justify-end w-full text-black relative rounded-md border border-[--site-chat-header-border] bg-[--site-main-newchat-input-color]">
 
                                     <span
-                                        onClick={() => {
-                                            handleSubmitmessage()
-                                        }}
-                                        className="absolute pr-4"
+                                        onClick={handleImageUploadClick}
+                                        className="absolute left-4 flex items-center"
+                                    >
+                                        <BsFillImageFill className="hover:scale-125 transition-transform duration-200" />
+                                    </span>
+                                    <div className="flex flex-col w-full bg-white rounded-md p-2.5 px-9">
+                                        <textarea
+                                            type="text"
+                                            rows="2"
+                                            cols="50"
+                                            value={message}
+                                            onChange={(e) =>
+                                                setMessage(e.target.value)
+                                            }
+                                            onKeyDown={handleSubmit}
+                                            className="w-full rounded-md text-[--site-card-icon-color] block text-sm focus:outline-none"
+                                            placeholder="Type message"
+                                        />
+                                        <div className="flex flex-wrap gap-2">
+                                            {image && image.length > 0 && image.map((item, index) => {
+                                                return (
+                                                    <div className="relative">
+                                                        <img src={URL.createObjectURL(item)} alt="file" className="w-10 h-10" />
+                                                        <button
+                                                            onClick={() => handleRemoveImage(index)}
+                                                            className="absolute w-3 h-3 top-0 right-0 bg-red-500 text-white rounded-full"
+                                                        >
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    <span
+                                        onClick={handleSubmit}
+                                        className="absolute right-4 flex items-center"
                                     >
                                         <BsSendPlus className="hover:scale-125 transition-transform duration-200" />
                                     </span>
