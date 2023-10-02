@@ -197,7 +197,7 @@ def send_message():
         response = analyze_image_from_bytes(image_bytes, feature_types)
         if response.text_annotations:
             text = response.text_annotations[0].description
-    
+    print("\n\n", text)
     current_message = db.session.query(Message).filter_by(uuid=uuid).first()
     if current_message is None:
         return jsonify({
