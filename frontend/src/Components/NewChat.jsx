@@ -324,6 +324,7 @@ const NewChat = () => {
                     if (done) {
                         setStreamData('')
                         receiveMessage(res);
+                        console.log(res)
                         setSpinner(false);
                         return;
                     }
@@ -490,6 +491,7 @@ const NewChat = () => {
                                                         remarkPlugins={[remarkGfm, remarkMath]}
                                                         rehypePlugins={[rehypeMathjax, rehypeRaw]}
                                                         children={data.content}
+                                                        className="whitespace-normal"
                                                         components={{
                                                             code({ inline, className, children, ...props }) {
                                                                 const match = /language-(\w+)/.exec(className || '')
