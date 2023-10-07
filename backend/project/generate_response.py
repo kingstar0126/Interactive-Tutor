@@ -181,6 +181,7 @@ def generate_AI_message(query, history, behavior, temp, model):
                          streaming=True,
                          callbacks=[QueueCallback(q)],
                          openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
+    
     conversation = LLMChain(
         llm=llm,
         verbose=True,

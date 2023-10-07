@@ -79,7 +79,7 @@ const Enterprise = () => {
 
     const getAlluser = () => {
         axios
-            .post(webAPI.getallusers, { id: user.id })
+            .post(webAPI.getallusers, { id: user.id, search: "" })
             .then((res) => {
                 setData(res.data.data);
             })
@@ -238,7 +238,7 @@ const Enterprise = () => {
             <div className="flex md:items-center items-end justify-between w-full md:h-[100px] md:px-10 from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] md:border-b-[--site-chat-header-border] md:border bg-gradient-to-r px-4 py-2 max-h-min gap-1">
                 <div className="hidden md:flex gap-2 mt-9 mb-8 text-[--site-card-icon-color]">
                     <BsDatabaseFillGear className="w-8 h-8" />
-                    <span className="text-2xl font-semibold">EnterPrise</span>
+                    <span className="text-2xl font-semibold">Enterprise</span>
                 </div>
                 <AiOutlineMenu
                     onClick={handleOpenSidebar}
@@ -300,7 +300,7 @@ const Enterprise = () => {
 
             <div className="flex md:hidden gap-2 text-[--site-card-icon-color] pt-8 px-5">
                 <BsDatabaseFillGear className="w-8 h-8" />
-                <span className="text-2xl font-semibold">Enter Prise</span>
+                <span className="text-2xl font-semibold">Enterprise</span>
             </div>
 
             <div className="bg-gradient-to-r from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] border-[--site-chat-header-border] border rounded-xl md:m-10 m-5 flex flex-col gap-5 shadow-xl shadow-[--site-chat-header-border] overflow-x-auto">

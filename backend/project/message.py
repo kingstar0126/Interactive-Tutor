@@ -200,7 +200,6 @@ def send_message():
             if response.text_annotations:
                 text += f"Image{index+1}: " + response.text_annotations[0].description + "\n"
     print("\n\n", text)
-        
     current_message = db.session.query(Message).filter_by(uuid=uuid).first()
     if current_message is None:
         return jsonify({
