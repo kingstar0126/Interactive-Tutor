@@ -73,4 +73,5 @@ export const webAPI = {
     uploadInviteFile: SERVER_URL + "/api/uploadInviteFile",
 
     streamingTest: SERVER_URL + "/api/testStreaming",
+    closeAccount: SERVER_URL + "/api/closeAccunt",
 };
