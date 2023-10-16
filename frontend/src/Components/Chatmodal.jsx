@@ -61,7 +61,7 @@ const Chatmodal = (props) => {
             label: `Remove training data ring fencing and perform like ChatGPT`,
         }
     ]
-    const [gptmodel, SetGPTmodel] = useState(models);
+    // const [gptmodel, SetGPTmodel] = useState(models);
     const [Creativity, SetCreativity] = useState(0.3);
     const [selected, setSelected] = useState(0)
     const [behaviormodel, SetBehaviormodel] = useState(
@@ -173,13 +173,13 @@ const Chatmodal = (props) => {
     };
 
     useEffect(() => {
-        if (user.role === 2 || user.role === 5) {
-            SetGPTmodel([models[0]]);
-        } else if (user.role === 3) {
-            SetGPTmodel(models.slice(0, 2));
-        } else if (user.role === 4) {
-            SetGPTmodel(models);
-        }
+        // if (user.role === 2 || user.role === 5) {
+        //     SetGPTmodel([models[0]]);
+        // } else if (user.role === 3) {
+        //     SetGPTmodel(models.slice(0, 2));
+        // } else if (user.role === 4) {
+        //     SetGPTmodel(models);
+        // }
         if (!props.chat) {
             SetLabel("")
             setOpen(0);
@@ -402,7 +402,7 @@ const Chatmodal = (props) => {
                                                 }}
                                                 className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black placeholder:opacity-50"
                                             >
-                                                {gptmodel.map((item) => {
+                                                {models.map((item) => {
                                                     return (
                                                         <option
                                                             key={item.value}

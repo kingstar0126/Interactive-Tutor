@@ -216,7 +216,7 @@ const SubscriptionModal = (props) => {
                                                         </span>
                                                     </Typography>
                                                 </CardHeader>
-                                                <CardBody className="p-0 md:h-[298px] h-3/6">
+                                                <CardBody className="p-0">
                                                     <ul className="flex flex-col gap-2">
                                                         {subscriptions &&
                                                             description[
@@ -293,7 +293,7 @@ const SubscriptionModal = (props) => {
                                                         </span>
                                                     </Typography>
                                                 </CardHeader>
-                                                <CardBody className="flex flex-col justify-start gap-2 p-0 h-3/6  md:h-[298px] ">
+                                                <CardBody className="flex flex-col justify-start gap-2 p-0">
                                                     <ul className="flex flex-col gap-2">
                                                         {subscriptions &&
                                                             description[
