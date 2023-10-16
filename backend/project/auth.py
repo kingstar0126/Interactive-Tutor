@@ -820,3 +820,15 @@ def parse_csv(file):
 def is_email(s):
     pattern = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
     return bool(re.match(pattern, s))
+
+
+@auth.route('/api/closeAccunt', methods=['POST'])
+def closeAccunt():
+    id = request.json['id']
+    user = db.session.query(User).filter_by(id=id).first()
+    msg = Message('Customer wants to delete their account !!!', sender=os.getenv('MAIL_USERNAME'),
+                  recipients=[os.getenv('MAIL_USERNAME')])
+    msg.html = render_template(
+        'send_custom_plan.html', username=user.username, email=user.email, phone=user.contact)
+    mail.send(msg)
+    return jsonify({'success': True, 'code': 200, 'message': 'We have sent your request to the manager.'})
