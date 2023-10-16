@@ -171,15 +171,15 @@ const SubscriptionModal = (props) => {
                 <span className="text-[32px] leading-12 font-semibold text-[--site-card-icon-color]">
                     Subscription
                 </span>
-                <Link>
+                {user.role !== 7 && <Link>
                     <span onClick={() => {setType(!type)}} className="bg-transparent text-[--site-card-icon-color] text-base font-semibold hover:text-[--site-main-slider-thumb-color]">Invite others for a 50% discount</span>
-                </Link>
+                </Link>}
             </DialogHeader>
             <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium md:px-12 md:pb-20 md:max-h-[42rem] max-h-[25rem] overflow-y-auto">
                 <Toaster />
                 {type ? subscriptions && subscriptions.length !== 0 && (
                     <div>
-                        {user.role !== 7 && <div className="flex flex-col items-start justify-center w-full gap-12 py-4 md:flex-row">
+                        <div className="flex flex-col items-start justify-center w-full gap-12 py-4 md:flex-row">
                             {subscriptions.map((item, index) => {
                                 return (
                                     <React.Fragment key={item.price_id}>
@@ -346,7 +346,7 @@ const SubscriptionModal = (props) => {
                                     </React.Fragment>
                                 );
                             })}
-                        </div>}
+                        </div>
                         <div className="justify-center flex p-2">
                             {user.role !== 6 ? (
                                 <span
@@ -366,13 +366,12 @@ const SubscriptionModal = (props) => {
                         </div>
                     </div>
                 ): <div className="flex flex-col gap-5">
-                        <span className="text-2xl font-semibold text-[--site-card-icon-color]">Invite 5 subscribers to get 50% off your subscription</span>
+                        {user.role !== 7 && <><span className="text-2xl font-semibold text-[--site-card-icon-color]">Invite 5 subscribers to get 50% off your subscription</span>
                         <div className="flex flex-col gap-2">
-                            {console.log('HIHIHI', inviteEmails)}
                             {inviteEmails.map((item, id) => {
                                 return <InviteEmailItem data={item} InviteConfirm={handleInvite} key={id}/>
                             })}
-                        </div>
+                        </div></>}
                         
                     </div>}
             </DialogBody>

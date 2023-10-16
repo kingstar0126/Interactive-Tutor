@@ -137,12 +137,6 @@ const Manager = () => {
                         Enter Prise
                     </span>
                 );
-            case 8:
-                return (
-                    <span className="px-2 py-1 font-semibold leading-tight rounded-lg bg-[#0000f7] text-[white]">
-                        Enter Prise
-                    </span>
-                );
             default:
                 throw new Error("Invalid role encountered.");
         }

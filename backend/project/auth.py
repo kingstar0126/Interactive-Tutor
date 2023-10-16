@@ -66,7 +66,7 @@ def compare_month():
                 user.query = query + 3000
             elif user.role == 4:
                 user.query = query + 10000
-            elif user.role == 8:
+            elif user.role == 7:
                 user.query = query + 30000
             user.usage = 0
             db.session.commit()

@@ -242,30 +242,34 @@ def stripe_webhook():
                 _subscription_id)['items']['data'][0]['price']['id']
             
             user.subscription_id = _subscription_id
-            user.role = db.session.query(Production).filter_by(
-                price_id=price_id).first().role
+            price_item = db.session.query(Production).filter_by(
+                price_id=price_id).first()
+            user.role = price_item.role
             query = user.query
 
             delete_email_to_sendgrid_marketing(os.getenv('SENDGRID_FREE_TRIAL_LIST_ID'), user.email)
             add_email_to_sendgrid_marketing(os.getenv('SENDGRID_SUBSCRIPTION_USERS_LIST_ID'), user.username, user.email)
             
-            if user.role == 2:
+            if price_item.role == 2:
                 query = 500
                 tutors = 1
                 training_datas = 1
                 training_words = 100000
-            elif user.role == 3:
+            elif price_item.role== 3:
                 query = 3000
                 tutors = 5
                 training_datas = 3
                 training_words = 10000000
-            elif user.role == 4:
+            elif price_item.role == 4:
                 query = 10000
                 tutors = 10
                 training_datas = 10
                 training_words = 20000000
-            elif user.role == 8:
-                query = 10000
+            elif price_item.role == 7:
+                query = 30000
+                tutors = 10000
+                training_datas = 100000
+                training_words = 20000000
             user.query = query
             user.tutors = tutors
             user.training_datas = training_datas
