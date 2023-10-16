@@ -1,4 +1,4 @@
-import { BsFillPlayFill } from "react-icons/bs";
+import { BsFillPlayFill, BsCartPlus } from "react-icons/bs";
 import { AiOutlineUser, AiOutlineMenu } from "react-icons/ai";
 import { useState, useEffect, useRef } from "react";
 import Chatmodal from "./Chatmodal";
@@ -27,6 +27,7 @@ import {
     DialogFooter,
 } from "@material-tailwind/react";
 import SubscriptionModal from "./SubscriptionModal";
+import { loadStripe } from "@stripe/stripe-js";
 
 const Chat = () => {
     const location = useLocation();
@@ -207,6 +208,34 @@ const Chat = () => {
         });
     };
 
+    const getClientReferenceId = () => {
+        return (
+            (window.Rewardful && window.Rewardful.referral) ||
+            "checkout_" + new Date().getTime()
+        );
+    };
+
+    const handleMoreQuery = () => {
+        axios
+            .post(webAPI.create_checkout_query, {
+                id: user.id,
+                clientReferenceId: getClientReferenceId(),
+            })
+            .then(async (res) => {
+                // Load Stripe and redirect to the Checkout page
+                const stripe = await loadStripe(res.data.key);
+
+                const { error } = stripe.redirectToCheckout({
+                    sessionId: res.data.sessionId,
+                });
+                if (error) {
+                    console.error("Error:", error);
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    }
     return (
         <div>
             <Toaster />
@@ -266,6 +295,16 @@ const Chat = () => {
                         <MdOutlineUpdate className="w-4 h-4 md:w-6 md:h-6" />
                         <span className="md:text-base text-[12px] font-medium">
                             Upgrade
+                        </span>
+                    </Button>
+
+                    <Button
+                        onClick={handleMoreQuery}
+                        className="normal-case gap-1 flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
+                    >
+                        <BsCartPlus className="w-4 h-4 md:w-6 md:h-6" />
+                        <span className="md:text-base text-[12px] font-medium">
+                            Top-up Queries
                         </span>
                     </Button>
 

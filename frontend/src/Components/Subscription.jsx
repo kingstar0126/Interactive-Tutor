@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useState } from "react";
 import { Toaster } from "react-hot-toast";
+import { BsCartPlus } from "react-icons/bs";
 import { AiOutlineTrophy, AiOutlineMenu } from "react-icons/ai";
 import { getUseraccount } from "../redux/actions/userAction";
 import { useSelector, useDispatch } from "react-redux";
@@ -14,6 +15,7 @@ import { Slider, Button } from "@material-tailwind/react";
 import SubscriptionModal from "./SubscriptionModal";
 import { setOpenSidebar } from "../redux/actions/locationAction";
 import { useNavigate } from "react-router-dom";
+import { loadStripe } from "@stripe/stripe-js";
 
 const Subscription = () => {
     const dispatch = useDispatch();
@@ -97,6 +99,34 @@ const Subscription = () => {
                 .catch((error) => console.log(error));
         }
     };
+    const getClientReferenceId = () => {
+        return (
+            (window.Rewardful && window.Rewardful.referral) ||
+            "checkout_" + new Date().getTime()
+        );
+    };
+
+    const handleMoreQuery = () => {
+        axios
+            .post(webAPI.create_checkout_query, {
+                id: user.id,
+                clientReferenceId: getClientReferenceId(),
+            })
+            .then(async (res) => {
+                // Load Stripe and redirect to the Checkout page
+                const stripe = await loadStripe(res.data.key);
+
+                const { error } = stripe.redirectToCheckout({
+                    sessionId: res.data.sessionId,
+                });
+                if (error) {
+                    console.error("Error:", error);
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    }
     return (
         <div className="w-full h-full">
             <Toaster />
@@ -161,6 +191,15 @@ const Subscription = () => {
                         <MdOutlineUpdate className="w-4 h-4 md:w-6 md:h-6" />
                         <span className="md:text-base text-[12px] font-medium">
                             Upgrade
+                        </span>
+                    </Button>
+                    <Button
+                        onClick={handleMoreQuery}
+                        className="normal-case gap-1 flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
+                    >
+                        <BsCartPlus className="w-4 h-4 md:w-6 md:h-6" />
+                        <span className="md:text-base text-[12px] font-medium">
+                            Top-up Queries
                         </span>
                     </Button>
                 </div>
