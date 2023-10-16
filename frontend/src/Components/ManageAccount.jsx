@@ -1,4 +1,5 @@
 import axios from "axios";
+import { BsCartPlus } from "react-icons/bs";
 import { webAPI } from "../utils/constants";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
@@ -16,6 +17,7 @@ import { MdOutlineUpdate } from "react-icons/md";
 import { setOpenSidebar } from "../redux/actions/locationAction";
 import SubscriptionModal from "./SubscriptionModal";
 import { Button } from "@material-tailwind/react";
+import { loadStripe } from "@stripe/stripe-js";
 
 const ManageAccount = () => {
     const [username, setUsername] = useState("");
@@ -124,6 +126,35 @@ const ManageAccount = () => {
             });
     }, []);
 
+    const getClientReferenceId = () => {
+        return (
+            (window.Rewardful && window.Rewardful.referral) ||
+            "checkout_" + new Date().getTime()
+        );
+    };
+
+    const handleMoreQuery = () => {
+        axios
+            .post(webAPI.create_checkout_query, {
+                id: user.id,
+                clientReferenceId: getClientReferenceId(),
+            })
+            .then(async (res) => {
+                // Load Stripe and redirect to the Checkout page
+                const stripe = await loadStripe(res.data.key);
+
+                const { error } = stripe.redirectToCheckout({
+                    sessionId: res.data.sessionId,
+                });
+                if (error) {
+                    console.error("Error:", error);
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    }
+
     return (
         <div className="w-full h-full">
             <Toaster />
@@ -186,6 +217,15 @@ const ManageAccount = () => {
                         <MdOutlineUpdate className="w-4 h-4 md:w-6 md:h-6" />
                         <span className="md:text-base text-[12px] font-medium">
                             Upgrade
+                        </span>
+                    </Button>
+                    <Button
+                        onClick={handleMoreQuery}
+                        className="normal-case gap-1 flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
+                    >
+                        <BsCartPlus className="w-4 h-4 md:w-6 md:h-6" />
+                        <span className="md:text-base text-[12px] font-medium">
+                            Top-up Queries
                         </span>
                     </Button>
                 </div>}
