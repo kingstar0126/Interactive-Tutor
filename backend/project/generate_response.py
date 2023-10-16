@@ -96,7 +96,7 @@ def generate_message(query, behavior, temp, model, chat, template):
     docsearch = Pinecone.from_existing_index(
         index_name=PINECONE_INDEX_NAME, embedding=embeddings)
     # _query = query
-    # docs = docsearch.similarity_search_with_score(query, filter={"chat": str(chat)})
+    docs = docsearch.similarity_search_with_score(" ", filter={"chat": str(chat)})
     # print(docs)
     qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=docsearch.as_retriever(search_kwargs={'filter': {"chat": str(chat)}}), chain_type_kwargs=chain_type_kwargs)
     

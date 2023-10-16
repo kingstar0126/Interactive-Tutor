@@ -199,7 +199,7 @@ def send_message():
             response = analyze_image_from_bytes(image_bytes, feature_types)
             if response.text_annotations:
                 text += f"Image{index+1}: " + response.text_annotations[0].description + "\n"
-    print("\n\n", text)
+    # print("\n\n", text)
     current_message = db.session.query(Message).filter_by(uuid=uuid).first()
     if current_message is None:
         return jsonify({
@@ -216,14 +216,18 @@ def send_message():
     user_check = db.session.query(User).filter_by(id=invite_account.user_id).first() if invite_account else None
     user = user_check if user_check and user_check.role == 7 else user
 
-    if user and user.query - user.usage == 0:
+    if user and user.query - user.usage <= 0:
         return jsonify({
             'success': False,
             'code': 401,
             'message': 'Insufficient queries remaining!',
         })
-
-    user.usage += 1
+    if model == '1':
+        user.usage += 1
+    elif model == '2':
+        user.usage += 2
+    elif model == '3':
+        user.usage += 4
 
     temp = current_message.creativity
     history = json.loads(current_message.message)

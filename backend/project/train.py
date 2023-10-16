@@ -63,7 +63,7 @@ def compare_token_words(ct, chatbot):
     current_chat = db.session.query(Chat).filter_by(uuid=chatbot).first()
     user = db.session.query(User).filter_by(id=current_chat.user_id).first()
 
-    if user.role == 1:
+    if user.role == 1 or user.role == 8:
         return True
 
     elif ct >= user.training_words:
@@ -93,7 +93,7 @@ def parse_pdf(file: BytesIO) -> List[str]:
     full_text = ""
     for page in pdf.pages:
         text = page.extract_text()
-        print(text)
+        # print(text)
         # # Merge hyphenated words
         # text = re.sub(r"(\w+)-\n(\w+)", r"\1\2", text)
         # # Fix newlines in the middle of sentences
@@ -111,7 +111,7 @@ def parse_csv(file):
     string_data = str(data)
     string_data = correct_grammar(string_data)
     text = []
-    print(string_data)
+    # print(string_data)
     text.append(string_data)
     return text
 
@@ -295,7 +295,7 @@ def compare_role_user(chatbot):
     traindata = json.loads(current_chat.train)
     ct = len(traindata)
     user = db.session.query(User).filter_by(id=current_chat.user_id).first()
-    if not user.role == 1:
+    if not user.role == 1 or user.role == 8:
         if ct >= user.training_datas:
             return False
     return True
@@ -334,7 +334,8 @@ def create_train_url():
     url = request.json['url']
     chatbot = request.json['chatbot']
     if compare_role_user(chatbot):
-        data = web_scraping(url, 1)
+        data = web_scraping(url, 0)
+        # print(data)
         if data == False:
             return jsonify({
                 'success': False,
@@ -438,7 +439,7 @@ def create_train_file():
             if compare_role_user(chatbot):
                 if compare_token_words(ct, chatbot):
                     result = text_to_docs(output, filename, chatbot)
-                    print(result)
+                    # print(result)
                     trainid = create_train(filename, 'file', True, chatbot)
                     if (trainid == False):
                         return jsonify({

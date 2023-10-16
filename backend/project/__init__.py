@@ -164,9 +164,9 @@ def delete_email_to_sendgrid_marketing(list_id, email):
         query_params=params
     )
 
-    print(response.status_code)
-    print(response.body)
-    print(response.headers)
+    # print(response.status_code)
+    # print(response.body)
+    # print(response.headers)
 
 def get_sendgrid_list_ids():
     sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
@@ -177,6 +177,6 @@ def get_sendgrid_list_ids():
         query_params=params
     )
 
-    print(response.status_code)
-    print(response.body)
-    print(response.headers)
+    # print(response.status_code)
+    # print(response.body)
+    # print(response.headers)

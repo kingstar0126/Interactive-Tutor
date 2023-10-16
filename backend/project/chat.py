@@ -85,7 +85,7 @@ def add_chat():
     user = db.session.query(User).filter_by(id=user_id).first()
     ct = db.session.query(Chat).filter_by(user_id=user_id).count() + 1
 
-    if not user.role == 1:
+    if not user.role == 1 or user.role == 8:
         if ct > user.tutors:
             return jsonify({
                 'success': False,

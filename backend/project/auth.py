@@ -67,6 +67,8 @@ def compare_month():
                 user.query = 3000
             elif user.role == 4:
                 user.query = 10000
+            elif user.role == 8:
+                user.query = 30000
             db.session.commit()
 
 
@@ -829,6 +831,6 @@ def closeAccunt():
     msg = Message('Customer wants to delete their account !!!', sender=os.getenv('MAIL_USERNAME'),
                   recipients=[os.getenv('MAIL_USERNAME')])
     msg.html = render_template(
-        'send_custom_plan.html', username=user.username, email=user.email, phone=user.contact)
+        'delete_account.html', username=user.username, email=user.email, phone=user.contact)
     mail.send(msg)
     return jsonify({'success': True, 'code': 200, 'message': 'We have sent your request to the manager.'})

@@ -230,7 +230,7 @@ def stripe_webhook():
             training_words = 100000
         elif user.role == 3:
             query = 3000
-            tutors = 3
+            tutors = 5
             training_datas = 3
             training_words = 10000000
         elif user.role == 4:
@@ -238,6 +238,8 @@ def stripe_webhook():
             tutors = 10
             training_datas = 10
             training_words = 20000000
+        elif user.role == 8:
+            query = 10000
         user.query = query
         user.tutors = tutors
         user.training_datas = training_datas

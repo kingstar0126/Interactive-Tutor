@@ -271,6 +271,29 @@ const NewChat = () => {
         }
     };
 
+    const handleSubmitIcon = async (event) => {
+        if (spinner === false) {
+            let id = chatbot;
+            let _message = message.trim();
+            if (_message === "") {
+                return;
+            }
+            let human = { role: "human", content: _message };
+            if (image.length) {
+                const imagesrc = image.map(item => URL.createObjectURL(item));
+                const human = { role: "human", content: _message, images: imagesrc };
+                setChathistory((prevHistory) => [...prevHistory, human]);
+            } else {
+                setChathistory((prevHistory) => [...prevHistory, human]);
+            }
+
+            await sendMessage(id, _message);
+
+            event.preventDefault();
+            setMessage("");
+        }
+    }
+
     const sendMessage = async (id, _message) => {
         let { behaviormodel, train, model } = chat;
         if (!id || !_message) {
@@ -704,7 +727,7 @@ const NewChat = () => {
                                     </div>
 
                                     <span
-                                        onClick={handleSubmit}
+                                        onClick={handleSubmitIcon}
                                         className="absolute right-4 flex items-center"
                                     >
                                         <BsSendPlus className="hover:scale-125 transition-transform duration-200" />
