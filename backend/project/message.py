@@ -225,9 +225,9 @@ def send_message():
     if model == '1':
         user.usage += 1
     elif model == '2':
-        user.usage += 2
+        user.usage += 3
     elif model == '3':
-        user.usage += 4
+        user.usage += 15
 
     temp = current_message.creativity
     history = json.loads(current_message.message)
