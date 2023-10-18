@@ -154,7 +154,7 @@ const ChatmodalTrain = (props) => {
         >
             <DialogHeader className="px-8 pt-8 pb-6">
                 <span className="text-[32px] leading-12 font-semibold text-[--site-card-icon-color]">
-                    Add provider
+                    Add Training Data
                 </span>
             </DialogHeader>
             <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium flex flex-col h-[30rem]">
@@ -163,7 +163,7 @@ const ChatmodalTrain = (props) => {
                         <div className="flex flex-col gap-6 px-8 py-5">
                             <div className="flex flex-col items-start gap-2">
                                 <label className="text-base font-medium">
-                                    Context behavior (Required)
+                                    Data Type
                                 </label>
                                 <Select
                                     styles={customStyles}
@@ -207,7 +207,7 @@ const ChatmodalTrain = (props) => {
                                     onChange={(e) => {
                                         SetLabel(e.target.value);
                                     }}
-                                    placeholder="AI-Tutor name"
+                                    placeholder="Data Name"
                                     className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black placeholder:opacity-50"
                                 />
                                 <p className="text-start">

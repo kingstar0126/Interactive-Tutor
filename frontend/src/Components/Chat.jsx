@@ -1,4 +1,4 @@
-import { BsFillPlayFill } from "react-icons/bs";
+import { BsFillPlayFill, BsCartPlus } from "react-icons/bs";
 import { AiOutlineUser, AiOutlineMenu } from "react-icons/ai";
 import { useState, useEffect, useRef } from "react";
 import Chatmodal from "./Chatmodal";
@@ -9,7 +9,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { webAPI } from "../utils/constants";
 import { useNavigate } from "react-router-dom";
 import { Outlet, useLocation } from "react-router-dom";
-import { getUserState } from "../redux/actions/userAction";
+import { getUseraccount } from "../redux/actions/userAction";
 import { setquery } from "../redux/actions/queryAction";
 import ReactSpeedometer from "react-d3-speedometer";
 import { setOpenSidebar } from "../redux/actions/locationAction";
@@ -27,6 +27,7 @@ import {
     DialogFooter,
 } from "@material-tailwind/react";
 import SubscriptionModal from "./SubscriptionModal";
+import { loadStripe } from "@stripe/stripe-js";
 
 const Chat = () => {
     const location = useLocation();
@@ -51,6 +52,7 @@ const Chat = () => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [open, setOpen] = useState(false);
     const [isopenModal, setIsOpenModal] = useState(false);
+    const [check, setCheck] = useState(true);
     const descroption = [
         {
             title: "Welcome to Interactive Tutor",
@@ -163,8 +165,19 @@ const Chat = () => {
         setIsPlaying(!video.paused);
     };
     useEffect(() => {
+        axios
+            .post(webAPI.checkUserInvite, { id: user.id })
+            .then(res => {
+                if (res.data.success) {
+                    setCheck(false)
+                }
+                else {
+                    setCheck(true)
+                }
+            })
+            .catch(err => console.error(err))
         const fetchData = async () => {
-            getUserState(dispatch, { id: user.id });
+            getUseraccount(dispatch, { id: user.id });
             setquery(dispatch, user.query);
             if (user.role === 5) {
                 setTrial(user.days);
@@ -195,19 +208,47 @@ const Chat = () => {
         });
     };
 
+    const getClientReferenceId = () => {
+        return (
+            (window.Rewardful && window.Rewardful.referral) ||
+            "checkout_" + new Date().getTime()
+        );
+    };
+
+    const handleMoreQuery = () => {
+        axios
+            .post(webAPI.create_checkout_query, {
+                id: user.id,
+                clientReferenceId: getClientReferenceId(),
+            })
+            .then(async (res) => {
+                // Load Stripe and redirect to the Checkout page
+                const stripe = await loadStripe(res.data.key);
+
+                const { error } = stripe.redirectToCheckout({
+                    sessionId: res.data.sessionId,
+                });
+                if (error) {
+                    console.error("Error:", error);
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    }
     return (
         <div>
             <Toaster />
             <div className="flex md:items-center items-end justify-between w-full md:h-[100px] md:px-10 from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] md:border-b-[--site-chat-header-border] md:border bg-gradient-to-r px-4 py-2 max-h-min gap-1">
                 <div className="hidden md:flex gap-2 mt-9 mb-8 text-[--site-card-icon-color]">
                     <AiOutlineUser className="w-8 h-8" />
-                    <span className="text-2xl font-semibold">Tutors</span>
+                    <span className="text-2xl font-semibold">AI Tutors</span>
                 </div>
                 <AiOutlineMenu
                     onClick={handleOpenSidebar}
                     className="w-6 h-6 mb-1 md:hidden"
                 />
-                <div className="flex items-end justify-end md:mt-[27px] md:mb-[30px]">
+                {check && <div className="flex items-end justify-end md:mt-[27px] md:mb-[30px]">
                     {_chat && _chat.organization && (
                         <div className="xl:flex flex-col items-start justify-center mr-2 p-2 bg-[--site-warning-text-color] rounded shadow-2xl hidden">
                             <p>
@@ -258,6 +299,16 @@ const Chat = () => {
                     </Button>
 
                     <Button
+                        onClick={handleMoreQuery}
+                        className="normal-case gap-1 flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
+                    >
+                        <BsCartPlus className="w-4 h-4 md:w-6 md:h-6" />
+                        <span className="md:text-base text-[12px] font-medium">
+                            Top-up Queries
+                        </span>
+                    </Button>
+
+                    <Button
                         className="p-2 flex justify-center items-center bg-[--site-card-icon-color] rounded text-[--site-logo-text-color] pt-3 ml-2 opacity-100"
                         onClick={() => setIsOpen(!isOpen)}
                     >
@@ -267,11 +318,11 @@ const Chat = () => {
                             <MdArrowDropDown className="w-3 h-3 md:w-5 md:h-5 hover:scale-105" />
                         )}
                     </Button>
-                </div>
+                </div>}
             </div>
             <div className="flex md:hidden gap-2 text-[--site-card-icon-color] pt-8 px-10">
                 <AiOutlineUser className="w-8 h-8" />
-                <span className="text-2xl font-semibold">Tutors</span>
+                <span className="text-2xl font-semibold">AI Tutors</span>
             </div>
             <div className="flex flex-col w-full px-5 pt-8 pb-16 md:gap-8 md:px-10">
                 <div className={showDescription}>

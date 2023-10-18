@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { BsSendPlus } from "react-icons/bs";
+import React, { useState, useRef, useEffect } from "react";
+import { BsSendPlus, BsFillImageFill } from "react-icons/bs";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
 import { useSelector, useDispatch } from "react-redux";
@@ -9,12 +9,16 @@ import { Scrollbar } from "react-scrollbars-custom";
 import { dracula, CopyBlock } from "react-code-blocks";
 import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
-import { getUserState } from "../redux/actions/userAction";
-import { setquery } from "../redux/actions/queryAction";
+import { getquery } from "../redux/actions/queryAction";
 import { useLocation } from "react-router-dom";
 import ReactLoading from "react-loading";
-import { Grid } from  'react-loader-spinner'
-import { Button } from "@material-tailwind/react";
+import { Grid } from 'react-loader-spinner'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeMathjax from 'rehype-mathjax';
+import remarkMath from 'remark-math';
+import rehypeRaw from 'rehype-raw'
+import { Dialog, DialogBody } from "@material-tailwind/react";
 
 const NewChat = () => {
     const navigate = useNavigate();
@@ -33,10 +37,16 @@ const NewChat = () => {
     const ai_background = useRef(null);
     const newchat = useRef(null);
     const messagesEndRef = useRef(null);
+    const imageInput = useRef(null);
     let location = useLocation();
     const [message, setMessage] = useState("");
+    const [streamData, setStreamData] = useState('');
     const [loading, setLoading] = useState(false);
     const [spinner, setSpinner] = useState(false);
+    const [image, setImage] = useState([]);
+    const [imagesrc, setImagesrc] = useState(null);
+    const [state, setState] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const chatState = useSelector((state) => state.chat.chat);
     const chat = chatState && JSON.parse(chatState) || {};
     const chatbot = useSelector((state) => state.chat.chatbot);
@@ -46,6 +56,10 @@ const NewChat = () => {
         if (type === "error") {
             toast.error(message);
         }
+    };
+
+    const handleImageClick = () => {
+        setIsModalOpen(!isModalOpen);
     };
 
     useEffect(() => {
@@ -59,7 +73,6 @@ const NewChat = () => {
                     .get("https://geolocation-db.com/json/")
                     .then((res) => {
                         let country = res.data.country_name;
-                        // getUserState(dispatch, { id: chat.user_id });
                         new_chat["country"] = country;
                         setchatbot(dispatch, new_chat);
                         setLoading(false);
@@ -233,37 +246,53 @@ const NewChat = () => {
             ai_background.current.style["font-size"] =
                 chat.chat_logo.ai_size + "px";
         }
-    }, [chathistory]);
+    }, [chathistory, streamData]);
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         if (!event.shiftKey && event.keyCode === 13 && spinner === false) {
             let id = chatbot;
             let _message = message.trim();
             if (_message === "") {
                 return;
             }
-            setChathistory([
-                ...chathistory,
-                { role: "human", content: _message },
-            ]);
-            sendMessage(id, _message);
+            let human = { role: "human", content: _message };
+            if (image.length) {
+                const imagesrc = image.map(item => URL.createObjectURL(item));
+                const human = { role: "human", content: _message, images: imagesrc };
+                setChathistory((prevHistory) => [...prevHistory, human]);
+            } else {
+                setChathistory((prevHistory) => [...prevHistory, human]);
+            }
+
+            await sendMessage(id, _message);
 
             event.preventDefault();
             setMessage("");
         }
     };
 
-    const handleSubmitmessage = () => {
-        let id = chatbot;
-        let _message = message;
-        if (_message === "") {
-            return;
-        }
-        setChathistory([...chathistory, { role: "human", content: _message }]);
-        sendMessage(id, _message);
+    const handleSubmitIcon = async (event) => {
+        if (spinner === false) {
+            let id = chatbot;
+            let _message = message.trim();
+            if (_message === "") {
+                return;
+            }
+            let human = { role: "human", content: _message };
+            if (image.length) {
+                const imagesrc = image.map(item => URL.createObjectURL(item));
+                const human = { role: "human", content: _message, images: imagesrc };
+                setChathistory((prevHistory) => [...prevHistory, human]);
+            } else {
+                setChathistory((prevHistory) => [...prevHistory, human]);
+            }
 
-        setMessage("");
-    };
+            await sendMessage(id, _message);
+
+            event.preventDefault();
+            setMessage("");
+        }
+    }
 
     const sendMessage = async (id, _message) => {
         let { behaviormodel, train, model } = chat;
@@ -271,24 +300,70 @@ const NewChat = () => {
             return;
         }
         setSpinner(true)
-        await axios
-            .post(webAPI.sendchat, {
-                id,
-                _message,
-                behaviormodel,
-                train,
-                model,
-            })
-            .then((res) => {
-                if (!res.data.success) {
-                    notification("error", res.data.message);
-                } else {
-                    setquery(dispatch, res.data.query);
-                    receiveMessage(res.data.data);
+        setState(true)
+        // Create a new FormData to send the necessary data
+        const formData = new FormData();
+        formData.append('id', id);
+        formData.append('_message', _message);
+        formData.append('behaviormodel', behaviormodel);
+        formData.append('train', train);
+        formData.append('model', model);
+        if (image.length) {
+            image.map(item => {
+                formData.append('image', item);
+            });
+            setImage([]);
+        }
+
+        // Send the formData to the streaming API
+        fetch(webAPI.sendchat, {
+            // mode: 'no-cors',
+            method: 'POST',
+            body: formData
+        })
+            .then(async (response) => {
+                let res = ''
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        // Handle 404 error (Not found)
+                        notification("error", "Not found tutor!")
+                    } else if (response.status === 401) {
+                        // Handle 401 error (Unauthorized)
+                        notification("error", "Insufficient queries remaining!")
+                    } else if (response.status === 500) {
+                        // Handle 500 error (Internal server error)
+                        notification("error", "The response is too long for this model. Please upgrade your model or enter a different prompt!")
+                    } else {
+                        // Handle other error cases
+                        notification("error", "The response is too long for this model. Please upgrade your model or enter a different prompt!")
+                    }
+                    throw new Error(`Network response was not ok - ${response.status}`);
                 }
-                setSpinner(false)
+                // Read the response stream
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                await reader.read().then(function process({ done, value }) {
+                    if (done) {
+                        setStreamData('')
+                        receiveMessage(res);
+                        console.log(res)
+                        setSpinner(false);
+                        return;
+                    }
+                    setState(false);
+                    let data = decoder.decode(value);
+                    res += data;
+                    setStreamData(res);
+
+                    return reader.read().then(process);
+                });
+                getquery(dispatch, { id: chatbot })
             })
-            .catch((err) => setSpinner(false));
+            .catch((error) => {
+                console.error('There has been a problem with your fetch operation:', error);
+                setSpinner(false);
+            });
     };
 
     const receiveMessage = (message) => {
@@ -298,11 +373,34 @@ const NewChat = () => {
         ]);
     };
 
+    const handleImageUploadClick = (e) => {
+        e.preventDefault();
+        imageInput.current?.click();
+    };
+
+    const handleUploadImage = (e) => {
+        if (e.target.files) {
+            const files = Array.from(e.target.files);
+            setImage(files)
+        }
+        e.target.value = null;
+    };
+
+    const handleRemoveImage = (index) => {
+        setImage((prevState) => {
+            if (prevState.length === 1) {
+                return [];
+            } else {
+                return prevState.filter((img, imgIndex) => imgIndex !== index);
+            }
+        });
+    };
+
     return (
         <div
-        style={{
-            background: `linear-gradient(to bottom right, ${chat?.chat_logo?.bg || '#ffffff00'}, transparent)`,
-        }}
+            style={{
+                background: `linear-gradient(to bottom right, ${chat?.chat_logo?.bg || '#ffffff00'}, transparent)`,
+            }}
             className="w-full h-full rounded-xl"
         >
             {loading && (
@@ -315,7 +413,7 @@ const NewChat = () => {
                         delay={15}
                     ></ReactLoading>
                     <span className="text-[--site-card-icon-color]">
-                        Creating AI Tutor...
+                        loading ...
                     </span>
                 </div>
             )}
@@ -369,8 +467,28 @@ const NewChat = () => {
                                                 />
                                                 <div
                                                     name="human"
-                                                    className="flex w-full p-2 whitespace-break-spaces"
+                                                    className="flex flex-col w-full p-2 whitespace-break-spaces"
                                                 >
+
+                                                    {data.images && data.images.length ? <div className="flex flex-wrap">{data.images.map((item) => {
+                                                        return <>
+                                                            <img
+                                                                src={item}
+                                                                alt="image"
+                                                                className="w-[100px] h-[100px]"
+                                                                onClick={() => { setImagesrc(item); handleImageClick(); }}
+                                                            />
+                                                            <Dialog size="lg" open={isModalOpen} handler={handleImageClick}>
+                                                                <DialogBody className="h-[30rem] flex items-center justify-center">
+                                                                    <img
+                                                                        src={imagesrc}
+                                                                        alt="image"
+                                                                        className={`${isModalOpen ? 'max-h-[28rem] max-w-[28rem]' : ''}`}
+                                                                    />
+                                                                </DialogBody>
+                                                            </Dialog>
+                                                        </>
+                                                    })}</div> : <></>}
                                                     <span>{data.content}</span>
                                                 </div>
                                             </div>
@@ -392,48 +510,65 @@ const NewChat = () => {
                                                     name="ai"
                                                     className="flex flex-col w-full p-2 whitespace-break-spaces"
                                                 >
-                                                    {data.content
-                                                        .split("```")
-                                                        .map((item, index) => {
-                                                            if (
-                                                                index === 0 ||
-                                                                index % 2 === 0
-                                                            ) {
+                                                    <ReactMarkdown
+                                                        remarkPlugins={[remarkGfm, remarkMath]}
+                                                        rehypePlugins={[rehypeMathjax, rehypeRaw]}
+                                                        children={data.content}
+                                                        className="whitespace-normal"
+                                                        components={{
+                                                            code({ inline, className, children, ...props }) {
+                                                                const match = /language-(\w+)/.exec(className || '')
+                                                                if (!inline && match) {
+                                                                    // remove the newline character at the end of children, if it exists
+                                                                    const codeString = String(children).replace(/\n$/, '');
+
+                                                                    return (
+                                                                        <CopyBlock
+                                                                            text={codeString}
+                                                                            language={match[1]}
+                                                                            showLineNumbers={false}
+                                                                            wrapLongLines
+                                                                            theme={dracula}
+                                                                            {...props}
+                                                                        />
+                                                                    );
+                                                                }
+                                                                return <code className={className} {...props}>{children}</code>;
+                                                            },
+                                                            table({ children, ...props }) {
                                                                 return (
-                                                                    <span
-                                                                        key={
-                                                                            index
-                                                                        }
-                                                                    >
-                                                                        {item}
-                                                                    </span>
+                                                                    <table style={{ borderCollapse: 'collapse', width: '100%', fontFamily: 'Arial, sans-serif', fontSize: '14px' }} {...props}>
+                                                                        {children}
+                                                                    </table>
                                                                 );
-                                                            } else {
+                                                            },
+                                                            // Add CSS styles to the table row
+                                                            tr({ children, ...props }) {
+                                                                return <tr style={{ backgroundColor: '#f8f8f8' }} {...props}>{children}</tr>;
+                                                            },
+                                                            // Add CSS styles to the table cell
+                                                            td({ children, ...props }) {
+                                                                return <td style={{ padding: '8px', border: '1px solid #ddd' }} {...props}>{children}</td>;
+                                                            },
+                                                            th({ children, ...props }) {
+                                                                return <th style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold', textAlign: 'left' }} {...props}>{children}</th>;
+                                                            },
+                                                            a({ href, children, ...props }) {
                                                                 return (
-                                                                    <CopyBlock
-                                                                        key={
-                                                                            index
-                                                                        }
-                                                                        text={
-                                                                            item
-                                                                        }
-                                                                        language={
-                                                                            "javascript"
-                                                                        }
-                                                                        showLineNumbers={
-                                                                            false
-                                                                        }
-                                                                        wrapLongLines={
-                                                                            true
-                                                                        }
-                                                                        theme={
-                                                                            dracula
-                                                                        }
-                                                                        wrapLines
-                                                                    />
+                                                                    <a style={{ color: '#007bff', textDecoration: 'none' }} href={href} target="_blank" rel="noopener noreferrer" {...props}>
+                                                                        {children}
+                                                                    </a>
                                                                 );
-                                                            }
-                                                        })}
+                                                            },
+                                                            li({ children, ...props }) {
+                                                                // If children is a string, apply the transformation
+                                                                if (typeof children === 'string') {
+                                                                    children = children.replace(/(\d+\.)\s*\n\s*/g, "$1 ").trim();
+                                                                }
+                                                                return <li style={{ marginBottom: '0.25em' }} {...props}>{children}</li>;
+                                                            },
+                                                        }}
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
@@ -454,7 +589,54 @@ const NewChat = () => {
                                             name="ai"
                                             className="flex flex-col w-full p-2 whitespace-break-spaces"
                                         >
-                                            <Grid
+                                            <ReactMarkdown
+                                                remarkPlugins={[remarkGfm, remarkMath]}
+                                                rehypePlugins={[rehypeMathjax]}
+                                                children={streamData}
+                                                components={{
+                                                    code({ inline, className, children, ...props }) {
+                                                        const match = /language-(\w+)/.exec(className || '')
+                                                        if (!inline && match) {
+                                                            const codeString = String(children).replace(/\n$/, '');
+                                                            return (
+                                                                <CopyBlock
+                                                                    text={codeString}
+                                                                    language={match[1]}
+                                                                    showLineNumbers={false}
+                                                                    wrapLongLines
+                                                                    theme={dracula}
+                                                                    {...props}
+                                                                />
+                                                            );
+                                                        }
+                                                        return <code className={className} {...props}>{children}</code>;
+                                                    },
+                                                    table({ children, ...props }) {
+                                                        return (
+                                                            <table style={{ borderCollapse: 'collapse', width: '100%', fontFamily: 'Arial, sans-serif', fontSize: '14px' }} {...props}>
+                                                                {children}
+                                                            </table>
+                                                        );
+                                                    },
+                                                    tr({ children, ...props }) {
+                                                        return <tr style={{ backgroundColor: '#f8f8f8' }} {...props}>{children}</tr>;
+                                                    },
+                                                    td({ children, ...props }) {
+                                                        return <td style={{ padding: '8px', border: '1px solid #ddd' }} {...props}>{children}</td>;
+                                                    },
+                                                    th({ children, ...props }) {
+                                                        return <th style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold', textAlign: 'left' }} {...props}>{children}</th>;
+                                                    },
+                                                    a({ href, children, ...props }) {
+                                                        return (
+                                                            <a style={{ color: '#007bff', textDecoration: 'none' }} href={href} target="_blank" rel="noopener noreferrer" {...props}>
+                                                                {children}
+                                                            </a>
+                                                        );
+                                                    }
+                                                }}
+                                            />
+                                            {state && <Grid
                                                 height="50"
                                                 width="50"
                                                 color="#4fa94d"
@@ -463,7 +645,7 @@ const NewChat = () => {
                                                 wrapperStyle={{}}
                                                 wrapperClass=""
                                                 visible={true}
-                                            />
+                                            />}
                                         </div>
                                     </div>
                                 </div>}
@@ -499,29 +681,56 @@ const NewChat = () => {
                                     {chat.chat_button.button3_text}
                                 </a>
                             </div>
-
+                            <input type="file" className="hidden" multiple ref={imageInput} onChange={handleUploadImage} accept=".jpg,.jpeg,.png" />
                             <div className="flex items-center w-full divide-x-2 sm:w-4/5">
-                                <div className="flex items-center justify-end w-full text-black">
-                                    <textarea
-                                        type="text"
-                                        rows="3"
-                                        cols="50"
-                                        value={message}
-                                        onChange={(e) =>
-                                            setMessage(e.target.value)
-                                        }
-                                        onKeyDown={handleSubmit}
-                                        className="w-full rounded-md border border-[--site-chat-header-border] bg-[--site-main-newchat-input-color] text-[--site-card-icon-color] block text-sm p-2.5 pr-9"
-                                        placeholder="Type message"
-                                    />
+                                {/* <div className="flex justify-center items-center p-2 cursor-pointer hover:scale-105 transition-transform duration-200">
+                                    <span onClick={handleImageUploadClick}>
+                                        <BsFillImageFill className="hover:scale-125 transition-transform duration-200" />
+                                    </span>
+                                    <input type="file" className="hidden" ref={imageInput} onChange={handleUploadImage} accept=".jpg,.jpeg,.png" />
+                                </div> */}
+                                <div className="flex items-center justify-end w-full text-black relative rounded-md border border-[--site-chat-header-border] bg-[--site-main-newchat-input-color]">
 
                                     <span
-                                        onClick={() => {
-                                            handleSubmitmessage();
-                                        }}
-                                        className="absolute pr-4"
+                                        onClick={handleImageUploadClick}
+                                        className="absolute left-4 flex items-center"
                                     >
-                                        <BsSendPlus />
+                                        <BsFillImageFill className="hover:scale-125 transition-transform duration-200" />
+                                    </span>
+                                    <div className="flex flex-col w-full bg-white rounded-md p-2.5 px-9">
+                                        <textarea
+                                            type="text"
+                                            rows="2"
+                                            cols="50"
+                                            value={message}
+                                            onChange={(e) =>
+                                                setMessage(e.target.value)
+                                            }
+                                            onKeyDown={handleSubmit}
+                                            className="w-full rounded-md text-[--site-card-icon-color] block text-sm focus:outline-none"
+                                            placeholder="Type message"
+                                        />
+                                        <div className="flex flex-wrap gap-2">
+                                            {image && image.length > 0 && image.map((item, index) => {
+                                                return (
+                                                    <div className="relative">
+                                                        <img src={URL.createObjectURL(item)} alt="file" className="w-10 h-10" />
+                                                        <button
+                                                            onClick={() => handleRemoveImage(index)}
+                                                            className="absolute w-3 h-3 top-0 right-0 bg-red-500 text-white rounded-full"
+                                                        >
+                                                        </button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    <span
+                                        onClick={handleSubmitIcon}
+                                        className="absolute right-4 flex items-center"
+                                    >
+                                        <BsSendPlus className="hover:scale-125 transition-transform duration-200" />
                                     </span>
                                 </div>
                             </div>

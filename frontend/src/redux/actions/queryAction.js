@@ -6,11 +6,11 @@ export const getquery = (dispatch, data) => {
     axios
         .post(webAPI.getquery, data)
         .then((res) => {
-            console.log(res.data.query - res.data.usage);
-            dispatch({
-                type: SET_QUERY,
-                payload: res.data.query - res.data.usage,
-            });
+            if (res.data.success)
+                dispatch({
+                    type: SET_QUERY,
+                    payload: res.data.query - res.data.usage,
+                });
         })
         .catch((err) => {
             console.error(err);

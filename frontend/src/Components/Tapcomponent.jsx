@@ -117,14 +117,14 @@ export default function Example() {
                                     className="normal-case bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2 text-black text-base"
                                 >
                                     <AiFillFolderOpen />
-                                    Open Chat
+                                    Open
                                 </Button>
                                 <Button
                                     onClick={handleEmbedding}
                                     className="normal-case bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2 text-black text-base"
                                 >
                                     <SiHiveBlockchain />
-                                    Embedded Chat
+                                    Embed or Share
                                 </Button>
                             </div>
                             {chat && chat.inviteId === null && <Button
@@ -132,7 +132,7 @@ export default function Example() {
                                 onClick={handleUpdate}
                             >
                                 <MdUpdate className="w-6 h-6" />
-                                Update Chat
+                                Update
                             </Button>}
                         </div>
                     </div>

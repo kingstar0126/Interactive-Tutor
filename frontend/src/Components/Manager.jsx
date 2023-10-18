@@ -28,6 +28,7 @@ const Manager = () => {
     const [userTutorCount, setUserTutorCount] = useState(0);
     const [userTrainCount, setUserTrainCount] = useState(0);
     const [userWordCount, setUserWordCount] = useState(0);
+    const [search, setSearch] = useState("");
     const chatState = useSelector((state) => state.chat.chat);
     const _chat = chatState && JSON.parse(chatState) || {};
     const query = useSelector((state) => state.query.query);
@@ -51,7 +52,7 @@ const Manager = () => {
         if (user.role === 5) {
             setTrial(user.days);
         }
-        if (user.role !== 1 ) {
+        if (user.role !== 1) {
             navigate(-1)
         }
         getAlluser();
@@ -59,9 +60,10 @@ const Manager = () => {
 
     const getAlluser = () => {
         axios
-            .post(webAPI.getallusers, { id: user.id })
+            .post(webAPI.getallusers, { id: user.id, search })
             .then((res) => {
-                setData(res.data.data);
+                let data = res.data.data.filter(item => item.role !== 0)
+                setData(data);
             })
             .catch((err) => console.error(err));
     };
@@ -135,6 +137,12 @@ const Manager = () => {
                         Enter Prise
                     </span>
                 );
+            case 8:
+                return (
+                    <span className="px-2 py-1 font-semibold leading-tight rounded-lg bg-[#0000f7] text-[white]">
+                        Enter Prise
+                    </span>
+                );
             default:
                 throw new Error("Invalid role encountered.");
         }
@@ -200,6 +208,12 @@ const Manager = () => {
         }
     ]
 
+    useEffect(() => {
+        const typingTimer = setTimeout(() => {
+            getAlluser();
+          }, 500);
+        return () => clearTimeout(typingTimer);
+    }, [search])
     return (
         <div className="w-full h-full">
             <Toaster />
@@ -273,15 +287,16 @@ const Manager = () => {
 
             <div className="bg-gradient-to-r from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] border-[--site-chat-header-border] border rounded-xl md:m-10 m-5 flex flex-col gap-5 shadow-xl shadow-[--site-chat-header-border] overflow-x-auto">
                 <div className="w-full h-full rounded-xl p-2">
-                    {/* <div className="flex items-center justify-end w-full p-2">
-                        <button
-                            className="bg-[--site-logo-text-color] p-2 rounded-lg font-semibold text-[--site-card-icon-color] flex gap-3 items-center justify-center"
-                            onClick={(e) => setIsOpenModal(true)}
-                        >
-                            <BsPersonFillAdd className="fill-[ --site-card-icon-color] w-[20px] h-[20px]" />
-                            Add user
-                        </button>
-                    </div> */}
+                    <div className="flex items-center justify-end w-full p-2 gap-2">
+                        <span>Search</span>
+                        <input
+                            type="text"
+                            name="search"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-1/3 h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black/60 placeholder:opacity-50"
+                        />
+                    </div>
                     <table className="w-full rounded-xl">
                         <thead className="rounded-xl">
                             <tr className="text-md font-semibold tracking-wide text-center text-[black] uppercase border-b border-gray-600 rounded-xl">
@@ -462,7 +477,7 @@ const Manager = () => {
                                     onChange={e => setRole(e)}
                                     value={role.toString()}
                                 >
-                                {OptionRoles.map((role, index) => <Option value={role.value} key={index}>{role.label}</Option>)}
+                                    {OptionRoles.map((role, index) => <Option value={role.value} key={index}>{role.label}</Option>)}
                                 </Select>
                             </div>
                             <div className="flex flex-col">

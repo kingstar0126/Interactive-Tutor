@@ -12,10 +12,7 @@ const History = (props) => {
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
     const chatbot = useSelector((state) => state.chat.chatbot);
     useEffect(() => {
-        const new_data = props.data.sort((a, b) => {
-            return new Date(a.update_data) - new Date(b.update_data);
-        });
-        setHistory(new_data);
+        setHistory(props.data);
     }, [props.data]);
 
     const handleMessage = (index) => {
@@ -55,8 +52,9 @@ const History = (props) => {
                                     className="w-10 h-10 rounded-full"
                                 />
                                 <div className="flex items-center justify-between w-full">
-                                    <span className="w-4/5 leading-5">
-                                        {item.name}
+                                    <span className="w-4/5 leading-5 flex-col flex">
+                                        <span>{item.name}</span>
+                                        <span>{item.update_data}</span>
                                     </span>
                                     <RiDeleteBin6Line
                                         className="active:fill-[--site-card-icon-color] fill-[--site-error-text-color]"

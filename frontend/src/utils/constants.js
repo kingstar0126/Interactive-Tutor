@@ -5,11 +5,11 @@ export const stringConstant = {
 
 export const webAPI = {
     email_verification: SERVER_URL + "/api/email_verification",
-    getuseraccount: SERVER_URL + "/api/getuseraccount",
     register: SERVER_URL + "/api/signup",
     adduseraccount: SERVER_URL + "/api/adduseraccount",
     getuser: SERVER_URL + "/api/getaccount",
     getallusers: SERVER_URL + "/api/getallaccounts",
+    checkUserInvite: SERVER_URL + "/api/checkUserInvite",
     changeuser: SERVER_URL + "/api/changeaccount",
     changeuserstatus: SERVER_URL + "/api/changeaccountstatus",
     deleteuser: SERVER_URL + "/api/deleteaccount",
@@ -50,7 +50,8 @@ export const webAPI = {
     delete_product: SERVER_URL + "/api/delete/product", //user_id, product_id
     delete_all_product: SERVER_URL + "/api/delete/all_products", //user_id
 
-    create_checkout: SERVER_URL + "/api/create/checkout/session", //
+    create_checkout: SERVER_URL + "/api/create/checkout/session",
+    create_checkout_query: SERVER_URL + "/api/create/checkout/session/query",
     create_customer: SERVER_URL + "/api/create-customer",
     updateSubscription: SERVER_URL + "/api/update/subscription",
 
@@ -61,10 +62,17 @@ export const webAPI = {
     transfer_tutor: SERVER_URL + "/api/transfer_tutor",
     imageupload: SERVER_URL + "/api/imageupload",
     custom_plan: SERVER_URL + "/api/subscription/custom_plan",
+    upgrade_query: SERVER_URL + "/api/subscription/upgrade_query",
     inviteEmail: SERVER_URL + "/api/inviteEmail",
     getinviteEmails: SERVER_URL + "/api/getInviteEmails",
     remove_invite: SERVER_URL + "/api/removeInvite",
 
     userInvite: SERVER_URL + "/api/userInvite",
     userInviteRemove: SERVER_URL + "/api/userInviteRemove",
+    setTutors: SERVER_URL + "/api/setTutors",
+    resendInvitation: SERVER_URL + "/api/resendInvitation",
+    uploadInviteFile: SERVER_URL + "/api/uploadInviteFile",
+
+    streamingTest: SERVER_URL + "/api/testStreaming",
+    closeAccount: SERVER_URL + "/api/closeAccunt",
 };

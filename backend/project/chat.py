@@ -26,11 +26,12 @@ openai.openai_api_key = OPENAI_API_KEY
 chat = Blueprint('chat', __name__)
 
 
-def delete_vectore(source):
+def delete_vectore(source, chat):
     index = pinecone.Index(PINECONE_INDEX_NAME)
     return index.delete(
         filter={
             "source": f"{source}",
+            "chat": f"{chat}"
         }
     )
 
@@ -84,19 +85,13 @@ def add_chat():
     user = db.session.query(User).filter_by(id=user_id).first()
     ct = db.session.query(Chat).filter_by(user_id=user_id).count() + 1
 
-    if not user.role == 1:
+    if not user.role == 1 or user.role == 8:
         if ct > user.tutors:
             return jsonify({
                 'success': False,
                 'code': 401,
                 'message': "You can no longer create AI Tutors.",
             })
-    if chat := db.session.query(Chat).filter_by(label=label).first():
-        return jsonify({
-            'success': False,
-            'code': 401,
-            'message': 'A chart with the same name already exists. Please change the Name and description',
-        })
     new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
                     access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button)
     db.session.add(new_chat)
@@ -426,8 +421,8 @@ def delete_chat(id):
         # delete index in the pinecone
 
         for id in train_ids:
-            source = db.session.query(Train).filter_by(id=id).first().label
-            delete_vectore(source)
+            source = db.session.query(Train).filter_by(id=id).first()
+            delete_vectore(source.label, chat.uuid)
             db.session.query(Train).filter_by(id=id).delete()
         db.session.delete(chat)
         db.session.commit()
@@ -448,7 +443,10 @@ def delete_chat(id):
 @chat.route('/api/getreportdata', methods=['POST'])
 def get_report_data():
     id = request.json['id']
+
+    user = db.session.query(User).filter_by(id=id).first()
     chats = db.session.query(Chat).filter_by(user_id=id).all()
+
     current_month = datetime.datetime.now().month
     messages = []
     labels = []
@@ -457,6 +455,11 @@ def get_report_data():
         labels.append(chat.label)
         message = db.session.query(Message).filter_by(
             chat_id=chat.id).order_by(Message.create_date).all()
+        if user.role == 7:
+            invite_chat = db.session.query(Chat).filter_by(inviteId=id, label=chat.label).first()
+            if invite_chat:
+                invite_message = db.session.query(Message).filter_by( chat_id=invite_chat.id ).order_by(Message.create_date).all()
+                message.extend(invite_message)
         for msg in message:
             if msg.create_date.month == current_month:
                 data.append(msg.create_date.strftime("%Y-%m-%d"))

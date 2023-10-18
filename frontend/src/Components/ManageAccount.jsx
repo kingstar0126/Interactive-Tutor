@@ -1,4 +1,5 @@
 import axios from "axios";
+import { BsCartPlus } from "react-icons/bs";
 import { webAPI } from "../utils/constants";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
@@ -16,6 +17,7 @@ import { MdOutlineUpdate } from "react-icons/md";
 import { setOpenSidebar } from "../redux/actions/locationAction";
 import SubscriptionModal from "./SubscriptionModal";
 import { Button } from "@material-tailwind/react";
+import { loadStripe } from "@stripe/stripe-js";
 
 const ManageAccount = () => {
     const [username, setUsername] = useState("");
@@ -23,6 +25,7 @@ const ManageAccount = () => {
     const [phone, setPhone] = useState("");
     const [state, setState] = useState("");
     const [city, setCity] = useState("");
+    const [check, setCheck] = useState(true);
     const [isSubscriptionOpenModal, setIsSubscriptionOpenModal] =
         useState(false);
     const [country, setCountry] = useState("");
@@ -98,6 +101,17 @@ const ManageAccount = () => {
             setTrial(user.days);
         }
         axios
+            .post(webAPI.checkUserInvite, { id: user.id })
+            .then(res => {
+                if (res.data.success) {
+                    setCheck(false)
+                }
+                else {
+                    setCheck(true)
+                }
+            })
+            .catch(err => console.error(err))
+        axios
             .post(webAPI.getuser, { id: user.id })
             .then((res) => {
                 setUsername(res.data.data.username);
@@ -112,6 +126,35 @@ const ManageAccount = () => {
             });
     }, []);
 
+    const getClientReferenceId = () => {
+        return (
+            (window.Rewardful && window.Rewardful.referral) ||
+            "checkout_" + new Date().getTime()
+        );
+    };
+
+    const handleMoreQuery = () => {
+        axios
+            .post(webAPI.create_checkout_query, {
+                id: user.id,
+                clientReferenceId: getClientReferenceId(),
+            })
+            .then(async (res) => {
+                // Load Stripe and redirect to the Checkout page
+                const stripe = await loadStripe(res.data.key);
+
+                const { error } = stripe.redirectToCheckout({
+                    sessionId: res.data.sessionId,
+                });
+                if (error) {
+                    console.error("Error:", error);
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+            });
+    }
+
     return (
         <div className="w-full h-full">
             <Toaster />
@@ -125,7 +168,7 @@ const ManageAccount = () => {
                     onClick={handleOpenSidebar}
                     className="w-6 h-6 mb-1 md:hidden"
                 />
-                <div className="flex items-end justify-end md:mt-[27px] md:mb-[30px] md:pr-[44px] pr-9">
+                {check && <div className="flex items-end justify-end md:mt-[27px] md:mb-[30px] md:pr-[44px] pr-9">
                     {_chat && _chat.organization && (
                         <div className="xl:flex flex-col items-start justify-center mr-2 p-2 bg-[--site-warning-text-color] rounded shadow-2xl hidden">
                             <p>
@@ -176,7 +219,16 @@ const ManageAccount = () => {
                             Upgrade
                         </span>
                     </Button>
-                </div>
+                    <Button
+                        onClick={handleMoreQuery}
+                        className="normal-case gap-1 flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
+                    >
+                        <BsCartPlus className="w-4 h-4 md:w-6 md:h-6" />
+                        <span className="md:text-base text-[12px] font-medium">
+                            Top-up Queries
+                        </span>
+                    </Button>
+                </div>}
             </div>
 
             <div className="flex md:hidden gap-2 text-[--site-card-icon-color] pt-8 px-5">
@@ -267,12 +319,12 @@ const ManageAccount = () => {
                         />
                     </div>
                     <div className="flex flex-col justify-end w-full gap-3 md:flex-row">
-                        <Button
+                        {check && user.role !== 7 && <Button
                             className="normal-case px-4 py-2 text-base font-semibold text-[--site-card-icon-color] border bg-transparent border-[--site-card-icon-color] rounded-md"
                             onClick={() => handleCancelSubscription()}
                         >
                             Manage Subscription
-                        </Button>
+                        </Button>}
 
                         <Button
                             className="normal-case px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md"

@@ -2,9 +2,9 @@ const UserMessage = (props) => {
     return (
         <div>
             <div className="flex flex-col border border-[--site-chat-header-border] rounded-lg p-4 gap-5">
-                <span className="border-b border-[--site-chat-header-border] pb-2">
+                <h1 className="border-b-[1px] border-[--site-card-icon-color] font-semibold pb-2">
                     {props.title}
-                </span>
+                </h1>
                 <div className="flex justify-between gap-3">
                     <div className="flex flex-col w-1/3 gap-2">
                         <span className="text-[12px] md:text-[16px]">
