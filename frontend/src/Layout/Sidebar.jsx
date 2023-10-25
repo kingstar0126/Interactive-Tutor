@@ -143,7 +143,7 @@ const Sidebar = () => {
                 >
                     <AiOutlineUser className="w-6 h-6" />
 
-                    <span className="flex items-end text-base">AI Tutors</span>
+                    <span className="flex items-end text-base">AI Bots</span>
                 </Link>
                 {check && <Link
                     to="subscription"

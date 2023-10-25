@@ -114,7 +114,7 @@ const ChatTable = (props) => {
                         props.handleAdd();
                     }}
                 >
-                    Add AI Tutors
+                    Add AI Bots
                     <AiOutlinePlus className="w-4 h-4" />
                 </Button>
             </div>
@@ -150,7 +150,7 @@ const ChatTable = (props) => {
                                                 }}
                                             >
                                                 <span className="text-xl">
-                                                    Add AI Tutors
+                                                    Add AI Bots
                                                 </span>
                                                 <AiOutlinePlus className="w-6 h-6" />
                                             </Button>
@@ -314,7 +314,7 @@ const ChatTable = (props) => {
                 <DialogHeader>Are you sure?</DialogHeader>
                 <DialogBody divider>
                     <span className="text-base text-black">
-                        Are you sure to delete this AI Tutor?
+                        Are you sure to delete this AI Bots?
                     </span>
                 </DialogBody>
                 <DialogFooter className="flex items-center justify-end gap-4 pb-8">

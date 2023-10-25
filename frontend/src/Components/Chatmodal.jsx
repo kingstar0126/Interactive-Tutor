@@ -330,7 +330,7 @@ const Chatmodal = (props) => {
             <Toaster />
             <DialogHeader className="px-8 pt-8 pb-6">
                 <span className="text-[32px] leading-12 font-semibold text-[--site-card-icon-color]">
-                    Build AI Tutor
+                    Build AI Bots
                 </span>
             </DialogHeader>
             <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium pl-8 pt-6 h-[25rem]">
@@ -338,7 +338,7 @@ const Chatmodal = (props) => {
                     <div className="mr-4">
                         {type ? <div>
                             <div className="flex flex-col items-start gap-2">
-                                <label>AI Tutor Name</label>
+                                <label>AI Bots Name</label>
                                 <input
                                     type="text"
                                     name="label"
@@ -351,7 +351,7 @@ const Chatmodal = (props) => {
                                     className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black/60 placeholder:opacity-50"
                                 />
                                 <p>
-                                    The label is used to identify your AI Tutor.
+                                    The label is used to identify your AI Bots.
                                     It's private and exclusively visible to you.
                                 </p>
                                 {!label && (
@@ -414,7 +414,7 @@ const Chatmodal = (props) => {
                                                 })}
                                             </select>
                                             <p>
-                                                How would you like your AI Tutor to start conversations?
+                                                How would you like your AI Bots to start conversations?
                                             </p>
                                         </div>
                                     </AccordionBody>
@@ -449,7 +449,7 @@ const Chatmodal = (props) => {
                                             ></textarea>
                                             <p>
                                                 The description is used to identify
-                                                your AI Tutor. It's private and
+                                                your AI Bots. It's private and
                                                 exclusively visible to you.
                                             </p>
                                         </div>
@@ -466,13 +466,13 @@ const Chatmodal = (props) => {
                                         className="border-0"
                                     >
                                         <p className="text-base font-medium text-black">
-                                            AI Tutor Fine-Tuning
+                                            AI Bots Fine-Tuning
                                         </p>
                                     </AccordionHeader>
                                     <AccordionBody className="border-t border-[--site-main-modal-input-border-color] gap-5 flex-col flex h-full">
                                         <div className="flex flex-col items-start gap-2 text-black">
                                             <label>
-                                                How do you want your AI Tutor to use your training data?
+                                                How do you want your AI Bots to use your training data?
                                             </label>
                                             <Select
                                                 placeholder="Hello friends! How can I help you today?"
@@ -505,7 +505,7 @@ const Chatmodal = (props) => {
                                                 The context Behaviour determines how
                                                 the training data you provide will
                                                 be Utilised. It specifies the way in
-                                                which the AI Tutor understands and
+                                                which the AI Bots understands and
                                                 responds to user inputs based on the
                                                 given context.
                                             </p>
@@ -524,7 +524,7 @@ const Chatmodal = (props) => {
                                                 className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black"
                                             ></textarea>
                                             <p>
-                                                The Behaviour prompt overrides our default Behaviour of 'You are a helpful assistant' to provide a more customised experience, allowing your AI Tutor to act in a manner that aligns with your specific requirements and preferences.
+                                                The Behaviour prompt overrides our default Behaviour of 'You are a helpful assistant' to provide a more customised experience, allowing your AI Bots to act in a manner that aligns with your specific requirements and preferences.
                                             </p>
                                         </div>
                                         <div className="flex flex-col items-start gap-2 text-black">

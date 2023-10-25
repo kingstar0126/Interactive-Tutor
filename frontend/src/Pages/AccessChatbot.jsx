@@ -77,7 +77,7 @@ const AccessChatbot = () => {
                 <div className="mt-[100px]">
                     <div className="w-full p-6 m-auto bg-[--site-main-color3] rounded-md h-full lg:max-w-xl">
                         <h1 className="text-3xl font-semibold text-center text-[--site-main-Login] underline">
-                            AI Tutor
+                            AI Bots
                         </h1>
                         {isloading ? (
                             <div className="flex items-center justify-center mt-6">

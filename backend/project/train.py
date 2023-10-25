@@ -479,7 +479,7 @@ def handle_request_entity_too_large(error):
 
 @train.route('/api/data/gettraindatas', methods=['POST'])
 def get_traindatas():
-    uuid = request.json['uuid']
+    uuid = request.json.get('uuid')
     if uuid:
         chat = db.session.query(Chat).filter_by(uuid=uuid).first()
         if not chat:

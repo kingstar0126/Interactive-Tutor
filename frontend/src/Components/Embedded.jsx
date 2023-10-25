@@ -100,11 +100,11 @@ const Embedded = (props) => {
                                 className="border items-start gap-5 justify-center border-[--site-chat-header-border] rounded-xl w-full py-5 flex flex-col"
                             >
                                 <h3 className="border-b-[1px] border-[--site-chat-header-border] p-5 w-full">
-                                    Share AI Tutor with URL.
+                                    Share AI Bots with URL.
                                 </h3>
                                 <div className="flex flex-col w-full gap-2 px-5">
                                     <span>
-                                        You can access in this AI Tutor with URL
+                                        You can access in this AI Bots with URL
                                     </span>
                                     <textarea
                                         ref={chatbot_URL}

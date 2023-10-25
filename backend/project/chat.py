@@ -90,7 +90,7 @@ def add_chat():
             return jsonify({
                 'success': False,
                 'code': 401,
-                'message': "You can no longer create AI Tutors.",
+                'message': "You can no longer create AI Bots.",
             })
     new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
                     access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button)
