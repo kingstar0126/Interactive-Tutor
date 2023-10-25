@@ -59,16 +59,16 @@ def compare_month():
     if is_new_month:
         users = db.session.query(User).all()
         for user in users:
-            query = user.query
-            user.usage = 0
+            query = user.query - user.usage
             if user.role == 2:
-                user.query = 500
+                user.query = query + 500
             elif user.role == 3:
-                user.query = 3000
+                user.query = query + 3000
             elif user.role == 4:
-                user.query = 10000
-            elif user.role == 8:
-                user.query = 30000
+                user.query = query + 10000
+            elif user.role == 7:
+                user.query = query + 30000
+            user.usage = 0
             db.session.commit()
 
 

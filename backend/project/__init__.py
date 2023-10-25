@@ -34,7 +34,7 @@ def create_app():
     handler.setFormatter(formatter)
     app.logger.addHandler(handler)
     app.config['SECRET_KEY'] = 'key-goes-here'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:postgres@interactive-tutor.crzdypgejusl.eu-west-2.rds.amazonaws.com/postgres'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://postgres:postgres@interacitve-10-16.crzdypgejusl.eu-west-2.rds.amazonaws.com/postgres'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['MAIL_SERVER'] = 'smtp.gmail.com'
     app.config['MAIL_PORT'] = 587
