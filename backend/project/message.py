@@ -11,7 +11,7 @@ from rich import print, pretty
 import time
 import os
 import json
-from .generate_response import generate_message, generate_AI_message, generate_Bubble_message, generate_part_file
+from .generate_response import generate_message, generate_AI_message, generate_Bubble_message, generate_part_file, get_data_from_csv
 from .train import parse_pdf, parse_csv, parse_docx, extract_data_from_xlsx
 import re
 import nltk
@@ -206,6 +206,7 @@ def handle_file_uploads(request):
     if 'file' not in request.files:
         return None
     file = request.files['file']
+    query = request.form.get('_message')
     if file.filename == '':
         return None
     if file:
@@ -215,9 +216,7 @@ def handle_file_uploads(request):
         elif file.filename.endswith('.docx'):
             data = parse_docx(file)
         elif file.filename.endswith('.csv'):
-            data = parse_csv(file)
-        elif file.filename.endswith('.xlsx'):
-            data = extract_data_from_xlsx(file)
+            data = [get_data_from_csv(file, query)]
         else:
             return None
         return data
@@ -279,6 +278,7 @@ def send_message():
     file_data = handle_file_uploads(request)
     if file_data is not None:
         file_text = split_files_result(file_data, 13000)
+        print('\n\n', file_text)
         if len(file_text) > 1:
             context = convert_large_data_to_small(file_text, query, 13000)
         else:

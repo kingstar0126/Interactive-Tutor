@@ -23,6 +23,12 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 
 
+from langchain.agents.agent_types import AgentType
+from langchain_experimental.agents.agent_toolkits import create_csv_agent
+from werkzeug.exceptions import RequestEntityTooLarge
+from werkzeug.utils import secure_filename
+from werkzeug.datastructures import FileStorage
+
 PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
 PINECONE_ENV = os.getenv('PINECONE_ENV')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
@@ -315,3 +321,19 @@ def generate_part_file(prompt, data):
         prompt=prompt
     )
     return response
+
+
+def get_data_from_csv(file, prompt):
+    filename = secure_filename(file.filename)
+    file.save(filename)
+
+    agent = create_csv_agent(
+        ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k"),
+        filename,
+        verbose=True,
+        agent_type=AgentType.OPENAI_FUNCTIONS,
+    )
+    result = agent.run(prompt)
+    os.remove(filename)
+    print('\n\n---> ', result)
+    return result
