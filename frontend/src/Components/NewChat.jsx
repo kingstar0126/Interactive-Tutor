@@ -708,7 +708,7 @@ const NewChat = () => {
                                 </a>
                             </div>
                             <input type="file" className="hidden" multiple ref={imageInput} onChange={handleUploadImage} accept=".jpg,.jpeg,.png" />
-                            <input type="file" className="hidden" ref={fileInput} onChange={handleUploadFile} accept=".pdf,.docx,.doc" />
+                            <input type="file" className="hidden" ref={fileInput} onChange={handleUploadFile} accept=".pdf,.docx,.doc,.csv" />
                             <div className="flex items-center w-full divide-x-2 sm:w-4/5 md:gap-2 gap-1">
                                 <div className="flex items-center justify-end w-full text-black relative rounded-2xl border border-[--site-chat-header-border] !bg-white">
 
