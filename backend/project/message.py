@@ -11,7 +11,7 @@ from rich import print, pretty
 import time
 import os
 import json
-from .generate_response import generate_message, generate_AI_message, generate_Bubble_message, generate_part_file, get_data_from_csv
+from .generate_response import generate_message, generate_AI_message, generate_Bubble_message, generate_part_file, get_data_from_csv, get_nouns_from_prompt
 from .train import parse_pdf, parse_csv, parse_docx, extract_data_from_xlsx
 import re
 import nltk
@@ -216,7 +216,8 @@ def handle_file_uploads(request):
         elif file.filename.endswith('.docx'):
             data = parse_docx(file)
         elif file.filename.endswith('.csv'):
-            data = [get_data_from_csv(file, query)]
+            prompt = get_nouns_from_prompt(query)
+            data = [get_data_from_csv(file, f"Give information about these. Only output the data in the datasets and if there is not information, then output null. \n\n{prompt}")]
         else:
             return None
         return data

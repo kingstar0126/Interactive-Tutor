@@ -2,22 +2,16 @@ from langchain.chat_models import ChatOpenAI
 
 from threading import Thread
 from queue import Queue, Empty
-from threading import Thread
-from collections.abc import Generator
 from langchain.llms import OpenAI
 from langchain.callbacks.base import BaseCallbackHandler
 from typing import Any, Callable
 import json
-from gptcache import Cache
-from gptcache.manager.factory import manager_factory
-from gptcache.processor.pre import get_prompt
-from langchain.cache import GPTCache
 import langchain
-import hashlib
 import os
 from langchain.vectorstores.pinecone import Pinecone
 from dotenv import load_dotenv
-from langchain import PromptTemplate, LLMChain
+from langchain.chains import LLMChain
+from langchain.prompts import PromptTemplate 
 import pinecone
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
@@ -28,23 +22,12 @@ from langchain_experimental.agents.agent_toolkits import create_csv_agent
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
+import tempfile
 
 PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
 PINECONE_ENV = os.getenv('PINECONE_ENV')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
-
-def get_hashed_name(name):
-    return hashlib.sha256(name.encode()).hexdigest()
-
-
-def init_gptcache(cache_obj: Cache, llm: str):
-    hashed_llm = get_hashed_name(llm)
-    cache_obj.init(
-        pre_embedding_func=get_prompt,
-        data_manager=manager_factory(
-            manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
-    )
 
 class QueueCallback(BaseCallbackHandler):
     """Callback handler for streaming LLM responses to a queue."""
@@ -232,19 +215,6 @@ def generate_Bubble_message(query):
     prompt = PromptTemplate(
         input_variables=["query"], template=template)
 
-    def get_hashed_name(name):
-        return hashlib.sha256(name.encode()).hexdigest()
-
-    def init_gptcache(cache_obj: Cache, llm: str):
-        hashed_llm = get_hashed_name(llm)
-        cache_obj.init(
-            pre_embedding_func=get_prompt,
-            data_manager=manager_factory(
-                manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
-        )
-
-    langchain.llm_cache = GPTCache(init_gptcache)
-
     llm = ChatOpenAI(model_name="gpt-3.5-turbo",
                      temperature=1,
                      streaming=True,
@@ -259,6 +229,33 @@ def generate_Bubble_message(query):
     )
     response = response.replace('"', '')
     return response
+
+def get_nouns_from_prompt(query):
+    load_dotenv()
+
+    template = '''Please tell me all the keypoints in this sentence as a array.
+    "{query}". 
+    Won't output any other sentences except the list.
+    '''
+
+    prompt = PromptTemplate(
+        input_variables=["query"], template=template)
+
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo",
+                     temperature=0,
+                     streaming=True,
+                     openai_api_key=os.getenv('OPENAI_API_KEY'))
+    conversation = LLMChain(
+        llm=llm,
+        verbose=True,
+        prompt=prompt
+    )
+    response = conversation.run(
+        query=query
+    )
+    print(response)
+    return response
+
 
 def generate_system_prompt_role(role):
     load_dotenv()
@@ -324,16 +321,14 @@ def generate_part_file(prompt, data):
 
 
 def get_data_from_csv(file, prompt):
-    filename = secure_filename(file.filename)
-    file.save(filename)
-
+  with tempfile.NamedTemporaryFile() as tmp:
+    file.save(tmp.name)
     agent = create_csv_agent(
-        ChatOpenAI(temperature=0, model="gpt-3.5-turbo-16k"),
-        filename,
-        verbose=True,
-        agent_type=AgentType.OPENAI_FUNCTIONS,
+      ChatOpenAI(temperature=0, model="gpt-3.5-turbo"),
+      tmp.name,
+      verbose=True,
+      agent_type=AgentType.OPENAI_FUNCTIONS,
     )
     result = agent.run(prompt)
-    os.remove(filename)
-    print('\n\n---> ', result)
-    return result
+  print('\n\n---> ', result)
+  return result
