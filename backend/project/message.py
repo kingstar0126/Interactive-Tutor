@@ -11,7 +11,8 @@ from rich import print, pretty
 import time
 import os
 import json
-from .generate_response import generate_message, generate_AI_message, generate_Bubble_message
+from .generate_response import generate_message, generate_AI_message, generate_Bubble_message, generate_part_file
+from .train import parse_pdf, parse_csv, parse_docx, extract_data_from_xlsx
 import re
 import nltk
 from nltk.corpus import stopwords
@@ -19,7 +20,9 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk import pos_tag
 from typing import Sequence
 from google.cloud import vision
-
+import tiktoken
+from multiprocessing import Process
+import threading
 
 message = Blueprint('message', __name__)
 
@@ -179,6 +182,90 @@ def testStreaming():
     
     return Response(stream_with_context(generate()), mimetype="text/event-stream", direct_passthrough=True, headers={'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
 
+def handle_image_uploads(request):
+    if 'image' in request.files:
+        images = request.files.getlist('image')  # Get all files under 'image' key
+        text = analyze_images(images)
+        return text
+    else:
+        return None
+
+def analyze_images(images):
+    text = ""  # Initialize text
+    for index, image in enumerate(images):
+        image_bytes = image.read()
+        feature_types = [
+            vision.Feature.Type.TEXT_DETECTION
+        ]
+        response = analyze_image_from_bytes(image_bytes, feature_types)
+        if response.text_annotations:
+            text += f"Image{index+1}: " + response.text_annotations[0].description + "\n"
+    return text
+
+def handle_file_uploads(request):
+    if 'file' not in request.files:
+        return None
+    file = request.files['file']
+    if file.filename == '':
+        return None
+    if file:
+        # Use the appropriate function based on the file's extension
+        if file.filename.endswith('.pdf'):
+            data = parse_pdf(file)
+        elif file.filename.endswith('.docx'):
+            data = parse_docx(file)
+        elif file.filename.endswith('.csv'):
+            data = parse_csv(file)
+        elif file.filename.endswith('.xlsx'):
+            data = extract_data_from_xlsx(file)
+        else:
+            return None
+        return data
+
+def calculate_token_count(content):
+    encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
+    num_tokens = len(encoding.encode(content))
+    return num_tokens
+
+def convert_large_data_to_small(files, message, length):
+    threads = []
+    results = []
+
+    # start a new thread for each file
+    for data in files:
+        t = threading.Thread(target=generate_part_file_thread, args=(message, data, results))
+        t.start()
+        threads.append(t)
+
+    # wait for all threads to finish
+    for t in threads:
+        t.join()
+
+    result = '\n'.join(results)
+
+    if calculate_token_count(result) > length:
+        file_text = split_files_result([result], length)
+        return convert_large_data_to_small(file_text, message, length)
+    else:
+        return result
+
+def generate_part_file_thread(prompt, data, results):
+    response = generate_part_file(prompt, data)
+    results.append(response)
+
+def split_files_result(file_data, length):
+    file_text = []
+    _text = ""
+    for item in file_data:
+        next_text = f"{_text}{item}"
+        
+        if calculate_token_count(next_text) > length:
+            file_text.append(_text)
+            _text = item
+        else:
+            _text = next_text
+    file_text.append(_text)
+    return file_text
 
 @message.route('/api/sendchat', methods=['POST'])
 def send_message():
@@ -186,20 +273,16 @@ def send_message():
     query = request.form.get('_message')
     behaviormodel = request.form.get('behaviormodel')
     model = request.form.get('model')
-    text = "No text detected"
+    text = handle_image_uploads(request)
+    context = ""
 
-    if 'image' in request.files:
-        images = request.files.getlist('image')  # Get all files under 'image' key
-        text = ""  # Initialize text
-        for index, image in enumerate(images):
-            image_bytes = image.read()
-            feature_types = [
-                vision.Feature.Type.TEXT_DETECTION
-            ]
-            response = analyze_image_from_bytes(image_bytes, feature_types)
-            if response.text_annotations:
-                text += f"Image{index+1}: " + response.text_annotations[0].description + "\n"
-    # print("\n\n", text)
+    file_data = handle_file_uploads(request)
+    if file_data is not None:
+        file_text = split_files_result(file_data, 13000)
+        if len(file_text) > 1:
+            context = convert_large_data_to_small(file_text, query, 13000)
+        else:
+            context = file_text[0]
     current_message = db.session.query(Message).filter_by(uuid=uuid).first()
     if current_message is None:
         return jsonify({
@@ -211,7 +294,6 @@ def send_message():
     chat = db.session.query(Chat).filter_by(id=current_message.chat_id).first()
     user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
             Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
-
     invite_account = db.session.query(Invite).filter_by(email=user.email).first()
     user_check = db.session.query(User).filter_by(id=invite_account.user_id).first() if invite_account else None
     user = user_check if user_check and user_check.role == 7 else user
@@ -244,20 +326,30 @@ def send_message():
     Human: {question}
     Assistant:"""
 
+    image_text = f"Image Text:{{ {text} }}" if text is not None else ''
+    context_text = f"Context: {context}" if file_data is not None else ''
+
     template = f""" {behavior}
 
-    ===============
-    Image Text: {text}
-
+    ==============
+    {image_text}
+    {context_text}
     {prompt_content}
 
-    ===============
+    ==============
     {prompt_input}
     """
 
     response = generate_message(
-        query, behavior, temp, model, chat.uuid, template) if behaviormodel != "Remove training data ring fencing and perform like ChatGPT" \
-        else generate_AI_message(query, last_history, f"{behavior} \n\n======================\n\n Image Text: {text}", temp, model)
+        query, behavior, temp, model, chat.uuid, template
+    ) if behaviormodel != "Remove training data ring fencing and perform like ChatGPT" else generate_AI_message(
+        query, 
+        last_history, 
+        f"{behavior} \n\n======================\n\n {image_text}\n{context_text}" if image_text or context_text 
+        else f"{behavior}", 
+        temp, 
+        model
+    )
 
     def generate():
         content = None

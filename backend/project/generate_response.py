@@ -22,6 +22,7 @@ import pinecone
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 
+
 PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
 PINECONE_ENV = os.getenv('PINECONE_ENV')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
@@ -277,19 +278,6 @@ def generate_system_prompt_role(role):
     prompt = PromptTemplate(
         input_variables=["role"], template=template)
 
-    def get_hashed_name(name):
-        return hashlib.sha256(name.encode()).hexdigest()
-
-    def init_gptcache(cache_obj: Cache, llm: str):
-        hashed_llm = get_hashed_name(llm)
-        cache_obj.init(
-            pre_embedding_func=get_prompt,
-            data_manager=manager_factory(
-                manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
-        )
-
-    langchain.llm_cache = GPTCache(init_gptcache)
-
     llm = ChatOpenAI(model_name="gpt-3.5-turbo",
                      temperature=0.2,
                      openai_api_key=os.getenv('OPENAI_API_KEY'))
@@ -302,4 +290,28 @@ def generate_system_prompt_role(role):
     )
     if type(response) == str:
         response = json.loads(response)
+    return response
+
+def generate_part_file(prompt, data):
+    load_dotenv()
+    template = '''Answer using the sentences below Context. If you cannot find an appropriate answer to the question in the Context, return "".
+            Context: {{ {text} }}
+            =========================
+            user: {prompt}
+            '''
+
+    prompt = PromptTemplate(
+        input_variables=["text", "prompt"], template=template)
+
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k",
+                     temperature=0.2,
+                     openai_api_key=os.getenv('OPENAI_API_KEY'))
+    conversation = LLMChain(
+        llm=llm,
+        prompt=prompt
+    )
+    response = conversation.run(
+        text=data,
+        prompt=prompt
+    )
     return response
