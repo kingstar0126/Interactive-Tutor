@@ -90,7 +90,6 @@ def create_vector(docs):
 def parse_pdf(file: BytesIO) -> List[str]:
     pdf = PdfReader(file)
     output = []
-    full_text = ""
     for page in pdf.pages:
         text = page.extract_text()
         # print(text)
@@ -101,20 +100,28 @@ def parse_pdf(file: BytesIO) -> List[str]:
         # # Remove multiple newlines
         # text = re.sub(r"\n\s*\n", "\n\n", text)
         # text = correct_grammar(text)
-        full_text += text + "\n"
-    output.append(full_text)
+        output.append(text)
     return output
 
 
-def parse_csv(file):
-    data = file.read()
-    string_data = str(data)
-    string_data = correct_grammar(string_data)
-    text = []
-    # print(string_data)
-    text.append(string_data)
-    return text
+# def parse_csv(file):
+#     data = file.read()
+#     string_data = str(data)
+#     string_data = correct_grammar(string_data)
+#     text = []
+#     # print(string_data)
+#     text.append(string_data)
+#     return text
 
+def parse_csv(file):
+    df = pd.read_csv(file)
+    # Convert DataFrame to list of dictionaries and then each dictionary to string
+    return [str(record) for record in df.to_dict('records')]
+
+def extract_data_from_xlsx(file):
+    df = pd.read_excel(file)
+    # Convert DataFrame to list of dictionaries and then each dictionary to string
+    return [str(record) for record in df.to_dict('records')]
 
 def parse_docx(file):
     doc = docx.Document(file)
@@ -151,9 +158,7 @@ def parse_epub(filename):
     return (text)
 
 
-def text_to_docs(text: str, filename: str, chat: str) -> List[Document]:
-    """Converts a string or list of strings to a list of Documents
-    with metadata."""
+def text_to_docs(text, filename, chat):
     if isinstance(text, str):
         # Take a single string as one page
         text = [text]
@@ -469,6 +474,7 @@ def create_train_file():
                 })
 
     except Exception as e:
+        print(str(e))
         return {"success": False, "message": str(e)}, 400
 
 
