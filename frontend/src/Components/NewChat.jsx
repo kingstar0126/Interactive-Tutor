@@ -547,59 +547,50 @@ const NewChat = () => {
                                                         rehypePlugins={[rehypeMathjax, rehypeRaw]}
                                                         children={data.content}
                                                         className="whitespace-normal"
-                                                        // components={{
-                                                        //     code({ inline, className, children, ...props }) {
-                                                        //         const match = /language-(\w+)/.exec(className || '')
-                                                        //         if (!inline && match) {
-                                                        //             // remove the newline character at the end of children, if it exists
-                                                        //             const codeString = String(children).replace(/\n$/, '');
+                                                        components={{
+                                                            code({ inline, className, children, ...props }) {
+                                                                const match = /language-(\w+)/.exec(className || '')
+                                                                if (!inline && match) {
+                                                                    // remove the newline character at the end of children, if it exists
+                                                                    const codeString = String(children).replace(/\n$/, '');
 
-                                                        //             return (
-                                                        //                 <CopyBlock
-                                                        //                     text={codeString}
-                                                        //                     language={match[1]}
-                                                        //                     showLineNumbers={false}
-                                                        //                     wrapLongLines
-                                                        //                     theme={dracula}
-                                                        //                     {...props}
-                                                        //                 />
-                                                        //             );
-                                                        //         }
-                                                        //         return <code className={className} {...props}>{children}</code>;
-                                                        //     },
-                                                        //     table({ children, ...props }) {
-                                                        //         return (
-                                                        //             <table style={{ borderCollapse: 'collapse', width: '100%', fontFamily: 'Arial, sans-serif', fontSize: '14px' }} {...props}>
-                                                        //                 {children}
-                                                        //             </table>
-                                                        //         );
-                                                        //     },
-                                                        //     tr({ children, ...props }) {
-                                                        //         return <tr style={{ backgroundColor: '#f8f8f8' }} {...props}>{children}</tr>;
-                                                        //     },
-                                                        //     td({ children, ...props }) {
-                                                        //         return <td style={{ padding: '8px', border: '1px solid #ddd' }} {...props}>{children}</td>;
-                                                        //     },
-                                                        //     th({ children, ...props }) {
-                                                        //         return <th style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold', textAlign: 'left' }} {...props}>{children}</th>;
-                                                        //     },
-                                                        //     a({ href, children, ...props }) {
-                                                        //         return (
-                                                        //             <a style={{ color: '#007bff', textDecoration: 'none' }} href={href} target="_blank" rel="noopener noreferrer" {...props}>
-                                                        //                 {children}
-                                                        //             </a>
-                                                        //         );
-                                                        //     },
-                                                        //     li({ children, ...props }) {
-                                                        //         // If children is a string, apply the transformation
-                                                        //         if (typeof children === 'string') {
-                                                        //             children = children.replace(/(\d+\.)\s*\n\s*/g, "$1 ").trim();
-                                                        //         }
-                                                                
-                                                        //         // Add the bullet before the content and a space after it
-                                                        //         return <li style={{ marginBottom: '0.25em' }} {...props}>{children}</li>;
-                                                        //     },
-                                                        // }}
+                                                                    return (
+                                                                        <CopyBlock
+                                                                            text={codeString}
+                                                                            language={match[1]}
+                                                                            showLineNumbers={false}
+                                                                            wrapLongLines
+                                                                            theme={dracula}
+                                                                            {...props}
+                                                                        />
+                                                                    );
+                                                                }
+                                                                return <code className={className} {...props}>{children}</code>;
+                                                            },
+                                                            table({ children, ...props }) {
+                                                                return (
+                                                                    <table style={{ borderCollapse: 'collapse', width: '100%', fontFamily: 'Arial, sans-serif', fontSize: '14px' }} {...props}>
+                                                                        {children}
+                                                                    </table>
+                                                                );
+                                                            },
+                                                            tr({ children, ...props }) {
+                                                                return <tr style={{ backgroundColor: '#f8f8f8' }} {...props}>{children}</tr>;
+                                                            },
+                                                            td({ children, ...props }) {
+                                                                return <td style={{ padding: '8px', border: '1px solid #ddd' }} {...props}>{children}</td>;
+                                                            },
+                                                            th({ children, ...props }) {
+                                                                return <th style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold', textAlign: 'left' }} {...props}>{children}</th>;
+                                                            },
+                                                            a({ href, children, ...props }) {
+                                                                return (
+                                                                    <a style={{ color: '#007bff', textDecoration: 'none' }} href={href} target="_blank" rel="noopener noreferrer" {...props}>
+                                                                        {children}
+                                                                    </a>
+                                                                );
+                                                            }
+                                                        }}
                                                     />
                                                 </div>
                                             </div>
@@ -626,61 +617,50 @@ const NewChat = () => {
                                                 rehypePlugins={[rehypeMathjax, rehypeRaw]}
                                                 children={streamData}
                                                 className="whitespace-normal"
-                                                // components={{
-                                                //     code({ inline, className, children, ...props }) {
-                                                //         const match = /language-(\w+)/.exec(className || '')
-                                                //         if (!inline && match) {
-                                                //             // remove the newline character at the end of children, if it exists
-                                                //             const codeString = String(children).replace(/\n$/, '');
+                                                components={{
+                                                    code({ inline, className, children, ...props }) {
+                                                        const match = /language-(\w+)/.exec(className || '')
+                                                        if (!inline && match) {
+                                                            // remove the newline character at the end of children, if it exists
+                                                            const codeString = String(children).replace(/\n$/, '');
 
-                                                //             return (
-                                                //                 <CopyBlock
-                                                //                     text={codeString}
-                                                //                     language={match[1]}
-                                                //                     showLineNumbers={false}
-                                                //                     wrapLongLines
-                                                //                     theme={dracula}
-                                                //                     {...props}
-                                                //                 />
-                                                //             );
-                                                //         }
-                                                //         return <code className={className} {...props}>{children}</code>;
-                                                //     },
-                                                //     table({ children, ...props }) {
-                                                //         return (
-                                                //             <table style={{ borderCollapse: 'collapse', width: '100%', fontFamily: 'Arial, sans-serif', fontSize: '14px' }} {...props}>
-                                                //                 {children}
-                                                //             </table>
-                                                //         );
-                                                //     },
-                                                //     tr({ children, ...props }) {
-                                                //         return <tr style={{ backgroundColor: '#f8f8f8' }} {...props}>{children}</tr>;
-                                                //     },
-                                                //     td({ children, ...props }) {
-                                                //         return <td style={{ padding: '8px', border: '1px solid #ddd' }} {...props}>{children}</td>;
-                                                //     },
-                                                //     th({ children, ...props }) {
-                                                //         return <th style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold', textAlign: 'left' }} {...props}>{children}</th>;
-                                                //     },
-                                                //     a({ href, children, ...props }) {
-                                                //         return (
-                                                //             <a style={{ color: '#007bff', textDecoration: 'none' }} href={href} target="_blank" rel="noopener noreferrer" {...props}>
-                                                //                 {children}
-                                                //             </a>
-                                                //         );
-                                                //     },
-                                                //     li({ children, ...props }) {
-                                                //         // If children is a string, apply the transformation
-                                                //         if (typeof children === 'string') {
-                                                //             children = children.replace(/(\d+\.)\s*\n\s*/g, "$1 ").trim();
-                                                //             // Prepend bullet only if the string starts with a number or '-'
-                                                //             if (/^(\d+|-)/.test(children)) {
-                                                //                 children = "• " + children;
-                                                //             }
-                                                //         }
-                                                //         return <li style={{ marginBottom: '0.25em' }} {...props}>{children}</li>;
-                                                //     },
-                                                // }}
+                                                            return (
+                                                                <CopyBlock
+                                                                    text={codeString}
+                                                                    language={match[1]}
+                                                                    showLineNumbers={false}
+                                                                    wrapLongLines
+                                                                    theme={dracula}
+                                                                    {...props}
+                                                                />
+                                                            );
+                                                        }
+                                                        return <code className={className} {...props}>{children}</code>;
+                                                    },
+                                                    table({ children, ...props }) {
+                                                        return (
+                                                            <table style={{ borderCollapse: 'collapse', width: '100%', fontFamily: 'Arial, sans-serif', fontSize: '14px' }} {...props}>
+                                                                {children}
+                                                            </table>
+                                                        );
+                                                    },
+                                                    tr({ children, ...props }) {
+                                                        return <tr style={{ backgroundColor: '#f8f8f8' }} {...props}>{children}</tr>;
+                                                    },
+                                                    td({ children, ...props }) {
+                                                        return <td style={{ padding: '8px', border: '1px solid #ddd' }} {...props}>{children}</td>;
+                                                    },
+                                                    th({ children, ...props }) {
+                                                        return <th style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold', textAlign: 'left' }} {...props}>{children}</th>;
+                                                    },
+                                                    a({ href, children, ...props }) {
+                                                        return (
+                                                            <a style={{ color: '#007bff', textDecoration: 'none' }} href={href} target="_blank" rel="noopener noreferrer" {...props}>
+                                                                {children}
+                                                            </a>
+                                                        );
+                                                    }
+                                                }}
                                             />
                                             {state && <Grid
                                                 height="50"
