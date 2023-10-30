@@ -303,7 +303,7 @@ const Chat = () => {
                         className="normal-case gap-1 flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
                     >
                         <BsCartPlus className="w-4 h-4 md:w-6 md:h-6" />
-                        <span className="md:text-base text-[12px] font-medium">
+                        <span className="md:text-base text-[12px] font-medium overflow-ellipsis overflow-hidden whitespace-nowrap">
                             Top-up Queries
                         </span>
                     </Button>

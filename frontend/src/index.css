@@ -41,6 +41,16 @@ p {
     font-weight: normal;
 }
 
+ul {
+    list-style-type: disc;
+    padding-left: 0;
+}
+
+ol {
+    list-style-type: decimal;
+    padding-left: 0;
+}
+
 :root {
     --site-main-color-home: #153144;
     --site-main-color1: #c1ff72;
