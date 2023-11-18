@@ -51,27 +51,6 @@ def calculate_days(signup_date):
     hours = 24 * 7 - int(time_difference.total_seconds() / 3600)
     return hours
 
-
-def compare_month():
-    today = datetime.today()
-    is_new_month = today.day == 1
-
-    if is_new_month:
-        users = db.session.query(User).all()
-        for user in users:
-            query = user.query - user.usage
-            if user.role == 2:
-                user.query = query + 500
-            elif user.role == 3:
-                user.query = query + 3000
-            elif user.role == 4:
-                user.query = query + 10000
-            elif user.role == 7:
-                user.query = query + 30000
-            user.usage = 0
-            db.session.commit()
-
-
 auth = Blueprint('auth', __name__)
 
 
@@ -115,7 +94,7 @@ def login_post():
             new_user = {
                 'id': user.id,
                 'username': user.username,
-                'query': user.query - user.usage,
+                'query': max(user.query - user.usage, 0),
                 'role': user.role,
             }
             response = {
@@ -129,7 +108,7 @@ def login_post():
             'id': user.id,
             'username': user.username,
             'role': user.role,
-            'query': user.query - user.usage,
+            'query': max(user.query - user.usage, 0),
             'days': days
         }
     else:
@@ -137,7 +116,7 @@ def login_post():
             'id': user.id,
             'username': user.username,
             'role': user.role,
-            'query': user.query - user.usage
+            'query': max(user.query - user.usage, 0)
         }
     response = {
         'success': True,
@@ -357,7 +336,7 @@ def get_useraccount():
                 'city': user.city,
                 'role': user.role,
                 'maxquery': user.query,
-                'query': user.query - user.usage,
+                'query': max(user.query - user.usage, 0),
                 'country': user.country,
                 'tutors': user.tutors,
                 'training_datas': user.training_datas,
@@ -380,7 +359,7 @@ def get_useraccount():
                 'city': user.city,
                 'role': user.role,
                 'maxquery': user.query,
-                'query': user.query - user.usage,
+                'query': max(user.query - user.usage, 0),
                 'country': user.country,
                 'tutors': user.tutors,
                 'training_datas': user.training_datas,
@@ -417,7 +396,7 @@ def get_useraccount():
                 'city': user.city,
                 'maxquery': user.query,
                 'role': user.role,
-                'query': user.query - user.usage,
+                'query': max(user.query - user.usage, 0),
                 'country': user.country,
                 'tutors': user.tutors,
                 'training_datas': user.training_datas,
@@ -569,14 +548,15 @@ def Change_user_limitation():
     user.training_datas = train
     user.tutors = tutors
     user.training_words = word
-    user.role = int(role)
-    if role == 7 or role == 6:
-        if role == 7:
-            delete_email_to_sendgrid_marketing(os.getenv('SENDGRID_FREE_TRIAL_LIST_ID'), user.email)
-            delete_email_to_sendgrid_marketing(os.getenv('SENDGRID_SUBSCRIPTION_USERS_LIST_ID'), user.email)
-            add_email_to_sendgrid_marketing(os.getenv('SENDGRID_ENTERPRISE_USERS_LIST_ID'), user.username, user.email)
-        if user.subscription_id is not None:
-            stripe.Subscription.cancel(user.subscription_id)
+    if user.role != int(role):
+        user.role = int(role)
+        if role == 7 or role == 6:
+            if role == 7:
+                delete_email_to_sendgrid_marketing(os.getenv('SENDGRID_FREE_TRIAL_LIST_ID'), user.email)
+                delete_email_to_sendgrid_marketing(os.getenv('SENDGRID_SUBSCRIPTION_USERS_LIST_ID'), user.email)
+                add_email_to_sendgrid_marketing(os.getenv('SENDGRID_ENTERPRISE_USERS_LIST_ID'), user.username, user.email)
+            if user.subscription_id is not None:
+                stripe.Subscription.cancel(user.subscription_id)
     db.session.commit()
     return jsonify({'success': True, 'code': 200, 'message': 'Updated Successfully'})
 

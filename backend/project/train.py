@@ -24,10 +24,6 @@ from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 import csv
-import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import sent_tokenize, word_tokenize
-from nltk import pos_tag
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service as ChromeService
@@ -36,6 +32,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from urllib.parse import urljoin
 from urllib.parse import urlparse
+import tiktoken
 
 load_dotenv()
 
@@ -45,9 +42,6 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
 pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
 openai.openai_api_key = OPENAI_API_KEY
-nltk.download('stopwords')
-nltk.download('punkt')
-nltk.download('averaged_perceptron_tagger')
 
 pretty.install()
 
@@ -55,8 +49,9 @@ train = Blueprint('train', __name__)
 
 
 def count_tokens(string):
-    tokens = nltk.word_tokenize(string)
-    return len(tokens)
+    encoding = tiktoken.get_encoding('cl100k_base')
+    num_tokens = len(encoding.encode(string))
+    return num_tokens
 
 
 def compare_token_words(ct, chatbot):
@@ -104,15 +99,6 @@ def parse_pdf(file: BytesIO) -> List[str]:
     return output
 
 
-# def parse_csv(file):
-#     data = file.read()
-#     string_data = str(data)
-#     string_data = correct_grammar(string_data)
-#     text = []
-#     # print(string_data)
-#     text.append(string_data)
-#     return text
-
 def parse_csv(file):
     df = pd.read_csv(file)
     # Convert DataFrame to list of dictionaries and then each dictionary to string
@@ -127,7 +113,7 @@ def parse_docx(file):
     doc = docx.Document(file)
     fullText = []
     for para in doc.paragraphs:
-        text = correct_grammar(para.text)
+        text = para.text
         fullText.append(text)
     return '\n'.join(fullText)
 
@@ -136,7 +122,7 @@ def parse_docx(file):
 
 def parse_srt(file):
     lines = file.read().decode("utf-8")
-    string = correct_grammar(lines)
+    string = lines
     text = []
     text.append(string)
     return text
@@ -151,7 +137,6 @@ def parse_epub(filename):
             soup = BeautifulSoup(bodyContent, 'html.parser')
             text_ = set()  # Store unique sentences using a set
             cleaned_text = soup.get_text()
-            cleaned_text = correct_grammar(cleaned_text)
             text_.add(cleaned_text)
 
             text.extend(text_)
@@ -192,42 +177,6 @@ def text_to_docs(text, filename, chat):
     return doc_chunks
 
 
-def correct_grammar(text):
-    # Tokenize the text into sentences
-    sentences = nltk.sent_tokenize(text)
-
-    # Correct each sentence separately
-    corrected_sentences = []
-    for sentence in sentences:
-        # Tokenize the sentence into words and tag their parts of speech
-        words = nltk.word_tokenize(sentence)
-        tagged_words = nltk.pos_tag(words)
-
-        # Perform grammar correction based on POS tags
-        corrected_words = []
-        for word, tag in tagged_words:
-            # Perform grammar correction as needed
-            # Example correction: singularize nouns, use proper verb forms, etc.
-            corrected_word = word  # Placeholder for correction logic
-            corrected_words.append(corrected_word)
-
-        # Reconstruct the corrected sentence
-        corrected_sentence = " ".join(corrected_words)
-        corrected_sentences.append(corrected_sentence)
-
-    correct_text = ""
-    tokens = 0
-    for sentence in corrected_sentences:
-        tokens += len(nltk.word_tokenize(sentence))
-        if tokens < 5000:
-            correct_text += ". " + sentence
-        else:
-            tokens = 0
-            correct_text += "\n" + sentence
-    return correct_text
-
-
-
 def web_scraping(url, max_depth=0, depth=0, visited_urls=set()):
     if depth > max_depth:  # Limit the depth to prevent infinite recursion
         return []
@@ -260,7 +209,6 @@ def web_scraping(url, max_depth=0, depth=0, visited_urls=set()):
 
         text = set()  # Store unique sentences using a set
         cleaned_text = soup.get_text()
-        cleaned_text = correct_grammar(cleaned_text)
         text.add(cleaned_text)
         
         # Get all links within the page
@@ -330,9 +278,10 @@ def insert_train_chat(chatbot, train_id):
         'chat_copyright': json.loads(current_chat.chat_copyright),
         'chat_button': json.loads(current_chat.chat_button),
         'bubble': json.loads(current_chat.bubble),
+        'inviteId': chat.inviteId,
+        'api_select': chat.api_select
     }
     return chat_data
-
 
 @train.route('/api/data/sendurl', methods=['POST'])
 def create_train_url():
@@ -477,11 +426,43 @@ def create_train_file():
         print(str(e))
         return {"success": False, "message": str(e)}, 400
 
-
-@train.errorhandler(RequestEntityTooLarge)
-def handle_request_entity_too_large(error):
-    return jsonify({'error_message': 'File size too large. Maximum allowed size is 16MB.'}), 413
-
+@train.route('/api/data/sendapi', methods=['POST'])
+def choose_api_for_account():
+    chatbot = request.json['chatbot']  # chatbot uuid
+    api = request.json['api'] # api (type: number)
+    chat = db.session.query(Chat).filter_by(uuid=chatbot).first()
+    chat.api_select = api
+    message = "select API" if api == 1 else "disable API"
+    db.session.commit()
+    new_chat = {
+        'id': chat.id,
+        'label': chat.label,
+        'description': chat.description,
+        'model': chat.model,
+        'conversation': chat.conversation,
+        'access': chat.access,
+        'creativity': chat.creativity,
+        'behavior': chat.behavior,
+        'behaviormodel': chat.behaviormodel,
+        'uuid': chat.uuid,
+        'train': json.loads(chat.train),
+        'chat_logo': json.loads(chat.chat_logo),
+        'chat_title': json.loads(chat.chat_title),
+        'chat_description': json.loads(chat.chat_description),
+        'chat_copyright': json.loads(chat.chat_copyright),
+        'chat_button': json.loads(chat.chat_button),
+        'bubble': json.loads(chat.bubble),
+        'inviteId': chat.inviteId,
+        'api_select': chat.api_select
+    }
+    
+    return jsonify({
+            'success': True,
+            'code': 200,
+            'data': new_chat,
+            'message': message,
+        })
+    
 
 @train.route('/api/data/gettraindatas', methods=['POST'])
 def get_traindatas():

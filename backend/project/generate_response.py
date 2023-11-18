@@ -1,5 +1,5 @@
 from langchain.chat_models import ChatOpenAI
-
+from typing import Sequence
 from threading import Thread
 from queue import Queue, Empty
 from langchain.llms import OpenAI
@@ -11,24 +11,41 @@ import os
 from langchain.vectorstores.pinecone import Pinecone
 from dotenv import load_dotenv
 from langchain.chains import LLMChain
-from langchain.prompts import PromptTemplate 
+from langchain.prompts import PromptTemplate, ChatPromptTemplate
 import pinecone
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 
+from pandasai import SmartDataframe
+from langchain.chat_models import ChatOpenAI
 
-from langchain.agents.agent_types import AgentType
-from langchain_experimental.agents.agent_toolkits import create_csv_agent, create_pandas_dataframe_agent
+from langchain.pydantic_v1 import BaseModel, Field
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 import tempfile
 import pandas as pd
+from .wonde import cleanup_empty_folders, check_files_in_folder
+import uuid
+import shutil
+import chardet
+from io import StringIO
 
 PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
 PINECONE_ENV = os.getenv('PINECONE_ENV')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME')
+
+
+class Person(BaseModel):
+    """Identifying information about a person."""
+
+    name: str = Field(..., description="The person's name")
+
+class People(BaseModel):
+    """Identifying information about all people in a text."""
+
+    people: Sequence[Person] = Field(..., description="The people in the text")
 
 class QueueCallback(BaseCallbackHandler):
     """Callback handler for streaming LLM responses to a queue."""
@@ -42,16 +59,37 @@ class QueueCallback(BaseCallbackHandler):
     def on_llm_end(self, *args, **kwargs: Any) -> None:
         return self.q.empty()
 
+def get_name_from_prompt(query):
+    llm = ChatOpenAI(model="gpt-4-1106-preview", temperature=0)
+    prompt = ChatPromptTemplate.from_messages(
+        [
+            (
+                "system",
+                "You are a world class algorithm for extracting information in structured formats.",
+            ),
+            (
+                "human",
+                "Use the given format to extract information from the following input: {input}",
+            ),
+            ("human", "Tip: Make sure to answer in the correct format"),
+        ]
+    )
+    runnable = create_structured_output_runnable(People, llm, prompt)
+    result = runnable.invoke({"input": query})
+    peoples = result.people
+    print(peoples)
+    names = [person.name for person in peoples]
+    print('THIS IS THE NAME: ', names)
+    return names
+
 def generate_message(query, behavior, temp, model, chat, template):
     load_dotenv()
     q = Queue()
     job_done = object()
-
+    
     prompt = PromptTemplate(
         input_variables=["context", "question"], template=template)
     chain_type_kwargs = {"prompt": prompt}
-
-    # langchain.llm_cache = GPTCache(init_gptcache)
 
     if model == "1":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo",
@@ -68,36 +106,22 @@ def generate_message(query, behavior, temp, model, chat, template):
                          callbacks=[QueueCallback(q)],
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "3":
-        llm = ChatOpenAI(model_name="gpt-4",
+        llm = ChatOpenAI(model_name="gpt-4-1106-preview",
                          temperature=temp,
                          streaming=True,
                          max_tokens=3000,
                          callbacks=[QueueCallback(q)],
                          openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
 
-    
-
-    # conversation = LLMChain(
-    #     llm=llm,
-    #     verbose=True,
-    #     prompt=prompt
-    # )
 
     embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
     docsearch = Pinecone.from_existing_index(
         index_name=PINECONE_INDEX_NAME, embedding=embeddings)
-    # _query = query
+
     docs = docsearch.similarity_search_with_score(" ", filter={"chat": str(chat)})
-    # print(docs)
+
     qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=docsearch.as_retriever(search_kwargs={'filter': {"chat": str(chat)}}), chain_type_kwargs=chain_type_kwargs)
     
-
-    # examples = ""
-    # for doc, _ in docs:dqa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=docsearch.as_retriever(search_kwargs={'filter': {"chat": str(chat)}}), chain_type_kwargs=chain_type_kwargs)
-    #     if doc.metadata['chat'] == str(chat):
-    #         doc.page_content = doc.page_content.replace('\n\n', ' ')
-    #         examples += doc.page_content + '\n'
-
     def task():
         try:
             qa.run(query)
@@ -141,19 +165,6 @@ def generate_AI_message(query, history, behavior, temp, model):
     prompt = PromptTemplate(
         input_variables=["history", "human_input", "behavior"], template=template)
 
-    # def get_hashed_name(name):
-    #     return hashlib.sha256(name.encode()).hexdigest()
-
-    # def init_gptcache(cache_obj: Cache, llm: str):
-    #     hashed_llm = get_hashed_name(llm)
-    #     cache_obj.init(
-    #         pre_embedding_func=get_prompt,
-    #         data_manager=manager_factory(
-    #             manager="map", data_dir=f"map/map_cache_{hashed_llm}"),
-    #     )
-
-    # langchain.llm_cache = GPTCache(init_gptcache)
-
     if model == "1":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo",
                          temperature=temp,
@@ -167,12 +178,13 @@ def generate_AI_message(query, history, behavior, temp, model):
                          callbacks=[QueueCallback(q)],
                          openai_api_key=os.getenv('OPENAI_API_KEY'))
     elif model == "3":
-        llm = ChatOpenAI(model_name="gpt-4",
+        llm = ChatOpenAI(model_name="gpt-4-1106-preview",
                          temperature=temp,
                          streaming=True,
                          callbacks=[QueueCallback(q)],
                          openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
-    
+
+
     conversation = LLMChain(
         llm=llm,
         verbose=True,
@@ -230,33 +242,6 @@ def generate_Bubble_message(query):
     )
     response = response.replace('"', '')
     return response
-
-def get_nouns_from_prompt(query):
-    load_dotenv()
-
-    template = '''Please tell me all the keypoints in this sentence as a array.
-    "{query}". 
-    Won't output any other sentences except the list.
-    '''
-
-    prompt = PromptTemplate(
-        input_variables=["query"], template=template)
-
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo",
-                     temperature=0,
-                     streaming=True,
-                     openai_api_key=os.getenv('OPENAI_API_KEY'))
-    conversation = LLMChain(
-        llm=llm,
-        verbose=True,
-        prompt=prompt
-    )
-    response = conversation.run(
-        query=query
-    )
-    print(response)
-    return response
-
 
 def generate_system_prompt_role(role):
     load_dotenv()
@@ -320,19 +305,30 @@ def generate_part_file(prompt, data):
     )
     return response
 
+def get_data_from_csv(file, prompt, message_id):
 
-def get_data_from_csv(file, prompt):
-  with tempfile.NamedTemporaryFile() as tmp:
-    file.save(tmp.name)
-    df = pd.read_csv(tmp.name)
-    df = df.dropna(how='all')
-    print(df)
-    agent = create_pandas_dataframe_agent(
-      ChatOpenAI(temperature=0, model="gpt-3.5-turbo"),
-      df,
-      verbose=True,
-      agent_type=AgentType.OPENAI_FUNCTIONS,
-    )
-    result = agent.run(prompt)
-    print('\n\n---> ', result)
-    return result
+    print('\n\n', file, '\n\n\n\n')
+    file_link = None
+    print(cleanup_empty_folders('exports/charts/'))
+    llm = ChatOpenAI(model_name="gpt-4-1106-preview", temperature=0, openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
+    
+    chart_id = str(uuid.uuid4())
+    
+    rawdata = file.read()
+    result = chardet.detect(rawdata)
+    file_content = rawdata.decode(result['encoding'])
+
+    df = pd.read_csv(StringIO(file_content))
+    full_chart_path = f"exports/charts/{message_id}/{chart_id}/"
+    agent = SmartDataframe(df, config={"llm":llm, 'verbose':True, 'max_retries': 6, 'save_charts':True, "custom_whitelisted_dependencies": ["any_module"], "enable_cache": True, "save_charts_path": full_chart_path})
+
+    try:
+        response = agent.chat(prompt)
+        if response is None:
+            file_link = f'![chart](http://18.133.183.77/image/{full_chart_path}/{check_files_in_folder(full_chart_path)})'
+        
+        print('\n\n', f'human: {prompt} \n output: {response}')
+        return f'human: {prompt} \n output: {response}', file_link
+    except Exception as e:
+        return str(e), file_link
+

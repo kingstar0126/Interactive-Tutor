@@ -85,6 +85,10 @@ def create_app():
     from .production import product as product_blueprint
     product_blueprint.db = db
     app.register_blueprint(product_blueprint)
+
+    from .wonde import wonde as wonde_blueprint
+    wonde_blueprint.db = db
+    app.register_blueprint(wonde_blueprint)
     
     return app
 
