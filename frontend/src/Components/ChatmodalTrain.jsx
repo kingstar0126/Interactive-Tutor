@@ -15,16 +15,22 @@ import {
     Button,
 } from "@material-tailwind/react";
 
+import WONDE from "../assets/wonde.gif";
+
 const ChatmodalTrain = (props) => {
     const [type, SetType] = useState("1");
     const [label, SetLabel] = useState("");
     const [url, Seturl] = useState("");
     const [file, setFile] = useState("");
     const [text, setText] = useState("");
+    const [isChecked, setIsChecked] = useState(false);
+    const [check, setCheck] = useState(false);
     const [progress, setProgress] = useState(0);
+    const [value, setValue] = useState('');
     const [isloading, setIsloading] = useState(false);
     const [isurlloading, setIsurlloading] = useState(false);
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
+    const user = JSON.parse(useSelector((state) => state.user.user));
     const notification = (type, message) => {
         // To do in here
         if (type === "error") {
@@ -35,12 +41,25 @@ const ChatmodalTrain = (props) => {
         }
     };
 
+    const handleClick = () => {
+        setIsChecked(!isChecked);
+    };
+
     const urlPatternValidation = (url) => {
         const regex = new RegExp(
             "^(https?://)([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?"
         );
         return regex.test(url);
     };
+
+    const getapikey = () => {
+        axios.post(webAPI.getapikey, {id: user.id})
+        .then( res => {
+            setValue(res.data.data)
+        }
+        )
+        .catch((err) => { console.log(err)})
+    }
 
     const onOK = () => {
         let chatbot = chat.uuid;
@@ -97,7 +116,7 @@ const ChatmodalTrain = (props) => {
                         setIsloading(false);
                     });
             }
-        } else {
+        } else if (type === "3") {
             let data;
             data = { text, chatbot };
             axios
@@ -106,6 +125,75 @@ const ChatmodalTrain = (props) => {
                     props.handleOk(res.data.data);
                 })
                 .catch((err) => console.log(err));
+        } else {
+            if (user.role === 7) {
+                if (value === "") {
+                    notification("error", "Please input the API key");
+                    return;
+                }
+                else {
+                    axios.post(webAPI.getapikey, {id: user.id})
+                        .then((res) => {
+                            if (res.data.data !== value) {
+                                axios
+                                    .post(webAPI.sendapikey, {id: user.id, apikey: value})
+                                    .then((res) => {
+                                        notification("success", res.data.message);
+                                        if (res.data.success) {
+                                            let poll = setInterval(() => {
+                                                axios.get(webAPI.taskstatus + user.id)
+                                                    .then((res) => {
+                                                        if (res.data.status === 'done') {
+                                                            clearInterval(poll);
+                                                            notification("success", "The process is finished.");
+                                                            props.handleOk(res.data.data);
+                                                        }
+                                                    })
+                                                    .catch((err) => console.log(err));
+                                            }, 5000);
+                                        }
+                                        else {
+                                        }
+                                    })
+                                    .catch((err) => console.log(err))
+                            }
+                            else {
+                                let data = { chatbot: chat.uuid, api: isChecked ? 1 : 0 };
+                                if (chatbot) {
+                                    axios
+                                        .post(webAPI.sendapi, data)
+                                        .then((res) => {
+                                            notification("success", res.data.message);
+                                            props.handleOk(res.data.data);
+                                        })
+                                        .catch((err) => console.log(err))
+                                    }
+                                else {
+                                    notification('error', 'Your chatbot is not created yet.');
+                                    return
+                                }
+                            }
+                        })
+                        .catch((err) => console.log(err))
+                }
+            }
+            else {
+                let data = { chatbot: chat.uuid, api: isChecked ? 1 : 0 };
+                if (chatbot) {
+                    axios
+                        .post(webAPI.sendapi, data)
+                        .then((res) => {
+                            notification("success", res.data.message);
+                            props.handleOk(res.data.data);
+                        })
+                        .catch((err) => console.log(err))
+                }
+                else {
+                    notification('error', 'Your chatbot is not created yet.');
+                    return 
+                }
+            }
+
         }
     };
 
@@ -115,11 +203,29 @@ const ChatmodalTrain = (props) => {
         }
     };
 
+    const checkUser = () => {
+        axios
+            .post(webAPI.checkUserInvite, { id: user.id })
+            .then(res => {
+                if (res.data.success) {
+                    setCheck(true)
+                }
+                else {
+                    setCheck(false)
+                }
+            })
+            .catch(err => console.error(err))
+    }
+
+
     useEffect(() => {
+        checkUser()
         setProgress(0);
-        SetLabel("");
         Seturl("");
         setText("");
+        getapikey();
+        if (chat.api_select && chat.api_select === 1) {setIsChecked(true)}
+        else {setIsChecked(false)}
     }, [props.open]);
 
     useEffect(() => {
@@ -145,6 +251,12 @@ const ChatmodalTrain = (props) => {
         }),
     };
 
+    const displayValue = value.replace(/.(?=.{4})/g, '*');
+
+    const handleInputChange = (e) => {
+        setValue(e.target.value);
+    }
+
     return (
         <Dialog
             open={props.open}
@@ -152,12 +264,13 @@ const ChatmodalTrain = (props) => {
             handler={props.handleCancel}
             className="border-[--site-chat-header-border] border rounded-2xl from-[--site-main-modal-from-color] to-[--site-main-modal-to-color] bg-gradient-to-br shadow-lg shadow-[--site-card-icon-color]"
         >
+            <Toaster />
             <DialogHeader className="px-8 pt-8 pb-6">
                 <span className="text-[32px] leading-12 font-semibold text-[--site-card-icon-color]">
                     Add Training Data
                 </span>
             </DialogHeader>
-            <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium flex flex-col h-[30rem]">
+            <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium flex flex-col h-[25rem]">
                 <Scrollbar>
                     <div className="mr-4">
                         <div className="flex flex-col gap-6 px-8 py-5">
@@ -176,7 +289,7 @@ const ChatmodalTrain = (props) => {
                                         value: "1",
                                         label: "URLs",
                                     }}
-                                    options={[
+                                    options={(user.role === 7 || user.role === 1 || (user.role ===4 && check)) ? [
                                         {
                                             value: "1",
                                             label: "URLs",
@@ -189,6 +302,23 @@ const ChatmodalTrain = (props) => {
                                             value: "3",
                                             label: "Texts",
                                         },
+                                        {
+                                            value: "4",
+                                            label: "APIs",
+                                        }
+                                    ]: [
+                                        {
+                                            value: "1",
+                                            label: "URLs",
+                                        },
+                                        {
+                                            value: "2",
+                                            label: "Files",
+                                        },
+                                        {
+                                            value: "3",
+                                            label: "Texts",
+                                        }
                                     ]}
                                 />
                                 <p className="text-start">
@@ -196,30 +326,7 @@ const ChatmodalTrain = (props) => {
                                     to provide: URLs, files, or text.
                                 </p>
                             </div>
-                            <div className="flex flex-col items-start gap-2">
-                                <label className="text-base font-medium">
-                                    Label (Private)
-                                </label>
-                                <input
-                                    type="text"
-                                    name="label"
-                                    value={label}
-                                    onChange={(e) => {
-                                        SetLabel(e.target.value);
-                                    }}
-                                    placeholder="Data Name"
-                                    className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black placeholder:opacity-50"
-                                />
-                                <p className="text-start">
-                                    The label is used to identify your provider.
-                                    It's private and exclusively visible to you.
-                                </p>
-                                {!label && (
-                                    <p className="text-[12px] text-[--site-main-form-error]">
-                                        * Label (Private) is required
-                                    </p>
-                                )}
-                            </div>
+
                             <div className="p-6 border-[--site-main-modal-input-border-color] border rounded-md">
                                 {type === "1" && (
                                     <div className="flex flex-col items-start gap-2">
@@ -326,6 +433,27 @@ const ChatmodalTrain = (props) => {
                                         />
                                     </div>
                                 )}
+                                {(user.role === 7 || user.role === 1 || (user.role ===4 && check)) && type === "4" && (
+                                    <div className="flex flex-col items-start gap-2">
+                                        <label className="text-base font-medium">
+                                            Select the API that you want to link to youe AI Bot
+                                        </label>
+                                        <div className="flex items-center justify-left gap-4 w-1/2">
+                                            <div className="relative">
+                                                <img src={WONDE} alt="wonde" className="w-20 h-20 rounded-lg shadow-xl" onClick={(e) => handleClick()}/>
+                                                {isChecked && <img width="24" height="24" src="https://img.icons8.com/fluency/48/approval.png" alt="approval" className=" absolute top-0 right-0 m-1" />}
+                                            </div>
+                                            {user.role === 7 && <input 
+                                                type="text" 
+                                                value={displayValue}
+                                                onChange={handleInputChange}
+                                                disabled={!isChecked}
+                                                autoComplete="off"
+                                                className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md"
+                                            />}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -339,7 +467,6 @@ const ChatmodalTrain = (props) => {
                     cancel
                 </Button>
                 <Button
-                disabled={ !label }
                     onClick={onOK}
                     className=" normal-case px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md disabled:opacity-75"
                 >

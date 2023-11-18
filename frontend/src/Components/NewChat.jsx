@@ -338,7 +338,6 @@ const NewChat = () => {
             .then(async (response) => {
                 let res = ''
                 if (!response.ok) {
-                    console.log(response)
                     if (response.status === 404) {
                         // Handle 404 error (Not found)
                         notification("error", "Not found tutor!")

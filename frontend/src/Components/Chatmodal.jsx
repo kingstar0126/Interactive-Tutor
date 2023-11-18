@@ -44,7 +44,7 @@ const Chatmodal = (props) => {
         },
         {
             value: "3",
-            label: "GPT 4 | 8K context",
+            label: "GPT 4 | 16K context",
         },
     ];
     const behaviorModelTheme = [

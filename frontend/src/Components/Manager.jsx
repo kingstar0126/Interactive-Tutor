@@ -62,8 +62,8 @@ const Manager = () => {
         axios
             .post(webAPI.getallusers, { id: user.id, search })
             .then((res) => {
-                let data = res.data.data.filter(item => item.role !== 0)
-                setData(data);
+                // let data = res.data.data.filter(item => item.role !== 0)
+                setData(res.data.data);
             })
             .catch((err) => console.error(err));
     };

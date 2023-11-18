@@ -1,4 +1,4 @@
-import toast, { Toaster } from "react-hot-toast";
+  import toast, { Toaster } from "react-hot-toast";
 import { React } from "react";
 
 const notification = (type, message) => {

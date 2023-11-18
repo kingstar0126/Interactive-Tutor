@@ -37,6 +37,10 @@ export const webAPI = {
     sendurl: SERVER_URL + "/api/data/sendurl",
     sendfile: SERVER_URL + "/api/data/sendfile",
     sendtext: SERVER_URL + "/api/data/sendtext",
+    sendapi: SERVER_URL + "/api/data/sendapi", //choose the API
+    sendapikey: SERVER_URL + "/api/wonde/sendapikey", //send the select API key. this is only user role == 7
+    getapikey: SERVER_URL + "/api/wonde/getapikey",
+    taskstatus: SERVER_URL + "/api/wonde/taskstatus/",
     gettraindatas: SERVER_URL + "/api/data/gettraindatas",
     deletetrain: SERVER_URL + "/api/data/deletetrain",
 
