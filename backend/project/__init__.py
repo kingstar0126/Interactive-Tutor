@@ -24,7 +24,10 @@ mail = Mail()
 db = SQLAlchemy()
 sendgrid_client = SendGridAPIClient(api_key=os.getenv('SENDGRID_API_KEY'))
 
+app = None
+
 def create_app():
+    global app
     app = Flask(__name__)
     CORS(app)
     

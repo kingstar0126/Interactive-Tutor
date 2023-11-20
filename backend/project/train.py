@@ -242,6 +242,10 @@ def create_train(label, _type, status, chat):
 
     return new_train.id
 
+def train_status_chanage(train_id):
+    train_data = db.session.query(Train).filter_by(id=train_id).first()
+    train_data.status = True
+    db.session.commit()
 
 def compare_role_user(chatbot):
     current_chat = db.session.query(Chat).filter_by(uuid=chatbot).first()
@@ -256,32 +260,35 @@ def compare_role_user(chatbot):
 
 def insert_train_chat(chatbot, train_id):
     current_chat = db.session.query(Chat).filter_by(uuid=chatbot).first()
-    traindata = json.loads(current_chat.train)
-    traindata.append(train_id)
-    current_chat.train = json.dumps(traindata)
-    db.session.commit()
-    chat_data = {
-        'id': current_chat.id,
-        'label': current_chat.label,
-        'description': current_chat.description,
-        'model': current_chat.model,
-        'conversation': current_chat.conversation,
-        'access': current_chat.access,
-        'creativity': current_chat.creativity,
-        'behavior': current_chat.behavior,
-        'behaviormodel': current_chat.behaviormodel,
-        'uuid': current_chat.uuid,
-        'train': json.loads(current_chat.train),
-        'chat_logo': json.loads(current_chat.chat_logo),
-        'chat_title': json.loads(current_chat.chat_title),
-        'chat_description': json.loads(current_chat.chat_description),
-        'chat_copyright': json.loads(current_chat.chat_copyright),
-        'chat_button': json.loads(current_chat.chat_button),
-        'bubble': json.loads(current_chat.bubble),
-        'inviteId': chat.inviteId,
-        'api_select': chat.api_select
-    }
-    return chat_data
+    if current_chat:
+        traindata = json.loads(current_chat.train)
+        traindata.append(train_id)
+        current_chat.train = json.dumps(traindata)
+        db.session.commit()
+        chat_data = {
+            'id': current_chat.id,
+            'label': current_chat.label,
+            'description': current_chat.description,
+            'model': current_chat.model,
+            'conversation': current_chat.conversation,
+            'access': current_chat.access,
+            'creativity': current_chat.creativity,
+            'behavior': current_chat.behavior,
+            'behaviormodel': current_chat.behaviormodel,
+            'uuid': current_chat.uuid,
+            'train': json.loads(current_chat.train),
+            'chat_logo': json.loads(current_chat.chat_logo),
+            'chat_title': json.loads(current_chat.chat_title),
+            'chat_description': json.loads(current_chat.chat_description),
+            'chat_copyright': json.loads(current_chat.chat_copyright),
+            'chat_button': json.loads(current_chat.chat_button),
+            'bubble': json.loads(current_chat.bubble),
+            'inviteId': current_chat.inviteId,
+            'api_select': current_chat.api_select
+        }
+        return chat_data
+    else:
+        return None
 
 @train.route('/api/data/sendurl', methods=['POST'])
 def create_train_url():
@@ -493,8 +500,9 @@ def delete_traindatas():
     train_ids.remove(id)
     chat.train = json.dumps(train_ids)
     source = db.session.query(Train).filter_by(id=id).first()
-    # delete vectors in the pinecone
-    delete_vectore(source.label, uuid)
+    if source.type != "API":
+        # delete vectors in the pinecone
+        delete_vectore(source.label, uuid)
     db.session.query(Train).filter_by(id=id).delete()
     db.session.commit()
     chat_data = {

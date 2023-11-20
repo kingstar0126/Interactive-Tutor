@@ -12,7 +12,7 @@ import time
 import os
 import json
 from .generate_response import generate_message, generate_AI_message, generate_Bubble_message, generate_part_file, get_data_from_csv, get_name_from_prompt
-from .wonde import answer_question
+from .wonde import answer_question, answer_question_e2b, answer_question_csv
 from .train import parse_pdf, parse_csv, parse_docx, extract_data_from_xlsx
 import re
 from typing import Sequence
@@ -236,7 +236,8 @@ def send_message():
     ######################################
     '''For the Wonde API'''
     if user.role == 7 and chat.api_select == 1:
-        context, file_link = answer_question(query, uuid, user.id)
+        # context, file_link = answer_question(query, uuid, user.id)
+        context, file_link = answer_question_csv(query, user.id)
     ######################################
 
     if user and user.query - user.usage <= 0:
@@ -283,7 +284,7 @@ def send_message():
 
     if file_link is not None:
         response = file_link
-    elif context is not None:
+    else:
         response = generate_message(
             query, behavior, temp, model, chat.uuid, template
         ) if behaviormodel != "Remove training data ring fencing and perform like ChatGPT" else generate_AI_message(
@@ -294,16 +295,16 @@ def send_message():
             temp, 
             model
         )
-
+    print(response)
     def generate():
         try:
             content = None
             print(context)
-            if file_link is not None and context is None:
-                content = file_link
-                yield content.encode('utf-8')
-            elif file_link is None and context is None:
+            if file_link is None and context is None:
                 content = 'There is not data about Wonde.'
+                yield content.encode('utf-8')
+            elif file_link is not None:
+                content = file_link
                 yield content.encode('utf-8')
             else:
                 content = None
