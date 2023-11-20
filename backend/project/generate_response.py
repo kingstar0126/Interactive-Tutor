@@ -18,7 +18,12 @@ from langchain.chains import RetrievalQA
 
 from pandasai import SmartDataframe
 from langchain.chat_models import ChatOpenAI
-
+from langchain.chains.openai_functions import (
+    create_openai_fn_chain,
+    create_openai_fn_runnable,
+    create_structured_output_chain,
+    create_structured_output_runnable,
+)
 from langchain.pydantic_v1 import BaseModel, Field
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
@@ -330,5 +335,5 @@ def get_data_from_csv(file, prompt, message_id):
         print('\n\n', f'human: {prompt} \n output: {response}')
         return f'human: {prompt} \n output: {response}', file_link
     except Exception as e:
-        return str(e), file_link
+        return str(e), file_link 
 

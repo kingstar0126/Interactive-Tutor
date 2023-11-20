@@ -5,7 +5,7 @@ import os
 import json
 import pandas as pd
 from dotenv import load_dotenv
-from .models import User
+from .models import User, Chat, Train
 from . import db
 import re
 import base64
@@ -14,28 +14,35 @@ import shutil
 from pandasai import SmartDataframe
 from langchain.chat_models import ChatOpenAI
 import threading
+from threading import Lock
+from . import app
+import numpy as np
 
+from langchain.agents import AgentType, initialize_agent
+from langchain.tools import E2BDataAnalysisTool
+
+from langchain_experimental.agents.agent_toolkits import create_csv_agent
+from .train import create_train, insert_train_chat, train_status_chanage
 
 load_dotenv()
 wonde = Blueprint('wonde', __name__)
 
-task_status = {}
+lock = Lock()
 
 @wonde.route('/api/wonde/sendapikey', methods=['POST'])
 def init_wonde_api():
     id = request.json.get('id')
     apikey = request.json.get('apikey')
+    chatbot = request.json.get('chatbot')
     user = db.session.query(User).filter_by(id=id).first()
     if user.role != 7:
         return jsonify({'success': False, 'message': 'You do not have permission'})
 
     headers = {'Authorization': f'Bearer {apikey}'}
-
     response = requests.get(
             f'https://api.wonde.com/v1.0/schools',
             headers=headers
         )
-    
     data = response.json().get('data')
     if data is None:
         return jsonify({'success': False, 'message': 'Your API key is not correct'})
@@ -45,22 +52,22 @@ def init_wonde_api():
     user.wonde_key = apikey
     db.session.commit()
 
-    def long_running_task(apikey, user):
-        global task_status
-        df = make_csv_file(apikey)
-        if df is not None:
-            df.to_csv(f'wonde_csvs/{user.id}students.csv', index=False)
-            task_status[user.id] = 'done'
+    train_id = create_train('Wonde API', 'API', False, chatbot)
+    chat = insert_train_chat(chatbot, train_id)
+    
+    def long_running_task(apikey, user_id, train_id):
+        with app.app_context():
+            lock.acquire()
+            try:
+                df = make_csv_file(apikey)
+                if df is not None:
+                    df.to_csv(f'wonde_csvs/{user_id}students.csv', index=False)
+                    train_status_chanage(train_id)
+            finally:
+                lock.release()
 
-    threading.Thread(target=long_running_task, args=(apikey, user)).start()
-    task_status[user.id] = 'processing'
-
-    return jsonify({'success': True, 'message': 'Successful! Now you can read the data from the Wonde.'})
-
-@wonde.route('/api/wonde/taskstatus/<id>', methods=['GET'])
-def get_task_status(id):
-    status = task_status.get(id, 'not started')
-    return jsonify({'status': status})
+    threading.Thread(target=long_running_task, args=(apikey, user.id, train_id)).start()
+    return jsonify({'success': True, 'message': 'Successful! Please wait to prepare the data', 'data': chat})
 
 
 @wonde.route('/api/wonde/getapikey', methods=['POST'])
@@ -71,6 +78,7 @@ def get_wonde_api():
     
     if apikey is None:
         apikey = ''
+    print(apikey)
     return jsonify({'success': True, 'data': apikey})
 
 def sanitize_data(d):
@@ -267,3 +275,81 @@ def answer_question(prompt, message_id, user_id):
             return str(e), file_link
     else:
         return None, None
+
+
+def answer_question_e2b(prompt, user_id):
+    e2b_data_analysis_tool = E2BDataAnalysisTool(
+        # Pass environment variables to the sandbox
+        env_vars={"E2B_API_KEY": os.getenv('E2B_API_KEY')},
+        on_stdout=lambda stdout: print("stdout:", stdout),
+        on_stderr=lambda stderr: print("stderr:", stderr),
+        on_artifact=save_artifact,
+    )
+
+    with open(f"wonde_csvs/{user_id}students.csv") as f:
+        remote_path = e2b_data_analysis_tool.upload_file(
+            file=f,
+            description="Data about students data including their forname, surname, achievements, results, etc.",
+        )
+        print(remote_path)
+    
+    tools = [e2b_data_analysis_tool.as_tool()]
+    llm = ChatOpenAI(model="gpt-4-1106-preview", temperature=0)
+    agent = initialize_agent(
+        tools,
+        llm,
+        agent=AgentType.OPENAI_FUNCTIONS,
+        verbose=True,
+        handle_parsing_errors=True,
+    )
+    result = agent.run(prompt)
+    print(result)
+    return result, None
+
+
+def save_artifact(artifact):
+    print("New matplotlib chart generated:", artifact.name)
+    # Download the artifact as `bytes` and leave it up to the user to display them (on frontend, for example)
+    file = artifact.download()
+    basename = os.path.basename(artifact.name)
+
+    # Save the chart to the `charts` directory
+    with open(f"exports/charts/{basename}", "wb") as f:
+        f.write(file)
+
+def answer_question_csv(prompt, user_id):
+    from .generate_response import get_name_from_prompt
+    search_keys = get_name_from_prompt(prompt)
+    dataframe = pd.read_csv(f"wonde_csvs/{user_id}students.csv")
+    dataframe = dataframe.apply(lambda x: x.astype(str).str.lower())
+
+    mask = pd.Series([False]*len(dataframe))
+
+    for key in search_keys:
+        for word in key.lower().split():
+            mask |= dataframe.apply(lambda row: row.str.contains(word).any(), axis=1)
+
+    result = dataframe[mask]
+    if result.empty:
+        result = dataframe.iloc[:, :3]
+
+    temp_csv_path = f'wonde_csvs/temp{user_id}students.csv'
+    print('Original :\n\n', result)
+    
+    result.replace('nan', np.nan, inplace=True)
+    result = result.dropna(axis=1, how='all')
+    result.to_csv(temp_csv_path)
+    print('Fixed :\n\n', result)
+    try:
+        agent = create_csv_agent(
+            ChatOpenAI(temperature=0, model="gpt-4-1106-preview"),
+            temp_csv_path,
+            verbose=True,
+            agent_type=AgentType.OPENAI_FUNCTIONS,
+        )
+        response = agent.run(prompt)
+        # response = ''
+    finally:
+        os.remove(temp_csv_path)
+
+    return response, None
