@@ -17,6 +17,10 @@ __pycache__/
 wonde_csvs/
 exports/
 build/
+pandasai.log
+cache/
+nohup.out
+application.log
 map/
 develop-eggs/
 dist/
