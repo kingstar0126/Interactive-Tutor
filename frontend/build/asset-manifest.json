@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.cc6af8c6.css",
-    "main.js": "/static/js/main.cc9b469a.js",
+    "main.css": "/static/css/main.d581550e.css",
+    "main.js": "/static/js/main.ed4310c9.js",
     "react-syntax-highlighter/refractor-core-import.js": "/static/js/react-syntax-highlighter/refractor-core-import.88909dc6.chunk.js",
     "react-syntax-highlighter_languages_refractor_abap.js": "/static/js/react-syntax-highlighter_languages_refractor_abap.94fc54b8.chunk.js",
     "react-syntax-highlighter_languages_refractor_actionscript.js": "/static/js/react-syntax-highlighter_languages_refractor_actionscript.96f15955.chunk.js",
@@ -154,10 +154,11 @@
     "react-syntax-highlighter_languages_refractor_xojo.js": "/static/js/react-syntax-highlighter_languages_refractor_xojo.cd196f77.chunk.js",
     "react-syntax-highlighter_languages_refractor_xquery.js": "/static/js/react-syntax-highlighter_languages_refractor_xquery.ffb03782.chunk.js",
     "react-syntax-highlighter_languages_refractor_yaml.js": "/static/js/react-syntax-highlighter_languages_refractor_yaml.c87b96a4.chunk.js",
+    "static/media/wonde.gif": "/static/media/wonde.3830b5722f2368f0dc96.gif",
     "static/media/logo.png": "/static/media/logo.3ad6aa2562266961ea19.png",
     "index.html": "/index.html",
-    "main.cc6af8c6.css.map": "/static/css/main.cc6af8c6.css.map",
-    "main.cc9b469a.js.map": "/static/js/main.cc9b469a.js.map",
+    "main.d581550e.css.map": "/static/css/main.d581550e.css.map",
+    "main.ed4310c9.js.map": "/static/js/main.ed4310c9.js.map",
     "refractor-core-import.88909dc6.chunk.js.map": "/static/js/react-syntax-highlighter/refractor-core-import.88909dc6.chunk.js.map",
     "react-syntax-highlighter_languages_refractor_abap.94fc54b8.chunk.js.map": "/static/js/react-syntax-highlighter_languages_refractor_abap.94fc54b8.chunk.js.map",
     "react-syntax-highlighter_languages_refractor_actionscript.96f15955.chunk.js.map": "/static/js/react-syntax-highlighter_languages_refractor_actionscript.96f15955.chunk.js.map",
@@ -312,7 +313,7 @@
     "react-syntax-highlighter_languages_refractor_yaml.c87b96a4.chunk.js.map": "/static/js/react-syntax-highlighter_languages_refractor_yaml.c87b96a4.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.cc6af8c6.css",
-    "static/js/main.cc9b469a.js"
+    "static/css/main.d581550e.css",
+    "static/js/main.ed4310c9.js"
   ]
 }
