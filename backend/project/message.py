@@ -11,13 +11,10 @@ from rich import print, pretty
 import time
 import os
 import json
-from .generate_response import generate_message, generate_AI_message, generate_Bubble_message, generate_part_file, get_data_from_csv, get_nouns_from_prompt
+from .generate_response import generate_message, generate_AI_message, generate_Bubble_message, generate_part_file, get_data_from_csv, get_name_from_prompt
+from .wonde import answer_question
 from .train import parse_pdf, parse_csv, parse_docx, extract_data_from_xlsx
 import re
-import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import sent_tokenize, word_tokenize
-from nltk import pos_tag
 from typing import Sequence
 from google.cloud import vision
 import tiktoken
@@ -40,40 +37,8 @@ def analyze_image_from_bytes(
 
     return client.annotate_image(request=request)
 
-
-def correct_grammar(text):
-    # Tokenize the text into sentences
-    sentences = nltk.sent_tokenize(text)
-
-    # Correct each sentence separately
-    corrected_sentences = []
-    for sentence in sentences:
-        # Tokenize the sentence into words and tag their parts of speech
-        words = nltk.word_tokenize(sentence)
-        tagged_words = nltk.pos_tag(words)
-
-        # Perform grammar correction based on POS tags
-        corrected_words = []
-        for word, tag in tagged_words:
-            # Perform grammar correction as needed
-            # Example correction: singularize nouns, use proper verb forms, etc.
-            corrected_word = word  # Placeholder for correction logic
-            corrected_words.append(corrected_word)
-
-        # Reconstruct the corrected sentence
-        corrected_sentence = " ".join(corrected_words)
-        corrected_sentences.append(corrected_sentence)
-
-    # Reconstruct the entire corrected text
-    corrected_text = " ".join(corrected_sentences)
-    return corrected_text
-
-
 @message.route('/api/search', methods=['POST'])
 def search_google():
-    nltk.download('stopwords')
-    nltk.download('punkt')
-    nltk.download('averaged_perceptron_tagger')
     api_key = os.getenv('GOOGLE_API')
     cse_id = os.getenv('GOOGLE_CX')
     search_query = request.form['query']
@@ -96,27 +61,9 @@ def search_google():
 
         # Extract the desired information from the webpage
         content_text = soup.get_text()
-        content_text = correct_grammar(content_text)
 
         content_text = content_text.strip()
         result['content'] = content_text
-        # sentences = sent_tokenize(content_text.lower())
-        # word_freq = nltk.FreqDist(word_tokenize(content_text))
-        # stop_words = set(stopwords.words('english'))
-
-        # ranking = {}
-        # for i, sentence in enumerate(sentences):
-        #     sentence_tokens = word_tokenize(sentence)
-        #     sentence_score = sum(
-        #         word_freq[token] for token in sentence_tokens if token not in stop_words)
-        #     ranking[i] = sentence_score
-
-        # top_sentences = sorted(ranking, key=ranking.get, reverse=True)[:10]
-
-        # summary = ''
-        # for i in top_sentences:
-        #     summary += ' '.join(sentence[i])
-        # result['summary'] = summary
         search_results.append(result)
     return {'results': search_results}
 
@@ -164,24 +111,6 @@ def get_query():
     else:
         return jsonify({'success': False, 'code': 404})
 
-
-@message.route('/api/testStreaming', methods=['POST'])
-def testStreaming():
-    id = request.form.get('id')
-    _message = request.form.get('_message')
-    behaviormodel = request.form.get('behaviormodel')
-    train = request.form.get('train')
-    model = request.form.get('model')
-    def generate():
-        for next_token, content in generate_AI_message(_message, [], '', 0.5, "3"):
-            data_chunk = content
-            yield (data_chunk).encode('utf-8')
-        final_data = json.dumps({"success": True, "data": content})
-        final_chunk = "FINAL:" + final_data
-        yield (final_chunk + "\n").encode('utf-8')
-    
-    return Response(stream_with_context(generate()), mimetype="text/event-stream", direct_passthrough=True, headers={'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
-
 def handle_image_uploads(request):
     if 'image' in request.files:
         images = request.files.getlist('image')  # Get all files under 'image' key
@@ -199,7 +128,7 @@ def analyze_images(images):
         ]
         response = analyze_image_from_bytes(image_bytes, feature_types)
         if response.text_annotations:
-            text += f"Image{index+1}: " + response.text_annotations[0].description + "\n"
+            text += f"Image text{index+1}: " + response.text_annotations[0].description + "\n"
     return text
 
 def handle_file_uploads(request):
@@ -215,9 +144,6 @@ def handle_file_uploads(request):
             data = parse_pdf(file)
         elif file.filename.endswith('.docx'):
             data = parse_docx(file)
-        elif file.filename.endswith('.csv'):
-            prompt = get_nouns_from_prompt(query)
-            data = [get_data_from_csv(file, f"Give information about these. Only output the data in the datasets and if there is not information, then output null. \n\n{prompt}")]
         else:
             return None
         return data
@@ -275,15 +201,23 @@ def send_message():
     model = request.form.get('model')
     text = handle_image_uploads(request)
     context = ""
+    file_link = None
+
+    if 'file' in request.files:
+        file = request.files['file']
+        if file:
+            if file.filename.endswith('.csv'):
+                context, file_link = get_data_from_csv(file, query, uuid)
+
 
     file_data = handle_file_uploads(request)
     if file_data is not None:
         file_text = split_files_result(file_data, 13000)
         print('\n\n', file_text)
         if len(file_text) > 1:
-            context = convert_large_data_to_small(file_text, query, 13000)
+            context += convert_large_data_to_small(file_text, query, 13000)
         else:
-            context = file_text[0]
+            context += file_text[0]
     current_message = db.session.query(Message).filter_by(uuid=uuid).first()
     if current_message is None:
         return jsonify({
@@ -298,6 +232,12 @@ def send_message():
     invite_account = db.session.query(Invite).filter_by(email=user.email).first()
     user_check = db.session.query(User).filter_by(id=invite_account.user_id).first() if invite_account else None
     user = user_check if user_check and user_check.role == 7 else user
+
+    ######################################
+    '''For the Wonde API'''
+    if user.role == 7 and chat.api_select == 1:
+        context, file_link = answer_question(query, uuid, user.id)
+    ######################################
 
     if user and user.query - user.usage <= 0:
         return jsonify({
@@ -327,8 +267,8 @@ def send_message():
     Human: {question}
     Assistant:"""
 
-    image_text = f"Image Text:{{ {text} }}" if text is not None else ''
-    context_text = f"Context: {context}" if file_data is not None else ''
+    image_text = f"Image Text:  {text}" if text is not None else ''
+    context_text = f"Context: {context}"
 
     template = f""" {behavior}
 
@@ -341,29 +281,44 @@ def send_message():
     {prompt_input}
     """
 
-    response = generate_message(
-        query, behavior, temp, model, chat.uuid, template
-    ) if behaviormodel != "Remove training data ring fencing and perform like ChatGPT" else generate_AI_message(
-        query, 
-        last_history, 
-        f"{behavior} \n\n======================\n\n {image_text}\n{context_text}" if image_text or context_text 
-        else f"{behavior}", 
-        temp, 
-        model
-    )
+    if file_link is not None:
+        response = file_link
+    elif context is not None:
+        response = generate_message(
+            query, behavior, temp, model, chat.uuid, template
+        ) if behaviormodel != "Remove training data ring fencing and perform like ChatGPT" else generate_AI_message(
+            query, 
+            last_history, 
+            f"{behavior} \n\n======================\n\n {image_text}\n{context_text}" if image_text or context_text 
+            else f"{behavior}", 
+            temp, 
+            model
+        )
 
     def generate():
-        content = None
-        for next_token, content in response:
-            data_chunk = next_token
-            yield (data_chunk).encode('utf-8')
-        
-        if content is not None:
-            history.append({"role": "human", "content": query})
-            history.append({"role": "ai", "content": content})  # Use the assigned value of content
-            current_message.message = json.dumps(history)
-            current_message.update_date = datetime.datetime.now()
-            db.session.commit()
+        try:
+            content = None
+            print(context)
+            if file_link is not None and context is None:
+                content = file_link
+                yield content.encode('utf-8')
+            elif file_link is None and context is None:
+                content = 'There is not data about Wonde.'
+                yield content.encode('utf-8')
+            else:
+                content = None
+                for next_token, content in response:
+                    data_chunk = next_token
+                    yield data_chunk.encode('utf-8')
+
+            if content is not None:
+                history.append({"role": "human", "content": query})
+                history.append({"role": "ai", "content": content})  
+                current_message.message = json.dumps(history)
+                current_message.update_date = datetime.datetime.now()
+                db.session.commit()
+        except Exception as e:
+            yield f"Error in generate function: {str(e)}".encode('utf-8')
     try:
         return Response(stream_with_context(generate()), mimetype="text/event-stream", direct_passthrough=True, headers={'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
     except Exception as e:
@@ -463,6 +418,13 @@ def get_messages():
 @message.route('/api/deletemessage', methods=['POST'])
 def delete_message():
     uuid = request.json['id']
+
+    ###################################
+    # Remove the chart folder of message.
+    if os.path.exists(path):
+        shutil.rmtree(f'exports/charts/{uuid}/')
+    ###################################
+
     db.session.query(Message).filter_by(uuid=uuid).delete()
     db.session.commit()
     _response = {

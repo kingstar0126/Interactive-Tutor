@@ -12,6 +12,7 @@ from .auth import generate_pin_password
 from werkzeug.utils import secure_filename
 from .generate_response import generate_system_prompt_role
 import datetime
+import shutil
 
 load_dotenv()
 
@@ -81,6 +82,7 @@ def add_chat():
         {'description': 'powered by interactive-tutor.com', 'status': 'false', 'color': '#ff0000'})
     chat_button = json.dumps({})
     bubble = json.dumps({"position": {"value": 0, "label": "Right"}})
+    api_select = 0
 
     user = db.session.query(User).filter_by(id=user_id).first()
     ct = db.session.query(Chat).filter_by(user_id=user_id).count() + 1
@@ -93,7 +95,7 @@ def add_chat():
                 'message': "You can no longer create AI Bots.",
             })
     new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
-                    access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button)
+                    access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button, api_select=api_select)
     db.session.add(new_chat)
     db.session.commit()
 
@@ -256,7 +258,8 @@ def get_chats():
                 'bubble': json.loads(chat.bubble),
                 'organization': organization,
                 'role': user.role,
-                'inviteId': chat.inviteId
+                'inviteId': chat.inviteId,
+                'api_select': chat.api_select
             }
             response.append(chat_data)
 
@@ -312,7 +315,10 @@ def get_chat_with_pin_organization():
         'chat_copyright': json.loads(chat.chat_copyright),
         'chat_button': json.loads(chat.chat_button),
         'bubble': json.loads(chat.bubble),
-        'role': user.role
+        'organization': organization,
+        'role': user.role,
+        'inviteId': chat.inviteId,
+        'api_select': chat.api_select
     }
 
     data = {
@@ -360,7 +366,8 @@ def get_chat():
             'bubble': json.loads(chat.bubble),
             'organization': organization,
             'role': user.role,
-            'inviteId': chat.inviteId
+            'inviteId': chat.inviteId,
+            'api_select': chat.api_select
         }
 
         data = {
@@ -383,6 +390,9 @@ def get_bubble(widgetID):
             'code': 404,
             'data': 'chat_data'
         })
+    user = db.session.query(User).filter_by(id=chat.user_id).first()
+    organization = db.session.query(Organization).filter_by(
+            email=user.email).first().uuid
     chat_data = {
         'id': chat.id,
         'label': chat.label,
@@ -401,6 +411,10 @@ def get_bubble(widgetID):
         'chat_copyright': json.loads(chat.chat_copyright),
         'chat_button': json.loads(chat.chat_button),
         'bubble': json.loads(chat.bubble),
+        'inviteId': chat.inviteId,
+        'organization': organization,
+        'role': user.role,
+        'api_select': chat.api_select,
         'embed_url': 'https://app.interactive-tutor.com/chat/embedding/',
     }
 
@@ -416,7 +430,21 @@ def get_bubble(widgetID):
 @chat.route('/api/deletechat/<int:id>', methods=['DELETE'])
 def delete_chat(id):
     if chat := db.session.query(Chat).filter_by(id=id).first():
-        db.session.query(Message).filter_by(chat_id=id).delete()
+        folders_to_remove = []
+        messages = db.session.query(Message).filter_by(chat_id=id).all()
+        for message in messages:
+            ###################################
+            # Remove the chart folder of message.
+            folder_path = f'exports/charts/{message.uuid}'
+            if os.path.exists(path):
+                folders_to_remove.append(folder_path)
+            message.delete()
+            ###################################
+        db.session.commit()
+        
+        for folder_path in folders_to_remove:
+            shutil.rmtree(folder_path)
+
         train_ids = json.loads(chat.train)
         # delete index in the pinecone
 

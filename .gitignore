@@ -17,7 +17,7 @@
 .env.development.local
 .env.test.local
 .env.production.local
-
+google-chrome-stable_current_amd64.deb
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

@@ -28,6 +28,8 @@ class User(UserMixin, db.Model):
     country = db.Column(db.String(255))
     status = db.Column(db.Integer)
     discount = db.Column(db.Boolean)
+    wonde_key = db.Column(db.String(255))
+
     create_date = db.Column(db.DateTime, default=datetime.utcnow)
     update_date = db.Column(
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -79,6 +81,8 @@ class Chat(UserMixin, db.Model):
     update_date = db.Column(
         db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
     uuid = db.Column(UUID(as_uuid=True), unique=True, default=uuid.uuid4)
+    # enterprise user select the API. 1 -> wonde
+    api_select = db.Column(db.Integer)
 
     def __repr__(self):
         return f'Chat {self.label}'
