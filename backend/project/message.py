@@ -201,6 +201,7 @@ def send_message():
     model = request.form.get('model')
     text = handle_image_uploads(request)
     context = ""
+    count = 0
     file_link = None
 
     if 'file' in request.files:
@@ -208,10 +209,12 @@ def send_message():
         if file:
             if file.filename.endswith('.csv'):
                 context, file_link = get_data_from_csv(file, query, uuid)
+                count = 18
 
 
     file_data = handle_file_uploads(request)
     if file_data is not None:
+        count = 18
         file_text = split_files_result(file_data, 13000)
         print('\n\n', file_text)
         if len(file_text) > 1:
@@ -238,6 +241,7 @@ def send_message():
     if user.role == 7 and chat.api_select == 1:
         # context, file_link = answer_question(query, uuid, user.id)
         context, file_link = answer_question_csv(query, user.id)
+        count = 20
     ######################################
 
     if user and user.query - user.usage <= 0:
@@ -247,12 +251,21 @@ def send_message():
             'message': 'Insufficient queries remaining!',
         })
     if model == '1':
-        user.usage += 1
+        if count:
+            count += 1
+        else:
+            count = 1
     elif model == '2':
-        user.usage += 3
+        if count:
+            count += 3
+        else:
+            count = 3
     elif model == '3':
-        user.usage += 15
-
+        if count:
+            count += 15
+        else:
+            count = 15
+    user.usage += count
     temp = current_message.creativity
     history = json.loads(current_message.message)
     last_history = history[-6:] if len(history) > 6 else history
