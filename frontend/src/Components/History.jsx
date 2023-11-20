@@ -96,7 +96,7 @@ const History = (props) => {
                                             />
                                             <div
                                                 name="human"
-                                                className="text-[--site-card-icon-color] whitespace-break-spaces w-full flex p-2"
+                                                className="text-[--site-card-icon-color] break-words whitespace-normal w-full flex p-2"
                                             >
                                                 <span>{data.content}</span>
                                             </div>
@@ -120,13 +120,13 @@ const History = (props) => {
                                             />
                                             <div
                                                 name="ai"
-                                                className="flex flex-col w-full p-2 whitespace-break-spaces"
+                                                className="flex flex-col w-full p-2 break-words whitespace-normal"
                                             >
                                                 <ReactMarkdown
                                                         remarkPlugins={[remarkGfm, remarkMath]}
                                                         rehypePlugins={[rehypeMathjax, rehypeRaw]}
                                                         children={data.content}
-                                                        className="whitespace-normal"
+                                                        className="break-words whitespace-normal"
                                                         components={{
                                                             code({ inline, className, children, ...props }) {
                                                                 const match = /language-(\w+)/.exec(className || '')

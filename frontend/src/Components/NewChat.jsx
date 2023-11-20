@@ -498,7 +498,7 @@ const NewChat = () => {
                                                 />
                                                 <div
                                                     name="human"
-                                                    className="flex flex-col w-full p-2 whitespace-break-spaces"
+                                                    className="flex flex-col w-full p-2 break-words whitespace-normal"
                                                 >
 
                                                     {data.images && data.images.length ? <div className="flex flex-wrap">{data.images.map((item) => {
@@ -539,13 +539,13 @@ const NewChat = () => {
                                                 />
                                                 <div
                                                     name="ai"
-                                                    className="flex flex-col w-full p-2 whitespace-break-spaces"
+                                                    className="flex flex-col w-full p-2 break-words whitespace-normal"
                                                 >
                                                     <ReactMarkdown
                                                         remarkPlugins={[remarkGfm, remarkMath]}
                                                         rehypePlugins={[rehypeMathjax, rehypeRaw]}
                                                         children={data.content}
-                                                        className="whitespace-normal"
+                                                        className="break-words whitespace-normal"
                                                         components={{
                                                             code({ inline, className, children, ...props }) {
                                                                 const match = /language-(\w+)/.exec(className || '')
@@ -609,13 +609,13 @@ const NewChat = () => {
                                         />
                                         <div
                                             name="ai"
-                                            className="flex flex-col w-full p-2 whitespace-break-spaces"
+                                            className="flex flex-col w-full p-2 break-words whitespace-normal"
                                         >
                                             <ReactMarkdown
                                                 remarkPlugins={[remarkGfm, remarkMath]}
                                                 rehypePlugins={[rehypeMathjax, rehypeRaw]}
                                                 children={streamData}
-                                                className="whitespace-normal"
+                                                className="break-words whitespace-normal"
                                                 components={{
                                                     code({ inline, className, children, ...props }) {
                                                         const match = /language-(\w+)/.exec(className || '')
