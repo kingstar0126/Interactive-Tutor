@@ -168,7 +168,7 @@ export default function Example() {
             value: "training Data",
             desc: (
                 <div className="border-[--site-chat-header-border] border rounded-xl from-[--site-main-modal-from-color] bg-gradient-to-br">
-                    <TraindataTable />
+                    <TraindataTable data={chat}/>
                 </div>
             ),
         },
