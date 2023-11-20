@@ -8,7 +8,7 @@ import { getchat } from "../redux/actions/chatAction";
 import toast, { Toaster } from "react-hot-toast";
 import { Typography, Chip, Button, Tooltip } from "@material-tailwind/react";
 
-export default function TraindataTable() {
+export default function TraindataTable(props) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [tableData, setTableData] = useState([]);
     const chatState = useSelector((state) => state.chat.chat);
@@ -21,7 +21,7 @@ export default function TraindataTable() {
 
     useEffect(() => {
         get_traindata();
-    }, []);
+    }, [props.data]);
 
     const getTotalPages = () => {
         return Math.ceil(trainData.length / itemsPerPage);
@@ -160,12 +160,18 @@ export default function TraindataTable() {
                                     </td>
                                     <td className={classes}>
                                         <div className="flex items-center justify-center h-full w-max">
-                                            <Chip
+                                            {data["status"] === "true" ? <Chip
                                                 variant="ghost"
                                                 size="sm"
                                                 value={"trained"}
                                                 className="bg-[--site-logo-text-color] text-[--site-card-icon-color] lowercase "
-                                            />
+                                            /> : <Chip
+                                            variant="ghost"
+                                            size="sm"
+                                            value={"processing"}
+                                            className="bg-[--site-warning-text-color] text-[--site-card-icon-color] lowercase "
+                                        />}
+                                        {console.log(data["status"], typeof(data["status"]))}
                                         </div>
                                     </td>
 

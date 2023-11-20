@@ -40,6 +40,7 @@ const ChatmodalTrain = (props) => {
             toast.success(message);
         }
     };
+    let poll;
 
     const handleClick = () => {
         setIsChecked(!isChecked);
@@ -136,24 +137,10 @@ const ChatmodalTrain = (props) => {
                         .then((res) => {
                             if (res.data.data !== value) {
                                 axios
-                                    .post(webAPI.sendapikey, {id: user.id, apikey: value})
+                                    .post(webAPI.sendapikey, {id: user.id, apikey: value, chatbot: chat.uuid})
                                     .then((res) => {
                                         notification("success", res.data.message);
-                                        if (res.data.success) {
-                                            let poll = setInterval(() => {
-                                                axios.get(webAPI.taskstatus + user.id)
-                                                    .then((res) => {
-                                                        if (res.data.status === 'done') {
-                                                            clearInterval(poll);
-                                                            notification("success", "The process is finished.");
-                                                            props.handleOk(res.data.data);
-                                                        }
-                                                    })
-                                                    .catch((err) => console.log(err));
-                                            }, 5000);
-                                        }
-                                        else {
-                                        }
+                                        props.handleOk(res.data.data);
                                     })
                                     .catch((err) => console.log(err))
                             }
@@ -224,6 +211,7 @@ const ChatmodalTrain = (props) => {
         Seturl("");
         setText("");
         getapikey();
+        clearInterval(poll);
         if (chat.api_select && chat.api_select === 1) {setIsChecked(true)}
         else {setIsChecked(false)}
     }, [props.open]);
@@ -251,7 +239,7 @@ const ChatmodalTrain = (props) => {
         }),
     };
 
-    const displayValue = value.replace(/.(?=.{4})/g, '*');
+    // const displayValue = value.replace(/.(?=.{4})/g, '*');
 
     const handleInputChange = (e) => {
         setValue(e.target.value);
@@ -445,7 +433,7 @@ const ChatmodalTrain = (props) => {
                                             </div>
                                             {user.role === 7 && <input 
                                                 type="text" 
-                                                value={displayValue}
+                                                value={value}
                                                 onChange={handleInputChange}
                                                 disabled={!isChecked}
                                                 autoComplete="off"
