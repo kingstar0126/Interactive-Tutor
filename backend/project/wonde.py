@@ -38,6 +38,9 @@ def init_wonde_api():
     if user.role != 7:
         return jsonify({'success': False, 'message': 'You do not have permission'})
 
+    # user.wonde_key = apikey
+    # db.session.commit()
+
     headers = {'Authorization': f'Bearer {apikey}'}
     response = requests.get(
             f'https://api.wonde.com/v1.0/schools',
