@@ -431,14 +431,14 @@ const ChatmodalTrain = (props) => {
                                                 <img src={WONDE} alt="wonde" className="w-20 h-20 rounded-lg shadow-xl" onClick={(e) => handleClick()}/>
                                                 {isChecked && <img width="24" height="24" src="https://img.icons8.com/fluency/48/approval.png" alt="approval" className=" absolute top-0 right-0 m-1" />}
                                             </div>
-                                            {user.role === 7 && <input 
+                                            {user.role === 7 ? <input 
                                                 type="text" 
                                                 value={value}
                                                 onChange={handleInputChange}
                                                 disabled={!isChecked}
                                                 autoComplete="off"
                                                 className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md"
-                                            />}
+                                            /> : <span className="w-full px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md">You cann't enter API key</span>}
                                         </div>
                                     </div>
                                 )}
