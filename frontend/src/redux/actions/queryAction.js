@@ -9,7 +9,7 @@ export const getquery = (dispatch, data) => {
             if (res.data.success)
                 dispatch({
                     type: SET_QUERY,
-                    payload: res.data.query - res.data.usage,
+                    payload: Math.max(res.data.query - res.data.usage, 0),
                 });
         })
         .catch((err) => {
