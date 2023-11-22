@@ -71,8 +71,8 @@ def create_assistant_file(filepath):
             purpose="assistants",
         )
         assistant = client.beta.assistants.create(
-            name="Math Tutor",
-            instructions="You are a personal math tutor. Answer questions briefly, in a sentence or less.",
+            name="Data Analtze",
+            instructions="You are a personal data analytics instructor. Please provide detailed information about the prompt in the uploaded file.",
             model="gpt-4-1106-preview",
             tools=[{"type": "code_interpreter"}],
             file_ids=[_file.id]
@@ -80,10 +80,14 @@ def create_assistant_file(filepath):
         return assistant.id, _file.id
 
 def delete_assistant_file(assistant_id, file_id):
-    client.beta.assistants.files.delete(
+    response = client.beta.assistants.files.delete(
                 assistant_id=assistant_id,
                 file_id=file_id
             )
+    client.files.delete(file_id)
+    print(response, '\n', assistant_id, '\n', file_id)
+    # assistants = client.beta.assistants.list()    
+    # delete_all_assistants(assistants)
     client.beta.assistants.delete(assistant_id)
 
 def ask_question(assistant_id, prompt, thread, uuid):
@@ -97,3 +101,12 @@ def ask_question(assistant_id, prompt, thread, uuid):
     return text, file_path, thread
 
 #############################################
+
+def delete_all_assistants(items):
+    assistants = items.data
+    for assistant in assistants:
+        if assistant.file_ids:
+            file_id = assistant.file_ids[0]
+            client.beta.assistants.files.delete(assistant_id=assistant.id, file_id=file_id)
+
+        client.beta.assistants.delete(assistant.id)
