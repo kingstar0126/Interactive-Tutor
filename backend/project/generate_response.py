@@ -1,3 +1,8 @@
+import os
+import json
+import base64
+import requests
+import langchain
 from langchain.chat_models import ChatOpenAI
 from typing import Sequence
 from threading import Thread
@@ -5,9 +10,6 @@ from queue import Queue, Empty
 from langchain.llms import OpenAI
 from langchain.callbacks.base import BaseCallbackHandler
 from typing import Any, Callable
-import json
-import langchain
-import os
 from langchain.vectorstores.pinecone import Pinecone
 from dotenv import load_dotenv
 from langchain.chains import LLMChain
@@ -16,8 +18,6 @@ import pinecone
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 
-from pandasai import SmartDataframe
-from langchain.chat_models import ChatOpenAI
 from langchain.chains.openai_functions import (
     create_openai_fn_chain,
     create_openai_fn_runnable,
@@ -25,16 +25,8 @@ from langchain.chains.openai_functions import (
     create_structured_output_runnable,
 )
 from langchain.pydantic_v1 import BaseModel, Field
-from werkzeug.exceptions import RequestEntityTooLarge
-from werkzeug.utils import secure_filename
-from werkzeug.datastructures import FileStorage
-import tempfile
-import pandas as pd
-from .wonde import cleanup_empty_folders, check_files_in_folder
-import uuid
-import shutil
-import chardet
-from io import StringIO
+
+
 
 PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
 PINECONE_ENV = os.getenv('PINECONE_ENV')
@@ -87,8 +79,12 @@ def get_name_from_prompt(query):
     print('THIS IS THE NAME: ', names)
     return names
 
-def generate_message(query, behavior, temp, model, chat, template):
+def generate_message(query, behavior, temp, model, chat, template, openai_api_key):
     load_dotenv()
+
+    if openai_api_key is None:
+        openai_api_key = os.getenv('OPENAI_API_KEY')
+
     q = Queue()
     job_done = object()
     
@@ -102,24 +98,24 @@ def generate_message(query, behavior, temp, model, chat, template):
                          streaming=True,
                          max_tokens=500,
                          callbacks=[QueueCallback(q)],
-                         openai_api_key=os.getenv('OPENAI_API_KEY'))
+                         openai_api_key=openai_api_key)
     elif model == "2":
-        llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k",
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo-1106",
                          temperature=temp,
                          streaming=True,
                          max_tokens=3000,
                          callbacks=[QueueCallback(q)],
-                         openai_api_key=os.getenv('OPENAI_API_KEY'))
+                         openai_api_key=openai_api_key)
     elif model == "3":
         llm = ChatOpenAI(model_name="gpt-4-1106-preview",
                          temperature=temp,
                          streaming=True,
                          max_tokens=3000,
                          callbacks=[QueueCallback(q)],
-                         openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
+                         openai_api_key=openai_api_key)
 
 
-    embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
+    embeddings = OpenAIEmbeddings(openai_api_key=os.getenv("OPENAI_API_KEY"))
     docsearch = Pinecone.from_existing_index(
         index_name=PINECONE_INDEX_NAME, embedding=embeddings)
 
@@ -143,7 +139,7 @@ def generate_message(query, behavior, temp, model, chat, template):
     # Get each new token from the queue and yield for our generator
     while True:
         try:
-            next_token = q.get(True, timeout=1)
+            next_token = q.get(True, timeout=0.5)
             if next_token is job_done:
                 break
             content += next_token
@@ -152,8 +148,12 @@ def generate_message(query, behavior, temp, model, chat, template):
             continue
 
 
-def generate_AI_message(query, history, behavior, temp, model):
+def generate_AI_message(query, history, behavior, temp, model, openai_api_key):
     load_dotenv()
+
+    if openai_api_key is None:
+        openai_api_key = os.getenv('OPENAI_API_KEY')
+
 
     q = Queue()
     job_done = object()
@@ -175,19 +175,19 @@ def generate_AI_message(query, history, behavior, temp, model):
                          temperature=temp,
                          streaming=True,
                          callbacks=[QueueCallback(q)],
-                         openai_api_key=os.getenv('OPENAI_API_KEY'))
+                         openai_api_key=openai_api_key)
     elif model == "2":
-        llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k",
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo-1106",
                          temperature=temp,
                          streaming=True,
                          callbacks=[QueueCallback(q)],
-                         openai_api_key=os.getenv('OPENAI_API_KEY'))
+                         openai_api_key=openai_api_key)
     elif model == "3":
         llm = ChatOpenAI(model_name="gpt-4-1106-preview",
                          temperature=temp,
                          streaming=True,
                          callbacks=[QueueCallback(q)],
-                         openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
+                         openai_api_key=openai_api_key)
 
 
     conversation = LLMChain(
@@ -216,7 +216,7 @@ def generate_AI_message(query, history, behavior, temp, model):
     # Get each new token from the queue and yield for our generator
     while True:
         try:
-            next_token = q.get(True, timeout=1)
+            next_token = q.get(True, timeout=0.5)
             if next_token is job_done:
                 break
             content += next_token
@@ -297,7 +297,7 @@ def generate_part_file(prompt, data):
     prompt = PromptTemplate(
         input_variables=["text", "prompt"], template=template)
 
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo-16k",
+    llm = ChatOpenAI(model_name="gpt-3.5-turbo-1106",
                      temperature=0.2,
                      openai_api_key=os.getenv('OPENAI_API_KEY'))
     conversation = LLMChain(
@@ -310,30 +310,36 @@ def generate_part_file(prompt, data):
     )
     return response
 
-def get_data_from_csv(file, prompt, message_id):
+def encode_image(image_file):
+    return base64.b64encode(image_file.read()).decode('utf-8')
 
-    print('\n\n', file, '\n\n\n\n')
-    file_link = None
-    print(cleanup_empty_folders('exports/charts/'))
-    llm = ChatOpenAI(model_name="gpt-4-1106-preview", temperature=0, openai_api_key=os.getenv('OPENAI_API_KEY_PRO'))
-    
-    chart_id = str(uuid.uuid4())
-    
-    rawdata = file.read()
-    result = chardet.detect(rawdata)
-    file_content = rawdata.decode(result['encoding'])
-
-    df = pd.read_csv(StringIO(file_content))
-    full_chart_path = f"exports/charts/{message_id}/{chart_id}/"
-    agent = SmartDataframe(df, config={"llm":llm, 'verbose':True, 'max_retries': 6, 'save_charts':True, "custom_whitelisted_dependencies": ["any_module"], "enable_cache": True, "save_charts_path": full_chart_path})
-
-    try:
-        response = agent.chat(prompt)
-        if response is None:
-            file_link = f'![chart](http://18.133.183.77/image/{full_chart_path}/{check_files_in_folder(full_chart_path)})'
-        
-        print('\n\n', f'human: {prompt} \n output: {response}')
-        return f'human: {prompt} \n output: {response}', file_link
-    except Exception as e:
-        return str(e), file_link 
-
+def image_understanding(image_file, prompt):
+    base64_image = encode_image(image_file)
+    openai_api_key = os.getenv('OPENAI_API_KEY')
+    headers = {"Content-Type": "application/json","Authorization": f"Bearer {openai_api_key}"}
+    payload = {
+        "model": "gpt-4-vision-preview",
+        #"response_format" : { "type": "json_object" },
+        "messages": [
+            {
+            "role": "user",
+            "content": [
+                    {
+                        "type": "text",
+                        "text": prompt
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{base64_image}"
+                            }
+                    }
+                ]
+            }
+        ],
+        "max_tokens": 3000
+    }
+    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
+    response = response.json()
+    data = response['choices'][0]['message']['content']
+    return(data)

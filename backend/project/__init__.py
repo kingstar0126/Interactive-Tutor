@@ -31,14 +31,18 @@ def create_app():
     app = Flask(__name__)
     CORS(app)
 
-    database_credential = os.getenv('DATABASE')
+    db_username = os.getenv('DATABASE_NAME')
+    db_password = os.getenv('DATABASE_PASSWORD')
+    db_host = os.getenv('DATABASE_HOST')
+    db_name = os.getenv('DATABASE_DB')
+    db_port = os.getenv('DATABASE_PORT')
     handler = logging.FileHandler('application.log')
     handler.setLevel(logging.ERROR)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     app.logger.addHandler(handler)
     app.config['SECRET_KEY'] = 'key-goes-here'
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql+psycopg2://{database_credential}:{database_credential}@localhost:5432/{database_credential}'
+    app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql+psycopg2://{db_username}:{db_password}@{db_host}:{db_port}/{db_name}'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['MAIL_SERVER'] = 'smtp.gmail.com'
     app.config['MAIL_PORT'] = 587

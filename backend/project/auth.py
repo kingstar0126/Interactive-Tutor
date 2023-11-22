@@ -456,44 +456,45 @@ def get_all_useraccount():
     
     else:
         invite_users = db.session.query(Invite).filter_by(user_id=id).all()
+        
         for invite_user in invite_users:
             if invite_user.status: #already signed up user
                 _user = db.session.query(User).filter_by(email=invite_user.email).first()
                 _chat = []
+                if _user is not None:
+                    if search:
+                        chats = db.session.query(Chat).filter(
+                            Chat.inviteId == id, 
+                            Chat.user_id == _user.id, 
+                            or_(
+                                Chat.label.ilike(f"%{search}%"),
+                                Chat.description.ilike(f"%{search}%"),
+                                Chat.model.ilike(f"%{search}%")
+                            )
+                        ).all()
+                    else:
+                        chats = db.session.query(Chat).filter_by(inviteId=id, user_id=_user.id).all()
                 
-                if search:
-                    chats = db.session.query(Chat).filter(
-                        Chat.inviteId == id, 
-                        Chat.user_id == _user.id, 
-                        or_(
-                            Chat.label.ilike(f"%{search}%"),
-                            Chat.description.ilike(f"%{search}%"),
-                            Chat.model.ilike(f"%{search}%")
-                        )
-                    ).all()
-                else:
-                    chats = db.session.query(Chat).filter_by(inviteId=id, user_id=_user.id).all()
-                
-                for chat in chats:
-                    chat_data = {
-                        'id': chat.id,
-                        'label': chat.label,
-                        'description': chat.description,
-                        'model': chat.model,
-                        'user_id': chat.user_id,
-                        'access': chat.access,
-                        'uuid': chat.uuid,
+                    for chat in chats:
+                        chat_data = {
+                            'id': chat.id,
+                            'label': chat.label,
+                            'description': chat.description,
+                            'model': chat.model,
+                            'user_id': chat.user_id,
+                            'access': chat.access,
+                            'uuid': chat.uuid,
+                        }
+                        _chat.append(chat_data)
+                    new_user = {
+                        'email': _user.email,
+                        'username': _user.username,
+                        'query': _user.query,
+                        'usage': _user.usage,
+                        'chats': _chat,
+                        'status': invite_user.status
                     }
-                    _chat.append(chat_data)
-                new_user = {
-                    'email': _user.email,
-                    'username': _user.username,
-                    'query': _user.query,
-                    'usage': _user.usage,
-                    'chats': _chat,
-                    'status': invite_user.status
-                }
-                current_users.append(new_user)
+                    current_users.append(new_user)
             else:                   # not sign up user
                 new_user = {
                     'email': invite_user.email,
