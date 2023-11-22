@@ -438,7 +438,7 @@ def delete_chat(id):
             folder_path = f'exports/charts/{message.uuid}'
             if os.path.exists(folder_path):
                 folders_to_remove.append(folder_path)
-            message.delete()
+            db.session.delete(message)
             ###################################
         db.session.commit()
         

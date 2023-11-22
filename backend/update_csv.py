@@ -7,15 +7,6 @@ import click
 app = create_app()
 app.app_context().push()
 
-@click.command()
-def update_data():
-    users = db.session.query(User).all()
-    for user in users:
-        if user.role == 7 and user.wonde_key is not None:
-            df = make_csv_file(user.wonde_key)
-            if df is not None:
-                df.to_csv(f'wonde_csvs/{user.id}students.csv', index=False)
-
 def compare_month():
     today = datetime.today()
     is_new_month = today.day == 1
@@ -38,5 +29,5 @@ def compare_month():
             db.session.commit()
 
 if __name__ == "__main__":
-    update_data()
+    # update_data()
     compare_month()
