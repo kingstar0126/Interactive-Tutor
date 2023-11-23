@@ -417,8 +417,19 @@ const NewChat = () => {
 
     const handleUploadFile = (e) => {
         if (e.target.files) {
+            const maxSize = 2 * 1024 * 1024;
             const files = Array.from(e.target.files);
-            setFiles(files)
+            const areFilesValid = files.every(file => {
+                if (file.size > maxSize) {
+                    notification('error', 'File is too large, please upload a file less than 2MB');
+                    return false;
+                } else {
+                    return true;
+                }
+            });
+            if (areFilesValid) {
+                setFiles(files);
+            }
         }
         e.target.value = null;
     };
