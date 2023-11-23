@@ -1,6 +1,7 @@
 import json
 from dotenv import load_dotenv
 import os
+from .wonde import cleanup_empty_folders
 from openai import OpenAI
 import time
 import uuid
@@ -31,6 +32,7 @@ def show_answer(response, thread, uuid):
     m = response.data[-1]
     last_printed_text = None # Variable to remember the last printed text
     file_path = None
+    cleanup_empty_folders('exports/charts/')
     full_chart_path = f"exports/charts/{uuid}"
     if not os.path.exists(full_chart_path):
         os.makedirs(full_chart_path)
@@ -99,6 +101,18 @@ def ask_question(assistant_id, prompt, thread, uuid):
     response = get_response(thread)
     text, file_path = show_answer(response, thread, uuid)
     return text, file_path, thread
+
+def create_image_file(prompt):
+    response = client.images.generate(
+        model="dall-e-3",
+        style="natural",
+        prompt=prompt,
+        size="1024x1024",
+        quality="standard",
+        n=1
+    )
+    image_url=response.data[0].url
+    return f"![image]({image_url})"
 
 #############################################
 
