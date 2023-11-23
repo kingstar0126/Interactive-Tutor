@@ -109,10 +109,12 @@ def create_image_file(prompt):
         prompt=prompt,
         size="1024x1024",
         quality="standard",
+        response_format="b64_json",
         n=1
     )
-    image_url=response.data[0].url
-    return f"![image]({image_url})"
+    print(response)
+    image_url=response.data[0].b64_json
+    return f"![image](data:image/jpeg;base64,{image_url})"
 
 #############################################
 
