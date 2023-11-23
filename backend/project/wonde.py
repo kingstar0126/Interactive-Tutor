@@ -11,7 +11,6 @@ import re
 import base64
 import uuid
 import shutil
-from pandasai import SmartDataframe
 from langchain.chat_models import ChatOpenAI
 import threading
 from threading import Lock
@@ -151,7 +150,7 @@ def answer_question(prompt, message_id, user_id):
         try:
             response = agent.chat(prompt)
             if response is None:
-                file_link = f'![chart](http://18.133.183.77/image/{full_chart_path}/{check_files_in_folder(full_chart_path)})'
+                file_link = f'![chart](https://app.interactive-tutor.com/image/{full_chart_path}/{check_files_in_folder(full_chart_path)})'
             
             print('\n\n', f'human: {prompt} \n output: {response}')
             return f'human: {prompt} \n output: {response}', file_link
