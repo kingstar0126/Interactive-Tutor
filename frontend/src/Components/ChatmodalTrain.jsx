@@ -211,6 +211,7 @@ const ChatmodalTrain = (props) => {
         Seturl("");
         setText("");
         getapikey();
+        SetType(0)
         clearInterval(poll);
         if (chat.api_select && chat.api_select === 1) {setIsChecked(true)}
         else {setIsChecked(false)}
@@ -424,7 +425,7 @@ const ChatmodalTrain = (props) => {
                                 {(user.role === 7 || user.role === 1 || (user.role ===4 && check)) && type === "4" && (
                                     <div className="flex flex-col items-start gap-2">
                                         <label className="text-base font-medium">
-                                            Select the API that you want to link to youe AI Bot
+                                            The admin for your schools needs to connect the API
                                         </label>
                                         <div className="flex items-center justify-left gap-4 w-1/2">
                                             <div className="relative">
