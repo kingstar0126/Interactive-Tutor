@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { BsSendPlus, BsUpload } from "react-icons/bs";
+import { BsSendPlus, BsUpload, BsDownload } from "react-icons/bs";
 import { BiImageAdd } from "react-icons/bi";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
@@ -438,6 +438,16 @@ const NewChat = () => {
         setFiles(oldFiles => oldFiles.filter((file, idx) => idx !== index));
     }
 
+    const downloadImage = (src) => {
+        const link = document.createElement('a');
+        link.href = src;
+        link.download = 'image.jpg';
+        link.target = "_blank";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     return (
         <div
             style={{
@@ -599,6 +609,16 @@ const NewChat = () => {
                                                                         {children}
                                                                     </a>
                                                                 );
+                                                            },
+                                                            img({node, src, alt}) {
+                                                                return (
+                                                                    <div className="relative">
+                                                                        <img src={src} alt={alt} />
+                                                                        <button onClick={() => downloadImage(src)} className="absolute top-2 right-2 text-black bg-transparent border-none">
+                                                                            <BsDownload />
+                                                                        </button>
+                                                                    </div>
+                                                                )
                                                             }
                                                         }}
                                                     />
