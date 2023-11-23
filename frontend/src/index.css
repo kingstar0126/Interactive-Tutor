@@ -39,11 +39,6 @@ h4 {
     font-size: 1.25em;
 }
 
-p {
-    font-size: 1em;
-    margin-bottom: 1em;
-}
-
 ul {
     list-style: disc;;
     padding-left: 20px;
@@ -59,10 +54,6 @@ ol {
 a {
     color: #007bff;
     text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
 }
 
 /* Responsive images */
