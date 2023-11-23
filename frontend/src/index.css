@@ -39,11 +39,6 @@ h4 {
     font-size: 1.25em;
 }
 
-p {
-    font-size: 1em;
-    margin-bottom: 1em;
-}
-
 ul {
     list-style: disc;;
     padding-left: 20px;
@@ -61,39 +56,10 @@ a {
     text-decoration: none;
 }
 
-a:hover {
-    text-decoration: underline;
-}
-
 /* Responsive images */
 img {
     max-width: 100%;
     height: auto;
-}
-
-h1 {
-    font-size: 2em;
-    font-weight: bold;
-}
-
-h2 {
-    font-size: 1.5em;
-    font-weight: bold;
-}
-
-h3 {
-    font-size: 1.17em;
-    font-weight: bold;
-}
-
-h4 {
-    font-size: 1em;
-    font-weight: bold;
-}
-
-p {
-    font-size: 1em;
-    font-weight: normal;
 }
 
 :root {
