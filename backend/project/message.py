@@ -15,7 +15,7 @@ import json
 from .generate_response import generate_message, generate_AI_message, generate_Bubble_message, generate_part_file, get_name_from_prompt, image_understanding
 from .wonde import answer_question_csv
 from .train import parse_pdf, parse_csv, parse_docx, extract_data_from_xlsx
-from .assistant import create_assistant_file, delete_assistant_file, ask_question
+from .assistant import create_assistant_file, delete_assistant_file, ask_question, create_image_file
 import re
 from typing import Sequence
 from google.cloud import vision
@@ -290,20 +290,13 @@ def send_message():
             'message': 'Insufficient queries remaining!',
         })
     if model == '1':
-        if count:
-            count += 1
-        else:
-            count = 1
+        count = 1
     elif model == '2':
-        if count:
-            count += 3
-        else:
-            count = 3
+        count = 3
     elif model == '3':
-        if count:
-            count += 15
-        else:
-            count = 15
+        count = 15
+    elif model == '4':
+        count = 20
     user.usage += count
     temp = current_message.creativity
     history = json.loads(current_message.message)
@@ -333,7 +326,9 @@ def send_message():
     {prompt_input}
     """
 
-    if file_upload_check:
+    if model == "4":
+        response = create_image_file(query)
+    elif file_upload_check:
         if file_link is not None:
             response = f"{context} \n\n {file_link}"
         else:
@@ -353,7 +348,10 @@ def send_message():
     def generate():
         try:
             content = None
-            if context is None:
+            if model == "4":
+                content = response
+                yield content.encode('utf-8')
+            elif context is None:
                 content = 'There is not data about Wonde.'
                 yield content.encode('utf-8')
             elif file_upload_check:
