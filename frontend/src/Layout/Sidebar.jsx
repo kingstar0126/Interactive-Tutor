@@ -78,7 +78,7 @@ const Sidebar = () => {
     }, [location]);
 
     const handleLogout = () => {
-        window.localStorage.clear();
+        window.sessionStorage.clear();
         window.location.replace(window.location.origin + "/login");
     };
 
