@@ -3,7 +3,7 @@ import NewChat from "./NewChat";
 
 const EmbeddingChat = () => {
     useEffect(() => {
-        localStorage.removeItem("chat");
+        sessionStorage.removeItem("chat");
     }, []);
     return <NewChat />;
 };
