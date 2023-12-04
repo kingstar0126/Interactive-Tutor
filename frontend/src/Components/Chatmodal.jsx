@@ -212,7 +212,7 @@ const Chatmodal = (props) => {
     };
 
     const handleTutorSeleted = (item, index) => {
-        if(item.model === "4") {
+        if(item.model === "4" || item.model === 4) {
             SetCreativity(0.8)
         }
         SetBehavior(item.prompt);

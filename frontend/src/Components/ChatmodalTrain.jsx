@@ -211,7 +211,7 @@ const ChatmodalTrain = (props) => {
         Seturl("");
         setText("");
         getapikey();
-        SetType(0)
+        SetType(1)
         clearInterval(poll);
         if (chat.api_select && chat.api_select === 1) {setIsChecked(true)}
         else {setIsChecked(false)}
@@ -425,7 +425,7 @@ const ChatmodalTrain = (props) => {
                                 {(user.role === 7 || user.role === 1 || (user.role ===4 && check)) && type === "4" && (
                                     <div className="flex flex-col items-start gap-2">
                                         <label className="text-base font-medium">
-                                            The admin for your schools needs to connect the API
+                                            Only school admins can connect to an API
                                         </label>
                                         <div className="flex items-center justify-left gap-4 w-1/2">
                                             <div className="relative">
@@ -439,7 +439,7 @@ const ChatmodalTrain = (props) => {
                                                 disabled={!isChecked}
                                                 autoComplete="off"
                                                 className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md"
-                                            /> : <span className="w-full px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md">You cann't enter API key</span>}
+                                            /> : <span className="w-full px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md">Restricted to admins</span>}
                                         </div>
                                     </div>
                                 )}
