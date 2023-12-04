@@ -1,7 +1,7 @@
 import { SET_QUERY } from "../type";
 
 const initialState = {
-    query: localStorage.getItem("query") || null,
+    query: sessionStorage.getItem("query") || null,
 };
 
 const queryReducer = (state = initialState, action) => {
@@ -9,10 +9,10 @@ const queryReducer = (state = initialState, action) => {
 
     switch (type) {
         case SET_QUERY:
-            localStorage.setItem("query", payload);
+            sessionStorage.setItem("query", payload);
             return {
                 ...state,
-                query: localStorage.getItem("query"),
+                query: sessionStorage.getItem("query"),
             };
         default:
             return state;

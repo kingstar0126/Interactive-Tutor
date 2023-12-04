@@ -498,7 +498,7 @@ const Chat = () => {
                     <DialogFooter className="flex items-center justify-end gap-4 pb-8">
                         <button
                             onClick={() => {
-                                window.localStorage.clear();
+                                window.sessionStorage.clear();
                                 window.location.replace(
                                     window.location.origin + "/login"
                                 );
