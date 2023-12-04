@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from flask import Response,stream_with_context
+from flask import Response, stream_with_context
 from .models import Message, Train, User, Chat, Invite
 from bs4 import BeautifulSoup
 import requests
@@ -374,7 +374,7 @@ def send_message():
 
             if content is not None:
                 history.append({"role": "human", "content": query})
-                history.append({"role": "ai", "content": content})  
+                history.append({"role": "ai", "content": content})
                 current_message.message = json.dumps(history)
                 current_message.update_date = datetime.datetime.now()
                 db.session.commit()

@@ -160,93 +160,99 @@ def answer_question(prompt, message_id, user_id):
         return None, None
 
 def search_data_in_wonde(keys, wondekey):
+    print('This is the wondekey', wondekey)
     headers = {'Authorization': f'Bearer {wondekey}'}
     response = requests.get(
             f'https://api.wonde.com/v1.0/schools',
             headers=headers
         )
     data = response.json().get('data')
-    school_id = data[0].get('id')
-    if school_id is not None:
-        students = []
-        
-        st_includes = [
-            "classes",
-            "classes.subject",
-            "attendance_summary",
-            "year",
-            "groups",
-            "sen_needs",
-            "behaviours",
-            "achievements",
-            "results",
-            "results.aspect"
-        ]
-        page = 1
-        per_page = 100
-        while True:
-            response = requests.get(
-                f'https://api.wonde.com/v1.0/schools/{school_id}/students?per_page={per_page}&page={page}',
-                headers=headers
-            )
-            response.raise_for_status()
-            data = response.json().get('data', [])
-            if not data:
-                break
-            for student in data:
-                if student.get('forename') is None or student.get('surname') is None:
-                    break
-                for key in keys:
-                    names = key.split()
-                    if len(names) > 1:
-                        if student.get('forename').lower() == names[0].lower() and student.get('surname').lower() == names[-1].lower():
-                            id  = student.get('id')
-                            response = requests.get(
-                                f'https://api.wonde.com/v1.0/schools/{school_id}/students/{id}/?include={",".join(st_includes)}',
-                                headers=headers
-                            )
-                            response.raise_for_status()
-                            student_related_data = response.json()
-                            students.append(student_related_data)
-                    else:
-                        if student.get('forename').lower() == names[0].lower() or student.get('surname').lower() == names[0].lower():
-                            id  = student.get('id')
-                            response = requests.get(
-                                f'https://api.wonde.com/v1.0/schools/{school_id}/students/{id}/?include={",".join(st_includes)}',
-                                headers=headers
-                            )
-                            response.raise_for_status()
-                            student_related_data = response.json()
-                            students.append(student_related_data)
-            page += 1
-
-        dataLakes = []
-        if students:
-            for item in students:
-                data = item.get('data')
-                cleaned_data = sanitize_data(data)
-                cleaned_data['achievements'] = cleaned_data['achievements']['data']
-                cleaned_data['attendance_summary'] = cleaned_data['attendance_summary']['data']
-                cleaned_data['behaviours'] = cleaned_data['behaviours']['data']
-                cleaned_data['classes'] = cleaned_data['classes']['data']
-                print('\n\n', cleaned_data['classes'])
-                for i in range(len(cleaned_data['classes'])):
-                    cleaned_data['classes'][i]['subject.data.name'] = cleaned_data['classes'][i]['subject']['data']['name']
-                    cleaned_data['classes'][i]['subject.data.active'] = cleaned_data['classes'][i]['subject']['data']['active']
-                    del cleaned_data['classes'][i]['subject']
-                cleaned_data['groups'] = cleaned_data['groups']['data']
-                cleaned_data['results'] = cleaned_data['results']['data']
-                for i in range(len(cleaned_data['results'])):
-                    cleaned_data['results'][i]['aspect.data.name'] = cleaned_data['results'][i]['aspect']['data']['name']
-                    cleaned_data['results'][i]['aspect.data.type'] = cleaned_data['results'][i]['aspect']['data']['type']
-                    del cleaned_data['results'][i]['aspect']
-                cleaned_data['sen_needs'] = cleaned_data['sen_needs']['data']
-                cleaned_data['year'] = cleaned_data['year']['data']
-                dataLakes.append(cleaned_data)
+    for item in data:
+        school_id = item.get('id')
+        response = requests.get(f'https://api.wonde.com/v1.0/schools/{school_id}/students', headers=headers)
+        print('This is the response of Requests test: ', response.status_code)
+        if response.status_code == 200:
+            students = []
             
-            return dataLakes
-        else:
-            return None
+            st_includes = [
+                "classes",
+                "classes.subject",
+                "attendance_summary",
+                "year",
+                "groups",
+                "sen_needs",
+                "behaviours",
+                "achievements",
+                "results",
+                "results.aspect"
+            ]
+            page = 1
+            per_page = 100
+            while True:
+                response = requests.get(
+                    f'https://api.wonde.com/v1.0/schools/{school_id}/students?per_page={per_page}&page={page}',
+                    headers=headers
+                )
+                response.raise_for_status()
+                data = response.json().get('data', [])
+                if not data:
+                    break
+                for student in data:
+                    if student.get('forename') is None or student.get('surname') is None:
+                        break
+                    for key in keys:
+                        names = key.split()
+                        if len(names) > 1:
+                            if student.get('forename').lower() == names[0].lower() and student.get('surname').lower() == names[-1].lower():
+                                id  = student.get('id')
+                                response = requests.get(
+                                    f'https://api.wonde.com/v1.0/schools/{school_id}/students/{id}/?include={",".join(st_includes)}',
+                                    headers=headers
+                                )
+                                response.raise_for_status()
+                                student_related_data = response.json()
+                                print('This is student_related_data: \n', student_related_data)
+                                students.append(student_related_data)
+                        else:
+                            if student.get('forename').lower() == names[0].lower() or student.get('surname').lower() == names[0].lower():
+                                id  = student.get('id')
+                                response = requests.get(
+                                    f'https://api.wonde.com/v1.0/schools/{school_id}/students/{id}/?include={",".join(st_includes)}',
+                                    headers=headers
+                                )
+                                response.raise_for_status()
+                                student_related_data = response.json()
+                                students.append(student_related_data)
+                page += 1
+
+            dataLakes = []
+            if students:
+                for item in students:
+                    data = item.get('data')
+                    cleaned_data = sanitize_data(data)
+                    cleaned_data['achievements'] = cleaned_data['achievements']['data']
+                    cleaned_data['attendance_summary'] = cleaned_data['attendance_summary']['data']
+                    cleaned_data['behaviours'] = cleaned_data['behaviours']['data']
+                    cleaned_data['classes'] = cleaned_data['classes']['data']
+                    print('This is classes: \n\n', cleaned_data['classes'])
+                    for i in range(len(cleaned_data['classes'])):
+                        print('This is type of i: ', cleaned_data['classes'][i])
+                        cleaned_data['classes'][i]['subject.data.name'] = cleaned_data['classes'][i]['subject']['data']['name']
+                        cleaned_data['classes'][i]['subject.data.active'] = cleaned_data['classes'][i]['subject']['data']['active']
+                        del cleaned_data['classes'][i]['subject']
+                    cleaned_data['groups'] = cleaned_data['groups']['data']
+                    cleaned_data['results'] = cleaned_data['results']['data']
+                    for i in range(len(cleaned_data['results'])):
+                        cleaned_data['results'][i]['aspect.data.name'] = cleaned_data['results'][i]['aspect']['data']['name']
+                        cleaned_data['results'][i]['aspect.data.type'] = cleaned_data['results'][i]['aspect']['data']['type']
+                        del cleaned_data['results'][i]['aspect']
+                    cleaned_data['sen_needs'] = cleaned_data['sen_needs']['data']
+                    cleaned_data['year'] = cleaned_data['year']['data']
+                    dataLakes.append(cleaned_data)
+                
+                return dataLakes
+            else:
+                return None
     return None
 
 def answer_question_csv(prompt, user_id):
