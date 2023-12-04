@@ -503,6 +503,9 @@ def delete_traindatas():
     if source.type != "API":
         # delete vectors in the pinecone
         delete_vectore(source.label, uuid)
+    else:
+        user = db.session.query(User).filter_by(id=chat.user_id).first()
+        user.wonde_key = ''
     db.session.query(Train).filter_by(id=id).delete()
     db.session.commit()
     chat_data = {

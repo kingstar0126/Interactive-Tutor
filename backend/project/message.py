@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from flask import Response,stream_with_context
+from flask import Response, stream_with_context
 from .models import Message, Train, User, Chat, Invite
 from bs4 import BeautifulSoup
 import requests
@@ -135,11 +135,10 @@ def handle_image_uploads(request, query):
 
 def analyze_images(images, query):
     text = ""  # Initialize text
-    for index, image in enumerate(images):
-        response = image_understanding(image, query)
-        text += f"Image {index+1}: {response} \n"
-        print(text)
-    return text
+    
+    response = image_understanding(images, query)
+    
+    return response
 
 def handle_file_uploads(request):
     if 'file' not in request.files:
@@ -312,13 +311,12 @@ def send_message():
     Human: {question}
     Assistant:"""
 
-    image_text = f"Images:  {text}" if text is not None else ''
+    # image_text = f"Images:  {text}" if text is not None else ''
     context_text = f"Context: {context}" if context is not None else ''
 
     template = f""" {behavior}
 
     ==============
-    {image_text}
     {context_text}
     {prompt_content}
 
@@ -328,6 +326,8 @@ def send_message():
 
     if model == "4":
         response = create_image_file(query)
+    elif text is not None:
+        response = text
     elif file_upload_check:
         if file_link is not None:
             response = f"{context} \n\n {file_link}"
@@ -339,7 +339,7 @@ def send_message():
         ) if behaviormodel != "Remove training data ring fencing and perform like ChatGPT" else generate_AI_message(
             query, 
             last_history, 
-            f"{behavior} \n\n======================\n\n {image_text}\n{context_text}" if image_text or context_text 
+            f"{behavior} \n\n======================\n\n {context_text}" if context_text 
             else f"{behavior}", 
             temp, 
             model,
@@ -351,6 +351,11 @@ def send_message():
             if model == "4":
                 content = response
                 yield content.encode('utf-8')
+            elif text is not None:
+                content = None
+                for next_token, content in response:
+                    data_chunk = next_token
+                    yield data_chunk.encode('utf-8')
             elif context is None:
                 content = 'There is not data about Wonde.'
                 yield content.encode('utf-8')
@@ -369,7 +374,7 @@ def send_message():
 
             if content is not None:
                 history.append({"role": "human", "content": query})
-                history.append({"role": "ai", "content": content})  
+                history.append({"role": "ai", "content": content})
                 current_message.message = json.dumps(history)
                 current_message.update_date = datetime.datetime.now()
                 db.session.commit()
