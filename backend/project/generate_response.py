@@ -7,7 +7,6 @@ from langchain.chat_models import ChatOpenAI
 from typing import Sequence
 from threading import Thread
 from queue import Queue, Empty
-from langchain.llms import OpenAI
 from langchain.callbacks.base import BaseCallbackHandler
 from typing import Any, Callable
 from langchain.vectorstores.pinecone import Pinecone
@@ -17,7 +16,7 @@ from langchain.prompts import PromptTemplate, ChatPromptTemplate
 import pinecone
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
-
+from openai import OpenAI
 from langchain.chains.openai_functions import (
     create_openai_fn_chain,
     create_openai_fn_runnable,
@@ -96,21 +95,18 @@ def generate_message(query, behavior, temp, model, chat, template, openai_api_ke
         llm = ChatOpenAI(model_name="gpt-3.5-turbo",
                          temperature=temp,
                          streaming=True,
-                         max_tokens=500,
                          callbacks=[QueueCallback(q)],
                          openai_api_key=openai_api_key)
     elif model == "2":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo-1106",
                          temperature=temp,
                          streaming=True,
-                         max_tokens=3000,
                          callbacks=[QueueCallback(q)],
                          openai_api_key=openai_api_key)
     elif model == "3":
         llm = ChatOpenAI(model_name="gpt-4-1106-preview",
                          temperature=temp,
                          streaming=True,
-                         max_tokens=3000,
                          callbacks=[QueueCallback(q)],
                          openai_api_key=openai_api_key)
 
@@ -139,7 +135,7 @@ def generate_message(query, behavior, temp, model, chat, template, openai_api_ke
     # Get each new token from the queue and yield for our generator
     while True:
         try:
-            next_token = q.get(True, timeout=0.5)
+            next_token = q.get(True, timeout=0)
             if next_token is job_done:
                 break
             content += next_token
@@ -216,7 +212,7 @@ def generate_AI_message(query, history, behavior, temp, model, openai_api_key):
     # Get each new token from the queue and yield for our generator
     while True:
         try:
-            next_token = q.get(True, timeout=0.5)
+            next_token = q.get(True, timeout=0)
             if next_token is job_done:
                 break
             content += next_token
@@ -310,36 +306,36 @@ def generate_part_file(prompt, data):
     )
     return response
 
-def encode_image(image_file):
-    return base64.b64encode(image_file.read()).decode('utf-8')
-
-def image_understanding(image_file, prompt):
-    base64_image = encode_image(image_file)
-    openai_api_key = os.getenv('OPENAI_API_KEY')
-    headers = {"Content-Type": "application/json","Authorization": f"Bearer {openai_api_key}"}
-    payload = {
-        "model": "gpt-4-vision-preview",
-        #"response_format" : { "type": "json_object" },
-        "messages": [
-            {
-            "role": "user",
-            "content": [
-                    {
+def image_understanding(image_files, prompt):
+    base64_images = [base64.b64encode(image_file.read()).decode('utf-8') for image_file in image_files]
+    client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+    
+    image_prompt = [{
                         "type": "text",
                         "text": prompt
-                    },
-                    {
+                    }]
+    for base64_image in base64_images:
+        image_prompt.append({
                         "type": "image_url",
                         "image_url": {
                             "url": f"data:image/jpeg;base64,{base64_image}"
                             }
-                    }
-                ]
+                    })
+    content = ""
+    response = client.chat.completions.create(
+        model="gpt-4-vision-preview",
+        temperature=0.3,
+        stream=True,
+        max_tokens=4000,
+        messages=[
+            {
+            "role": "user",
+            "content": image_prompt
             }
-        ],
-        "max_tokens": 3000
-    }
-    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
-    response = response.json()
-    data = response['choices'][0]['message']['content']
-    return(data)
+        ])
+    
+    for chunk in response:
+        next_token = chunk.choices[0].delta.content
+        if next_token is not None:
+            content += next_token
+            yield next_token, content
