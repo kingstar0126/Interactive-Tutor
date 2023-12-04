@@ -1,8 +1,8 @@
 import { SET_LOCATION, SET_OPEN_SIDEBAR } from "../type";
 
 const initialState = {
-    previous_location: localStorage.getItem("location.previous"),
-    current_location: localStorage.getItem("location.current"),
+    previous_location: sessionStorage.getItem("location.previous"),
+    current_location: sessionStorage.getItem("location.current"),
     openSidebar: false,
 };
 
@@ -11,15 +11,15 @@ const chatReducer = (state = initialState, action) => {
 
     switch (type) {
         case SET_LOCATION:
-            localStorage.setItem(
+            sessionStorage.setItem(
                 "location.previous",
-                localStorage.getItem("location.current")
+                sessionStorage.getItem("location.current")
             );
-            localStorage.setItem("location.current", payload);
+            sessionStorage.setItem("location.current", payload);
             return {
                 ...state,
-                previous_location: localStorage.getItem("location.previous"),
-                current_location: localStorage.getItem("location.current"),
+                previous_location: sessionStorage.getItem("location.previous"),
+                current_location: sessionStorage.getItem("location.current"),
             };
         case SET_OPEN_SIDEBAR:
             return {

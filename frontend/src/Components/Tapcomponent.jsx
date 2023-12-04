@@ -11,7 +11,7 @@ import NewChat from "./NewChat";
 import Branding from "./Branding";
 import TraindataTable from "./TrainData";
 import History from "./History";
-import { AiFillFolderOpen } from "react-icons/ai";
+import { AiFillFolderOpen, AiOutlineReload } from "react-icons/ai";
 import { SiHiveBlockchain } from "react-icons/si";
 import { MdUpdate } from "react-icons/md";
 import { useSelector } from "react-redux";
@@ -31,6 +31,7 @@ export default function Example() {
     const [message_history, setMessage_history] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [updateModalOpen, setUpdateModalOpen] = useState(false);
+    const [newChatKey, setNewChatKey] = useState(0);
     const notification = (type, message) => {
         // To do in here
         if (type === "error") {
@@ -51,14 +52,14 @@ export default function Example() {
                 notification("success", res.data.message);
                 getchat(dispatch, data);
                 axios
-                .get("https://geolocation-db.com/json/")
-                .then((res) => {
-                    let country = res.data.country_name;
-                    data["country"] = country;
-                    console.log(data)
-                    setchatbot(dispatch, data);
-                })
-                
+                    .get("https://geolocation-db.com/json/")
+                    .then((res) => {
+                        let country = res.data.country_name;
+                        data["country"] = country;
+                        console.log(data)
+                        setchatbot(dispatch, data);
+                    })
+
             }
         });
         setUpdateModalOpen(false);
@@ -97,6 +98,10 @@ export default function Example() {
             .catch((err) => console.error(err));
     };
 
+    const handleNewChat = () => {
+        setNewChatKey(prevKey => prevKey + 1);
+    };
+
     useEffect(() => {
         if (activeTab === "conversation Explorer") {
             getMessage_history();
@@ -112,6 +117,13 @@ export default function Example() {
                     <div className="flex flex-col p-5 md:w-full md:z-0">
                         <div className="flex flex-col justify-between gap-5 text-black md:flex-row md:gap-0">
                             <div className="flex flex-col gap-5 md:flex-row">
+                                <Button
+                                    onClick={handleNewChat}
+                                    className="normal-case bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2 text-black text-base"
+                                >
+                                    <AiOutlineReload />
+                                    New Chat
+                                </Button>
                                 <Button
                                     onClick={handleOpen}
                                     className="normal-case bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2 text-black text-base"
@@ -168,7 +180,7 @@ export default function Example() {
             value: "training Data",
             desc: (
                 <div className="border-[--site-chat-header-border] border rounded-xl from-[--site-main-modal-from-color] bg-gradient-to-br">
-                    <TraindataTable data={chat}/>
+                    <TraindataTable data={chat} />
                 </div>
             ),
         },
@@ -183,7 +195,7 @@ export default function Example() {
         },
     ];
     return (
-        <Tabs value={activeTab} id="custom-animation">
+        <Tabs value={activeTab} id="custom-animation" key={newChatKey}>
             <TabsHeader
                 className="md:px-6 md:py-4 bg-transparent border-b rounded-none border-[--site-chat-header-border] flex xl:flex-row flex-col gap-2 xl:gap-0"
                 indicatorProps={{

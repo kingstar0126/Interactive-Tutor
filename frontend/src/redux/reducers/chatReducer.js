@@ -6,7 +6,7 @@ import { GET_CHATBOT } from "../type";
 const initialState = {
     chat: JSON.stringify({}),
     chatbot: '',
-    chatmessage: localStorage.getItem("chatmessage"),
+    chatmessage: sessionStorage.getItem("chatmessage"),
 };
 
 const chatReducer = (state = initialState, action) => {
@@ -29,10 +29,10 @@ const chatReducer = (state = initialState, action) => {
                 chatbot: payload,
             };
         case GET_CHATBOT:
-            localStorage.setItem("chatmessage", payload);
+            sessionStorage.setItem("chatmessage", payload);
             return {
                 ...state,
-                chatmessage: localStorage.getItem("chatmessage"),
+                chatmessage: sessionStorage.getItem("chatmessage"),
             };
         default:
             return state;
