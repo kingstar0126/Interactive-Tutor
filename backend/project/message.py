@@ -276,7 +276,10 @@ def send_message():
     ######################################
     '''For the Wonde API'''
     if user.role == 7 and chat.api_select == 1:
+        if behaviormodel != "Remove training data ring fencing and perform like ChatGPT":
+            behaviormodel = "Remove training data ring fencing and perform like ChatGPT"
         context = answer_question_csv(query, user.id)
+        print('This is Context: \n\n', context)
         count = 3
         model_check = True
         openai_api_key = os.getenv('OPENAI_API_KEY_PRO')

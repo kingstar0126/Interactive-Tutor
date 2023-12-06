@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import requests
 import os
 import json
-from .models import Chat, Train, User
+from .models import Chat, Train, User, Invite
 import re
 from langchain.docstore.document import Document
 from typing import List
@@ -479,8 +479,16 @@ def get_traindatas():
         if not chat:
             return jsonify({'success': False, 'message': 'Not found', 'code': 404})
         train_ids = json.loads(chat.train)
-
+        
         data = []
+        
+        user = db.session.query(User).filter_by(id=chat.user_id).first()
+        invite_account = db.session.query(Invite).filter_by(email=user.email).first()
+        user_check = db.session.query(User).filter_by(id=invite_account.user_id).first() if invite_account else None
+        user = user_check if user_check and user_check.role == 7 else user
+        if user.wonde_key:
+            data.append({'label': 'Wonde API',
+                        'type': 'API', 'status': True})
         for id in train_ids:
             train_data = db.session.query(Train).filter_by(id=id).first()
             if train_data:
@@ -494,45 +502,52 @@ def get_traindatas():
 @train.route('/api/data/deletetrain', methods=['POST'])
 def delete_traindatas():
     uuid = request.json['uuid']
-    id = request.json['id']
-    chat = db.session.query(Chat).filter_by(uuid=uuid).first()
-    train_ids = json.loads(chat.train)
-    train_ids.remove(id)
-    chat.train = json.dumps(train_ids)
-    source = db.session.query(Train).filter_by(id=id).first()
-    if source.type != "API":
-        # delete vectors in the pinecone
-        delete_vectore(source.label, uuid)
+    id = request.json.get('id')
+    if id:
+        chat = db.session.query(Chat).filter_by(uuid=uuid).first()
+        train_ids = json.loads(chat.train)
+        train_ids.remove(id)
+        chat.train = json.dumps(train_ids)
+        source = db.session.query(Train).filter_by(id=id).first()
+        if source.type != "API":
+            # delete vectors in the pinecone
+            delete_vectore(source.label, uuid)
+        else:
+            user = db.session.query(User).filter_by(id=chat.user_id).first()
+            user.wonde_key = ''
+        db.session.query(Train).filter_by(id=id).delete()
+        db.session.commit()
+        chat_data = {
+            'id': chat.id,
+            'label': chat.label,
+            'description': chat.description,
+            'model': chat.model,
+            'conversation': chat.conversation,
+            'access': chat.access,
+            'creativity': chat.creativity,
+            'behavior': chat.behavior,
+            'behaviormodel': chat.behaviormodel,
+            'uuid': chat.uuid,
+            'train': json.loads(chat.train),
+            'chat_logo': json.loads(chat.chat_logo),
+            'chat_title': json.loads(chat.chat_title),
+            'chat_description': json.loads(chat.chat_description),
+            'chat_copyright': json.loads(chat.chat_copyright),
+            'chat_button': json.loads(chat.chat_button),
+            'bubble': json.loads(chat.bubble),
+        }
+        data = {
+            'code': 200,
+            'message': "Succesfullu delete",
+            'data': chat_data,
+            'success': True
+        }
     else:
-        user = db.session.query(User).filter_by(id=chat.user_id).first()
-        user.wonde_key = ''
-    db.session.query(Train).filter_by(id=id).delete()
-    db.session.commit()
-    chat_data = {
-        'id': chat.id,
-        'label': chat.label,
-        'description': chat.description,
-        'model': chat.model,
-        'conversation': chat.conversation,
-        'access': chat.access,
-        'creativity': chat.creativity,
-        'behavior': chat.behavior,
-        'behaviormodel': chat.behaviormodel,
-        'uuid': chat.uuid,
-        'train': json.loads(chat.train),
-        'chat_logo': json.loads(chat.chat_logo),
-        'chat_title': json.loads(chat.chat_title),
-        'chat_description': json.loads(chat.chat_description),
-        'chat_copyright': json.loads(chat.chat_copyright),
-        'chat_button': json.loads(chat.chat_button),
-        'bubble': json.loads(chat.bubble),
-    }
-    data = {
-        'code': 200,
-        'message': "Succesfullu delete",
-        'data': chat_data,
-        'success': True
-    }
+        data = {
+            'code': 403,
+            'message': "You can't delete this traindata",
+            'success': False
+        }
     return jsonify(data)
 
 
