@@ -11,6 +11,7 @@ import re
 import base64
 import uuid
 import shutil
+from pandasai import SmartDataframe
 from langchain.chat_models import ChatOpenAI
 import threading
 from threading import Lock
@@ -235,7 +236,7 @@ def search_data_in_wonde(keys, wondekey):
                     cleaned_data['attendance_summary'] = cleaned_data['attendance_summary']['data']
                     cleaned_data['behaviours'] = cleaned_data['behaviours']['data']
                     cleaned_data['classes'] = cleaned_data['classes']['data']
-                    # print('This is classes: \n\n', cleaned_data['classes'])
+                    print('This is classes: \n\n', cleaned_data['classes'])
                     for i in range(len(cleaned_data['classes'])):
                         print('This is type of i: ', cleaned_data['classes'][i])
                         cleaned_data['classes'][i]['subject.data.name'] = cleaned_data['classes'][i]['subject']['data']['name']

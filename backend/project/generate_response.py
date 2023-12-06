@@ -78,7 +78,7 @@ def get_name_from_prompt(query):
     print('THIS IS THE NAME: ', names)
     return names
 
-def generate_message(query, behavior, temp, model, chat, template, openai_api_key):
+def generate_message(query, behavior, temp, model, chat, template, openai_api_key = None):
     load_dotenv()
 
     if openai_api_key is None:
@@ -86,7 +86,7 @@ def generate_message(query, behavior, temp, model, chat, template, openai_api_ke
 
     q = Queue()
     job_done = object()
-    
+    print('This is template : \n\n', template)
     prompt = PromptTemplate(
         input_variables=["context", "question"], template=template)
     chain_type_kwargs = {"prompt": prompt}

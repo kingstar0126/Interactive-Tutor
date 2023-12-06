@@ -54,16 +54,8 @@ def calculate_days(signup_date):
 auth = Blueprint('auth', __name__)
 
 
-@auth.route('/api/login',  methods=['POST', 'OPTIONS', 'GET'])
+@auth.route('/api/login',  methods=['POST'])
 def login_post():
-    if request.method == 'OPTIONS':  # check for OPTIONS method
-        headers = {
-            'Access-Control-Allow-Origin': '*',  # Required for cors access
-            'Access-Control-Allow-Methods': 'POST',  # Required for cors access
-            'Access-Control-Allow-Headers': 'content-type',  # Required for cors access
-        }
-        return '', 200, headers
-
     email = request.json['email']
     password = request.json['password']
     user = db.session.query(User).filter_by(email=email).first()
