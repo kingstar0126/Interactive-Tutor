@@ -72,7 +72,7 @@ def get_wonde_api():
 
 def sanitize_data(d):
     # A set of keys to ignore from the data
-    keys_to_ignore = {'date', 'timezone_type', 'timezone', 'created_at', 'end_date', 'start_date', 'collection_date', 'result_date', 'updated_at', 'restored_at', 'recorded_date', 'achievement_date', 'action_date', 'incident_date', 'id', 'mis_id', 'resultset', 'student', 'meta', 'code', 'admission_number', 'upn', 'local_upn', 'former_upn', 'learner_number', 'admission_date', 'leaving_date', 'student_id', 'fsm_review_date', 'upi', 'initials'}
+    keys_to_ignore = {'date', 'timezone_type', 'timezone', 'created_at', 'end_date', 'start_date', 'collection_date', 'result_date', 'updated_at', 'restored_at', 'recorded_date', 'achievement_date', 'action_date', 'incident_date', 'id', 'mis_id', 'resultset', 'student', 'meta', 'code', 'admission_number', 'upn', 'local_upn', 'former_upn', 'learner_number', 'admission_date', 'leaving_date', 'student_id', 'fsm_review_date', 'upi', 'priority', 'notes', 'division', 'min_value', 'max_value', 'initials'}
 
     if isinstance(d, dict):
         return {k: sanitize_data(v) for k, v in d.items() if k not in keys_to_ignore}
@@ -185,6 +185,7 @@ def search_data_in_wonde(keys, wondekey):
                 "behaviours",
                 "achievements",
                 "results",
+                "medical_notes",
                 "results.aspect"
             ]
             page = 1

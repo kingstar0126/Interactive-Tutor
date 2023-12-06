@@ -96,21 +96,18 @@ def generate_message(query, behavior, temp, model, chat, template, openai_api_ke
         llm = ChatOpenAI(model_name="gpt-3.5-turbo",
                          temperature=temp,
                          streaming=True,
-                         max_tokens=500,
                          callbacks=[QueueCallback(q)],
                          openai_api_key=openai_api_key)
     elif model == "2":
         llm = ChatOpenAI(model_name="gpt-3.5-turbo-1106",
                          temperature=temp,
                          streaming=True,
-                         max_tokens=3000,
                          callbacks=[QueueCallback(q)],
                          openai_api_key=openai_api_key)
     elif model == "3":
         llm = ChatOpenAI(model_name="gpt-4-1106-preview",
                          temperature=temp,
                          streaming=True,
-                         max_tokens=5000,
                          callbacks=[QueueCallback(q)],
                          openai_api_key=openai_api_key)
 
