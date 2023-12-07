@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import Autocomplete from "react-google-autocomplete";
-import { GOOGLE_MAP_API } from "../env";
+// import { GOOGLE_MAP_API } from "../env";
 import toast, { Toaster } from "react-hot-toast";
 import { changeuser } from "../redux/actions/userAction";
 import { PiUserCircleGearLight } from "react-icons/pi";
@@ -285,7 +285,7 @@ const ManageAccount = () => {
                         <Autocomplete
                             defaultValue={city}
                             className="rounded-lg p-2 border border-[--site-main-modal-input-border-color] focus:outline-none bg-transparent"
-                            apiKey={GOOGLE_MAP_API}
+                            apiKey={process.env.REACT_APP_GOOGLE_MAP_API}
                             onPlaceSelected={(place) => {
                                 const addressComponents =
                                     place.address_components;

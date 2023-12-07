@@ -10,14 +10,14 @@ import {
 import { loadStripe } from "@stripe/stripe-js";
 import Select from "react-select";
 import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
-import { STRIPE_PUBLISH_KEY } from "../env";
+// import { STRIPE_PUBLISH_KEY } from "../env";
 import toast from "react-hot-toast";
 import Autocomplete from "react-google-autocomplete";
-import { GOOGLE_MAP_API } from "../env";
+// import { GOOGLE_MAP_API } from "../env";
 import { useSelector } from "react-redux";
 import { useEffect } from "react";
 
-const stripePromise = loadStripe(STRIPE_PUBLISH_KEY);
+const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISH_KEY);
 
 const SubscriptionForm = (props) => {
     const [name, setName] = useState("");
@@ -177,7 +177,7 @@ const SubscriptionForm = (props) => {
                 />
                 <Autocomplete
                     className="w-3/5 rounded-lg p-2 focus:ring-[--site-logo-text-color] focus:outline-none focus:ring focus:ring-opacity-40 text-[--site-card-icon-color]"
-                    apiKey={GOOGLE_MAP_API}
+                    apiKey={process.env.REACT_APP_GOOGLE_MAP_API}
                     onPlaceSelected={(place) => {
                         const addressComponents = place.address_components;
                         let _state, _country, _city;

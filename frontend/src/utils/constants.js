@@ -1,8 +1,8 @@
-import { SERVER_URL } from "../config/constant";
 export const stringConstant = {
     FAILED_GET_DATA: "Failed to get data",
 };
 
+const SERVER_URL = process.env.REACT_APP_SERVER_URL
 export const webAPI = {
     email_verification: SERVER_URL + "/api/email_verification",
     register: SERVER_URL + "/api/signup",

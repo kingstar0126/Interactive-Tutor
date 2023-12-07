@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { EMBED_SERVER_URL } from "../config/constant";
 import {
     DialogHeader,
     Dialog,
@@ -9,6 +8,7 @@ import {
 import { useSelector } from "react-redux";
 import { Scrollbar } from "react-scrollbars-custom";
 
+const EMBED_SERVER_URL = process.env.REACT_APP_EMBED_SERVER_URL;
 const Embedded = (props) => {
     const [chatwindow, setChatwindow] = useState("");
     const [chatURL, setChatURL] = useState("");
