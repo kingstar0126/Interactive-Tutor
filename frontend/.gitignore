@@ -7,7 +7,7 @@
 .env
 # testing
 /coverage
-
+/build
 # production
 /build
 # misc

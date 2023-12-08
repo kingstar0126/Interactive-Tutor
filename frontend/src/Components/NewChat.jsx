@@ -541,7 +541,7 @@ const NewChat = () => {
                                                             </Dialog>
                                                         </>
                                                     })}</div> : <></>}
-                                                    <span className="break-words whitespace-normal">{data.content}</span>
+                                                    <span>{data.content}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -571,6 +571,7 @@ const NewChat = () => {
                                                             code({ inline, className, children, ...props }) {
                                                                 const match = /language-(\w+)/.exec(className || '')
                                                                 if (!inline && match) {
+                                                                    // remove the newline character at the end of children, if it exists
                                                                     const codeString = String(children).replace(/\n$/, '');
 
                                                                     return (

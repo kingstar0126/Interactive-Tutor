@@ -1,28 +1,14 @@
 from flask import Blueprint, jsonify, request
 import requests
-import io
 import os
 import json
-import pandas as pd
 from dotenv import load_dotenv
-from .models import User, Chat, Train
+from .models import User
 from . import db
-import re
-import base64
-import uuid
 import shutil
-from pandasai import SmartDataframe
-from langchain.chat_models import ChatOpenAI
-import threading
+
 from threading import Lock
-from . import app
-import numpy as np
-
-from langchain.agents import AgentType, initialize_agent
-from langchain.tools import E2BDataAnalysisTool
-
-from langchain_experimental.agents.agent_toolkits import create_csv_agent
-from .train import create_train, insert_train_chat, train_status_chanage
+from .train import create_train, insert_train_chat
 
 load_dotenv()
 wonde = Blueprint('wonde', __name__)
@@ -81,12 +67,6 @@ def sanitize_data(d):
     else:
         return d
 
-
-@wonde.route('/api/wonde/webhook', methods=['POST'])
-def get_webhook():
-    data = request.json
-    return Response(status=200)
-
 def sanitize_data(d):
     # A set of keys to ignore from the data
     keys_to_ignore = {'date', 'timezone_type', 'timezone', 'created_at', 'end_date', 'start_date', 'collection_date', 'result_date', 'updated_at', 'restored_at', 'recorded_date', 'achievement_date', 'action_date', 'incident_date', 'id', 'mis_id', 'resultset', 'student', 'meta', 'code', 'admission_number', 'upn', 'local_upn', 'former_upn', 'learner_number', 'admission_date', 'leaving_date', 'student_id', 'fsm_review_date', 'upi', 'priority', 'notes', 'division', 'min_value', 'max_value', 'initials'}
@@ -134,31 +114,6 @@ def cleanup_empty_folders(path):
                     print(f"Failed to remove {full_path}. Reason: {e}")
 
     return "Cleanup completed."
-
-def answer_question(prompt, message_id, user_id):
-    csv_file_path = f'wonde_csvs/{user_id}students.csv'
-    if os.path.exists(csv_file_path):
-
-        file_link = None
-        print(cleanup_empty_folders('exports/charts/'))
-        llm = ChatOpenAI(model_name="gpt-4-1106-preview", temperature=0, openai_api_key=os.getenv('OPENAI_API_KEY'))
-        
-        chart_id = str(uuid.uuid4())
-        df = pd.read_csv(csv_file_path)
-        full_chart_path = f"exports/charts/{message_id}/{chart_id}/"
-        agent = SmartDataframe(df, config={"llm":llm, 'verbose':True, 'max_retries': 6, 'save_charts':True, "custom_whitelisted_dependencies": ["any_module"], "enable_cache": False, "save_charts_path": full_chart_path})
-
-        try:
-            response = agent.chat(prompt)
-            if response is None:
-                file_link = f'![chart](http://18.133.183.77/image/{full_chart_path}/{check_files_in_folder(full_chart_path)})'
-            
-            print('\n\n', f'human: {prompt} \n output: {response}')
-            return f'human: {prompt} \n output: {response}', file_link
-        except Exception as e:
-            return str(e), file_link
-    else:
-        return None, None
 
 def search_data_in_wonde(keys, wondekey):
     print('This is the wondekey', wondekey)
