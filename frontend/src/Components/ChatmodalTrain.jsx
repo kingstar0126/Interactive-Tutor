@@ -18,7 +18,7 @@ import {
 import WONDE from "../assets/wonde.gif";
 
 const ChatmodalTrain = (props) => {
-    const [type, SetType] = useState("1");
+    const [type, SetType] = useState(1);
     const [label, SetLabel] = useState("");
     const [url, Seturl] = useState("");
     const [file, setFile] = useState("");
@@ -211,7 +211,7 @@ const ChatmodalTrain = (props) => {
         Seturl("");
         setText("");
         getapikey();
-        SetType(1)
+        // SetType("1")
         clearInterval(poll);
         if (chat.api_select && chat.api_select === 1) {setIsChecked(true)}
         else {setIsChecked(false)}
@@ -274,10 +274,10 @@ const ChatmodalTrain = (props) => {
                                     onChange={(e) => {
                                         SetType(e.value);
                                     }}
-                                    defaultValue={{
-                                        value: "1",
-                                        label: "URLs",
-                                    }}
+                                    // defaultValue={{
+                                    //     value: "1",
+                                    //     label: "URLs",
+                                    // }}
                                     options={(user.role === 7 || user.role === 1 || (user.role ===4 && check)) ? [
                                         {
                                             value: "1",
