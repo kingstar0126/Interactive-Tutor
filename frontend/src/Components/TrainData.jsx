@@ -12,7 +12,7 @@ export default function TraindataTable(props) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [tableData, setTableData] = useState([]);
     const chatState = useSelector((state) => state.chat.chat);
-    const chat = chatState && JSON.parse(chatState) || {};
+    const chat = (chatState && JSON.parse(chatState)) || {};
     const dispatch = useDispatch();
     const TABLE_HEAD = ["LABEL", "TYPE", "STATUS", "ACTION"];
     const [currentPage, setCurrentPage] = useState(1);
@@ -25,6 +25,12 @@ export default function TraindataTable(props) {
 
     const getTotalPages = () => {
         return Math.ceil(trainData.length / itemsPerPage);
+    };
+
+    const notification = (type, message) => {
+        if (type === "error") {
+            toast.error(message);
+        }
     };
 
     const getPaginationRange = () => {
@@ -79,8 +85,13 @@ export default function TraindataTable(props) {
         axios
             .post(webAPI.deletetrain, traindata)
             .then((res) => {
-                get_traindata();
-                getchat(dispatch, res.data.data);
+                if (res.data.success) {
+                    get_traindata();
+                    getchat(dispatch, res.data.data);
+                }
+                else {
+                    notification("error", res.data.message);
+                }
             })
             .catch((err) => console.log(err));
     };
@@ -160,18 +171,21 @@ export default function TraindataTable(props) {
                                     </td>
                                     <td className={classes}>
                                         <div className="flex items-center justify-center h-full w-max">
-                                            {data["status"] === "true" ? <Chip
-                                                variant="ghost"
-                                                size="sm"
-                                                value={"trained"}
-                                                className="bg-[--site-logo-text-color] text-[--site-card-icon-color] lowercase "
-                                            /> : <Chip
-                                            variant="ghost"
-                                            size="sm"
-                                            value={"processing"}
-                                            className="bg-[--site-warning-text-color] text-[--site-card-icon-color] lowercase "
-                                        />}
-                                        {console.log(data["status"], typeof(data["status"]))}
+                                            {data["status"] ? (
+                                                <Chip
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    value={"trained"}
+                                                    className="bg-[--site-logo-text-color] text-[--site-card-icon-color] lowercase "
+                                                />
+                                            ) : (
+                                                <Chip
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    value={"processing"}
+                                                    className="bg-[--site-warning-text-color] text-[--site-card-icon-color] lowercase "
+                                                />
+                                            )}
                                         </div>
                                     </td>
 

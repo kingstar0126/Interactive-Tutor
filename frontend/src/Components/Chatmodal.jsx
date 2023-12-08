@@ -68,9 +68,7 @@ const Chatmodal = (props) => {
     // const [gptmodel, SetGPTmodel] = useState(models);
     const [Creativity, SetCreativity] = useState(0.3);
     const [selected, setSelected] = useState(0)
-    const [behaviormodel, SetBehaviormodel] = useState(
-        behaviorModelTheme[0].label
-    );
+    const [behaviormodel, SetBehaviormodel] = useState();
     const [behavior, SetBehavior] = useState("You are a helpful assistant");
     const TutorThemes = [
         {
@@ -153,9 +151,7 @@ const Chatmodal = (props) => {
             SetLabel("")
             setOpen(0);
             SetCreativity(0.3);
-            SetBehaviormodel(
-                behaviorModelTheme[TutorThemes[0].context].label
-            );
+            SetBehaviormodel(behaviorModelTheme[0].label);
             SetBehavior(TutorThemes[0].prompt);
             setType(false);
         }
@@ -452,24 +448,8 @@ const Chatmodal = (props) => {
                                                 onChange={(e) => {
                                                     SetBehaviormodel(e.label);
                                                 }}
-                                                defaultValue={{
-                                                    value: "1",
-                                                    label: `Prioritise the training data, use it to generate responses. However, if no answer can be found in the training data, respond with "I don't know".`,
-                                                }}
-                                                options={[
-                                                    {
-                                                        value: "1",
-                                                        label: `Prioritise the training data, use it to generate responses. However, if no answer can be found in the training data, respond with "I don't know".`,
-                                                    },
-                                                    {
-                                                        value: "2",
-                                                        label: `Leverage patterns learned from the training data to generate responses.`,
-                                                    },
-                                                    {
-                                                        value: "3",
-                                                        label: `Remove training data ring fencing and perform like ChatGPT`,
-                                                    },
-                                                ]}
+                                                defaultValue={behaviorModelTheme.find(item => item.label === behaviormodel)}
+                                                options={behaviorModelTheme}
                                             />
                                             <p>
                                                 The context Behaviour determines how
