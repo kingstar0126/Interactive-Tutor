@@ -4,10 +4,8 @@ import os
 from .wonde import cleanup_empty_folders
 from openai import OpenAI
 import time
-import uuid
 import openai
 import re
-import shutil
 
 load_dotenv()
 

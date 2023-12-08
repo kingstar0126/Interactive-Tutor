@@ -3,15 +3,13 @@ from flask import Blueprint, jsonify, request
 from . import db
 from .models import User, Production, Organization, Invite
 import stripe
-from rich import print, pretty
 import json
 import os
 from dotenv import load_dotenv
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 from . import add_email_to_sendgrid_marketing, get_sendgrid_list_ids, delete_email_to_sendgrid_marketing
 
 load_dotenv()
-pretty.install()
 
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 payment = Blueprint('payment', __name__)

@@ -18,9 +18,6 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from openai import OpenAI
 from langchain.chains.openai_functions import (
-    create_openai_fn_chain,
-    create_openai_fn_runnable,
-    create_structured_output_chain,
     create_structured_output_runnable,
 )
 from langchain.pydantic_v1 import BaseModel, Field

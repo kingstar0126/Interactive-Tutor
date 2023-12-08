@@ -20,11 +20,8 @@ import re
 from typing import Sequence
 from google.cloud import vision
 import tiktoken
-from multiprocessing import Process
 import threading
-from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
-from werkzeug.datastructures import FileStorage
 
 message = Blueprint('message', __name__)
 threads = {}
