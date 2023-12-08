@@ -129,7 +129,7 @@ def create_image_prompt(prompt):
                 6. Incorporate Action or Movement: If you want a dynamic image, describe actions or movements. For instance, “a cat jumping over a fence” is more dynamic than just “a cat.”
                 7. Avoid Overloading the Prompt: While details are good, too many can confuse the AI. Try to strike a balance between being descriptive and being concise.
                 8. Use Analogies or Comparisons: Sometimes it helps to compare what you want with something well-known, like “in the style of Van Gogh” or “resembling a scene from a fantasy novel.”
-                9. Specify Desired Styles or Themes: A super reality, digital artist, Movie Poster or Cartoon, yet with a detailed and clear style.
+                9. Specify Desired Styles or Themes: A super reality, digital artist, Movie Poster or Cartoon, yet with a detailed and clear style. not style like painting.
 
                 Only output the updated prompt and don't response any description.'''},
                 {"role": "user", "content": f"{prompt}"},
