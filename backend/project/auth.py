@@ -8,14 +8,12 @@ import string
 import json
 import secrets
 from rich import print, pretty
-from sqlalchemy import exc
 import stripe
 import os
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from flask_jwt_extended import create_access_token, decode_token
-from sqlalchemy.sql import text
 import csv
 
 from . import add_email_to_sendgrid_marketing, get_sendgrid_list_ids, delete_email_to_sendgrid_marketing

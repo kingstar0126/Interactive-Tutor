@@ -4,11 +4,8 @@ from flask_jwt_extended import JWTManager
 from flask_mail import Mail
 from flask_cors import CORS
 import os
-import random
 from dotenv import load_dotenv
-import time
 import logging
-from sqlalchemy.exc import SQLAlchemyError
 from rich import print, pretty
 from sendgrid import SendGridAPIClient
 # from sendgrid.helpers.mail import Mail
