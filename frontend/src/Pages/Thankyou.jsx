@@ -8,7 +8,7 @@ const ThankYou = () => {
     const { width, height } = useWindowSize()
     
     return (
-        <div className="bg-[--site-main-color-home] font-logo h-screen pb-10 px-2 flex flex-col">
+        <div className="font-logo h-screen pb-10 px-2 flex flex-col">
             <div>
                 <Header />
             </div>
@@ -16,15 +16,15 @@ const ThankYou = () => {
             width={width}
             height={height}
             />
-            <div className=" flex-1 h-full flex flex-col justify-center items-center bg-no-repeat bg-cover bg-[--site-card-icon-color] relative text-center">
+            <div className=" flex-1 flex flex-col justify-center items-center bg-no-repeat bg-cover relative text-center">
                 <FiCheckCircle className="text-[rgba(0,255,8,0.75)] text-[400px] top-[calc(50%-200px)] md:left-[calc(50%-400px)] left-[calc(50%-200px)] opacity-75 absolute" />
-                <h1 className="mb-5 font-bold text-white text-7xl drop-shadow-lg">
+                <h1 className="mb-5 font-bold text-gray-800 text-7xl drop-shadow-lg">
                     Success
                 </h1>
-                <h2 className="mb-3 text-3xl font-semibold text-white drop-shadow-lg">
+                <h2 className="mb-3 text-3xl font-semibold text-gray-800 drop-shadow-lg">
                     Your registration was successful.
                 </h2>
-                <p className="mb-8 text-lg text-center text-white drop-shadow-lg">
+                <p className="mb-8 text-lg text-center text-gray-800 drop-shadow-lg">
                     An email confirmation has been sent.
                 </p>
             </div>

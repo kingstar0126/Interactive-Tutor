@@ -16,7 +16,7 @@ import { setchatbot, getchat } from "../redux/actions/chatAction";
 
 const AccessChatbot = () => {
     const chatState = useSelector((state) => state.chat.chat);
-    const chat = chatState && JSON.parse(chatState) || {};
+    const chat = (chatState && JSON.parse(chatState)) || {};
     const [error, SetError] = useState(false);
     const navigate = useNavigate();
     const [organization, setOrganization] = useState("");
@@ -48,14 +48,13 @@ const AccessChatbot = () => {
                     notification("error", res.data.message);
                     setLoadindg(false);
                     setStatus(false);
-                    alert('Failed')
                 } else {
-                    alert('Success')
                     getchat(dispatch, res.data.data);
                     let chat = res.data.data;
-                    let response = await axios.get("https://geolocation-db.com/json/")
-                    alert(response.data.country_name)
-                    let country = response.data.country_name || ''
+                    let response = await axios.get(
+                        "https://geolocation-db.com/json/"
+                    );
+                    let country = response.data.country_name || "";
                     chat["country"] = country;
                     setchatbot(dispatch, chat);
                     setStatus(true);
@@ -70,15 +69,20 @@ const AccessChatbot = () => {
     };
 
     return (
-        <div className="bg-[--site-main-color-home] font-logo h-screen pb-10">
+        <div className="font-logo pb-10 px-2 flex flex-col">
             {status === false && <Header />}
             <Toaster />
             {status === false && (
-                <div className="mt-[100px]">
-                    <div className="w-full p-6 m-auto bg-[--site-main-color3] rounded-md h-full lg:max-w-xl">
-                        <h1 className="text-3xl font-semibold text-center text-[--site-main-Login] underline">
-                            AI Bots
-                        </h1>
+                <div>
+                    <div className="w-2/5 p-6 m-auto rounded-md lg:max-w-xl flex flex-col gap-5">
+                        <div className="flex flex-col gap-2">
+                            <span className="text-3xl font-semibold text-start text-[--site-main-Login1]">
+                                AI Bots
+                            </span>
+                            <span className="text-start">
+                                Log in to your account
+                            </span>
+                        </div>
                         {isloading ? (
                             <div className="flex items-center justify-center mt-6">
                                 <ReactLoading
@@ -90,11 +94,11 @@ const AccessChatbot = () => {
                                 ></ReactLoading>
                             </div>
                         ) : (
-                            <div className="mt-6">
-                                <div className="mb-2">
+                            <div className="mt-6 flex flex-col gap-5">
+                                <div className="gap-2 flex flex-col">
                                     <label
                                         htmlFor="username"
-                                        className="block text-sm font-semibold text-[--site-main-Login-Text]"
+                                        className="text-md font-medium text-[--site-main-Login-Text]"
                                     >
                                         Organisation ID
                                     </label>
@@ -104,12 +108,14 @@ const AccessChatbot = () => {
                                             setOrganization(e.target.value)
                                         }
                                         placeholder="First, enter your Organisation ID."
-                                        className="block w-full px-4 py-2 mt-2 mb-2 text-[--site-main-Login] bg-[--site-main-color3] border rounded-md focus:border-[--site-main-Login-border-focus] focus:ring-[--site-main-Login-border-focus] focus:outline-none focus:ring focus:ring-opacity-40"
+                                        className="w-full p-4 text-[--site-main-Login] border rounded-md border-gray-800"
                                         required
                                     />
+                                </div>
+                                <div className="gap-2 flex flex-col">
                                     <label
                                         htmlFor="email"
-                                        className="block text-sm font-semibold text-[--site-main-Login-Text]"
+                                        className="text-md font-medium text-[--site-main-Login-Text]"
                                     >
                                         PIN
                                     </label>
@@ -128,7 +134,7 @@ const AccessChatbot = () => {
                                             ref={pinField}
                                             validate="0123456789"
                                             onComplete={handleComplete}
-                                            className="mb-1 w-[40px] p-[15px] items-center justify-center h-[40px] focus:border-none focus:ring-opacity-40 text-[--site-card-icon-color] focus:outline-none focus:ring focus:border-[--site-main-color4] border rounded-lg hover:border-[--site-main-color5]"
+                                            className="p-4 items-center justify-center w-1/6 text-center text-[--site-card-icon-color] border rounded-md border-gray-800"
                                         />
                                     </div>
                                     <div className="mb=2">

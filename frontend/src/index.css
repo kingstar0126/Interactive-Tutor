@@ -77,7 +77,7 @@ img {
     --site-main-color10: #f0f0ea;
     --site-main-Login: #153144;
     --site-main-Login-border-focus: #153144;
-    --site-main-Login1: #153144;
+    --site-main-Login1: #12062E;
     --site-main-Login-Text: #424242;
     --site-main-form-error: #ff1122;
     --site-main-form-error1: #c40d19;
@@ -105,4 +105,6 @@ img {
     --site-main-newchat-input-color: #f6f5f6;
     --site-main-slider-thumb-color: #6eae1c;
     --site-main-pricing-color: #034f75;
+    --site-onboarding-secondary-color: #D1D1E9;
+    --site-onboarding-primary-color: #12062E;
 }

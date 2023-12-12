@@ -41,7 +41,7 @@ const Layout = () => {
                 <Sidebar />
             </div>
             <div
-                className="items-center justify-center w-screen bg-[--site-main-color3]"
+                className="items-center justify-center w-screen bg-white"
                 ref={sidebarRef}
             >
                 <Outlet />

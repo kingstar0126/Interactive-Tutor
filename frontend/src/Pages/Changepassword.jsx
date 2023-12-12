@@ -5,6 +5,7 @@ import axios from "axios";
 import { webAPI } from "../utils/constants";
 import toast, { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
+import { Button } from "@material-tailwind/react";
 
 const Register = () => {
     const {
@@ -30,26 +31,32 @@ const Register = () => {
         }
     };
     return (
-        <div className="bg-[--site-main-color-home] font-logo h-screen pb-10 px-2">
+        <div className="font-logo pb-10 px-2 flex flex-col">
             <Header />
             <Toaster />
-            <div className="mt-[100px]">
-                <div className="w-full p-6 m-auto bg-[--site-main-color3] rounded-md ring-2 ring-[--site-main-Login1] lg:max-w-xl">
-                    <h1 className="text-3xl font-semibold text-center text-[--site-main-Login1] underline uppercase">
-                        Change Password
-                    </h1>
-                    <form className="mt-6" onSubmit={handleSubmit(onSubmit)}>
-                        <div className="mb-2">
+            <div>
+                <div className="w-2/5 px-6 mx-auto rounded-md lg:max-w-xl flex flex-col gap-5">
+                    <div className="flex flex-col gap-2">
+                        <span className="text-3xl font-semibold text-start text-[--site-main-Login1]">
+                            Change Password
+                        </span>
+                    </div>
+                    <span className="text-start">Change your password</span>
+                    <form
+                        className="flex flex-col gap-3 py-3"
+                        onSubmit={handleSubmit(onSubmit)}
+                    >
+                        <div className="gap-2 flex flex-col">
                             <label
                                 htmlFor="email"
-                                className="block text-sm font-semibold text-[--site-main-Login-Text]"
+                                className="text-md font-medium text-[--site-main-Login-Text]"
                             >
                                 Email
                             </label>
                             <input
                                 type="email"
                                 name="email"
-                                className="block w-full px-4 py-2 mt-2 text-[--site-main-Login] bg-[--site-main-color3] border rounded-md focus:border-[--site-main-Login-border-focus] focus:ring-[--site-main-Login-border-focus] focus:outline-none focus:ring focus:ring-opacity-40"
+                                className="w-full p-4 text-[--site-main-Login] border rounded-md border-gray-800"
                                 placeholder="Please input your email address"
                                 {...register("email", {
                                     required: "Email is required",
@@ -65,18 +72,18 @@ const Register = () => {
                                 </p>
                             )}
                         </div>
-                        <div className="mb-2">
+                        <div className="gap-2 flex flex-col">
                             <label
                                 htmlFor="password"
-                                className="block text-sm font-semibold text-[--site-main-Login-Text]"
+                                className="text-md font-medium text-[--site-main-Login-Text]"
                             >
                                 Password
                             </label>
                             <input
                                 type="password"
                                 name="password"
-                                className="block w-full px-4 py-2 mt-2 text-[--site-main-Login] bg-[--site-main-color3] border rounded-md focus:border-[--site-main-Login-border-focus] focus:ring-[--site-main-Login-border-focus] focus:outline-none focus:ring focus:ring-opacity-40"
-                                placeholder="********"
+                                className="w-full p-4 text-[--site-main-Login] border rounded-md border-gray-800"
+                                placeholder="Please input your original password"
                                 {...register("old password", {
                                     required: "Password is required",
                                     minLength: {
@@ -92,18 +99,18 @@ const Register = () => {
                                 </p>
                             )}
                         </div>
-                        <div className="mb-2">
+                        <div className="gap-2 flex flex-col">
                             <label
                                 htmlFor="password"
-                                className="block text-sm font-semibold text-[--site-main-Login-Text]"
+                                className="text-md font-medium text-[--site-main-Login-Text]"
                             >
                                 New Password
                             </label>
                             <input
                                 type="password"
                                 name="password"
-                                className="block w-full px-4 py-2 mt-2 text-[--site-main-Login] bg-[--site-main-color3] border rounded-md focus:border-[--site-main-Login-border-focus] focus:ring-[--site-main-Login-border-focus] focus:outline-none focus:ring focus:ring-opacity-40"
-                                placeholder="********"
+                                className="w-full p-4 text-[--site-main-Login] border rounded-md border-gray-800"
+                                placeholder="Please input your new password"
                                 {...register("password", {
                                     required: "Password is required",
                                     minLength: {
@@ -119,18 +126,18 @@ const Register = () => {
                                 </p>
                             )}
                         </div>
-                        <div className="mb-2">
+                        <div className="gap-2 flex flex-col">
                             <label
                                 htmlFor="confirm"
-                                className="block text-sm font-semibold text-[--site-main-Login-Text]"
+                                className="text-md font-medium text-[--site-main-Login-Text]"
                             >
                                 Confirm Password
                             </label>
                             <input
                                 type="password"
                                 name="confirm"
-                                className="block w-full px-4 py-2 mt-2 text-[--site-main-Login] bg-[--site-main-color3] border rounded-md focus:border-[--site-main-Login-border-focus] focus:ring-[--site-main-Login-border-focus] focus:outline-none focus:ring focus:ring-opacity-40"
-                                placeholder="********"
+                                className="w-full p-4 text-[--site-main-Login] border rounded-md border-gray-800"
+                                placeholder="Please re-enter your password"
                                 {...register("confirm", {
                                     required: "Confirm password is required",
                                     validate: (value) =>
@@ -145,16 +152,16 @@ const Register = () => {
                             )}
                         </div>
                         <div className="mt-6">
-                            <button className="normal-case w-full px-4 py-2 tracking-wide text-[--site-main-color3] transition-colors duration-200 transform bg-[--site-main-Login] rounded-md hover:bg-[--site-main-Login1] focus:outline-none focus:bg-[--site-main-Login1]">
+                            <Button className="normal-case w-full p-4 text-md rounded-md bg-[--site-main-Login1] text-[--site-file-upload]">
                                 Change
-                            </button>
+                            </Button>
                         </div>
                     </form>
 
-                    <p className="mt-8 text-xs font-light text-center text-[--site-main-Login-Text]">
+                    <p className="text-sm text-gray-600 flex gap-2 justify-center">
                         <Link
                             to="/"
-                            className="font-medium text-[--site-main-Login1] hover:underline"
+                            className="font-bold text-[--site-main-Login1]"
                         >
                             Login
                         </Link>
