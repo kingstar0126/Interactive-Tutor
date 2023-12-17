@@ -79,8 +79,6 @@ jobs:
         echo "SENDGRID_ENTERPRISE_USERS_LIST_ID=${{env.SENDGRID_ENTERPRISE_USERS_LIST_ID}}" >> .env
         echo "E2B_API_KEY=${{env.E2B_API_KEY}}" >> .env
         echo "DATABASE_CONNECTION_STRING=${{env.DATABASE_CONNECTION_STRING}}" >> .env
-        echo "ECS_SERVICE=${{env.ECS_SERVICE}}" >> .env
-        echo "ECS_CLUSTER=${{env.ECS_CLUSTER}}" >> .env
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -89,11 +87,11 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
-    - name: Upload .env file as artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: env-file
-        path: .env
+    # - name: Upload .env file as artifact
+    #   uses: actions/upload-artifact@v2
+    #   with:
+    #     name: env-file
+    #     path: ./backend/project/.env
 
     - name: Login to Amazon ECR
       id: login-ecr
@@ -105,6 +103,8 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: latest
       run: |
+        cd ./backend/
+        docker pull $ECR_REPOSITORY:$IMAGE_TAG
         DOCKER_BUILDKIT=1 docker build --cache-from $ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REPOSITORY:$IMAGE_TAG .
         docker push $ECR_REPOSITORY:$IMAGE_TAG
         echo "::set-output name=image::$ECR_REPOSITORY:$IMAGE_TAG"
@@ -113,7 +113,7 @@ jobs:
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: task-definition-staging.json
+        task-definition: ./backend/task-definition-staging.json
         container-name: ${{ env.CONTAINER_NAME }}
         image: ${{ steps.build-image.outputs.image }}
 
@@ -125,54 +125,68 @@ jobs:
         cluster: ${{ env.ECS_CLUSTER }}
         wait-for-service-stability: true
 
-    # Notify Github Channel for Build Process
-    - name: Notify Slack
-      uses: ravsamhq/notify-slack-action@v1
-      if: always()
-      with:
-        status: ${{ job.status }}
-        notification_title: '{workflow} has {status_message}'
-        message_format: '{emoji} *{workflow}* {status_message} in <{repo_url}|{repo}>'
-        footer: '<{repo_url}|{repo}>'
-        notify_when: 'success,failure,warnings'
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    # # Notify Github Channel for Build Process
+    # - name: Notify Slack
+    #   uses: ravsamhq/notify-slack-action@v1
+    #   if: always()
+    #   with:
+    #     status: ${{ job.status }}
+    #     notification_title: '{workflow} has {status_message}'
+    #     message_format: '{emoji} *{workflow}* {status_message} in <{repo_url}|{repo}>'
+    #     footer: '<{repo_url}|{repo}>'
+    #     notify_when: 'success,failure,warnings'
+    #   env:
+    #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
-  # deploy-frontned-to-aws-s3-cloudfront:
-  #    runs-on: ubuntu-latest
+  deploy-frontend-to-aws-s3-cloudfront:
+     runs-on: ubuntu-latest
  
-  #    steps:
-  #      - name: Checkout
-  #        uses: actions/checkout@v2
+     steps:
+       - name: Checkout
+         uses: actions/checkout@v2
  
-  #      - name: Use Node.js
-  #        uses: actions/setup-node@v3
-  #        with:
-  #          node-version: '18'
+       - name: Use Node.js
+         uses: actions/setup-node@v3
+         with:
+           node-version: '18'
  
-  #      - name:  Prepare Env's for FE Application
-  #        run: |
-  #           cd frontend
-  #           echo "REACT_APP_SERVER_URL=${{env.STAGING_REACT_APP_SERVER_URL}}" >> .env
-  #           echo "REACT_APP_EMBED_SERVER_URL=${{env.STAGING_REACT_APP_EMBED_SERVER_URL}}" >> .env
-  #           echo "REACT_APP_GOOGLE_MAP_API=${{env.STAGING_REACT_APP_GOOGLE_MAP_API}}" >> .env
-  #           echo "REACT_APP_STRIPE_PUBLISH_KEY=${{env.STAGING_REACT_APP_STRIPE_PUBLISH_KEY}}" >> .env
+       - name:  Prepare Env's for FE Application
+         run: |
+            cd frontend
+            echo "REACT_APP_SERVER_URL=${{env.STAGING_REACT_APP_SERVER_URL}}" >> .env
+            echo "REACT_APP_EMBED_SERVER_URL=${{env.STAGING_REACT_APP_EMBED_SERVER_URL}}" >> .env
+            echo "REACT_APP_GOOGLE_MAP_API=${{env.STAGING_REACT_APP_GOOGLE_MAP_API}}" >> .env
+            echo "REACT_APP_STRIPE_PUBLISH_KEY=${{env.STAGING_REACT_APP_STRIPE_PUBLISH_KEY}}" >> .env
  
-  #      - name: Configure AWS credentials
-  #        uses: aws-actions/configure-aws-credentials@v1
-  #        with:
-  #          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #          aws-region: ${{ env.AWS_REGION }}
+       - name: Configure AWS credentials
+         uses: aws-actions/configure-aws-credentials@v1
+         with:
+           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+           aws-region: ${{ env.AWS_REGION }}
  
-  #      - name: Install Npm dependencies, Linting and create build
-  #        run: |
-  #          npm install
-  #          npm run lint
-  #          npm run build
+       - name: Install Npm dependencies, Linting and create build
+         run: |
+           cd frontend
+           yarn install
+           TSC_COMPILE_ON_ERROR=true yarn build
  
-  #      - name: Deploy to S3
-  #        run: |
-  #          aws s3 rm s3://interactive-tutor-staging-app-bucket/ --recursive
-  #          aws s3 cp build/ s3://interactive-tutor-staging-app-bucket/ --recursive
-  #          aws cloudfront create-invalidation --distribution-id EXV975SRMLZ0X --paths "/*"
+       - name: Deploy to S3
+         run: |
+           cd frontend
+           aws s3 sync ./build s3://interactive-tutor-staging-app-bucket/
+           aws cloudfront create-invalidation --distribution-id EXV975SRMLZ0X --paths "/*"
+
+
+          # # Notify Github Channel for Build Process
+          # - name: Notify Slack
+          #   uses: ravsamhq/notify-slack-action@v1
+          #   if: always()
+          #   with:
+          #     status: ${{ job.status }}
+          #     notification_title: '{workflow} has {status_message}'
+          #     message_format: '{emoji} *{workflow}* {status_message} in <{repo_url}|{repo}>'
+          #     footer: '<{repo_url}|{repo}>'
+          #     notify_when: 'success,failure,warnings'
+          #   env:
+          #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

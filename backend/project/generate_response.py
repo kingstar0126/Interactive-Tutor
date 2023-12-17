@@ -7,7 +7,6 @@ from langchain.chat_models import ChatOpenAI
 from typing import Sequence
 from threading import Thread
 from queue import Queue, Empty
-from langchain.llms import OpenAI
 from langchain.callbacks.base import BaseCallbackHandler
 from typing import Any, Callable
 from langchain.vectorstores.pinecone import Pinecone
@@ -19,9 +18,6 @@ from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from openai import OpenAI
 from langchain.chains.openai_functions import (
-    create_openai_fn_chain,
-    create_openai_fn_runnable,
-    create_structured_output_chain,
     create_structured_output_runnable,
 )
 from langchain.pydantic_v1 import BaseModel, Field
@@ -79,7 +75,7 @@ def get_name_from_prompt(query):
     print('THIS IS THE NAME: ', names)
     return names
 
-def generate_message(query, behavior, temp, model, chat, template, openai_api_key):
+def generate_message(query, behavior, temp, model, chat, template, openai_api_key = None):
     load_dotenv()
 
     if openai_api_key is None:
@@ -87,7 +83,7 @@ def generate_message(query, behavior, temp, model, chat, template, openai_api_ke
 
     q = Queue()
     job_done = object()
-    
+    print('This is template : \n\n', template)
     prompt = PromptTemplate(
         input_variables=["context", "question"], template=template)
     chain_type_kwargs = {"prompt": prompt}
@@ -116,7 +112,7 @@ def generate_message(query, behavior, temp, model, chat, template, openai_api_ke
     docsearch = Pinecone.from_existing_index(
         index_name=PINECONE_INDEX_NAME, embedding=embeddings)
 
-    # docs = docsearch.similarity_search_with_score(" ", filter={"chat": str(chat)})
+    docs = docsearch.similarity_search_with_score(" ", filter={"chat": str(chat)})
 
     qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=docsearch.as_retriever(search_kwargs={'filter': {"chat": str(chat)}}), chain_type_kwargs=chain_type_kwargs)
     
@@ -340,4 +336,3 @@ def image_understanding(image_files, prompt):
         if next_token is not None:
             content += next_token
             yield next_token, content
-

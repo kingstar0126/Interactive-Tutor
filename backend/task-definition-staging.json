@@ -1,0 +1,48 @@
+{
+    "family": "interactive-tutor-staging-backend-td",
+    "containerDefinitions": [
+        {
+            "name": "interactive-tutor-staging-backend-td",
+            "image": "987025303706.dkr.ecr.eu-west-2.amazonaws.com/interactive-tutor-staging-backend:latest",
+            "cpu": 1024,
+            "memory": 2048,
+            "portMappings": [
+                {
+                    "containerPort": 5000,
+                    "hostPort": 5000,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "user": "0",
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/interactive-tutor-staging-td",
+                    "awslogs-region": "eu-west-2",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
+        }
+    ],
+    "executionRoleArn": "arn:aws:iam::987025303706:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "1024",
+    "memory": "2048",
+    "tags": [
+        {
+            "key": "ApplicationEnvironment",
+            "value": "staging"
+        },
+        {
+            "key": "ApplicationName",
+            "value": "interactive-tutor"
+        }
+    ]
+}

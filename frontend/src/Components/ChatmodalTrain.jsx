@@ -18,7 +18,7 @@ import {
 import WONDE from "../assets/wonde.gif";
 
 const ChatmodalTrain = (props) => {
-    const [type, SetType] = useState("1");
+    const [type, SetType] = useState(1);
     const [label, SetLabel] = useState("");
     const [url, Seturl] = useState("");
     const [file, setFile] = useState("");
@@ -211,6 +211,7 @@ const ChatmodalTrain = (props) => {
         Seturl("");
         setText("");
         getapikey();
+        // SetType("1")
         clearInterval(poll);
         if (chat.api_select && chat.api_select === 1) {setIsChecked(true)}
         else {setIsChecked(false)}
@@ -273,10 +274,10 @@ const ChatmodalTrain = (props) => {
                                     onChange={(e) => {
                                         SetType(e.value);
                                     }}
-                                    defaultValue={{
-                                        value: "1",
-                                        label: "URLs",
-                                    }}
+                                    // defaultValue={{
+                                    //     value: "1",
+                                    //     label: "URLs",
+                                    // }}
                                     options={(user.role === 7 || user.role === 1 || (user.role ===4 && check)) ? [
                                         {
                                             value: "1",
@@ -424,7 +425,7 @@ const ChatmodalTrain = (props) => {
                                 {(user.role === 7 || user.role === 1 || (user.role ===4 && check)) && type === "4" && (
                                     <div className="flex flex-col items-start gap-2">
                                         <label className="text-base font-medium">
-                                            Select the API that you want to link to youe AI Bot
+                                            Only school admins can connect to an API
                                         </label>
                                         <div className="flex items-center justify-left gap-4 w-1/2">
                                             <div className="relative">
@@ -438,7 +439,7 @@ const ChatmodalTrain = (props) => {
                                                 disabled={!isChecked}
                                                 autoComplete="off"
                                                 className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md"
-                                            /> : <span className="w-full px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md">You cann't enter API key</span>}
+                                            /> : <span className="w-full px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md">Restricted to admins</span>}
                                         </div>
                                     </div>
                                 )}

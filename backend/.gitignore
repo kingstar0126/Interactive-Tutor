@@ -11,7 +11,7 @@ __pycache__/
 *.crt
 *.key
 *.pem
-*.json
+# *.json
 # Distribution / packaging
 .Python
 wonde_csvs/

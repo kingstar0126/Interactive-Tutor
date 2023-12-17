@@ -1,4 +1,4 @@
-FROM interactive-tutor-be-base-image
+FROM 987025303706.dkr.ecr.eu-west-2.amazonaws.com/interactive-tutor-staging-backend_base
 
 WORKDIR /var/app
 

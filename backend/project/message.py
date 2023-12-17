@@ -20,11 +20,8 @@ import re
 from typing import Sequence
 from google.cloud import vision
 import tiktoken
-from multiprocessing import Process
 import threading
-from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.utils import secure_filename
-from werkzeug.datastructures import FileStorage
 
 message = Blueprint('message', __name__)
 threads = {}
@@ -84,12 +81,12 @@ def init_message():
     country = request.json['country']
     response = generate_Bubble_message(country)
     name = f"{response}, {country}"
-    messages = db.session.query(Message).filter_by(chat_id=chat_id).all()
-    for row in messages:
-        _messages = json.loads(row.message)
-        if len(_messages) < 2:
-            db.session.delete(row)
-    db.session.commit()
+    # messages = db.session.query(Message).filter_by(chat_id=chat_id).all()
+    # for row in messages:
+    #     _messages = json.loads(row.message)
+    #     if len(_messages) < 2:
+    #         db.session.delete(row)
+    # db.session.commit()
     if conversation == "":
         message = json.dumps([])
     else:
