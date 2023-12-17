@@ -1,0 +1,178 @@
+name: Deploy to AWS ECS
+
+on:
+  push:
+    branches:
+      - staging
+env:
+  BUILD_RUN_ID: ${{github.run_number}}
+
+  ## backend
+  MAIL_USERNAME: ${{secrets.STAGING_MAIL_USERNAME}}
+  MAIL_PASSWORD: ${{secrets.STAGING_MAIL_PASSWORD}}
+  STRIPE_SECRET_KEY: ${{secrets.STAGING_STRIPE_SECRET_KEY}}
+  PINECONE_API_KEY: ${{secrets.STAGING_PINECONE_API_KEY}}
+  PINECONE_ENV: ${{secrets.STAGING_PINECONE_ENV}}
+  OPENAI_API_KEY: ${{secrets.STAGING_OPENAI_API_KEY}}
+  OPENAI_API_KEY_PRO: ${{secrets.STAGING_OPENAI_API_KEY_PRO}}
+  PINECONE_INDEX_NAME: ${{secrets.STAGING_PINECONE_INDEX_NAME}}
+  SECRET_KEY: ${{secrets.STAGING_SECRET_KEY}}
+  STRIPE_PUBLISHABLE_KEY: ${{secrets.STAGING_STRIPE_PUBLISHABLE_KEY}}
+  GOOGLE_API: ${{secrets.STAGING_GOOGLE_API}}
+  GOOGLE_CX: ${{secrets.STAGING_GOOGLE_CX}}
+  TAX_RATE_ID: ${{secrets.STAGING_TAX_RATE_ID}}
+  COUPON: ${{secrets.STAGING_COUPON}}
+  TOP_UP_QUERY_PRICE: ${{secrets.STAGING_TOP_UP_QUERY_PRICE}}
+  SENDGRID_MAIL: ${{secrets.STAGING_SENDGRID_MAIL}}
+  SENDGRID_API_KEY: ${{secrets.STAGING_SENDGRID_API_KEY}}
+  SENDGRID_RESET_PASSWORD_TEMPLATE_ID: ${{secrets.STAGING_SENDGRID_RESET_PASSWORD_TEMPLATE_ID}}
+  SENDGRID_FREE_TRIAL_LIST_ID: ${{secrets.STAGING_SENDGRID_FREE_TRIAL_LIST_ID}}
+  SENDGRID_FREE_TRIAL_END_LIST_ID: ${{secrets.STAGING_SENDGRID_FREE_TRIAL_END_LIST_ID}}
+  SENDGRID_SUBSCRIPTION_USERS_LIST_ID: ${{secrets.STAGING_SENDGRID_SUBSCRIPTION_USERS_LIST_ID}}
+  SENDGRID_ENTERPRISE_USERS_LIST_ID: ${{secrets.STAGING_SENDGRID_ENTERPRISE_USERS_LIST_ID}}
+  E2B_API_KEY: ${{secrets.STAGING_E2B_API_KEY}}
+  DATABASE_CONNECTION_STRING: ${{secrets.STAGING_DATABASE_CONNECTION_STRING}}
+  AWS_REGION: eu-west-2
+  ECR_REPOSITORY: 987025303706.dkr.ecr.eu-west-2.amazonaws.com/interactive-tutor-staging-backend
+  ECS_SERVICE: interactive-tutor-staging-backend-service 
+  ECS_CLUSTER: interactive-tutor-staging-ecs-cluster
+  CONTAINER_NAME: interactive-tutor-staging-backend-td
+  
+  ## frontend
+  REACT_APP_SERVER_URL: ${{secrets.STAGING_REACT_APP_SERVER_URL}}
+  REACT_APP_EMBED_SERVER_URL: ${{secrets.STAGING_REACT_APP_EMBED_SERVER_URL}}
+  REACT_APP_GOOGLE_MAP_API: ${{secrets.STAGING_REACT_APP_GOOGLE_MAP_API}}
+  REACT_APP_STRIPE_PUBLISH_KEY: ${{secrets.STAGING_REACT_APP_STRIPE_PUBLISH_KEY}}
+
+jobs:
+  deploy-backend-to-aws-ecs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Prepare Backend Application
+      run: |
+        cd backend/project/
+        echo "MAIL_USERNAME=${{env.MAIL_USERNAME}}" >> .env
+        echo "MAIL_PASSWORD=${{env.MAIL_PASSWORD}}" >> .env
+        echo "STRIPE_SECRET_KEY=${{env.STRIPE_SECRET_KEY}}" >> .env
+        echo "PINECONE_API_KEY=${{env.PINECONE_API_KEY}}" >> .env
+        echo "PINECONE_ENV=${{env.PINECONE_ENV}}" >> .env
+        echo "OPENAI_API_KEY=${{env.OPENAI_API_KEY}}" >> .env
+        echo "OPENAI_API_KEY_PRO=${{env.OPENAI_API_KEY_PRO}}" >> .env
+        echo "PINECONE_INDEX_NAME=${{env.PINECONE_INDEX_NAME}}" >> .env
+        echo "SECRET_KEY=${{env.SECRET_KEY}}" >> .env
+        echo "STRIPE_PUBLISHABLE_KEY=${{env.STRIPE_PUBLISHABLE_KEY}}" >> .env
+        echo "GOOGLE_API=${{env.GOOGLE_API}}" >> .env
+        echo "GOOGLE_CX=${{env.GOOGLE_CX}}" >> .env
+        echo "TAX_RATE_ID=${{env.TAX_RATE_ID}}" >> .env
+        echo "COUPON=${{env.COUPON}}" >> .env
+        echo "TOP_UP_QUERY_PRICE=${{env.TOP_UP_QUERY_PRICE}}" >> .env
+        echo "SENDGRID_MAIL=${{env.SENDGRID_MAIL}}" >> .env
+        echo "SENDGRID_API_KEY=${{env.SENDGRID_API_KEY}}" >> .env
+        echo "SENDGRID_RESET_PASSWORD_TEMPLATE_ID=${{env.SENDGRID_RESET_PASSWORD_TEMPLATE_ID}}" >> .env
+        echo "SENDGRID_FREE_TRIAL_LIST_ID=${{env.SENDGRID_FREE_TRIAL_LIST_ID}}" >> .env
+        echo "SENDGRID_FREE_TRIAL_END_LIST_ID=${{env.SENDGRID_FREE_TRIAL_END_LIST_ID}}" >> .env
+        echo "SENDGRID_SUBSCRIPTION_USERS_LIST_ID=${{env.SENDGRID_SUBSCRIPTION_USERS_LIST_ID}}" >> .env
+        echo "SENDGRID_ENTERPRISE_USERS_LIST_ID=${{env.SENDGRID_ENTERPRISE_USERS_LIST_ID}}" >> .env
+        echo "E2B_API_KEY=${{env.E2B_API_KEY}}" >> .env
+        echo "DATABASE_CONNECTION_STRING=${{env.DATABASE_CONNECTION_STRING}}" >> .env
+        echo "ECS_SERVICE=${{env.ECS_SERVICE}}" >> .env
+        echo "ECS_CLUSTER=${{env.ECS_CLUSTER}}" >> .env
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Upload .env file as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: env-file
+        path: .env
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v1
+
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-image
+      env:
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        IMAGE_TAG: latest
+      run: |
+        DOCKER_BUILDKIT=1 docker build --cache-from $ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REPOSITORY:$IMAGE_TAG .
+        docker push $ECR_REPOSITORY:$IMAGE_TAG
+        echo "::set-output name=image::$ECR_REPOSITORY:$IMAGE_TAG"
+
+    - name: Fill in the new image ID in the Amazon ECS task definition
+      id: task-def
+      uses: aws-actions/amazon-ecs-render-task-definition@v1
+      with:
+        task-definition: task-definition-staging.json
+        container-name: ${{ env.CONTAINER_NAME }}
+        image: ${{ steps.build-image.outputs.image }}
+
+    - name: Deploy Amazon ECS task definition
+      uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+      with:
+        task-definition: ${{ steps.task-def.outputs.task-definition }}
+        service: ${{ env.ECS_SERVICE }}
+        cluster: ${{ env.ECS_CLUSTER }}
+        wait-for-service-stability: true
+
+    # Notify Github Channel for Build Process
+    - name: Notify Slack
+      uses: ravsamhq/notify-slack-action@v1
+      if: always()
+      with:
+        status: ${{ job.status }}
+        notification_title: '{workflow} has {status_message}'
+        message_format: '{emoji} *{workflow}* {status_message} in <{repo_url}|{repo}>'
+        footer: '<{repo_url}|{repo}>'
+        notify_when: 'success,failure,warnings'
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # deploy-frontned-to-aws-s3-cloudfront:
+  #    runs-on: ubuntu-latest
+ 
+  #    steps:
+  #      - name: Checkout
+  #        uses: actions/checkout@v2
+ 
+  #      - name: Use Node.js
+  #        uses: actions/setup-node@v3
+  #        with:
+  #          node-version: '18'
+ 
+  #      - name:  Prepare Env's for FE Application
+  #        run: |
+  #           cd frontend
+  #           echo "REACT_APP_SERVER_URL=${{env.STAGING_REACT_APP_SERVER_URL}}" >> .env
+  #           echo "REACT_APP_EMBED_SERVER_URL=${{env.STAGING_REACT_APP_EMBED_SERVER_URL}}" >> .env
+  #           echo "REACT_APP_GOOGLE_MAP_API=${{env.STAGING_REACT_APP_GOOGLE_MAP_API}}" >> .env
+  #           echo "REACT_APP_STRIPE_PUBLISH_KEY=${{env.STAGING_REACT_APP_STRIPE_PUBLISH_KEY}}" >> .env
+ 
+  #      - name: Configure AWS credentials
+  #        uses: aws-actions/configure-aws-credentials@v1
+  #        with:
+  #          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #          aws-region: ${{ env.AWS_REGION }}
+ 
+  #      - name: Install Npm dependencies, Linting and create build
+  #        run: |
+  #          npm install
+  #          npm run lint
+  #          npm run build
+ 
+  #      - name: Deploy to S3
+  #        run: |
+  #          aws s3 rm s3://interactive-tutor-staging-app-bucket/ --recursive
+  #          aws s3 cp build/ s3://interactive-tutor-staging-app-bucket/ --recursive
+  #          aws cloudfront create-invalidation --distribution-id EXV975SRMLZ0X --paths "/*"
