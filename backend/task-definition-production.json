@@ -1,0 +1,48 @@
+{
+    "family": "interactive-tutor-prod-backend-td",
+    "containerDefinitions": [
+        {
+            "name": "interactive-tutor-prod-backend-td",
+            "image": "987025303706.dkr.ecr.eu-west-2.amazonaws.com/interactive-tutor-prod-backend:latest",
+            "cpu": 512,
+            "memory": 1024,
+            "portMappings": [
+                {
+                    "containerPort": 5000,
+                    "hostPort": 5000,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "user": "0",
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/interactive-tutor-prod-td",
+                    "awslogs-region": "eu-west-2",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            }
+        }
+    ],
+    "executionRoleArn": "arn:aws:iam::987025303706:role/ecsTaskExecutionRole",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "512",
+    "memory": "1024",
+    "tags": [
+        {
+            "key": "ApplicationEnvironment",
+            "value": "prod"
+        },
+        {
+            "key": "ApplicationName",
+            "value": "interactive-tutor"
+        }
+    ]
+}

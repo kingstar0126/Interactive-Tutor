@@ -21,3 +21,8 @@ google-chrome-stable_current_amd64.deb
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+/backend/project/.env.prod
+/backend/project/.env.staging
+/frontend/.env.prod
+/frontend/.env.staging
+/backend/project/.env.prod

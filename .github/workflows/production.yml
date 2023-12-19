@@ -3,46 +3,46 @@ name: Deploy to AWS ECS
 on:
   push:
     branches:
-      - staging
+      - production-v2
 env:
   BUILD_RUN_ID: ${{github.run_number}}
 
   ## backend
-  MAIL_USERNAME: ${{secrets.STAGING_MAIL_USERNAME}}
-  MAIL_PASSWORD: ${{secrets.STAGING_MAIL_PASSWORD}}
-  STRIPE_SECRET_KEY: ${{secrets.STAGING_STRIPE_SECRET_KEY}}
-  PINECONE_API_KEY: ${{secrets.STAGING_PINECONE_API_KEY}}
-  PINECONE_ENV: ${{secrets.STAGING_PINECONE_ENV}}
-  OPENAI_API_KEY: ${{secrets.STAGING_OPENAI_API_KEY}}
-  OPENAI_API_KEY_PRO: ${{secrets.STAGING_OPENAI_API_KEY_PRO}}
-  PINECONE_INDEX_NAME: ${{secrets.STAGING_PINECONE_INDEX_NAME}}
-  SECRET_KEY: ${{secrets.STAGING_SECRET_KEY}}
-  STRIPE_PUBLISHABLE_KEY: ${{secrets.STAGING_STRIPE_PUBLISHABLE_KEY}}
-  GOOGLE_API: ${{secrets.STAGING_GOOGLE_API}}
-  GOOGLE_CX: ${{secrets.STAGING_GOOGLE_CX}}
-  TAX_RATE_ID: ${{secrets.STAGING_TAX_RATE_ID}}
-  COUPON: ${{secrets.STAGING_COUPON}}
-  TOP_UP_QUERY_PRICE: ${{secrets.STAGING_TOP_UP_QUERY_PRICE}}
-  SENDGRID_MAIL: ${{secrets.STAGING_SENDGRID_MAIL}}
-  SENDGRID_API_KEY: ${{secrets.STAGING_SENDGRID_API_KEY}}
-  SENDGRID_RESET_PASSWORD_TEMPLATE_ID: ${{secrets.STAGING_SENDGRID_RESET_PASSWORD_TEMPLATE_ID}}
-  SENDGRID_FREE_TRIAL_LIST_ID: ${{secrets.STAGING_SENDGRID_FREE_TRIAL_LIST_ID}}
-  SENDGRID_FREE_TRIAL_END_LIST_ID: ${{secrets.STAGING_SENDGRID_FREE_TRIAL_END_LIST_ID}}
-  SENDGRID_SUBSCRIPTION_USERS_LIST_ID: ${{secrets.STAGING_SENDGRID_SUBSCRIPTION_USERS_LIST_ID}}
-  SENDGRID_ENTERPRISE_USERS_LIST_ID: ${{secrets.STAGING_SENDGRID_ENTERPRISE_USERS_LIST_ID}}
-  E2B_API_KEY: ${{secrets.STAGING_E2B_API_KEY}}
-  DATABASE_CONNECTION_STRING: ${{secrets.STAGING_DATABASE_CONNECTION_STRING}}
+  MAIL_USERNAME: ${{secrets.PRODUCTION_MAIL_USERNAME}}
+  MAIL_PASSWORD: ${{secrets.PRODUCTION_MAIL_PASSWORD}}
+  STRIPE_SECRET_KEY: ${{secrets.PRODUCTION_STRIPE_SECRET_KEY}}
+  PINECONE_API_KEY: ${{secrets.PRODUCTION_PINECONE_API_KEY}}
+  PINECONE_ENV: ${{secrets.PRODUCTION_PINECONE_ENV}}
+  OPENAI_API_KEY: ${{secrets.PRODUCTION_OPENAI_API_KEY}}
+  OPENAI_API_KEY_PRO: ${{secrets.PRODUCTION_OPENAI_API_KEY_PRO}}
+  PINECONE_INDEX_NAME: ${{secrets.PRODUCTION_PINECONE_INDEX_NAME}}
+  SECRET_KEY: ${{secrets.PRODUCTION_SECRET_KEY}}
+  STRIPE_PUBLISHABLE_KEY: ${{secrets.PRODUCTION_STRIPE_PUBLISHABLE_KEY}}
+  GOOGLE_API: ${{secrets.PRODUCTION_GOOGLE_API}}
+  GOOGLE_CX: ${{secrets.PRODUCTION_GOOGLE_CX}}
+  TAX_RATE_ID: ${{secrets.PRODUCTION_TAX_RATE_ID}}
+  COUPON: ${{secrets.PRODUCTION_COUPON}}
+  TOP_UP_QUERY_PRICE: ${{secrets.PRODUCTION_TOP_UP_QUERY_PRICE}}
+  SENDGRID_MAIL: ${{secrets.PRODUCTION_SENDGRID_MAIL}}
+  SENDGRID_API_KEY: ${{secrets.PRODUCTION_SENDGRID_API_KEY}}
+  SENDGRID_RESET_PASSWORD_TEMPLATE_ID: ${{secrets.PRODUCTION_SENDGRID_RESET_PASSWORD_TEMPLATE_ID}}
+  SENDGRID_FREE_TRIAL_LIST_ID: ${{secrets.PRODUCTION_SENDGRID_FREE_TRIAL_LIST_ID}}
+  SENDGRID_FREE_TRIAL_END_LIST_ID: ${{secrets.PRODUCTION_SENDGRID_FREE_TRIAL_END_LIST_ID}}
+  SENDGRID_SUBSCRIPTION_USERS_LIST_ID: ${{secrets.PRODUCTION_SENDGRID_SUBSCRIPTION_USERS_LIST_ID}}
+  SENDGRID_ENTERPRISE_USERS_LIST_ID: ${{secrets.PRODUCTION_SENDGRID_ENTERPRISE_USERS_LIST_ID}}
+  E2B_API_KEY: ${{secrets.PRODUCTION_E2B_API_KEY}}
+  DATABASE_CONNECTION_STRING: ${{secrets.PRODUCTION_DATABASE_CONNECTION_STRING}}
   AWS_REGION: eu-west-2
-  ECR_REPOSITORY: 987025303706.dkr.ecr.eu-west-2.amazonaws.com/interactive-tutor-staging-backend
-  ECS_SERVICE: interactive-tutor-staging-backend-service 
-  ECS_CLUSTER: interactive-tutor-staging-ecs-cluster
-  CONTAINER_NAME: interactive-tutor-staging-backend-td
+  ECR_REPOSITORY: 987025303706.dkr.ecr.eu-west-2.amazonaws.com/interactive-tutor-prod-backend
+  ECS_SERVICE: interactive-tutor-prod-backend-service 
+  ECS_CLUSTER: interactive-tutor-prod-ecs-cluster
+  CONTAINER_NAME: interactive-tutor-prod-backend-td
   
   ## frontend
-  REACT_APP_SERVER_URL: ${{secrets.STAGING_REACT_APP_SERVER_URL}}
-  REACT_APP_EMBED_SERVER_URL: ${{secrets.STAGING_REACT_APP_EMBED_SERVER_URL}}
-  REACT_APP_GOOGLE_MAP_API: ${{secrets.STAGING_REACT_APP_GOOGLE_MAP_API}}
-  REACT_APP_STRIPE_PUBLISH_KEY: ${{secrets.STAGING_REACT_APP_STRIPE_PUBLISH_KEY}}
+  REACT_APP_SERVER_URL: ${{secrets.PRODUCTION_REACT_APP_SERVER_URL}}
+  REACT_APP_EMBED_SERVER_URL: ${{secrets.PRODUCTION_REACT_APP_EMBED_SERVER_URL}}
+  REACT_APP_GOOGLE_MAP_API: ${{secrets.PRODUCTION_REACT_APP_GOOGLE_MAP_API}}
+  REACT_APP_STRIPE_PUBLISH_KEY: ${{secrets.PRODUCTION_REACT_APP_STRIPE_PUBLISH_KEY}}
 
 jobs:
   deploy-backend-to-aws-ecs:
@@ -113,7 +113,7 @@ jobs:
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: ./backend/task-definition-staging.json
+        task-definition: ./backend/task-definition-production.json
         container-name: ${{ env.CONTAINER_NAME }}
         image: ${{ steps.build-image.outputs.image }}
 
@@ -174,8 +174,8 @@ jobs:
        - name: Deploy to S3
          run: |
            cd frontend
-           aws s3 sync ./build s3://interactive-tutor-staging-app-bucket/
-           aws cloudfront create-invalidation --distribution-id EXV975SRMLZ0X --paths "/*"
+           aws s3 sync ./build s3://interactive-tutor-prod-app-bucket/
+           aws cloudfront create-invalidation --distribution-id E1AHLAHI7MTPUT --paths "/*"
 
 
           # # Notify Github Channel for Build Process
