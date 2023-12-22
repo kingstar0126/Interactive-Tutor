@@ -77,29 +77,11 @@ def login_post():
             'message': 'You are blocked.',
         })
     if user.role == 5:
-        days = calculate_days(user.create_date)
-        if days < 0:
-            user.role = 0
-            db.session.commit()
-            new_user = {
-                'id': user.id,
-                'username': user.username,
-                'query': max(user.query - user.usage, 0),
-                'role': user.role,
-            }
-            response = {
-                'success': True,
-                'code': 200,
-                'data': new_user,
-                'message': 'Your free trial has ended.'
-            }
-            return jsonify(response)
         new_user = {
             'id': user.id,
             'username': user.username,
             'role': user.role,
             'query': max(user.query - user.usage, 0),
-            'days': days
         }
     else:
         new_user = {

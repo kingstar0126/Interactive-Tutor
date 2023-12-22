@@ -199,7 +199,7 @@ def update_chat():
                 item.creativity = creativity
                 item.behavior = behavior
                 item.behaviormodel = behaviormodel
-                chat.label = label
+        chat.label = label
         chat.description = description
         chat.model = model
         chat.conversation = conversation
