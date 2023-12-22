@@ -13,66 +13,27 @@ import TraindataTable from "./TrainData";
 import History from "./History";
 import { AiFillFolderOpen, AiOutlineReload } from "react-icons/ai";
 import { SiHiveBlockchain } from "react-icons/si";
-import { MdUpdate } from "react-icons/md";
 import { useSelector } from "react-redux";
 import Embedded from "./Embedded";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
 import toast, { Toaster } from "react-hot-toast";
-import Chatmodal from "./Chatmodal";
-import { setchatbot, getchat } from "../redux/actions/chatAction";
-import { useDispatch } from "react-redux";
+import { useLocation } from "react-router-dom";
 
 export default function Example() {
     const chatState = useSelector((state) => state.chat.chat);
-    const chat = chatState && JSON.parse(chatState) || {};
+    const chat = (chatState && JSON.parse(chatState)) || {};
     const [activeTab, setActiveTab] = useState("preview");
-    const dispatch = useDispatch();
     const [message_history, setMessage_history] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [updateModalOpen, setUpdateModalOpen] = useState(false);
     const [newChatKey, setNewChatKey] = useState(0);
-    const notification = (type, message) => {
-        // To do in here
-        if (type === "error") {
-            toast.error(message);
-        }
-        if (type === "success") {
-            toast.success(message);
-        }
-    };
-    const showUpdateModal = () => {
-        setUpdateModalOpen(true);
-    };
-    const handleUpdateOk = (data) => {
-        axios.post(webAPI.updatechat, data).then((res) => {
-            if (!res.data.success) {
-                notification("error", res.data.message);
-            } else {
-                notification("success", res.data.message);
-                getchat(dispatch, data);
-                axios
-                    .get("https://geolocation-db.com/json/")
-                    .then((res) => {
-                        let country = res.data.country_name;
-                        data["country"] = country;
-                        console.log(data)
-                        setchatbot(dispatch, data);
-                    })
-
-            }
-        });
-        setUpdateModalOpen(false);
-    };
+    let location = useLocation();
 
     const handleOpen = (e) => {
         window.open(`/chat/embedding/${chat.uuid}`, "_blank");
     };
     const handleEmbedding = (e) => {
         showModal();
-    };
-    const handleUpdate = (e) => {
-        showUpdateModal();
     };
 
     const showModal = () => {
@@ -83,7 +44,6 @@ export default function Example() {
     };
     const handleCancel = () => {
         setIsModalOpen(false);
-        setUpdateModalOpen(false);
     };
     const getMessage_history = () => {
         axios
@@ -99,7 +59,7 @@ export default function Example() {
     };
 
     const handleNewChat = () => {
-        setNewChatKey(prevKey => prevKey + 1);
+        setNewChatKey((prevKey) => prevKey + 1);
     };
 
     useEffect(() => {
@@ -107,60 +67,57 @@ export default function Example() {
             getMessage_history();
         }
     }, [activeTab]);
+
+    useEffect(() => {
+        getMessage_history();
+    }, [location.pathname])
+
+
+
     const data = [
         {
             label: "Preview",
             value: "preview",
             desc: (
-                <div className="w-full h-full rounded-xl border-[--site-chat-header-border] border flex-col flex from-[--site-main-modal-from-color] bg-gradient-to-br">
-                    <Toaster />
+                <div className="w-full rounded-xl border-[--site-chat-header-border] border flex-col">
+                    <Toaster className="z-30"/>
                     <div className="flex flex-col p-5 md:w-full md:z-0">
                         <div className="flex flex-col justify-between gap-5 text-black md:flex-row md:gap-0">
                             <div className="flex flex-col gap-5 md:flex-row">
                                 <Button
                                     onClick={handleNewChat}
-                                    className="normal-case bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2 text-black text-base"
+                                    variant="outlined"
+                                    className="normal-case bg-white border border-[--site-onboarding-primary-color] py-2 px-4 rounded-md flex items-center justify-center gap-2 text-black text-base"
                                 >
                                     <AiOutlineReload />
                                     New Chat
                                 </Button>
                                 <Button
                                     onClick={handleOpen}
-                                    className="normal-case bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2 text-black text-base"
+                                    variant="outlined"
+                                    className="normal-case bg-white py-2 px-4 border border-[--site-onboarding-primary-color] rounded-md flex items-center justify-center gap-2 text-black text-base"
                                 >
                                     <AiFillFolderOpen />
                                     Open
                                 </Button>
                                 <Button
                                     onClick={handleEmbedding}
-                                    className="normal-case bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2 text-black text-base"
+                                    variant="outlined"
+                                    className="normal-case bg-white py-2 px-4 border border-[--site-onboarding-primary-color] rounded-md flex items-center justify-center gap-2 text-black text-base"
                                 >
                                     <SiHiveBlockchain />
                                     Embed or Share
                                 </Button>
                             </div>
-                            {chat && chat.inviteId === null && <Button
-                                className="normal-case bg-[--site-logo-text-color] p-2 rounded-sm flex items-center justify-center gap-2 text-black text-base"
-                                onClick={handleUpdate}
-                            >
-                                <MdUpdate className="w-6 h-6" />
-                                Update
-                            </Button>}
                         </div>
                     </div>
-                    <div className="h-hull min-h-[430px] flex">
+                    <div className="h-hull min-h-[430px]">
                         <NewChat />
                     </div>
                     <Embedded
                         data={chat}
                         open={isModalOpen}
                         handleOk={handleOk}
-                        handleCancel={handleCancel}
-                    />
-                    <Chatmodal
-                        chat={chat}
-                        open={updateModalOpen}
-                        handleOk={handleUpdateOk}
                         handleCancel={handleCancel}
                     />
                 </div>
@@ -179,7 +136,7 @@ export default function Example() {
             label: "Training Data",
             value: "training Data",
             desc: (
-                <div className="border-[--site-chat-header-border] border rounded-xl from-[--site-main-modal-from-color] bg-gradient-to-br">
+                <div className="border-[--site-chat-header-border] border rounded-xl">
                     <TraindataTable data={chat} />
                 </div>
             ),
@@ -188,56 +145,51 @@ export default function Example() {
             label: "Conversation Explorer",
             value: "conversation Explorer",
             desc: (
-                <div className="border-[--site-chat-header-border] border rounded-xl from-[--site-main-modal-from-color] bg-gradient-to-br">
+                <div className="border-[--site-chat-header-border] border rounded-xl">
                     <History data={message_history} />
                 </div>
             ),
         },
     ];
     return (
-        <Tabs value={activeTab} id="custom-animation" key={newChatKey}>
-            <TabsHeader
-                className="md:px-6 md:py-4 bg-transparent border-b rounded-none border-[--site-chat-header-border] flex xl:flex-row flex-col gap-2 xl:gap-0"
-                indicatorProps={{
-                    className:
-                        "bg-[--site-card-icon-color] shadow-none text-white py-3 px-20",
-                }}
-            >
-                {data.map(({ label, value }) => (
-                    <Tab
-                        key={value}
-                        value={value}
-                        onClick={() => {
-                            setActiveTab(value);
-                        }}
-                        className={
-                            activeTab === value
-                                ? "text-white w-full flex justify-center"
-                                : "flex justify-center xl:border-none border w-full border-black rounded-md"
-                        }
-                    >
-                        {label}
-                    </Tab>
-                ))}
-            </TabsHeader>
-            <TabsBody
-                animate={{
-                    initial: { y: 250 },
-                    mount: { y: 0 },
-                    unmount: { y: 250 },
-                }}
-                className="mt-6"
-            >
-                {data.map(({ value, desc }) => (
-                    <TabPanel
-                        key={value}
-                        value={value}
-                        className="p-0 rounded-2xl"
-                    >
-                        {desc}
-                    </TabPanel>
-                ))}
-            </TabsBody>
-        </Tabs>
+        <div className="py-4 px-8 w-full">
+            <Tabs value={activeTab} key={newChatKey}>
+                <TabsHeader
+                    className="md:px-6 md:py-4 bg-transparent border-b rounded-none border-[--site-chat-header-border] flex xl:flex-row flex-col gap-2 xl:gap-0"
+                    indicatorProps={{
+                        className:
+                            "bg-[--site-onboarding-primary-color] shadow-none text-white py-3 px-20",
+                    }}
+                >
+                    {data.map(({ label, value }) => (
+                        <Tab
+                            key={value}
+                            value={value}
+                            onClick={() => {
+                                setActiveTab(value);
+                            }}
+                            className={
+                                activeTab === value
+                                    ? "text-white w-full flex justify-center z-0"
+                                    : "flex justify-center xl:border-none border z-0 w-full border-black rounded-md"
+                            }
+                        >
+                            {label}
+                        </Tab>
+                    ))}
+                </TabsHeader>
+                <TabsBody className="mt-6 h-full">
+                    {data.map(({ value, desc }) => (
+                        <TabPanel
+                            key={value}
+                            value={value}
+                            className="p-0 rounded-2xl"
+                        >
+                            {desc}
+                        </TabPanel>
+                    ))}
+                </TabsBody>
+            </Tabs>
+        </div>
     );
 }

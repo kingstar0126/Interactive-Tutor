@@ -49,10 +49,9 @@ export const webAPI = {
     create_product: SERVER_URL + "/api/create/product", // user_id
     // get_products: SERVER_URL + "/api/getproducts",
     get_all_products: SERVER_URL + "/api/getallproducts",
-    update_product: SERVER_URL + "/api/update/product", //user_id, product_id
+    updateProducts: SERVER_URL + "/api/updateproducts",
+
     cancel_subscription: SERVER_URL + "/api/cancel/subscription",
-    delete_product: SERVER_URL + "/api/delete/product", //user_id, product_id
-    delete_all_product: SERVER_URL + "/api/delete/all_products", //user_id
 
     create_checkout: SERVER_URL + "/api/create/checkout/session",
     create_checkout_query: SERVER_URL + "/api/create/checkout/session/query",
@@ -79,4 +78,6 @@ export const webAPI = {
 
     streamingTest: SERVER_URL + "/api/testStreaming",
     closeAccount: SERVER_URL + "/api/closeAccunt",
+
+    dashboard: SERVER_URL + "/api/dashboardchat",
 };

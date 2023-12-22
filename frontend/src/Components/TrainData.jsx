@@ -98,12 +98,13 @@ export default function TraindataTable(props) {
 
     return (
         <div className="flex flex-col w-full h-full gap-5 py-5">
-            <Toaster />
+            <Toaster className="z-30"/>
             <div className="flex justify-end px-5 ">
                 <Button
                     type="button"
                     onClick={showModal}
-                    className=" normal-case text-black bg-[--site-logo-text-color] font-medium text-base text-center items-center gap-2 p-2 flex"
+                    variant="outlined"
+                    className="normal-case text-[--site-onboarding-primary-color] border border-[--site-onboarding-primary-color] font-medium text-base text-center items-center gap-2 p-2 flex"
                 >
                     <HiOutlineCircleStack className="w-[30px] h-[30px] text-xl pointer-events-none" />
                     <span>Add Data</span>
@@ -161,12 +162,7 @@ export default function TraindataTable(props) {
                                     </td>
                                     <td className={classes}>
                                         <div className="flex items-center justify-center h-full w-max">
-                                            <Chip
-                                                variant="ghost"
-                                                size="sm"
-                                                value={data["type"]}
-                                                className="bg-[--site-logo-text-color] text-[--site-card-icon-color] lowercase "
-                                            />
+                                            {data['type']}
                                         </div>
                                     </td>
                                     <td className={classes}>
@@ -175,15 +171,15 @@ export default function TraindataTable(props) {
                                                 <Chip
                                                     variant="ghost"
                                                     size="sm"
-                                                    value={"trained"}
-                                                    className="bg-[--site-logo-text-color] text-[--site-card-icon-color] lowercase "
+                                                    value={"Trained"}
+                                                    className="bg-[--site-logo-text-color] text-[--site-card-icon-color] normal-case"
                                                 />
                                             ) : (
                                                 <Chip
                                                     variant="ghost"
                                                     size="sm"
-                                                    value={"processing"}
-                                                    className="bg-[--site-warning-text-color] text-[--site-card-icon-color] lowercase "
+                                                    value={"Processing"}
+                                                    className="bg-[--site-warning-text-color] text-[--site-card-icon-color] normal-case"
                                                 />
                                             )}
                                         </div>
@@ -193,12 +189,11 @@ export default function TraindataTable(props) {
                                         <div className="flex items-center justify-center h-full w-max">
                                             <Tooltip content="Delete training data">
                                                 <Button
-                                                    variant="outlined"
-                                                    color="red"
                                                     onClick={() => {
                                                         deleteTrain(data);
                                                     }}
-                                                    className="text-[--site-card-icon-color] sm:text-base text-medium text-[12px] px-1 py-1"
+                                                    variant="filled"
+                                                    className="normal-case font-semibold rounded-md text-base px-2 py-1 bg-[--site-onboarding-primary-color] text-center inline-flex items-center text-white"
                                                 >
                                                     Delete
                                                 </Button>

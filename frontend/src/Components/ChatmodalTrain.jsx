@@ -18,7 +18,7 @@ import {
 import WONDE from "../assets/wonde.gif";
 
 const ChatmodalTrain = (props) => {
-    const [type, SetType] = useState("1");
+    const [type, SetType] = useState(1);
     const [label, SetLabel] = useState("");
     const [url, Seturl] = useState("");
     const [file, setFile] = useState("");
@@ -211,7 +211,7 @@ const ChatmodalTrain = (props) => {
         Seturl("");
         setText("");
         getapikey();
-        SetType(1)
+        // SetType("1")
         clearInterval(poll);
         if (chat.api_select && chat.api_select === 1) {setIsChecked(true)}
         else {setIsChecked(false)}
@@ -251,11 +251,11 @@ const ChatmodalTrain = (props) => {
             open={props.open}
             size={"lg"}
             handler={props.handleCancel}
-            className="border-[--site-chat-header-border] border rounded-2xl from-[--site-main-modal-from-color] to-[--site-main-modal-to-color] bg-gradient-to-br shadow-lg shadow-[--site-card-icon-color]"
+            className="border-[--site-chat-header-border] border rounded-md shadow-lg shadow-[--site-onboarding-primary-color]"
         >
-            <Toaster />
+            <Toaster className="z-30"/>
             <DialogHeader className="px-8 pt-8 pb-6">
-                <span className="text-[32px] leading-12 font-semibold text-[--site-card-icon-color]">
+                <span className="text-[32px] leading-12 font-semibold text-[--site-onboarding-primary-color]">
                     Add Training Data
                 </span>
             </DialogHeader>
@@ -274,10 +274,10 @@ const ChatmodalTrain = (props) => {
                                     onChange={(e) => {
                                         SetType(e.value);
                                     }}
-                                    defaultValue={{
-                                        value: "1",
-                                        label: "URLs",
-                                    }}
+                                    // defaultValue={{
+                                    //     value: "1",
+                                    //     label: "URLs",
+                                    // }}
                                     options={(user.role === 7 || user.role === 1 || (user.role ===4 && check)) ? [
                                         {
                                             value: "1",
@@ -368,7 +368,7 @@ const ChatmodalTrain = (props) => {
                                             accept=".pdf,.csv,.docx, .srt, .epub, .txt,
                     .md, .json"
                                             max="100000000"
-                                            className="block w-full text-sm border rounded-md text-black file:mr-4 file:py-2 file:px-4 file:rounded-md file:border file:text-sm file:font-medium file:bg-[--site-file-upload] file:border-[--site-main-modal-input-border-color] file:text-black hover:file:opacity-75 border-[--site-main-modal-input-border-color]"
+                                            className="block w-full text-sm border rounded-md text-black file:mr-4 file:py-2 file:px-4 file:rounded-md file:border file:text-sm file:font-medium file:bg-[--site-onboarding-primary-color] file:border-[--site-main-modal-input-border-color] file:text-white hover:file:opacity-75 border-[--site-main-modal-input-border-color]"
                                         />
                                         <p className="text-sm text-start">
                                             Accepted formats : .pdf, .csv,
@@ -451,13 +451,13 @@ const ChatmodalTrain = (props) => {
             <DialogFooter className="flex items-center justify-end gap-4 px-10 pb-8">
                 <Button
                     onClick={props.handleCancel}
-                    className=" normal-case bg-transparent border-[--site-card-icon-color] text-[--site-card-icon-color] text-base font-semibold border rounded-md px-4 py-2"
+                    className=" normal-case bg-transparent border-[--site-onboarding-primary-color] text-[--site-onboarding-primary-color] text-base font-semibold border rounded-md px-4 py-2"
                 >
                     cancel
                 </Button>
                 <Button
                     onClick={onOK}
-                    className=" normal-case px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md disabled:opacity-75"
+                    className=" normal-case px-4 py-2 text-base font-semibold text-white bg-[--site-onboarding-primary-color] rounded-md disabled:opacity-75"
                 >
                     confirm
                 </Button>

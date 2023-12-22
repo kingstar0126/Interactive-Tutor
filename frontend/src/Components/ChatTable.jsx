@@ -106,7 +106,7 @@ const ChatTable = (props) => {
 
     return (
         <div className="relative overflow-x-auto rounded-xl">
-            <Toaster />
+            <Toaster className="z-30"/>
             <div className="flex xl:hidden justify-end pt-3 px-2">
                 <Button
                     className="normal-case px-4 py-2 rounded-md gap-1 text-sm inline-flex items-center justify-center bg-[--site-card-icon-color] w-1/2 text-[--site-main-Table-Text]"
