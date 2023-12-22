@@ -1,5 +1,4 @@
 import axios from "axios";
-import { BsCartPlus } from "react-icons/bs";
 import { webAPI } from "../utils/constants";
 import { useSelector, useDispatch } from "react-redux";
 import { useState, useEffect } from "react";
@@ -11,10 +10,6 @@ import toast, { Toaster } from "react-hot-toast";
 import { changeuser } from "../redux/actions/userAction";
 import { PiUserCircleGearLight } from "react-icons/pi";
 import { AiOutlineMenu } from "react-icons/ai";
-import { useNavigate } from "react-router-dom";
-import ReactSpeedometer from "react-d3-speedometer";
-import { MdOutlineUpdate } from "react-icons/md";
-import { setOpenSidebar } from "../redux/actions/locationAction";
 import SubscriptionModal from "./SubscriptionModal";
 import { Button } from "@material-tailwind/react";
 import { loadStripe } from "@stripe/stripe-js";
@@ -30,11 +25,7 @@ const ManageAccount = () => {
         useState(false);
     const [country, setCountry] = useState("");
     const user = JSON.parse(useSelector((state) => state.user.user));
-    const query = useSelector((state) => state.query.query);
-    const _chat = JSON.parse(useSelector((state) => state.chat.chat));
-    const [trial, setTrial] = useState(0);
     const dispatch = useDispatch();
-    const navigate = useNavigate();
     const notification = (type, message) => {
         if (type === "error") {
             toast.error(message);
@@ -79,13 +70,6 @@ const ManageAccount = () => {
         }
     };
 
-    const handleOpenSidebar = () => {
-        dispatch(setOpenSidebar());
-    };
-
-    const handleOpenModel = () => {
-        handleCancelSubscription();
-    };
 
     const handleCancelSubscription = () => {
         axios
@@ -97,20 +81,16 @@ const ManageAccount = () => {
     };
 
     useEffect(() => {
-        if (user.role === 5) {
-            setTrial(user.days);
-        }
         axios
             .post(webAPI.checkUserInvite, { id: user.id })
-            .then(res => {
+            .then((res) => {
                 if (res.data.success) {
-                    setCheck(false)
-                }
-                else {
-                    setCheck(true)
+                    setCheck(false);
+                } else {
+                    setCheck(true);
                 }
             })
-            .catch(err => console.error(err))
+            .catch((err) => console.error(err));
         axios
             .post(webAPI.getuser, { id: user.id })
             .then((res) => {
@@ -126,117 +106,18 @@ const ManageAccount = () => {
             });
     }, []);
 
-    const getClientReferenceId = () => {
-        return (
-            (window.Rewardful && window.Rewardful.referral) ||
-            "checkout_" + new Date().getTime()
-        );
-    };
-
-    const handleMoreQuery = () => {
-        axios
-            .post(webAPI.create_checkout_query, {
-                id: user.id,
-                clientReferenceId: getClientReferenceId(),
-            })
-            .then(async (res) => {
-                // Load Stripe and redirect to the Checkout page
-                const stripe = await loadStripe(res.data.key);
-
-                const { error } = stripe.redirectToCheckout({
-                    sessionId: res.data.sessionId,
-                });
-                if (error) {
-                    console.error("Error:", error);
-                }
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-    }
-
     return (
         <div className="w-full h-full">
-            <Toaster />
+            <Toaster className="z-30" />
 
-            <div className="flex md:items-center items-end justify-between w-full md:h-[100px] md:px-10 from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] md:border-b-[--site-chat-header-border] md:border bg-gradient-to-r px-4 py-2 max-h-min gap-1">
-                <div className="hidden md:flex gap-2 mt-9 mb-8 text-[--site-card-icon-color]">
+            <div className="flex md:items-center items-end w-full md:h-[80px] shadow-md md:px-10 md:border-b-[--site-chat-header-border] md:border px-4 py-2 max-h-min gap-1">
+                <div className="hidden md:flex gap-2 mt-9 mb-8 text-[--site-onboarding-primary-color]">
                     <PiUserCircleGearLight className="w-8 h-8" />
                     <span className="text-2xl font-semibold">Account</span>
                 </div>
-                <AiOutlineMenu
-                    onClick={handleOpenSidebar}
-                    className="w-6 h-6 mb-1 md:hidden"
-                />
-                {check && <div className="flex items-end justify-end md:mt-[27px] md:mb-[30px] md:pr-[44px] pr-9">
-                    {_chat && _chat.organization && (
-                        <div className="xl:flex flex-col items-start justify-center mr-2 p-2 bg-[--site-warning-text-color] rounded shadow-2xl hidden">
-                            <p>
-                                <span className="font-bold text-[14px]">
-                                    Organisation ID:{" "}
-                                </span>
-                                <span className="text-[--site-error-text-color] font-semibold">
-                                    {_chat.organization}
-                                </span>
-                            </p>
-                        </div>
-                    )}
-                    {query && (
-                        <p className="bg-[--site-logo-text-color] p-2 rounded gap-2 items-center justify-center h-full flex md:mr-0">
-                            <span className="text-[--site-error-text-color] font-semibold text-[12px] md:text-base">
-                                {query}
-                            </span>
-                            <span className="text-[--site-card-icon-color] text-[12px] md:text-base font-medium">
-                                Queries
-                            </span>
-                        </p>
-                    )}
-                    {trial > 0 && (
-                        <div className="flex items-end justify-end md:w-max scale-75 md:scale-100 ml-[-14px] mr-[-20px] translate-y-2 md:translate-y-0">
-                            <ReactSpeedometer
-                                maxSegmentLabels={0}
-                                segments={4}
-                                width={100}
-                                height={58}
-                                ringWidth={10}
-                                value={24 - trial}
-                                needleColor="black"
-                                needleHeightRatio={0.5}
-                                maxValue={24}
-                                startColor={"#f5da42"}
-                                endColor={"#ff0000"}
-                            />
-                        </div>
-                    )}
-                    <Button
-                        onClick={() => {
-                            handleSubscriptionOpenModel();
-                        }}
-                        className="normal-case flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
-                    >
-                        <MdOutlineUpdate className="w-4 h-4 md:w-6 md:h-6" />
-                        <span className="md:text-base text-[12px] font-medium">
-                            Upgrade
-                        </span>
-                    </Button>
-                    <Button
-                        onClick={handleMoreQuery}
-                        className="normal-case gap-1 flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
-                    >
-                        <BsCartPlus className="w-4 h-4 md:w-6 md:h-6" />
-                        <span className="md:text-base text-[12px] font-medium overflow-ellipsis overflow-hidden whitespace-nowrap">
-                            Top-up Queries
-                        </span>
-                    </Button>
-                </div>}
             </div>
 
-            <div className="flex md:hidden gap-2 text-[--site-card-icon-color] pt-8 px-5">
-                <PiUserCircleGearLight className="w-8 h-8" />
-                <span className="text-2xl font-semibold">Account</span>
-            </div>
-
-            <div className="bg-gradient-to-r from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] border-[--site-chat-header-border] border rounded-xl md:m-10 m-5 flex flex-col gap-5 shadow-xl shadow-[--site-chat-header-border]">
+            <div className="border-[--site-chat-header-border] border rounded-md md:m-10 m-5 flex flex-col gap-5 shadow-xl shadow-[--site-chat-header-border]">
                 <div className="flex flex-col items-center justify-start gap-5 p-8 text-black">
                     <div className="flex flex-col w-full">
                         <span className="font-medium">Username</span>
@@ -319,15 +200,18 @@ const ManageAccount = () => {
                         />
                     </div>
                     <div className="flex flex-col justify-end w-full gap-3 md:flex-row">
-                        {check && user.role !== 7 && <Button
-                            className="normal-case px-4 py-2 text-base font-semibold text-[--site-card-icon-color] border bg-transparent border-[--site-card-icon-color] rounded-md"
-                            onClick={() => handleCancelSubscription()}
-                        >
-                            Manage Subscription
-                        </Button>}
+                        {check && user.role !== 7 && (
+                            <Button
+                                className="normal-case px-4 py-2 text-base font-semibold text-[--site-onboarding-primary-color] border bg-transparent border-[--site-onboarding-primary-color] rounded-md"
+                                onClick={() => handleCancelSubscription()}
+                            >
+                                Manage Subscription
+                            </Button>
+                        )}
 
                         <Button
-                            className="normal-case px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md"
+                            variant="outlined"
+                            className="normal-case px-4 py-2 text-base font-semibold text-[--site-onboarding-primary-color] border border-[--site-onboarding-primary-color] rounded-md"
                             onClick={() => handleChange()}
                         >
                             Confirm

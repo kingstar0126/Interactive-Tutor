@@ -93,7 +93,7 @@ const LogoBranding = (props) => {
                     <div className="w-full">
                         <span>Select your Logo</span>
                         <div className="mt-2">
-                            <div className="border rounded-md border-[--site-chat-header-border] w-[70px] h-[70px]">
+                            <div className="border rounded-md border-[--site-chat-header-border] w-1/3 h-auto">
                                 <Dropzone
                                     onDrop={handleFileChange}
                                     multiple={false}
@@ -125,7 +125,7 @@ const LogoBranding = (props) => {
                                 onClick={(e) => {
                                     handleUpload();
                                 }}
-                                className="normal-case p-2 rounded-xl bg-[--site-logo-text-color] my-2 border border-[--site-chat-header-border] text-black text-base"
+                                className="normal-case p-2 rounded-md bg-[--site-logo-text-color] my-2 border border-[--site-chat-header-border] text-black text-base"
                             >
                                 Upload
                             </Button>

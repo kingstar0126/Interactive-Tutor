@@ -16,6 +16,8 @@ import Report from "./Components/Report";
 import AccessChatbot from "./Pages/AccessChatbot";
 import VerifyEmail from "./Pages/VerifyEmail";
 import EmbeddingChat from "./Components/EmbeddingChat";
+import OnBoarding from "./Components/OnBoarding";
+import DashBoard from "./Components/DashBoard";
 
 const AppRoutes = [
     {
@@ -27,9 +29,17 @@ const AppRoutes = [
                 element: <Chat />,
                 children: [
                     {
-                        path: "newchat",
+                        path: "onboarding",
+                        element: <OnBoarding />,
+                    },
+                    {
+                        path: "newchat/:chat",
                         element: <Tapcomponent />,
                     },
+                    {
+                        path: "dashboard",
+                        element: <DashBoard />
+                    }
                 ],
             },
             {
@@ -79,7 +89,7 @@ const AppRoutes = [
             },
             {
                 path: "/thankyou",
-                element: < Thankyou />
+                element: <Thankyou />,
             },
             {
                 path: "/chatbot/share/url",
@@ -157,4 +167,4 @@ const AppRoutes_login = [
     },
 ];
 
-export {AppRoutes, AppRoutes_login};
+export { AppRoutes, AppRoutes_login };

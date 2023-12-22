@@ -4,6 +4,7 @@ export const setlocation = (dispatch, data) => {
     dispatch({ type: SET_LOCATION, payload: data });
 };
 
-export const setOpenSidebar = () => {
-    return { type: SET_OPEN_SIDEBAR };
+export const setOpenSidebar = (dispatch, data) => {
+    console.log('HIHIHI', data)
+    dispatch ({ type: SET_OPEN_SIDEBAR, payload: data});
 };
