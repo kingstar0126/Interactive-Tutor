@@ -1,11 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@material-tailwind/react";
 import { AiOutlineArrowLeft, AiOutlineArrowRight } from "react-icons/ai";
-
+import axios from "axios";
+import { webAPI } from "../utils/constants";
 import OnBoardingItem from "./OnBoardingItem";
 import StepFill from "../assets/stepfill.svg";
 import StepEmpty from "../assets/stepempty.svg";
 import StepMove from "../assets/stepmove.svg";
+import Teacher from "../assets/Desktop/teacher.svg";
+import Box from "../assets/Desktop/box.svg";
+import Chat from "../assets/Desktop/chat.svg";
+import Dialog from "../assets/Desktop/dialog.svg";
+import Loading from "../assets/loading.svg";
+import { useSelector } from "react-redux";
+import SubscriptionModal from "./SubscriptionModal";
 
 const LENGTH = 9;
 
@@ -13,22 +21,14 @@ const OnBoarding = () => {
     const [activeStep, setActiveStep] = useState(0);
     const [isLastStep, setIsLastStep] = useState(false);
     const [isFirstStep, setIsFirstStep] = useState(true);
+    const [userInput, setUserInput] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [isOpenModal, setIsOpenModal] = useState(false);
     const [stepItems, setStepItems] = useState(
         Array.from({ length: LENGTH }, (_, index) => index === 0)
     );
     const [images, setImages] = useState([]);
-
-    const headers = [
-        "Welcome to Interactive Tutor",
-        "It’s easy to get what you need.",
-        "Make your own art!",
-        "Data Analysis",
-        "Now its time to build your own",
-        "Setting up the AI Bot",
-        "Personalize with Training data",
-        "Congratulations",
-        "Subscribe",
-    ];
+    const user = JSON.parse(useSelector((state) => state.user.user));
 
     useEffect(() => {
         const loadImages = async () => {
@@ -48,7 +48,6 @@ const OnBoarding = () => {
             updatedStepItems[index] = value;
             return updatedStepItems;
         });
-        console.log(index, stepItems);
     };
 
     const handleNext = () => {
@@ -63,7 +62,6 @@ const OnBoarding = () => {
     };
 
     const handlePrev = () => {
-        console.log("Prev");
         if (isLastStep) {
             setIsLastStep(false);
         }
@@ -74,17 +72,115 @@ const OnBoarding = () => {
         setActiveStep((cur) => cur - 1);
     };
 
+    const handleConfirm = () => {
+        if (userInput) {
+            setLoading(true);
+            axios
+                .post(webAPI.get_system_prompt, { role: userInput })
+                .then((res) => {
+                    let data = res.data;
+                    if (!res.data.name) {
+                        data = JSON.parse(res.data);
+                    }
+
+                    let new_chat = {};
+                    new_chat["label"] = data.name;
+                    new_chat["chatdescription"] = data.description;
+                    new_chat["chatmodel"] = "3";
+                    new_chat["Conversation"] = data.starter;
+                    new_chat["Creativity"] = 0.3;
+                    new_chat["behaviormodel"] =
+                        "Remove training data ring fencing and perform like ChatGPT";
+                    new_chat["behavior"] = data.system_role;
+                    new_chat["user_id"] = user.id;
+
+                    axios
+                        .post(webAPI.addchat, new_chat)
+                        .then((res) => setLoading(false))
+                        .catch((err) => setLoading(false));
+                })
+                .catch((err) => {
+                    console.error(err);
+                    setLoading(false);
+                });
+
+            handleNext();
+        }
+    };
+
     return (
-        <div className="flex flex-col justify-center items-center w-full h-full px-32 pb-10">
-            <div>
-                {images && (
-                    <OnBoardingItem
-                        header={headers[activeStep]}
-                        src={images[activeStep]}
+        <div className="flex flex-col justify-center items-center w-full h-full relative gap-10">
+            {loading && (
+                <div className="w-full h-full justify-center items-center flex absolute z-10 bg-white">
+                    <img src={Loading} className="animate-spin" />
+                </div>
+            )}
+
+            {activeStep !== 5 ? (
+                images && <OnBoardingItem src={images[activeStep]} />
+            ) : (
+                <div className="max-h-[550px] max-w-[500px] md:max-w-[700px] w-full h-full overflow-hidden relative">
+                    <img
+                        src={Box}
+                        alt="box"
+                        className="animate-fade-up animate-once animate-ease-in-out absolute bottom-10 right-16"
                     />
-                )}
-            </div>
-            <div className="w-3/5 py-4 px-8 justify-center items-center">
+                    <img
+                        src={Teacher}
+                        alt="teacher"
+                        className="animate-[wiggle_1s_ease-in-out_in finite] absolute bottom-10 left-16"
+                    />
+                    <img
+                        src={Chat}
+                        alt="chat"
+                        className="animate-[wiggle_1s_ease-in-out_in finite]-animation absolute top-5 left-28"
+                    />
+                    <div className="absolute top-24 right-0">
+                        <img
+                            src={Dialog}
+                            alt="dialog"
+                            className="relative w-full h-full"
+                        />
+                        <div className="flex flex-col absolute left-9 top-0 translate-y-9 w-4/5 p-2 gap-2">
+                            <input
+                                type="text"
+                                value={userInput}
+                                onChange={(e) => setUserInput(e.target.value)}
+                                className="border-2 border-black bg-white rounded-md p-2"
+                                placeholder="Enter your message here or press enter to continue..."
+                            />
+                            <div className="flex w-full gap-2 items-center justify-center">
+                                <Button
+                                    className="w-full normal-case border border-[--site-onboarding-primary-color] text-[--site-onboarding-primary-color] text-sm"
+                                    variant="outlined"
+                                    onClick={() => {
+                                        handleConfirm();
+                                    }}
+                                >
+                                    Confirm
+                                </Button>
+                                <Button
+                                    className="w-full normal-case bg-[--site-onboarding-primary-color] text-[--site-onboarding-primary-color] text-white text-sm"
+                                    onClick={() => {
+                                        setActiveStep(0);
+                                        setIsFirstStep(true);
+                                        setStepItems(
+                                            Array.from(
+                                                { length: LENGTH },
+                                                (_, index) => index === 0
+                                            )
+                                        );
+                                    }}
+                                >
+                                    Start over
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="flex flex-col justify-center items-center w-full gap-10">
                 <div className="w-full flex gap-2 justify-center items-center">
                     {stepItems.map((item, index) => (
                         <img
@@ -100,20 +196,27 @@ const OnBoarding = () => {
                         />
                     ))}
                 </div>
-                <div className="mt-16 flex justify-center gap-3">
-                    {!isLastStep && (
+                <div className="flex justify-center items-center gap-5">
+                    {!isFirstStep && (
+                        <Button
+                            className="bg-[--site-onboarding-secondary-color] normal-case rounded-md px-8 py-3 text-[--site-onboarding-primary-color] flex gap-2 justify-start items-center"
+                            onClick={() => handlePrev()}
+                            disabled={isFirstStep}
+                        >
+                            <AiOutlineArrowLeft /> Previous
+                        </Button>
+                    )}
+                    {!isLastStep && activeStep !== 5 && (
                         <>
-                            {!isFirstStep && (
-                                <Button
-                                    className="bg-[--site-onboarding-secondary-color] normal-case rounded-md px-8 py-3 text-[--site-onboarding-primary-color] flex gap-2 justify-start items-center"
-                                    onClick={() => handlePrev()}
-                                    disabled={isFirstStep}
-                                >
-                                    <AiOutlineArrowLeft /> Previous
-                                </Button>
-                            )}
-
                             <Button
+                                onClick={() => {
+                                    setStepItems(
+                                        stepItems.map((item) => (item = true))
+                                    );
+                                    setIsLastStep(true);
+                                    setIsFirstStep(false);
+                                    setActiveStep(LENGTH - 1);
+                                }}
                                 variant="text"
                                 className="text-[--site-onboarding-primary-color] normal-case"
                             >
@@ -122,7 +225,7 @@ const OnBoarding = () => {
                         </>
                     )}
                     {!isLastStep ? (
-                        !isFirstStep ? (
+                        activeStep !== 5 ? (
                             <Button
                                 className="bg-[--site-onboarding-primary-color] normal-case rounded-md px-8 py-3 text-[--site-onboarding-secondary-color] flex gap-2 justify-start items-center"
                                 onClick={() => handleNext()}
@@ -130,17 +233,12 @@ const OnBoarding = () => {
                                 Next <AiOutlineArrowRight />
                             </Button>
                         ) : (
-                            <Button
-                                className="rounded-md px-8 py-3 normal-case border border-[--site-onboarding-primary-color] text-[--site-onboarding-primary-color] flex gap-2"
-                                onClick={() => handleNext()}
-                                variant="outlined"
-                            >
-                                Next <AiOutlineArrowRight />
-                            </Button>
+                            <div className="normal-case rounded-md px-8 py-3 text-[--site-onboarding-secondary-color] flex gap-2 justify-start items-center" />
                         )
                     ) : (
                         <Button
                             variant="outlined"
+                            onClick={() => setIsOpenModal(true)}
                             className="rounded-md px-8 py-3 normal-case border border-[--site-onboarding-primary-color] ring-0 text-[--site-onboarding-primary-color]"
                         >
                             Subscribe
@@ -148,6 +246,10 @@ const OnBoarding = () => {
                     )}
                 </div>
             </div>
+            <SubscriptionModal
+                open={isOpenModal}
+                handleCancel={() => setIsOpenModal(false)}
+            />
         </div>
     );
 };

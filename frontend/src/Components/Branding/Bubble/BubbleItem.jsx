@@ -48,34 +48,33 @@ const BubbleItem = (props) => {
             <h1 className="border-b-[1px] border-[--site-card-icon-color] font-semibold pb-2">
                 {props.title}
             </h1>
-            <div name="content">
-                <div className="flex">
-                    <div className="flex flex-col w-1/2">
-                        <span>Background</span>
-                        <input
-                            type="color"
-                            onChange={handleColor}
-                            defaultValue={
-                                props.data.color === undefined
-                                    ? "#efefef"
-                                    : props.data.color
-                            }
-                            className="w-1/3 my-1 bg-transparent  border border-[--site-card-icon-color]"
-                        />
-                    </div>
-                    <div className="flex flex-col w-1/2 gap-1">
-                        <span>Position</span>
-                        <Select
-                            defaultValue={props.data.position}
-                            onChange={handlePosition}
-                            options={[
-                                { value: 0, label: "Left" },
-                                { value: 1, label: "Right" },
-                            ]}
-                            styles={customStyles}
-                        />
-                    </div>
+            <div className="flex flex-col w-full">
+                <div className="flex flex-col w-2/3">
+                    <span>Background</span>
+                    <input
+                        type="color"
+                        onChange={handleColor}
+                        defaultValue={
+                            props.data.color === undefined
+                                ? "#efefef"
+                                : props.data.color
+                        }
+                        className="my-1 bg-transparent"
+                    />
                 </div>
+                <div className="flex flex-col gap-1">
+                    <span>Position</span>
+                    <Select
+                        defaultValue={props.data.position}
+                        onChange={handlePosition}
+                        options={[
+                            { value: 0, label: "Left" },
+                            { value: 1, label: "Right" },
+                        ]}
+                        styles={customStyles}
+                    />
+                </div>
+
                 <div className="flex">
                     <div name="switch" className="flex flex-col gap-2 mt-5">
                         <span className="font-medium">Open the page load</span>

@@ -71,10 +71,10 @@ const AccessChatbot = () => {
     return (
         <div className="font-logo pb-10 px-2 flex flex-col">
             {status === false && <Header />}
-            <Toaster />
+            <Toaster className="z-30"/>
             {status === false && (
                 <div>
-                    <div className="w-2/5 p-6 m-auto rounded-md lg:max-w-xl flex flex-col gap-5">
+                    <div className="container p-6 m-auto rounded-md lg:max-w-xl flex flex-col gap-5">
                         <div className="flex flex-col gap-2">
                             <span className="text-3xl font-semibold text-start text-[--site-main-Login1]">
                                 AI Bots

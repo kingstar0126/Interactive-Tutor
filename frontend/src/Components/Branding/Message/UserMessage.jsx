@@ -5,8 +5,8 @@ const UserMessage = (props) => {
                 <h1 className="border-b-[1px] border-[--site-card-icon-color] font-semibold pb-2">
                     {props.title}
                 </h1>
-                <div className="flex justify-between gap-3">
-                    <div className="flex flex-col w-1/3 gap-2">
+                <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2">
                         <span className="text-[12px] md:text-[16px]">
                             Background
                         </span>
@@ -20,10 +20,10 @@ const UserMessage = (props) => {
                                     ? "#efefef"
                                     : props.data.user_bg
                             }
-                            className="my-1 bg-transparent border border-[--site-card-icon-color]"
+                            className="my-1"
                         />
                     </div>
-                    <div className="flex flex-col w-1/3 gap-2">
+                    <div className="flex flex-col gap-2">
                         <span className="text-[12px] md:text-[16px]">
                             Color
                         </span>
@@ -37,10 +37,10 @@ const UserMessage = (props) => {
                                     ? "#efefef"
                                     : props.data.user_color
                             }
-                            className="my-1 bg-transparent border border-[--site-card-icon-color]"
+                            className="my-1 "
                         />
                     </div>
-                    <div className="flex flex-col w-1/3 gap-2">
+                    <div className="flex flex-col gap-2">
                         <span className="text-[12px] md:text-[16px]">
                             Size (pixel)
                         </span>

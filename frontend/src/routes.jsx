@@ -33,7 +33,7 @@ const AppRoutes = [
                         element: <OnBoarding />,
                     },
                     {
-                        path: "newchat",
+                        path: "newchat/:chat",
                         element: <Tapcomponent />,
                     },
                     {

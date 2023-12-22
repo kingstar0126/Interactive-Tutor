@@ -12,14 +12,18 @@ body {
 }
 
 code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+    font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+        monospace;
 
     padding: 2px 4px;
     border-radius: 4px;
 }
 
-h1, h2, h3, h4 {
-    color: #0056b3; /* Consistent color for headings */
+h1,
+h2,
+h3,
+h4,
+p {
     margin-bottom: 0.6em;
 }
 
@@ -40,7 +44,7 @@ h4 {
 }
 
 ul {
-    list-style: disc;;
+    list-style: disc;
     padding-left: 20px;
     margin-bottom: 1em;
 }
@@ -56,11 +60,29 @@ a {
     text-decoration: none;
 }
 
-
 /* Responsive images */
 img {
     max-width: 100%;
     height: auto;
+}
+
+input[type="color"] {
+    -webkit-appearance: none;
+    appearance: none;
+    background: white;
+    cursor: pointer;
+    width: 80%;
+    height: 40px;
+    max-width: 300px;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    border-radius: 4px;
+    border: none;
+}
+input[type="color"]::-moz-color-swatch {
+    border-radius: 4px;
+    border: none;
 }
 
 :root {
@@ -77,7 +99,7 @@ img {
     --site-main-color10: #f0f0ea;
     --site-main-Login: #153144;
     --site-main-Login-border-focus: #153144;
-    --site-main-Login1: #12062E;
+    --site-main-Login1: #12062e;
     --site-main-Login-Text: #424242;
     --site-main-form-error: #ff1122;
     --site-main-form-error1: #c40d19;
@@ -105,6 +127,12 @@ img {
     --site-main-newchat-input-color: #f6f5f6;
     --site-main-slider-thumb-color: #6eae1c;
     --site-main-pricing-color: #034f75;
-    --site-onboarding-secondary-color: #D1D1E9;
-    --site-onboarding-primary-color: #12062E;
+    --site-onboarding-secondary-color: #d1d1e9;
+    --site-onboarding-primary-color: #12062e;
+    --site-bot-background-hover: #d1d1e9;
+    --site-threedot-text: #9b72fb;
+    --site-threedot-background: #c7c7f2;
+    --site-history-background: #F2F6FF;
+    --site-hisotry-text: #153144;
+    --site-history-delete-color: #12062E
 }

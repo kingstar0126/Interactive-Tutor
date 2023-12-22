@@ -52,9 +52,9 @@ const Register = () => {
     return (
         <div className="font-logo pb-10 px-2 flex flex-col">
             <Header />
-            <Toaster />
+            <Toaster className="z-30"/>
             <div>
-                <div className="w-2/5 px-6 mx-auto rounded-md lg:max-w-xl flex flex-col gap-5">
+            <div className="container p-6 m-auto rounded-md lg:max-w-xl flex flex-col gap-5">
                     <div className="flex flex-col gap-2">
                         <span className="text-3xl font-semibold text-start text-[--site-main-Login1]">
                             Register
