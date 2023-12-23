@@ -89,8 +89,10 @@ const NewChat = () => {
     useEffect(() => {
         const pattern = /\/chat\/embedding\/(\w+)/;
         const result = pattern.exec(location.pathname);
+        console.log(result);
         const fetchData = async () => {
             if (chat.access) {
+                console.log(result, 'New chta', chatId);
                 setLoading(true);
                 let new_chat = chat;
                 setchatbot(dispatch, new_chat);
@@ -108,11 +110,13 @@ const NewChat = () => {
                 }
             } else if (!chat.access || result) {
                 setLoading(true);
+                console.log(result, 'Here Embedded code', chatId);
                 axios
                     .post(webAPI.getchat, chatId)
                     .then(async (res) => {
                         if (res.data.code === 200) {
                             getchat(dispatch, res.data.data);
+                            setchatbot(dispatch, res.data.data);
                             setLoading(false);
                         } else {
                             navigate(-1);
