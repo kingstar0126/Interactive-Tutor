@@ -178,7 +178,6 @@ def send_message():
                 assistants[chat.id], files[chat.id] = create_assistant_file(filename)
                 context, file_link, thread = ask_question(assistants[chat.id], query, threads[chat.id], uuid)
                 threads[chat.id] = thread
-                print('This is the context, filelink: ', context, file_link)
                 os.remove(filename)
                 count = 18
         if chat.id in assistants and assistants[chat.id] is not None and file_upload_check == False:
@@ -254,11 +253,11 @@ def send_message():
         if 'image' in request.files:
             images = request.files.getlist('image')
             image_data = images[0].read()
-            response = create_image_file(query, uuid, image_data)
+            response = create_image_file(query, current_message.behavior, uuid, image_data)
         else:
-            response = create_image_file(query, uuid)
+            response = create_image_file(query, current_message.behavior, uuid)
     elif model == "5":
-        response = create_pollinations_prompt(query)
+        response = create_pollinations_prompt(query, current_message.behavior)
     elif text is not None:
         response = text
     elif file_upload_check:

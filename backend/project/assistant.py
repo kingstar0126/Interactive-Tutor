@@ -170,7 +170,7 @@ def create_pollinations_prompt(prompt):
         print('This is the Error: ', e)
         return None
 
-def create_image_file(prompt, uuid, image = False):
+def create_image_file(prompt, behavior, uuid, image = False):
     try:
         if image:
             response = client.images.create_variation(
@@ -180,7 +180,7 @@ def create_image_file(prompt, uuid, image = False):
                 )
             image_url = response.data[0].url
         else:
-            prompt = create_image_prompt(prompt)
+             prompt = behavior + '\n\n' + create_image_prompt(prompt)
             response = client.images.generate(
                 model="dall-e-3",
                 style="vivid",
@@ -202,7 +202,7 @@ def create_image_file(prompt, uuid, image = False):
             image_content = requests.get(image_url).content
             with open(local_image_path, 'wb') as handle:
                 handle.write(image_content)
-        return f"![image](http://18.133.183.77/image/{local_image_path})"
+        return f"![image](https://app.interactive-tutor.com/image/{local_image_path})"
     except openai.BadRequestError as e:
         print(e)
         dict_str = re.search(r"\{.*\}", str(e)).group()

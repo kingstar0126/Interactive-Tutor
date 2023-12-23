@@ -500,7 +500,6 @@ def get_traindatas():
     else:
         return jsonify({'success': False, 'message': 'Not found', 'code': 404})
 
-
 @train.route('/api/data/deletetrain', methods=['POST'])
 def delete_traindatas():
     uuid = request.json['uuid']
