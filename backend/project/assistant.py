@@ -180,7 +180,7 @@ def create_image_file(prompt, behavior, uuid, image = False):
                 )
             image_url = response.data[0].url
         else:
-             prompt = behavior + '\n\n' + create_image_prompt(prompt)
+            prompt = behavior + '\n\n' + create_image_prompt(prompt)
             response = client.images.generate(
                 model="dall-e-3",
                 style="vivid",

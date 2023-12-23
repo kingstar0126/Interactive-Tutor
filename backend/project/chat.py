@@ -127,12 +127,6 @@ def upload_image():
         return {"success": False, "message": str(e)}, 400
 
 
-@chat.route('/api/imageupload/<image_id>', methods=['GET'])
-def view_image(image_id):
-    image_folder = f'image/{image_id}'
-    return send_file(image_folder, mimetype='image/jpeg')
-
-
 @chat.route('/api/sendbrandingdata', methods=['POST'])
 def update_brandingData():
     id = request.json['id']
