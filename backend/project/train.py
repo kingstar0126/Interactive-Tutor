@@ -485,10 +485,11 @@ def get_traindatas():
         user = db.session.query(User).filter_by(id=chat.user_id).first()
         invite_account = db.session.query(Invite).filter_by(email=user.email).first()
         user_check = db.session.query(User).filter_by(id=invite_account.user_id).first() if invite_account else None
-        user = user_check if user_check and user_check.role == 7 else user
-        if user.wonde_key:
-            data.append({'label': 'Wonde API',
-                        'type': 'API', 'status': True})
+        if user_check and user_check.role == 7:
+            user = user_check
+            if user.wonde_key:
+                data.append({'label': 'Wonde API',
+                            'type': 'API', 'status': True})
         for id in train_ids:
             train_data = db.session.query(Train).filter_by(id=id).first()
             if train_data:
@@ -497,7 +498,6 @@ def get_traindatas():
         return jsonify({'data': data, 'success': True})
     else:
         return jsonify({'success': False, 'message': 'Not found', 'code': 404})
-
 
 @train.route('/api/data/deletetrain', methods=['POST'])
 def delete_traindatas():

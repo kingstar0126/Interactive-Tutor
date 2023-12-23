@@ -138,9 +138,9 @@ def create_image_prompt(prompt):
         print('This is the Error: ', e)
         return None
 
-def create_image_file(prompt):
+def create_image_file(prompt, behavior):
     try:
-        prompt = create_image_prompt(prompt)
+        prompt = behavior + '\n\n' + create_image_prompt(prompt)
         response = client.images.generate(
         model="dall-e-3",
         style="vivid",

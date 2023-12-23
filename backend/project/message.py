@@ -248,7 +248,6 @@ def send_message():
                 assistants[chat.id], files[chat.id] = create_assistant_file(filename)
                 context, file_link, thread = ask_question(assistants[chat.id], query, threads[chat.id], uuid)
                 threads[chat.id] = thread
-                print('This is the context, filelink: ', context, file_link)
                 os.remove(filename)
                 count = 18
     if chat.id in assistants and assistants[chat.id] is not None and file_upload_check == False:
@@ -328,7 +327,7 @@ def send_message():
     """
 
     if model == "4":
-        response = create_image_file(query)
+        response = create_image_file(query, current_message.behavior)
     elif text is not None:
         response = text
     elif file_upload_check:
