@@ -284,7 +284,7 @@ const Sidebar = () => {
                             onClick={() => handleOpen(1)}
                             className="text-white text-base hover:text-[--site-main-color1]"
                         >
-                            My Tutors
+                            My AI Bots
                         </AccordionHeader>
                         <AccordionBody>
                             <div className="w-full md:h-96 h-36">

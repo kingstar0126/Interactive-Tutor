@@ -123,7 +123,7 @@ const Subscription = () => {
                         </div>
                     )}
                     <div className="flex flex-col w-[99.33%] border-[--site-chat-header-border] border rounded-md shadow-xl shadow-[--site-chat-header-border] py-8 px-4 gap-5">
-                        <div className="w-full px-2 flex gap-3 items-center justity-between">
+                        <div className="w-full px-2 flex gap-3 md:items-center md:justity-between md:flex-row flex-col ">
                             <span className="text-black text-lg font-semibold w-40">
                                 Queries
                             </span>
@@ -160,7 +160,7 @@ const Subscription = () => {
                             </Button>
                         </div>
                         {datas && (
-                            <div className="w-full px-2 flex gap-3 items-center justity-center">
+                            <div className="w-full px-2 flex gap-3 md:items-center md:justity-between md:flex-row flex-col ">
                                 <span className="text-black text-lg font-semibold w-40">
                                     Tutors
                                 </span>
@@ -197,7 +197,7 @@ const Subscription = () => {
                             </div>
                         )}
                         {datasources > 0 ? (
-                            <div className="w-full px-2 flex gap-3 items-center justity-center">
+                            <div className="w-full px-2 flex gap-3 md:items-center md:justity-between md:flex-row flex-col ">
                                 <span className="text-black text-lg font-semibold w-40">
                                     Data Sources
                                 </span>
