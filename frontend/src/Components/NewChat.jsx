@@ -1135,7 +1135,7 @@ const NewChat = () => {
                                             overflow: "hidden",
                                             height: `${inputHeight}px`,
                                         }}
-                                        className="w-full text-[--site-card-icon-color] px-10 py-2 border border-gray-600 focus:outline-none rounded-md"
+                                        className="w-full text-[--site-card-icon-color] px-10 py-3 border border-gray-600 focus:outline-none rounded-md"
                                         placeholder="Type message"
                                     ></textarea>
                                     <div className="flex flex-wrap gap-2">

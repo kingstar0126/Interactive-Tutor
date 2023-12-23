@@ -13,12 +13,15 @@ import TraindataTable from "./TrainData";
 import History from "./History";
 import { AiFillFolderOpen, AiOutlineReload } from "react-icons/ai";
 import { SiHiveBlockchain } from "react-icons/si";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import Embedded from "./Embedded";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
 import toast, { Toaster } from "react-hot-toast";
+import { MdUpdate } from "react-icons/md";
 import { useLocation } from "react-router-dom";
+import Chatmodal from "./Chatmodal";
+import { updatechatbot } from "../redux/actions/chatAction";
 
 export default function Example() {
     const chatState = useSelector((state) => state.chat.chat);
@@ -26,8 +29,10 @@ export default function Example() {
     const [activeTab, setActiveTab] = useState("preview");
     const [message_history, setMessage_history] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [updateModalOpen, setUpdateModalOpen] = useState(false);
     const [newChatKey, setNewChatKey] = useState(0);
     let location = useLocation();
+    const dispatch = useDispatch();
 
     const handleOpen = (e) => {
         window.open(`/chat/embedding/${chat.uuid}`, "_blank");
@@ -43,6 +48,7 @@ export default function Example() {
         setIsModalOpen(false);
     };
     const handleCancel = () => {
+        setUpdateModalOpen(false);
         setIsModalOpen(false);
     };
     const getMessage_history = () => {
@@ -70,9 +76,20 @@ export default function Example() {
 
     useEffect(() => {
         getMessage_history();
-    }, [location.pathname])
+    }, [location.pathname]);
 
+    const handleUpdate = (e) => {
+        setUpdateModalOpen(true);
+    };
 
+    const handleUpdateOk = (data) => {
+        axios.post(webAPI.updatechat, data).then((res) => {
+            if (res.data.success) {
+                updatechatbot(dispatch, true);
+            }
+        });
+        setUpdateModalOpen(false);
+    };
 
     const data = [
         {
@@ -80,7 +97,7 @@ export default function Example() {
             value: "preview",
             desc: (
                 <div className="w-full rounded-xl border-[--site-chat-header-border] border flex-col">
-                    <Toaster className="z-30"/>
+                    <Toaster className="z-30" />
                     <div className="flex flex-col p-5 md:w-full md:z-0">
                         <div className="flex flex-col justify-between gap-5 text-black md:flex-row md:gap-0">
                             <div className="flex flex-col gap-5 md:flex-row">
@@ -108,6 +125,14 @@ export default function Example() {
                                     <SiHiveBlockchain />
                                     Embed or Share
                                 </Button>
+                                <Button
+                                    variant="outlined"
+                                    className="normal-case bg-white py-2 px-4 border border-[--site-onboarding-primary-color] rounded-md flex items-center justify-center gap-2 text-black text-base"
+                                    onClick={handleUpdate}
+                                >
+                                    <MdUpdate className="w-6 h-6" />
+                                    Update
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -118,6 +143,12 @@ export default function Example() {
                         data={chat}
                         open={isModalOpen}
                         handleOk={handleOk}
+                        handleCancel={handleCancel}
+                    />
+                    <Chatmodal
+                        chat={chat}
+                        open={updateModalOpen}
+                        handleUpdate={handleUpdateOk}
                         handleCancel={handleCancel}
                     />
                 </div>
@@ -178,7 +209,7 @@ export default function Example() {
                         </Tab>
                     ))}
                 </TabsHeader>
-                <TabsBody className="mt-6 h-full">
+                <TabsBody className="mt-6 h-full flex justify-center">
                     {data.map(({ value, desc }) => (
                         <TabPanel
                             key={value}

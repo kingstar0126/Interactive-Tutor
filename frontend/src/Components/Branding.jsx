@@ -1,7 +1,7 @@
 import { BiCheckCircle } from "react-icons/bi";
 import BrandingTextItem from "./BrandingTextItem";
 import { useSelector, useDispatch } from "react-redux";
-import { getchat } from "../redux/actions/chatAction";
+import { getchat, updatechatbot } from "../redux/actions/chatAction";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { webAPI } from "../utils/constants";
@@ -38,6 +38,7 @@ const Branding = () => {
             .post(webAPI.send_branding, current_chat)
             .then((res) => {
                 getchat(dispatch, current_chat);
+                updatechatbot(dispatch, true);
                 notification("success", res.data.message);
             })
             .catch((err) => console.log(err));
@@ -45,7 +46,7 @@ const Branding = () => {
     return (
         <>
             {chat.access && (
-                <div className="flex flex-col w-full h-full py-5">
+                <div className="flex flex-col w-full h-full pb-5">
                     <Toaster className="z-30"/>
 
                     <div className="flex flex-col gap-8">

@@ -97,8 +97,8 @@ export default function TraindataTable(props) {
     };
 
     return (
-        <div className="flex flex-col w-full h-full gap-5 py-5">
-            <Toaster className="z-30"/>
+        <div className="flex flex-col w-full h-full py-5">
+            <Toaster />
             <div className="flex justify-end px-5 ">
                 <Button
                     type="button"
