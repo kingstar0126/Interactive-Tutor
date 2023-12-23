@@ -13,3 +13,4 @@ export const GET_CHATBOT = "GET_CHATBOT";
 export const GET_USER_ACCOUNT = "GET_USER_ACCOUNT";
 export const SET_QUERY = "SET_QUERY";
 export const SET_OPEN_SIDEBAR = "SET_OPEN_SIDEBAR";
+export const UPDATE_CHAT = "UPDATE_CHAT";

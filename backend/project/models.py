@@ -29,6 +29,7 @@ class User(UserMixin, db.Model):
     status = db.Column(db.Integer)
     discount = db.Column(db.Boolean)
     wonde_key = db.Column(db.String(255))
+    ispaid = db.Column(db.Boolean)
 
     create_date = db.Column(db.DateTime, default=datetime.utcnow)
     update_date = db.Column(

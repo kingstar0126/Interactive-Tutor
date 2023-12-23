@@ -8,14 +8,12 @@ import string
 import json
 import secrets
 from rich import print, pretty
-from sqlalchemy import exc
 import stripe
 import os
 from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from flask_jwt_extended import create_access_token, decode_token
-from sqlalchemy.sql import text
 import csv
 
 from . import add_email_to_sendgrid_marketing, get_sendgrid_list_ids, delete_email_to_sendgrid_marketing
@@ -79,29 +77,11 @@ def login_post():
             'message': 'You are blocked.',
         })
     if user.role == 5:
-        days = calculate_days(user.create_date)
-        if days < 0:
-            user.role = 0
-            db.session.commit()
-            new_user = {
-                'id': user.id,
-                'username': user.username,
-                'query': max(user.query - user.usage, 0),
-                'role': user.role,
-            }
-            response = {
-                'success': True,
-                'code': 200,
-                'data': new_user,
-                'message': 'Your free trial has ended.'
-            }
-            return jsonify(response)
         new_user = {
             'id': user.id,
             'username': user.username,
             'role': user.role,
             'query': max(user.query - user.usage, 0),
-            'days': days
         }
     else:
         new_user = {

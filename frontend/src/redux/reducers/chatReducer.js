@@ -2,11 +2,13 @@ import { ADD_CHAT } from "../type";
 import { GET_CHAT } from "../type";
 import { SET_CHATBOT } from "../type";
 import { GET_CHATBOT } from "../type";
+import { UPDATE_CHAT } from "../type";
 
 const initialState = {
     chat: JSON.stringify({}),
     chatbot: '',
     chatmessage: sessionStorage.getItem("chatmessage"),
+    isUpdate: false,
 };
 
 const chatReducer = (state = initialState, action) => {
@@ -34,6 +36,11 @@ const chatReducer = (state = initialState, action) => {
                 ...state,
                 chatmessage: sessionStorage.getItem("chatmessage"),
             };
+        case UPDATE_CHAT:
+            return {
+                ...state,
+                isUpdate: payload
+            }
         default:
             return state;
     }

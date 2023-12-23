@@ -24,7 +24,7 @@ const chatReducer = (state = initialState, action) => {
         case SET_OPEN_SIDEBAR:
             return {
                 ...state,
-                openSidebar: !state.openSidebar,
+                openSidebar: payload,
             };
         default:
             return state;

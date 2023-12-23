@@ -36,7 +36,7 @@ const VerifyEmail = () => {
             navigate("/");
         }
     }, []);
-    return <Toaster />;
+    return <Toaster className="z-30"/>;
 };
 
 export default VerifyEmail;
