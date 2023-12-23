@@ -8,6 +8,7 @@ import openai
 import re
 import base64
 import requests
+import urllib
 
 load_dotenv()
 
@@ -169,7 +170,7 @@ def create_pollinations_prompt(prompt):
         print('This is the Error: ', e)
         return None
 
-def create_image_file(prompt, image = False):
+def create_image_file(prompt, uuid, image = False):
     try:
         if image:
             response = client.images.create_variation(
@@ -192,7 +193,16 @@ def create_image_file(prompt, image = False):
             print(response)
 
             image_url=response.data[0].url
-        return f"![image]({image_url})"
+            image_file_name = urllib.parse.urlsplit(image_url).path.split('/')[-1]
+            cleanup_empty_folders('exports/charts/')
+            full_chart_path = f"exports/charts/{uuid}"
+            if not os.path.exists(full_chart_path):
+                os.makedirs(full_chart_path)
+            local_image_path = os.path.join(full_chart_path, image_file_name)
+            image_content = requests.get(image_url).content
+            with open(local_image_path, 'wb') as handle:
+                handle.write(image_content)
+        return f"![image](http://18.133.183.77/image/{local_image_path})"
     except openai.BadRequestError as e:
         print(e)
         dict_str = re.search(r"\{.*\}", str(e)).group()

@@ -109,14 +109,19 @@ def init_message():
 
 @message.route('/api/getquery', methods=['POST'])
 def get_query():
-    uuid = request.json['id']
-    chat = db.session.query(Chat).join(Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
-    if chat and chat.inviteId:
-        user = db.session.query(User).filter_by(id=chat.inviteId).first()
-        if user and user.role == 7:
-            return jsonify({'query': user.query, 'usage': user.usage, 'success': True})
-    user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
-    Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
+    data = request.get_json()
+    uuid = data.get('id')
+    user_id = data.get('user_id')
+    if user_id:
+        user = db.session.query(User).filter_by(id=user_id).first()
+    else:
+        chat = db.session.query(Chat).join(Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
+        if chat and chat.inviteId:
+            user = db.session.query(User).filter_by(id=chat.inviteId).first()
+            if user and user.role == 7:
+                return jsonify({'query': user.query, 'usage': user.usage, 'success': True})
+        user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
+        Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
     if user:
         return jsonify({'query': user.query, 'usage': user.usage, 'success': True})
     else:
@@ -136,7 +141,8 @@ def send_message():
     query = request.form.get('_message')
     behaviormodel = request.form.get('behaviormodel')
     model = request.form.get('model')
-    
+    user_id = request.form.get('user_id')
+
     context = ""
     count = 0
     file_link = None
@@ -180,12 +186,14 @@ def send_message():
             context, file_link, thread = ask_question(assistants[chat.id], query, threads[chat.id], uuid)
             threads[chat.id] = thread
         text = handle_image_uploads(request, query)
-    user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
-            Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
-    invite_account = db.session.query(Invite).filter_by(email=user.email).first()
-    user_check = db.session.query(User).filter_by(id=invite_account.user_id).first() if invite_account else None
-    user = user_check if user_check and user_check.role == 7 else user
-
+    if user_id:
+        user = db.session.query(User).filter_by(id=user_id).first()
+    else:
+        user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
+                Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
+        invite_account = db.session.query(Invite).filter_by(email=user.email).first()
+        user_check = db.session.query(User).filter_by(id=invite_account.user_id).first() if invite_account else None
+        user = user_check if user_check and user_check.role == 7 else user
     ######################################
     '''For the Wonde API'''
     if user.role == 7 and chat.api_select == 1:
@@ -246,9 +254,9 @@ def send_message():
         if 'image' in request.files:
             images = request.files.getlist('image')
             image_data = images[0].read()
-            response = create_image_file(query, image_data)
+            response = create_image_file(query, uuid, image_data)
         else:
-            response = create_image_file(query)
+            response = create_image_file(query, uuid)
     elif model == "5":
         response = create_pollinations_prompt(query)
     elif text is not None:
@@ -316,36 +324,6 @@ def send_message():
             'code': 500,
             'message': str(e),
         })
-
-@message.route('/api/dashboardchat', methods=['POST'])
-def send_message_dashboard():
-    user_id = request.form.get('id')
-    chat_uuid = os.getenv('DASHBOARD')
-    chat = db.session.query(Chat).filter_by(uuid=chat_uuid)
-    behavior = chat.behavior
-    creativity = chat.creativity
-    conversation = chat.conversation
-    response = generate_Bubble_message('random country')
-    name = f"DashBoard"
-
-    if conversation == "":
-        message = json.dumps([])
-    else:
-        message = json.dumps([{"role": "ai", "content": conversation}])
-    new_message = Message(chat_id=chat_id, message=message,
-                          behavior=behavior, creativity=creativity, name=name)
-    db.session.add(new_message)
-    db.session.commit()
-
-    if assistants:
-        if chat_id in assistants and assistants[chat_id] is not None:
-            delete_assistant_file(assistants[chat_id], files[chat_id])
-    threads[chat_id] = None
-    assistants[chat_id] = None
-    files[chat_id] = None
-    response = {'success': True, 'code': 200,
-                'message': "Successfuly created", 'data': new_message.uuid}
-    return jsonify(response)
 
 
 @message.route('/api/sendchatbubble', methods=['POST'])
