@@ -145,7 +145,7 @@ const SubscriptionModal = (props) => {
             return parsedDescription.split("\n");
         });
         setDescription(newDescription);
-        // handleUpdateProduct()
+        // handleUpdateProduct();
     }, [subscriptions]);
 
     const getInviteEmails = () => {
@@ -175,9 +175,7 @@ const SubscriptionModal = (props) => {
             price_id: "price_1OPsImIhMOfFZaiyaXpphfqv",
             description: `1 Licence to Interactive Tutor
                             500 Monthly Queries (top-ups available)
-                            GPT 3.5, GPT 4.5 Turbo and Dall-e
                             Access to Library
-                            Unlimited AI Bots
                             Full Styling Options
                             Embed and Share Anywhere
                             Available on IoS and Android`,
@@ -187,12 +185,9 @@ const SubscriptionModal = (props) => {
             name: "School",
             price: 469,
             price_id: "price_1OPsJ5IhMOfFZaiyz0xmoN6O",
-            description: `School Account Management
-                            Unlimited Licences to Interactive Tutor
+            description: `  Unlimited Licences to Interactive Tutor
                             30k Monthly Queries (top-ups available)
-                            GPT 3.5, GPT 4.5 Turbo and Dall-e
                             Access to Library
-                            Unlimited AI Bots
                             Full Styling Options
                             Embed and Share Anywhere
                             Available on IoS and Android
@@ -217,236 +212,158 @@ const SubscriptionModal = (props) => {
                 <span className="text-[32px] w-full leading-12 font-semibold text-[--site-card-icon-color] flex flex-col items-center justify-center">
                     Plans and pricing
                 </span>
-                {user.role !== 7 && (
-                    <Link>
-                        <span
-                            onClick={() => {
-                                setType(!type);
-                            }}
-                            className="bg-transparent text-[--site-card-icon-color] text-base font-semibold hover:text-[--site-main-slider-thumb-color]"
-                        >
-                            Invite others for a 50% discount
-                        </span>
-                    </Link>
-                )}
             </DialogHeader>
-            <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium md:px-12 md:pb-20 md:max-h-[42rem] max-h-[25rem] overflow-y-auto">
-                <Toaster className="z-30" />
-                {type ? (
-                    subscriptions &&
-                    subscriptions.length !== 0 && (
-                        <div>
-                            <div className="flex flex-col items-start justify-center w-full gap-12 py-4 md:flex-row">
-                                {subscriptions.map((item, index) => {
-                                    return (
-                                        <React.Fragment key={item.price_id}>
-                                            {price &&
-                                            price === item.price_id ? (
-                                                <Card
-                                                    variant="gradient"
-                                                    className="w-full p-8 bg-[#034F75] text-white flex flex-col scale-y-105"
-                                                >
-                                                    <CardHeader
-                                                        floated={false}
-                                                        shadow={false}
-                                                        color="transparent"
-                                                        className="pb-2 m-0 mb-4 text-center border-b rounded-none border-white/10 h-2/6"
-                                                    >
-                                                        <div className="flex flex-col w-full gap-4 py-2">
-                                                            <span className="flex px-6 text-2xl items-center justify-start w-full">
-                                                                {item.name}
-                                                            </span>
+            <DialogBody className="text-black text-base font-medium md:px-12 py-4 md:max-h-full max-h-[25rem] overflow-y-auto">
+                <Toaster />
 
-                                                            <div
-                                                                className="flex items-end justify-start gap-2 px-6 font-semibold"
-                                                            >
-                                                                <span className="text-[36px] text-[--site-onboarding-primary-color]">
-                                                                    £
-                                                                    {item.price}{" "}
-                                                                    /
-                                                                </span>
-                                                                <span className="text-[--site-onboarding-primary-color] text-[20px]">
-                                                                    month
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </CardHeader>
-                                                    <CardBody className="p-0">
-                                                        <ul className="flex flex-col gap-2">
-                                                            {subscriptions &&
-                                                                description[
-                                                                    index
-                                                                ] &&
-                                                                description[
-                                                                    index
-                                                                ].map(
-                                                                    (
-                                                                        subscription
-                                                                    ) => (
-                                                                        <li
-                                                                            className="flex items-start gap-4"
-                                                                            key={
-                                                                                subscription
-                                                                            }
-                                                                        >
-                                                                            <div className="p-1">
-                                                                                <IoCheckbox className="text-[#2DC937] w-8 h-8" />
-                                                                            </div>
-                                                                            <div className="p-1 items-center justify-start">
-                                                                                <span className="font-normal text-start">
-                                                                                    {
-                                                                                        subscription
-                                                                                    }
-                                                                                </span>
-                                                                            </div>
-                                                                        </li>
-                                                                    )
-                                                                )}
-                                                        </ul>
-                                                    </CardBody>
-                                                    <CardFooter className="px-2 pb-4 mt-6 h-1/6 items-center justify-center flex">
-                                                        <Button
-                                                            size="lg"
-                                                            color="white"
-                                                            className="text-white bg-[--site-card-icon-color] hover:scale-[1.02] focus:scale-[1.02] active:scale-100 text-[20px] normal-case w-1/2"
-                                                            ripple={false}
-                                                            onClick={() => {
-                                                                handleCancelSubscription();
-                                                            }}
-                                                            fullWidth={true}
-                                                        >
-                                                            Manage Plan
-                                                        </Button>
-                                                    </CardFooter>
-                                                </Card>
-                                            ) : (
-                                                <Card
-                                                    variant="gradient"
-                                                    className="w-full p-8 text-[--site-onboarding-primary-color] flex flex-col border border-gray-400"
-                                                >
-                                                    <CardHeader
-                                                        floated={false}
-                                                        shadow={false}
-                                                        color="transparent"
-                                                        className="m-0 mb-4 rounded-none border-b border-white/10 pb-2 text-center text-[--site-onboarding-primary-color] h-max flex flex-col"
-                                                    >
-                                                        <div className="flex flex-col w-full gap-4 py-2">
-                                                            <span className="flex px-6 text-2xl items-center justify-start w-full">
-                                                                {item.name}
-                                                            </span>
-
-                                                            <div
-                                                                className="flex items-end justify-start gap-2 px-6 font-semibold"
-                                                            >
-                                                                <span className="text-[36px] text-[--site-onboarding-primary-color]">
-                                                                    £
-                                                                    {item.price}{" "}
-                                                                    /
-                                                                </span>
-                                                                <span className="text-[--site-onboarding-primary-color] text-[20px]">
-                                                                    month
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </CardHeader>
-                                                    <CardBody className="flex flex-col justify-start gap-2 p-0">
-                                                        <ul className="flex flex-col gap-2">
-                                                            {subscriptions &&
-                                                                description[
-                                                                    index
-                                                                ] &&
-                                                                description[
-                                                                    index
-                                                                ].map(
-                                                                    (
-                                                                        subscription
-                                                                    ) => (
-                                                                        <li
-                                                                            className="flex items-start gap-4 justify-start w-full"
-                                                                            key={
-                                                                                subscription
-                                                                            }
-                                                                        >
-                                                                            <div className="p-1">
-                                                                                <IoCheckbox className="text-[#2DC937] w-8 h-8" />
-                                                                            </div>
-                                                                            <div className="p-1 items-center justify-start">
-                                                                                <span className="font-normal text-start">
-                                                                                    {
-                                                                                        subscription
-                                                                                    }
-                                                                                </span>
-                                                                            </div>
-                                                                        </li>
-                                                                    )
-                                                                )}
-                                                        </ul>
-                                                    </CardBody>
-                                                    <CardFooter className="px-2 pb-4 mt-6 h-1/6 items-center justify-center flex">
-                                                        <Button
-                                                            size="lg"
-                                                            color="white"
-                                                            variant="outlined"
-                                                            className="text-[--site-onboarding-primary-color] border border-[--site-onboarding-primary-color] hover:scale-[1.02] focus:scale-[1.02] active:scale-100 text-[20px] normal-case w-1/2 "
-                                                            ripple={false}
-                                                            fullWidth={true}
-                                                            onClick={() =>
-                                                                initiateSubscriptionCheckout(
-                                                                    item.price_id
-                                                                )
-                                                            }
-                                                        >
-                                                            Choose Plan
-                                                        </Button>
-                                                    </CardFooter>
-                                                </Card>
-                                            )}
-                                        </React.Fragment>
-                                    );
-                                })}
-                            </div>
-                            {/* <div className="justify-center flex p-2">
-                                {user.role !== 6 ? (
-                                    <span
-                                        onClick={handleOpenModal}
-                                        className=" text-[#034F75] border border-[--site-main-pricing-color] rounded-lg mt-5 p-5 hover:scale-[1.02] focus:scale-[1.02] active:scale-100"
+                <div className="grid grid-rows-2 w-full gap-12 md:grid-cols-2 md:grid-rows-none">
+                    {subscriptions.map((item, index) => {
+                        return (
+                            <React.Fragment key={item.price_id}>
+                                {price && price === item.price_id ? (
+                                    <Card
+                                        variant="gradient"
+                                        className="col-span-1 row-span-1 h-full px-4 py-2 bg-primary text-white flex flex-col scale-y-105"
                                     >
-                                        Custom Plan
-                                    </span>
+                                        <CardHeader
+                                            floated={false}
+                                            shadow={false}
+                                            color="transparent"
+                                            className="pb-2 m-0 mb-4 text-center border-b rounded-none border-white/10 h-2/6"
+                                        >
+                                            <div className="flex flex-col w-full gap-4 py-2">
+                                                <span className="flex px-6 text-2xl items-center justify-start w-full">
+                                                    {item.name}
+                                                </span>
+
+                                                <div className="flex items-end justify-start gap-2 px-6 font-semibold">
+                                                    <span className="text-[36px] text-[--site-onboarding-primary-color]">
+                                                        £{item.price} /
+                                                    </span>
+                                                    <span className="text-[--site-onboarding-primary-color] text-[20px]">
+                                                        month
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </CardHeader>
+                                        <CardBody className="p-0">
+                                            <ul className="flex flex-col gap-2">
+                                                {subscriptions &&
+                                                    description[index] &&
+                                                    description[index].map(
+                                                        (subscription) => (
+                                                            <li
+                                                                className="flex items-start gap-4"
+                                                                key={
+                                                                    subscription
+                                                                }
+                                                            >
+                                                                <div className="p-1">
+                                                                    <IoCheckbox className="text-[#2DC937] w-8 h-8" />
+                                                                </div>
+                                                                <div className="p-1 items-center justify-start">
+                                                                    <span className="font-normal text-start">
+                                                                        {
+                                                                            subscription
+                                                                        }
+                                                                    </span>
+                                                                </div>
+                                                            </li>
+                                                        )
+                                                    )}
+                                            </ul>
+                                        </CardBody>
+                                        <CardFooter className="px-2 pb-4 mt-6 h-1/6 items-center justify-center flex">
+                                            <Button
+                                                size="lg"
+                                                color="white"
+                                                className="text-white bg-[--site-card-icon-color] hover:scale-[1.02] focus:scale-[1.02] active:scale-100 text-[20px] normal-case w-1/2"
+                                                ripple={false}
+                                                onClick={() => {
+                                                    handleCancelSubscription();
+                                                }}
+                                                fullWidth={true}
+                                            >
+                                                Manage Plan
+                                            </Button>
+                                        </CardFooter>
+                                    </Card>
                                 ) : (
-                                    <span
-                                        onClick={handleOpenModal}
-                                        className=" bg-[#034F75] text-white border border-[--site-main-pricing-color] rounded-lg mt-5 p-5 hover:scale-[1.02] focus:scale-[1.02] active:scale-100"
+                                    <Card
+                                        variant="gradient"
+                                        className="col-span-1 row-span-1 justify-between px-4 py-2 text-[--site-onboarding-primary-color] flex flex-col border border-gray-400 h-full"
                                     >
-                                        Custom Plan
-                                    </span>
+                                        <CardHeader
+                                            floated={false}
+                                            shadow={false}
+                                            color="transparent"
+                                            className="m-0 mb-4 rounded-none border-b border-white/10 pb-2 text-center text-[--site-onboarding-primary-color] h-max flex flex-col"
+                                        >
+                                            <div className="flex flex-col w-full gap-4 py-2">
+                                                <span className="flex px-6 text-2xl items-center justify-start w-full">
+                                                    {item.name}
+                                                </span>
+
+                                                <div className="flex items-end justify-start gap-2 px-6 font-semibold">
+                                                    <span className="text-[36px] text-[--site-onboarding-primary-color]">
+                                                        £{item.price} /
+                                                    </span>
+                                                    <span className="text-[--site-onboarding-primary-color] text-[20px]">
+                                                        month
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </CardHeader>
+                                        <CardBody className="flex flex-col justify-start p-0">
+                                            <ul className="flex flex-col gap-2">
+                                                {subscriptions &&
+                                                    description[index] &&
+                                                    description[index].map(
+                                                        (subscription) => (
+                                                            <li
+                                                                className="flex items-start gap-4 justify-start w-full"
+                                                                key={
+                                                                    subscription
+                                                                }
+                                                            >
+                                                                <div className="p-1">
+                                                                    <IoCheckbox className="text-[#2DC937] w-8 h-8" />
+                                                                </div>
+                                                                <div className="p-1 items-center justify-start">
+                                                                    <span className="font-normal text-start">
+                                                                        {
+                                                                            subscription
+                                                                        }
+                                                                    </span>
+                                                                </div>
+                                                            </li>
+                                                        )
+                                                    )}
+                                            </ul>
+                                        </CardBody>
+                                        <CardFooter className="px-2 pb-4 items-center justify-center flex">
+                                            <Button
+                                                size="lg"
+                                                color="white"
+                                                variant="outlined"
+                                                className="text-[--site-onboarding-primary-color] border border-[--site-onboarding-primary-color] hover:scale-[1.02] focus:scale-[1.02] active:scale-100 text-[20px] normal-case w-1/2 "
+                                                ripple={false}
+                                                fullWidth={true}
+                                                onClick={() =>
+                                                    initiateSubscriptionCheckout(
+                                                        item.price_id
+                                                    )
+                                                }
+                                            >
+                                                Choose Plan
+                                            </Button>
+                                        </CardFooter>
+                                    </Card>
                                 )}
-                            </div> */}
-                        </div>
-                    )
-                ) : (
-                    <div className="flex flex-col gap-5">
-                        {user.role !== 7 && (
-                            <>
-                                <span className="text-2xl font-semibold text-[--site-card-icon-color]">
-                                    Invite 5 subscribers to get 50% off your
-                                    subscription
-                                </span>
-                                <div className="flex flex-col gap-2">
-                                    {inviteEmails.map((item, id) => {
-                                        return (
-                                            <InviteEmailItem
-                                                data={item}
-                                                InviteConfirm={handleInvite}
-                                                key={id}
-                                            />
-                                        );
-                                    })}
-                                </div>
-                            </>
-                        )}
-                    </div>
-                )}
+                            </React.Fragment>
+                        );
+                    })}
+                </div>
             </DialogBody>
             <Dialog
                 open={isopen}

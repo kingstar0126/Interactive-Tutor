@@ -14,6 +14,7 @@ import Dialog from "../assets/Desktop/dialog.svg";
 import Loading from "../assets/loading.svg";
 import { useSelector } from "react-redux";
 import SubscriptionModal from "./SubscriptionModal";
+import { Toaster } from "react-hot-toast";
 
 const LENGTH = 9;
 
@@ -110,6 +111,7 @@ const OnBoarding = () => {
 
     return (
         <div className="flex flex-col justify-center items-center w-full h-full relative gap-10">
+            <Toaster />
             {loading && (
                 <div className="w-full h-full justify-center items-center flex absolute z-10 bg-white">
                     <img src={Loading} className="animate-spin" />

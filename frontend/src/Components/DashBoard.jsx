@@ -12,7 +12,6 @@ import axios from "axios";
 import { Scrollbar } from "react-scrollbars-custom";
 import { dracula, CopyBlock } from "react-code-blocks";
 import { getquery } from "../redux/actions/queryAction";
-import ReactLoading from "react-loading";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeMathjax from "rehype-mathjax";
@@ -26,7 +25,6 @@ import {
     MenuList,
     MenuItem,
     IconButton,
-    Button,
 } from "@material-tailwind/react";
 
 import PDF from "../assets/pdf.png";
@@ -75,17 +73,21 @@ const DashBoard = () => {
     };
 
     useEffect(() => {
-        if (user.role === 5 || user.role === 0) {
-            navigate("/chatbot/chat/onboarding");
+        if (!user) {
+            navigate("/login");
         } else {
-            axios
-                .post(webAPI.getchat, {
-                    id: chatbotID,
-                })
-                .then((res) => {
-                    getchat(dispatch, res.data.data);
-                    setchatbot(dispatch, res.data.data);
-                });
+            if (user.role === 5 || user.role === 0) {
+                navigate("/chatbot/chat/onboarding");
+            } else {
+                axios
+                    .post(webAPI.getchat, {
+                        id: chatbotID,
+                    })
+                    .then((res) => {
+                        getchat(dispatch, res.data.data);
+                        setchatbot(dispatch, res.data.data);
+                    });
+            }
         }
     }, []);
 
@@ -202,6 +204,7 @@ const DashBoard = () => {
         formData.append("behaviormodel", behaviormodel);
         formData.append("train", train);
         formData.append("model", model);
+        formData.append("user_id", user.id);
         if (image.length) {
             image.map((item) => {
                 formData.append("image", item);
@@ -269,7 +272,7 @@ const DashBoard = () => {
 
                     return reader.read().then(process);
                 });
-                getquery(dispatch, { id: chatbot });
+                getquery(dispatch, { id: chatbot, user_id: user.id });
             })
             .catch((error) => {
                 console.error(
@@ -879,7 +882,7 @@ const DashBoard = () => {
                             </div>
                             <textarea
                                 type="text"
-                                rows="2"
+                                rows="3"
                                 cols="50"
                                 value={message}
                                 onChange={handleMessage}
@@ -888,7 +891,7 @@ const DashBoard = () => {
                                     overflow: "hidden",
                                     height: `${inputHeight}px`,
                                 }}
-                                className="w-full text-[--site-card-icon-color] px-10 py-2 border border-gray-600 focus:outline-none rounded-md resize"
+                                className="w-full text-[--site-card-icon-color] px-10 py-3 border border-gray-600 focus:outline-none rounded-md resize"
                                 placeholder="Type message"
                             ></textarea>
 
