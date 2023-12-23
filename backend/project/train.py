@@ -174,6 +174,7 @@ def text_to_docs(text, filename, chat):
             doc.metadata["source"] = f"{filename}"
             doc.metadata["chat"] = f"{chat}"
             doc_chunks.append(doc)
+        print(doc_chunks)
     return doc_chunks
 
 
@@ -295,8 +296,8 @@ def create_train_url():
     url = request.json['url']
     chatbot = request.json['chatbot']
     if compare_role_user(chatbot):
-        data = web_scraping(url, 0)
-        # print(data)
+        data = web_scraping(url, 1)
+        print(data)
         if data == False:
             return jsonify({
                 'success': False,

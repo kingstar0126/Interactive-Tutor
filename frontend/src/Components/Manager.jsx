@@ -84,7 +84,7 @@ const Manager = () => {
     };
 
     const handleOpenSidebar = () => {
-        dispatch(setOpenSidebar());
+        // dispatch(setOpenSidebar());
     };
 
     const getSubscriptionName = (role) => {
@@ -210,7 +210,7 @@ const Manager = () => {
     }, [search])
     return (
         <div className="w-full h-full">
-            <Toaster />
+            <Toaster className="z-30"/>
             <div className="flex md:items-center items-end justify-between w-full md:h-[100px] md:px-10 from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] md:border-b-[--site-chat-header-border] md:border bg-gradient-to-r px-4 py-2 max-h-min gap-1">
                 <div className="hidden md:flex gap-2 mt-9 mb-8 text-[--site-card-icon-color]">
                     <BsDatabaseFillGear className="w-8 h-8" />

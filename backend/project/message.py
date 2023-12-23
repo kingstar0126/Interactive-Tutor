@@ -15,7 +15,7 @@ import json
 from .generate_response import generate_message, generate_AI_message, generate_Bubble_message, generate_part_file, get_name_from_prompt, image_understanding
 from .wonde import answer_question_csv
 from .train import parse_pdf, parse_csv, parse_docx, extract_data_from_xlsx
-from .assistant import create_assistant_file, delete_assistant_file, ask_question, create_image_file
+from .assistant import create_assistant_file, delete_assistant_file, ask_question, create_image_file, create_pollinations_prompt
 import re
 from typing import Sequence
 from google.cloud import vision
@@ -78,9 +78,9 @@ def init_message():
     behavior = request.json['behavior']
     creativity = request.json['creativity']
     conversation = request.json['conversation']
-    country = request.json['country']
-    response = generate_Bubble_message(country)
-    name = f"{response}, {country}"
+    # country = request.json['country']
+    response = generate_Bubble_message('any country')
+    name = f"{response}"
     # messages = db.session.query(Message).filter_by(chat_id=chat_id).all()
     # for row in messages:
     #     _messages = json.loads(row.message)
@@ -109,14 +109,19 @@ def init_message():
 
 @message.route('/api/getquery', methods=['POST'])
 def get_query():
-    uuid = request.json['id']
-    chat = db.session.query(Chat).join(Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
-    if chat and chat.inviteId:
-        user = db.session.query(User).filter_by(id=chat.inviteId).first()
-        if user and user.role == 7:
-            return jsonify({'query': user.query, 'usage': user.usage, 'success': True})
-    user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
-    Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
+    data = request.get_json()
+    uuid = data.get('id')
+    user_id = data.get('user_id')
+    if user_id:
+        user = db.session.query(User).filter_by(id=user_id).first()
+    else:
+        chat = db.session.query(Chat).join(Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
+        if chat and chat.inviteId:
+            user = db.session.query(User).filter_by(id=chat.inviteId).first()
+            if user and user.role == 7:
+                return jsonify({'query': user.query, 'usage': user.usage, 'success': True})
+        user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
+        Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
     if user:
         return jsonify({'query': user.query, 'usage': user.usage, 'success': True})
     else:
@@ -125,79 +130,10 @@ def get_query():
 def handle_image_uploads(request, query):
     if 'image' in request.files:
         images = request.files.getlist('image')  # Get all files under 'image' key
-        text = analyze_images(images, query)
+        text = image_understanding(images, query)
         return text
     else:
         return None
-
-def analyze_images(images, query):
-    text = ""  # Initialize text
-    
-    response = image_understanding(images, query)
-    
-    return response
-
-def handle_file_uploads(request):
-    if 'file' not in request.files:
-        return None
-    file = request.files['file']
-    query = request.form.get('_message')
-    if file.filename == '':
-        return None
-    if file:
-        # Use the appropriate function based on the file's extension
-        if file.filename.endswith('.pdf'):
-            data = parse_pdf(file)
-        elif file.filename.endswith('.docx'):
-            data = parse_docx(file)
-        else:
-            return None
-        return data
-
-def calculate_token_count(content):
-    encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
-    num_tokens = len(encoding.encode(content))
-    return num_tokens
-
-def convert_large_data_to_small(files, message, length):
-    threads = []
-    results = []
-
-    # start a new thread for each file
-    for data in files:
-        t = threading.Thread(target=generate_part_file_thread, args=(message, data, results))
-        t.start()
-        threads.append(t)
-
-    # wait for all threads to finish
-    for t in threads:
-        t.join()
-
-    result = '\n'.join(results)
-
-    if calculate_token_count(result) > length:
-        file_text = split_files_result([result], length)
-        return convert_large_data_to_small(file_text, message, length)
-    else:
-        return result
-
-def generate_part_file_thread(prompt, data, results):
-    response = generate_part_file(prompt, data)
-    results.append(response)
-
-def split_files_result(file_data, length):
-    file_text = []
-    _text = ""
-    for item in file_data:
-        next_text = f"{_text}{item}"
-        
-        if calculate_token_count(next_text) > length:
-            file_text.append(_text)
-            _text = item
-        else:
-            _text = next_text
-    file_text.append(_text)
-    return file_text
 
 @message.route('/api/sendchat', methods=['POST'])
 def send_message():
@@ -205,7 +141,8 @@ def send_message():
     query = request.form.get('_message')
     behaviormodel = request.form.get('behaviormodel')
     model = request.form.get('model')
-    
+    user_id = request.form.get('user_id')
+
     context = ""
     count = 0
     file_link = None
@@ -222,15 +159,11 @@ def send_message():
         })
 
     chat = db.session.query(Chat).filter_by(id=current_message.chat_id).first()
-
     
-
-    text = handle_image_uploads(request, query)
-
-    if 'file' in request.files:
-        file = request.files['file']
-        if file:
-            # if file.filename.endswith('.csv'):
+    if model != "4" or model != "5":
+        if 'file' in request.files:
+            file = request.files['file']
+            if file:
                 file_upload_check = True
                 filename = secure_filename(file.filename)
                 file.save(filename)
@@ -248,28 +181,19 @@ def send_message():
                 print('This is the context, filelink: ', context, file_link)
                 os.remove(filename)
                 count = 18
-    if chat.id in assistants and assistants[chat.id] is not None and file_upload_check == False:
-        file_upload_check = True
-        context, file_link, thread = ask_question(assistants[chat.id], query, threads[chat.id], uuid)
-        threads[chat.id] = thread
-
-
-    # file_data = handle_file_uploads(request)
-    # if file_data is not None:
-    #     count = 5
-    #     file_text = split_files_result(file_data, 13000)
-
-    #     if len(file_text) > 1:
-    #         context += convert_large_data_to_small(file_text, query, 13000)
-    #     else:
-    #         context += file_text[0]
-    
-    user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
-            Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
-    invite_account = db.session.query(Invite).filter_by(email=user.email).first()
-    user_check = db.session.query(User).filter_by(id=invite_account.user_id).first() if invite_account else None
-    user = user_check if user_check and user_check.role == 7 else user
-
+        if chat.id in assistants and assistants[chat.id] is not None and file_upload_check == False:
+            file_upload_check = True
+            context, file_link, thread = ask_question(assistants[chat.id], query, threads[chat.id], uuid)
+            threads[chat.id] = thread
+        text = handle_image_uploads(request, query)
+    if user_id:
+        user = db.session.query(User).filter_by(id=user_id).first()
+    else:
+        user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
+                Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
+        invite_account = db.session.query(Invite).filter_by(email=user.email).first()
+        user_check = db.session.query(User).filter_by(id=invite_account.user_id).first() if invite_account else None
+        user = user_check if user_check and user_check.role == 7 else user
     ######################################
     '''For the Wonde API'''
     if user.role == 7 and chat.api_select == 1:
@@ -296,6 +220,8 @@ def send_message():
         count = 15
     elif model == '4':
         count = 20
+    elif model == '5':
+        count = 10
     user.usage += count
     temp = current_message.creativity
     history = json.loads(current_message.message)
@@ -325,7 +251,14 @@ def send_message():
     """
 
     if model == "4":
-        response = create_image_file(query)
+        if 'image' in request.files:
+            images = request.files.getlist('image')
+            image_data = images[0].read()
+            response = create_image_file(query, uuid, image_data)
+        else:
+            response = create_image_file(query, uuid)
+    elif model == "5":
+        response = create_pollinations_prompt(query)
     elif text is not None:
         response = text
     elif file_upload_check:
@@ -350,6 +283,9 @@ def send_message():
             content = None
             if model == "4":
                 content = response
+                yield content.encode('utf-8')
+            elif model == "5":
+                content == response
                 yield content.encode('utf-8')
             elif text is not None:
                 content = None
@@ -459,13 +395,14 @@ def get_messages():
     current_messages = db.session.query(Message).filter_by(chat_id=chat_id).order_by(Message.update_date.desc()).all()
     response = []
     for _message in current_messages:
-        message_data = {
-            'uuid': _message.uuid,
-            'name': _message.name,
-            'message': json.loads(_message.message),
-            'update_data': _message.update_date.strftime('%d-%m-%Y')
-        }
-        response.append(message_data)
+        if len(json.loads(_message.message)) > 1:
+            message_data = {
+                'uuid': _message.uuid,
+                'name': _message.name,
+                'message': json.loads(_message.message),
+                'update_data': _message.update_date.strftime('%d-%m-%Y')
+            }
+            response.append(message_data)
 
     _response = {
         'success': True,

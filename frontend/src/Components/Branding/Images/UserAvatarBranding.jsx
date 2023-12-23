@@ -70,7 +70,7 @@ const UserAvatarBranding = (props) => {
                 <div className="flex flex-col gap-2">
                     <span>User avatar URL</span>
                     <div>
-                        <div className="border-[1px] rounded-xl border-[--site-chat-header-border] w-[70px] h-[70px]">
+                        <div className="border-[1px] rounded-xl border-[--site-chat-header-border] w-1/3 h-auto">
                             <Dropzone
                                 onDrop={handleFileChange}
                                 multiple={false}
@@ -102,7 +102,7 @@ const UserAvatarBranding = (props) => {
                             onClick={() => {
                                 handleUpload();
                             }}
-                            className="normal-case p-2 rounded-xl bg-[--site-logo-text-color] my-2 border border-[--site-chat-header-border] text-black text-base"
+                            className="normal-case p-2 rounded-md bg-[--site-logo-text-color] my-2 border border-[--site-chat-header-border] text-black text-base"
                         >
                             Upload
                         </Button>

@@ -49,33 +49,32 @@ const BrandingTextItem = (props) => {
                     onChange={handleDescription}
                 ></input>
             </div>
-            <div name="colorsize" className="flex justify-between w-full">
-                <div className="flex flex-col">
-                    <span>Color</span>
-                    <input
-                        type="color"
-                        onChange={handleColor}
-                        defaultValue={
-                            props.data.color === undefined
-                                ? "#efefef"
-                                : props.data.color
-                        }
-                        className={`my-1 bg-transparent ${
-                            /chrome/i.test(navigator.userAgent)
-                                ? ""
-                                : "border border-[--site-card-icon-color]"
-                        }`}
-                    />
-                </div>
-                <div name="size" className="flex flex-col w-1/3 gap-1">
-                    <span>Size (pixel)</span>
-                    <input
-                        defaultValue={props.data.size}
-                        type="number"
-                        onChange={handleSize}
-                        className="border-[--site-chat-header-border] border bg-transparent px-4 py-1 rounded-md"
-                    />
-                </div>
+
+            <div className="flex flex-col w-full">
+                <span>Color</span>
+                <input
+                    type="color"
+                    onChange={handleColor}
+                    defaultValue={
+                        props.data.color === undefined
+                            ? "#efefef"
+                            : props.data.color
+                    }
+                    className={`my-1 w-2/3 bg-transparent ${
+                        /chrome/i.test(navigator.userAgent)
+                            ? ""
+                            : "border border-[--site-card-icon-color]"
+                    }`}
+                />
+            </div>
+            <div name="size" className="flex flex-col w-full gap-1">
+                <span>Size (pixel)</span>
+                <input
+                    defaultValue={props.data.size}
+                    type="number"
+                    onChange={handleSize}
+                    className="border-[--site-chat-header-border] border bg-transparent px-4 py-1 rounded-md"
+                />
             </div>
         </div>
     );
