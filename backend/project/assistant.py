@@ -162,7 +162,7 @@ def create_image_prompt(prompt):
                     Prompt 9: A mixed media collage with a variety of textures and materials.
                     Prompt 10: A traditional oil painting with realistic details and a classical composition.
 
-                Only output the updated prompt and don't response any description.'''},
+                Only output the updated prompt.'''},
                 {"role": "user", "content": f"{prompt}"},
             ]
 
