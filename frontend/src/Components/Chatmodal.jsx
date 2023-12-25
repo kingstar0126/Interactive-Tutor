@@ -65,7 +65,7 @@ const Chatmodal = (props) => {
     ];
     // const [gptmodel, SetGPTmodel] = useState(models);
     const [Creativity, SetCreativity] = useState(0.3);
-    const [selected, setSelected] = useState(0);
+    const [selected, setSelected] = useState(null);
     const [behaviormodel, SetBehaviormodel] = useState();
     const [behavior, SetBehavior] = useState("You are a helpful assistant");
     const TutorThemes = [
@@ -145,7 +145,7 @@ const Chatmodal = (props) => {
             setOpen(0);
             SetCreativity(0.3);
             SetBehaviormodel(behaviorModelTheme[0].label);
-            SetBehavior(TutorThemes[0].prompt);
+            SetBehavior('You are a helpful assistant.');
             setType(false);
         }
         if (props.chat && props.chat.label) {

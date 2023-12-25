@@ -355,7 +355,7 @@ const Sidebar = () => {
                                                                         </span>
                                                                     </div>
                                                                 </MenuItem>
-                                                                <MenuItem>
+                                                                {user && (user.role === 4 || user.role === 7) && <MenuItem>
                                                                     <div
                                                                         className="flex h-full w-full items-center justify-start gap-2"
                                                                         onClick={() =>
@@ -377,7 +377,7 @@ const Sidebar = () => {
                                                                             School
                                                                         </span>
                                                                     </div>
-                                                                </MenuItem>
+                                                                </MenuItem>}
                                                                 <MenuItem>
                                                                     <div
                                                                         className="flex h-full w-full items-center justify-start gap-2"
