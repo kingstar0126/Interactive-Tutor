@@ -14,6 +14,8 @@ import AIMessage from "./Branding/Message/AIMessage";
 import BackgroundColor from "./Branding/Message/BackgroundColor";
 import UserMessage from "./Branding/Message/UserMessage";
 import ButtonBranding1 from "./Branding/Button/ButtonBranding1";
+import ButtonBranding2 from "./Branding/Button/ButtonBranding2";
+import ButtonBranding3 from "./Branding/Button/ButtonBranding3";
 import { Button } from "@material-tailwind/react";
 
 const Branding = () => {
@@ -207,13 +209,13 @@ const Branding = () => {
                                     />
                                 </div>
                                 <div className="w-full 2xl:w-1/3 h-full">
-                                    <ButtonBranding1
+                                    <ButtonBranding2
                                         title={"Button 2"}
                                         data={current_chat.chat_button}
                                     />
                                 </div>
                                 <div className="w-full 2xl:w-1/3 h-full">
-                                    <ButtonBranding1
+                                    <ButtonBranding3
                                         title={"Button 3"}
                                         data={current_chat.chat_button}
                                     />
