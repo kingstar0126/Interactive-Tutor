@@ -87,13 +87,13 @@ def add_chat():
     user = db.session.query(User).filter_by(id=user_id).first()
     ct = db.session.query(Chat).filter_by(user_id=user_id).count() + 1
 
-    if not user.role == 1 or user.role == 7:
-        if ct > user.tutors:
-            return jsonify({
-                'success': False,
-                'code': 401,
-                'message': "You can no longer create AI Bots.",
-            })
+    # if not user.role == 1 or user.role == 7:
+    #     if ct > user.tutors:
+    #         return jsonify({
+    #             'success': False,
+    #             'code': 401,
+    #             'message': "You can no longer create AI Bots.",
+    #         })
     new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
                     access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button, api_select=api_select)
     db.session.add(new_chat)

@@ -113,23 +113,54 @@ def create_image_prompt(prompt):
             model='gpt-4-1106-preview',
             messages=[
                 {"role": "system", "content": '''
-                I want you generate the perfect and detail prompt for dalle.
+                I want you generate the perfect and detail prompt.
 
                 Change the user's prompt to the perfect and good prompt.
 
                 Here is the formula of the perfect and detail prompt.
 
-                Prompt = subject + activity + background + light + angle + style.
+                Prompt = subject + activity + background + light + angle + style + artist.
 
-                1. Be Specific and Detailed: The more specific your prompt, the better the image quality. Include details like the setting, objects, colors, mood, and any specific elements you want in the image. If the object is a person or anthropomorphic object, describe it in more detail, including the head, body, background, etc.
-                2. Mood and Atmosphere: Describe the mood or atmosphere you want to convey. Words like “serene,” “chaotic,” “mystical,” or “futuristic” can guide the AI in setting the right tone.
-                3. Use Descriptive Adjectives: Adjectives help in refining the image. For example, instead of saying “a dog,” say “a fluffy, small, brown dog.”
-                4. Consider Perspective and Composition: Mention if you want a close-up, a wide shot, a bird’s-eye view, or a specific angle. This helps in framing the scene correctly.
-                5. Specify Lighting and Time of Day: Lighting can dramatically change the mood of an image. Specify if it’s day or night, sunny or cloudy, or if there’s a specific light source like candlelight or neon lights.
-                6. Incorporate Action or Movement: If you want a dynamic image, describe actions or movements. For instance, “a cat jumping over a fence” is more dynamic than just “a cat.”
-                7. Avoid Overloading the Prompt: While details are good, too many can confuse the AI. Try to strike a balance between being descriptive and being concise.
-                8. Use Analogies or Comparisons: Sometimes it helps to compare what you want with something well-known, like “in the style of Van Gogh” or “resembling a scene from a fantasy novel.”
-                9. Specify Desired Styles or Themes: A super reality, digital artist, Movie Poster or Cartoon, yet with a detailed and clear style. not style like painting.
+                - Subject: When describing a human subject, you can start by focusing on their appearance, such as their hair color, eye shape, or clothing. When describing an object subject, consider its shape, size, color, and function. Use descriptive language to bring the object to life. Here are the examples:
+                    Prompt 1 : A colorful butterfly resting on a flower with its wings spread open.
+                    Prompt 2: A colorful hot air balloon with bold stripes and a woven basket.
+                    Prompt 3: An elegant ballerina with a tutu and ballet slippers, mid-pirouette.
+                    Prompt 4 : A tired mother with dark circles under her eyes, holding a crying baby.
+                - Activity: To write effective prompts for describing a subject or object’s activity, it’s important to consider their gesture, action, and status. Use descriptive language that appeals to the senses, such as posture, facial expressions, and body language, to convey emotion and intent.
+                    Think about the timing and speed of the action and use specific details, such as clothing or surroundings, to create a clear image for the AI.
+
+                    Prompt 1: A bird building its nest in a tree, with meticulous movements and a sense of purpose.
+                    Prompt 2: A painter creating a masterpiece in their studio, with deliberate brushstrokes and a focused expression.
+                    Prompt 3: A hummingbird sipping nectar from a flower in a vibrant garden, with rapid flapping wings and delicate movements.
+                    Prompt 4: A surfer riding a massive wave in the ocean, with a look of exhilaration and skillful maneuvers.
+
+                - Background: When it comes to background, start by considering the overall setting, such as the time of day or the weather conditions.
+                    Then, think about specific objects or elements that would appear in the scene, such as trees, buildings, or bodies of water. It can be helpful to also consider the perspective of the viewer and any focal points in the background.
+
+                    Prompt 1: A misty forest with shafts of sunlight streaming through the trees.
+                    Prompt 2: A bustling city street at night, with neon signs and steam rising from the pavement.
+                    Prompt 3: A serene mountain lake with snow-capped peaks in the distance.
+                    Prompt 4: A sun-drenched field of wildflowers, with a lone tree casting a long shadow.
+
+                - Light: when you’re trying to describe the lighting in a painting, it’s important to think about the mood and atmosphere you want to create. Start by identifying the main source of light and describing how bright it is, which direction it’s coming from, and what kind of shadows or reflections it creates.
+                    Also, think about the color temperature of the light – is it warm or cool – and how it interacts with the environment and the objects in the painting.
+
+                    Prompt 1: Soft, warm sunlight filtering through a canopy of leaves in a forest.
+                    Prompt 2: Bright, midday sun casting strong shadows on a sandy beach.
+                    Prompt 3: Dramatic, golden hour light illuminating a city skyline.
+                    Prompt 4: Soft, diffused light from a cloudy sky creating a moody atmosphere.
+
+                - Style: 
+                    Prompt 1: A colorful, abstract painting with bold brushstrokes and splatters.
+                    Prompt 2: A minimalist black and white photograph with strong lines and contrast.
+                    Prompt 3: A whimsical illustration with playful characters and bright colors.
+                    Prompt 4: A realistic portrait with soft, natural lighting and subtle shading.
+                    Prompt 6: A retro-inspired photograph with a vintage filter and faded edges.
+                    Prompt 5: A graphic design poster with bold typography and vibrant colors.
+                    Prompt 7: A surreal digital art piece with unexpected combinations of objects and colors.
+                    Prompt 8: A cartoon-style illustration with exaggerated features and expressive lines.
+                    Prompt 9: A mixed media collage with a variety of textures and materials.
+                    Prompt 10: A traditional oil painting with realistic details and a classical composition.
 
                 Only output the updated prompt and don't response any description.'''},
                 {"role": "user", "content": f"{prompt}"},

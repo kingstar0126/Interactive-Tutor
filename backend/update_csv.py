@@ -21,7 +21,7 @@ def compare_month():
             elif user.role == 3:
                 user.query = 3000
             elif user.role == 4:
-                user.query = 10000
+                user.query = 30000
             elif user.role == 7:
                 user.query = 30000
             user.usage = 0

@@ -58,11 +58,11 @@ def compare_token_words(ct, chatbot):
     current_chat = db.session.query(Chat).filter_by(uuid=chatbot).first()
     user = db.session.query(User).filter_by(id=current_chat.user_id).first()
 
-    if user.role == 1 or user.role == 7:
-        return True
+    # if user.role == 1 or user.role == 7:
+    #     return True
 
-    elif ct >= user.training_words:
-        return False
+    # elif ct >= user.training_words:
+    #     return False
     return True
 
 
@@ -253,9 +253,9 @@ def compare_role_user(chatbot):
     traindata = json.loads(current_chat.train)
     ct = len(traindata)
     user = db.session.query(User).filter_by(id=current_chat.user_id).first()
-    if not user.role == 1 or user.role == 7:
-        if ct >= user.training_datas:
-            return False
+    # if not user.role == 1 or user.role == 7:
+    #     if ct >= user.training_datas:
+    #         return False
     return True
 
 

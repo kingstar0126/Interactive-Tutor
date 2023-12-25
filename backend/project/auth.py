@@ -132,7 +132,7 @@ def register_new_user(username, email, password):
         if user and user.role == 7:  # Ensure user exists and has role 7
             # Updating values for user with role 7
             role = 4
-            query = 10000
+            query = 30000
             tutors = 100
             training_datas = 100
             training_words = 20000000
@@ -295,50 +295,23 @@ def get_useraccount():
     user = db.session.query(User).filter_by(id=id).first()
     invite_account = db.session.query(Invite).filter_by(email=user.email).first()
     if user.role == 5:
-        days = calculate_days(user.create_date)
-        if days < 0:
-            user.role = 0
-            db.session.commit()
-            new_user = {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'contact': user.contact,
-                'state': user.state,
-                'city': user.city,
-                'role': user.role,
-                'maxquery': user.query,
-                'query': max(user.query - user.usage, 0),
-                'country': user.country,
-                'tutors': user.tutors,
-                'training_datas': user.training_datas,
-                'training_words': user.training_words
-            }
-            response = {
-                'success': True,
-                'code': 200,
-                'data': new_user,
-                'message': 'Your free trial has ended.'
-            }
-            return jsonify(response)
-        else:
-            new_user = {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'contact': user.contact,
-                'state': user.state,
-                'city': user.city,
-                'role': user.role,
-                'maxquery': user.query,
-                'query': max(user.query - user.usage, 0),
-                'country': user.country,
-                'tutors': user.tutors,
-                'training_datas': user.training_datas,
-                'training_words': user.training_words,
-                'days': days
-            }
-            return jsonify({'success': True, 'data': new_user, 'code': 200})
+        new_user = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'contact': user.contact,
+            'state': user.state,
+            'city': user.city,
+            'role': user.role,
+            'maxquery': user.query,
+            'query': max(user.query - user.usage, 0),
+            'country': user.country,
+            'tutors': user.tutors,
+            'training_datas': user.training_datas,
+            'training_words': user.training_words,
+            'days': days
+        }
+        return jsonify({'success': True, 'data': new_user, 'code': 200})
     else:
         if invite_account:
             invite_user = db.session.query(User).filter_by(id=invite_account.user_id).first()
