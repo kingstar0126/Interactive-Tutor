@@ -238,7 +238,7 @@ def signup_post():
 
     verification_token = create_access_token(identity={'username': username, 'email': email, 'password': password},
                                              expires_delta=timedelta(minutes=30))
-    verification_link = f"https://app.interactive-tutor.com/verify-email/token={verification_token}"
+    verification_link = f"http://18.133.183.77/verify-email/token={verification_token}"
     msg = Message('Welcome to Interactive Tutor', sender=os.getenv('MAIL_USERNAME'),
                   recipients=[email])
     msg.html = render_template(
@@ -566,7 +566,7 @@ def invite_email():
     db.session.commit()
     msg = Message('Invite to the interactive tutor', sender=os.getenv('MAIL_USERNAME'), recipients=[email])
     msg.html = render_template(
-        'invite.html', username=user.username, url=f"https://app.interactive-tutor.com/register?email={email}"
+        'invite.html', username=user.username, url=f"http://18.133.183.77/register?email={email}"
     )
     mail.send(msg)
     return jsonify({'success': True, 'code': 200, 'message': 'You have successfully sent the invitation!'})
@@ -621,7 +621,7 @@ def resendInvitation():
     email = request.json['email']
     msg = Message('Invite to the interactive tutor', sender=os.getenv('MAIL_USERNAME'), recipients=[email])
     msg.html = render_template(
-        'enterprise.html', username=user.username, url=f"https://app.interactive-tutor.com/register?email={email}"
+        'enterprise.html', username=user.username, url=f"http://13.133.183.77/register?email={email}"
     )
     mail.send(msg)
     return jsonify({'success': True, 'code': 200, 'message': 'You have successfully Resent the invitation!'})
@@ -644,7 +644,7 @@ def sendUserInvite():
         db.session.commit()
         msg = Message('Invite to the interactive tutor', sender=os.getenv('MAIL_USERNAME'), recipients=[email])
         msg.html = render_template(
-            'enterprise.html', username=enterpriseUser.username, url=f"https://app.interactive-tutor.com/register?email={email}"
+            'enterprise.html', username=enterpriseUser.username, url=f"http://18.133.183.77/register?email={email}"
         )
         mail.send(msg)
     return jsonify({'success': True, 'code': 200, 'message': 'You have successfully sent the invitation!'})
