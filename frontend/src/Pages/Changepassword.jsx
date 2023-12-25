@@ -152,7 +152,7 @@ const Register = () => {
                             )}
                         </div>
                         <div className="mt-6">
-                            <Button className="normal-case w-full p-4 text-md rounded-md bg-[--site-main-Login1] text-[--site-file-upload]">
+                            <Button type="submit" className="normal-case w-full p-4 text-md rounded-md bg-[--site-main-Login1] text-[--site-file-upload]">
                                 Change
                             </Button>
                         </div>
