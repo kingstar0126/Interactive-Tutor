@@ -13,7 +13,7 @@
 # misc
 src/env.js
 src/index-prefixed.css
-src/config/
+src/config/constant.js
 *.crt
 *.key
 *.pem
