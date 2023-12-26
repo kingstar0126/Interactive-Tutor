@@ -75,7 +75,7 @@ export default function Example() {
     }, [activeTab]);
 
     useEffect(() => {
-        getMessage_history();
+    setNewChatKey((prevKey) => prevKey + 1);
     }, [location.pathname]);
 
     const handleUpdate = (e) => {
