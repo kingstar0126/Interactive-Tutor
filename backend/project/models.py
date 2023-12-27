@@ -11,7 +11,7 @@ from datetime import datetime
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(255), unique=True)
+    email = db.Column(db.String(255))
     password = db.Column(db.String(255))
     username = db.Column(db.String(255))
     role = db.Column(db.Integer)
@@ -26,10 +26,11 @@ class User(UserMixin, db.Model):
     state = db.Column(db.String(255))
     city = db.Column(db.String(255))
     country = db.Column(db.String(255))
-    status = db.Column(db.Integer)
+    status = db.Column(db.String(65535))
     discount = db.Column(db.Boolean)
     wonde_key = db.Column(db.String(255))
     ispaid = db.Column(db.Boolean)
+    libraries = db.relationship('Library', backref='user', lazy=True)
 
     create_date = db.Column(db.DateTime, default=datetime.utcnow)
     update_date = db.Column(
@@ -66,7 +67,7 @@ class Chat(UserMixin, db.Model):
     description = db.Column(db.String(65535))
     model = db.Column(db.String(65535))
     conversation = db.Column(db.String(65535))
-    access = db.Column(db.Integer)
+    access = db.Column(db.String(65535))
     creativity = db.Column(db.Float)
     behavior = db.Column(db.String(65535))
     behaviormodel = db.Column(db.String(65535))
@@ -84,6 +85,8 @@ class Chat(UserMixin, db.Model):
     uuid = db.Column(UUID(as_uuid=True), unique=True, default=uuid.uuid4)
     # enterprise user select the API. 1 -> wonde
     api_select = db.Column(db.Integer)
+    islibrary = db.Column(db.Boolean)
+    libraries = db.relationship('Library', backref='chat', lazy=True)
 
     def __repr__(self):
         return f'Chat {self.label}'
@@ -161,6 +164,34 @@ class Invite(UserMixin, db.Model):
     email = db.Column(db.String(255))
     status = db.Column(db.Boolean)
     index = db.Column(db.Integer)
+    create_date = db.Column(db.Date, default=datetime.utcnow)
+    update_date = db.Column(
+        db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class Review (UserMixin, db.Model):
+    __tablename__ = 'review'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    username = db.Column(db.String(255))
+    useravatar = db.Column(db.Text)
+    rating = db.Column(db.Integer)
+    message = db.Column(db.Text)
+    create_date = db.Column(db.Date, default=datetime.utcnow)
+    update_date = db.Column(
+        db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+
+class Library (UserMixin, db.Model):
+    __tablename__ = 'library'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    review_id = db.Column(db.JSON)
+    downloads = db.Column(db.Integer)
+    role = db.Column(db.Integer)
+    subject = db.Column(db.Integer)
+    task = db.Column(db.Integer)
+    fun = db.Column(db.Integer)
+    badge = db.Column(db.JSON)
     create_date = db.Column(db.Date, default=datetime.utcnow)
     update_date = db.Column(
         db.Date, default=datetime.utcnow, onupdate=datetime.utcnow)

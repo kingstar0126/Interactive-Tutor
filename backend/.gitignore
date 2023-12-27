@@ -40,6 +40,7 @@ share/python-wheels/
 MANIFEST
 
 cache/
+migrations/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -66,7 +67,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
-
+migrations/
 # Translations
 *.mo
 *.pot
