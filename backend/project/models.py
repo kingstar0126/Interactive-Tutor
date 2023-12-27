@@ -7,7 +7,6 @@ import uuid
 from sqlalchemy.dialects.postgresql import UUID
 from time import time
 from datetime import datetime
-from sqlalchemy import ARRAY
 
 
 class User(UserMixin, db.Model):
