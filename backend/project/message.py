@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from flask import Response, stream_with_context
 from .models import Message, Train, User, Chat, Invite
 from bs4 import BeautifulSoup
+from sqlalchemy import and_
 import requests
 import uuid
 from . import db
@@ -81,12 +82,21 @@ def init_message():
     # country = request.json['country']
     response = generate_Bubble_message('any country')
     name = f"{response}"
-    # messages = db.session.query(Message).filter_by(chat_id=chat_id).all()
-    # for row in messages:
-    #     _messages = json.loads(row.message)
-    #     if len(_messages) < 2:
-    #         db.session.delete(row)
-    # db.session.commit()
+
+    current_date = datetime.datetime.now()
+    messages = db.session.query(Message).filter(
+        and_(
+            Message.chat_id == chat_id, 
+            Message.update_date < current_date
+        )
+    ).all()
+    for row in messages:
+        _messages = json.loads(row.message)
+        if len(_messages) < 2:
+            db.session.delete(row)
+    db.session.commit()
+    
+
     if conversation == "":
         message = json.dumps([])
     else:

@@ -199,7 +199,7 @@ def create_image_prompt(prompt):
                     Prompt 9: A mixed media collage with a variety of textures and materials.
                     Prompt 10: A traditional oil painting with realistic details and a classical composition.
 
-                Only output the updated prompt and don't response any description.'''},
+                Only output the updated prompt.'''},
                 {"role": "user", "content": f"{prompt}"},
             ]
 
@@ -249,6 +249,7 @@ def create_image_file(prompt, behavior, uuid, image = False):
             image_url = response.data[0].url
         else:
             prompt = behavior + '\n\n' + create_image_prompt(prompt)
+            # prompt = behavior + '\n' + prompt
             response = client.images.generate(
                 model="dall-e-3",
                 style="vivid",

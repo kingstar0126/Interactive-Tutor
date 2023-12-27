@@ -104,7 +104,7 @@ const Manager = () => {
             case 2:
                 return (
                     <span className="px-2 py-1 font-semibold leading-tight rounded-lg bg-[#0fAf00] text-[white]">
-                        Starter
+                        Teacher
                     </span>
                 );
             case 3:
@@ -116,7 +116,7 @@ const Manager = () => {
             case 4:
                 return (
                     <span className="px-2 py-1 font-semibold leading-tight rounded-lg bg-[#5d18e6] text-[white]">
-                        Pro
+                        School
                     </span>
                 );
             case 5:
