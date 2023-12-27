@@ -58,7 +58,6 @@ export const webAPI = {
     create_customer: SERVER_URL + "/api/create-customer",
     updateSubscription: SERVER_URL + "/api/update/subscription",
 
-    getaccess_AI_Tutor: SERVER_URL + "/api/getaccess_ai_tutor", //chatbot uuid to get pin code and organization code
     getquery: SERVER_URL + "/api/getquery",
     getChatwithPIN: SERVER_URL + "/api/getchatwithpin",
     change_user_limitation: SERVER_URL + "/api/change_user_limitation",
@@ -80,4 +79,6 @@ export const webAPI = {
     closeAccount: SERVER_URL + "/api/closeAccunt",
 
     dashboard: SERVER_URL + "/api/dashboardchat",
+    sharechatbot: SERVER_URL + "/api/sharechatbot",
+    publishchat: SERVER_URL + "/api/publishchat",
 };
