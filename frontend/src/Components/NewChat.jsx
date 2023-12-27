@@ -141,7 +141,6 @@ const NewChat = () => {
         setFiles([]);
         setImagesrc(null);
         setState(false);
-        setchatbot(dispatch, chat);
     }, [location.pathname]);
 
     useEffect(() => {

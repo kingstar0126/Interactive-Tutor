@@ -695,7 +695,7 @@ def setTutors():
         creativity = chat['creativity']
         behavior = chat['behavior']
         behaviormodel = chat['behaviormodel']
-        train = json.dumps(chat['train'])
+        train = json.dumps([])
         chat_copyright = json.dumps(chat['chat_copyright'])
         chat_button = json.dumps(chat['chat_button'])
         bubble = json.dumps(chat['bubble'])

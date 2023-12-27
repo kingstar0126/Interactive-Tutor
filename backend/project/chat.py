@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request, send_file
-from .models import Chat, Message, Train, User, Organization
+from sqlalchemy import and_
+from .models import Chat, Message, Train, User, Organization, Invite, Library
 from . import db
 from collections import Counter
 import json
@@ -85,7 +86,7 @@ def add_chat():
     api_select = 0
 
     user = db.session.query(User).filter_by(id=user_id).first()
-    ct = db.session.query(Chat).filter_by(user_id=user_id).count() + 1
+    # ct = db.session.query(Chat).filter_by(user_id=user_id).count() + 1
 
     # if not user.role == 1 or user.role == 7:
     #     if ct > user.tutors:
@@ -213,6 +214,69 @@ def update_chat():
     return jsonify(response)
 
 
+@chat.route('/api/sharechatbot', methods=['POST'])
+def share_chat():
+    chat = request.json['chat']
+    user_id = request.json['id']
+    
+    current_user = db.session.query(User).filter_by(id=user_id).first()
+    if current_user is None:
+        return jsonify({'success': False, 'message': 'User does not exist in the database!'})
+    if current_user.role == 7:
+        users = db.session.query(Invite, User.id).join(User, User.email == Invite.email).filter(Invite.user_id == user_id).all()
+    else:
+        users = db.session.query(Invite, User.id).join(User, User.email == Invite.email).filter(Invite.user_id == shareChat.inviteId).all()
+
+    for user in users:
+        user_id = user.id
+        islibrary = True
+        label = chat['label']
+        description = chat['description']
+        model = chat['model']
+        conversation = chat['conversation']
+        access = generate_pin_password()
+        creativity = chat['creativity']
+        behavior = chat['behavior']
+        behaviormodel = chat['behaviormodel']
+        train = json.dumps([])
+        chat_copyright = json.dumps(chat['chat_copyright'])
+        chat_button = json.dumps(chat['chat_button'])
+        bubble = json.dumps(chat['bubble'])
+        chat_logo = json.dumps(chat['chat_logo'])
+        chat_title = json.dumps(chat['chat_title'])
+        chat_description = json.dumps(chat['chat_description'])
+
+
+        new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
+                    access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button, islibrary=islibrary)
+        db.session.add(new_chat)
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'Share Chatbot'})
+
+@chat.route('/api/publishchat', methods=['POST'])
+def publish_chat():
+    chat = request.json['chat']
+    user_id = request.json['id']
+    
+    current_user = db.session.query(User).filter_by(id=user_id).first()
+    if current_user is None:
+        return jsonify({'success': False, 'message': 'User does not exist in the database!'})
+    chat_id = chat.id
+    downloads = 0
+    review_id = json.dumps([])
+    role = chat.role
+    subject = chat.subject
+    task = chat.task
+    fun = chat.fun
+    badge = json.dumps([])
+    library = Library(chat_id=chat_id, user_id=user_id, review_id=review_id, downloads=downloads, role=role, subject=subject, task=task, fun=fun, badge=badge)
+    db.session.add(library)
+    db.session.commit()
+    return jsonify({
+        'success': True,
+        'message': 'Successful'
+    })
+
 @chat.route('/api/getchats', methods=['POST'])
 def get_chats():
 
@@ -253,7 +317,8 @@ def get_chats():
                 'organization': organization,
                 'role': user.role,
                 'inviteId': chat.inviteId,
-                'api_select': chat.api_select
+                'api_select': chat.api_select,
+                'islibrary': chat.islibrary,
             }
             response.append(chat_data)
 
@@ -488,14 +553,6 @@ def get_report_data():
         messages.append(generate_final_report_data(data))
     messages.append(labels)
     return jsonify({'success': True, 'data': messages})
-
-
-@chat.route('/api/getaccess_ai_tutor', methods=['POST'])
-def get_access_AI_tutor():
-    email = request.json['email']
-    organization_id = db.session.query(
-        Organization).filter_by(email=email).first().uuid
-    return jsonify({'success': True, 'data': organization_id, 'code': 200})
 
 
 @chat.route('/api/transfer_tutor', methods=['POST'])
