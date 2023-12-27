@@ -13,7 +13,6 @@ const Chat = () => {
     useEffect(() => {
         const fetchData = async () => {
             getUseraccount(dispatch, { id: user.id });
-            setquery(dispatch, user.query);
             if (user.role === 5 || user.role === 0) {
                 navigate("onboarding");
             } else {
