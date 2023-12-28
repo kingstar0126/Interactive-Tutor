@@ -81,10 +81,14 @@ const PublishModal = (props) => {
   };
 
   const handleOk = () => {
-    if (!label || !chatdescription || role === null || subject === null || task === null || fun === null ) {
+    if (!label || !chatdescription) {
       notification('error', 'Please select all fileds')
       return;
     }
+    if (role === null && subject === null && task === null && fun === null) {
+      notification('error', 'Please select any category!')
+    }
+    
     chat.label = label;
     chat.description = chatdescription;
     chat.role = role
@@ -237,7 +241,7 @@ const PublishModal = (props) => {
                   className="rounded-md md:w-1/4 border border-[--site-onboarding-primary-color]"
                   placeholder="Role"
                   options={ROLES.map((item, id) => {
-                    return { label: item, value: id };
+                    return { label: item, value: id + 1 };
                   })}
                 />
 
@@ -246,7 +250,7 @@ const PublishModal = (props) => {
                   className="rounded-md md:w-1/4 border border-[--site-onboarding-primary-color]"
                   placeholder="Subject"
                   options={SUBJECTS.map((item, id) => {
-                    return { label: item, value: id };
+                    return { label: item, value: id + 1 };
                   })}
                 />
 
@@ -255,7 +259,7 @@ const PublishModal = (props) => {
                   className="rounded-md md:w-1/4 border border-[--site-onboarding-primary-color]"
                   placeholder="Task"
                   options={TASKS.map((item, id) => {
-                    return { label: item, value: id };
+                    return { label: item, value: id + 1 };
                   })}
                 />
                 <Select
@@ -263,7 +267,7 @@ const PublishModal = (props) => {
                   className="rounded-md md:w-1/4 border border-[--site-onboarding-primary-color]"
                   placeholder="Just For Fun"
                   options={FUNS.map((item, id) => {
-                    return { label: item, value: id };
+                    return { label: item, value: id + 1 };
                   })}
                 />
               </div>
