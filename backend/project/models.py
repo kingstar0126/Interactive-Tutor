@@ -86,7 +86,7 @@ class Chat(UserMixin, db.Model):
     # enterprise user select the API. 1 -> wonde
     api_select = db.Column(db.Integer)
     islibrary = db.Column(db.Boolean)
-    libraries = db.relationship('Library', backref='chat', lazy=True)
+    libraries = db.relationship('Library', backref='chat', lazy=True, cascade="all, delete-orphan")
 
     def __repr__(self):
         return f'Chat {self.label}'
