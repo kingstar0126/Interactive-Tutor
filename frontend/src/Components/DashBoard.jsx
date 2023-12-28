@@ -84,6 +84,7 @@ const DashBoard = () => {
                         id: chatbotID,
                     })
                     .then((res) => {
+                        console.log('Onboarding')
                         getchat(dispatch, res.data.data);
                         setchatbot(dispatch, res.data.data);
                     });
