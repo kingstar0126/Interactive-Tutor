@@ -50,8 +50,8 @@ const ChatItem = (props) => {
       {chat.status ? (
         <div className="flex gap-2 items-center">
           <Avatar src={chat.url} alt="avatar" className="w-8 h-8" />
-          <span>
-            {chat.username} {chat.userrole}
+          <span className="flex gap-1">
+            {chat.username}, <i>{chat.userrole}</i>
           </span>
         </div>
       ) : (

@@ -245,11 +245,11 @@ const PublishModal = (props) => {
                                 <img
                                   src={selectedLogo}
                                   alt="Selected"
-                                  className="rounded-md w-[100px] h-[100px] object-contain border border-[--site-onboarding-primary-color]"
+                                  className="rounded-md w-full object-contain border border-[--site-onboarding-primary-color]"
                                 />
                               </div>
                             ) : (
-                              <div className="w-[100px] h-[100px] border border-[--site-onboarding-primary-color] rounded-md">
+                              <div className="w-10 h-10 border border-[--site-onboarding-primary-color] rounded-md">
                                 <p>Image</p>
                               </div>
                             )}
@@ -358,7 +358,7 @@ const PublishModal = (props) => {
               </div>
               {status && (
                 <div className="flex gap-2 md:flex-row flex-col py-2">
-                  <div className="flex flex-col md:w-1/3 py-2 gap-2 justify-between">
+                  <div className="flex flex-col md:w-1/4 py-2 gap-2 justify-between">
                     <label>Upload Photo or Avatar</label>
 
                     <Dropzone onDrop={handleFileChange} multiple={false}>
@@ -377,7 +377,7 @@ const PublishModal = (props) => {
                               />
                             </div>
                           ) : (
-                            <div className="w-[50px] h-[50px] border border-[--site-onboarding-primary-color] rounded-md">
+                            <div className="w-[100px] h-[100px] border border-[--site-onboarding-primary-color] rounded-md items-center justify-center flex">
                               <p>Image</p>
                             </div>
                           )}
@@ -385,7 +385,7 @@ const PublishModal = (props) => {
                       )}
                     </Dropzone>
                   </div>
-                  <div className="flex flex-col py-2 gap-4 justify-center">
+                  <div className="flex flex-col py-2 gap-4 justify-end w-2/3">
                     <input
                       type="text"
                       className="rounded-md p-2 border border-[--site-onboarding-primary-color] text-[--site-onboarding-primary-color]"

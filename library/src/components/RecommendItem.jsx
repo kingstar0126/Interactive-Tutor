@@ -32,7 +32,7 @@ const RecommendItem = (props) => {
   };
 
   return (
-    <div className="w-full rounded-md flex flex-col shadow-lg px-4 py-2 gap-2 hover:cursor-pointer">
+    <div className="w-[14rem] rounded-md flex flex-col shadow-lg px-4 py-2 gap-2 hover:cursor-pointer">
       <div className="w-[8rem] h-[8rem] overflow-hidden">
         <img
           src={chat.chat_logo.url || chat.chat_logo.ai}
@@ -51,7 +51,7 @@ const RecommendItem = (props) => {
         <div className="flex gap-2 items-center">
           <Avatar src={chat.url} alt="avatar" className="w-8 h-8" />
           <span>
-            {chat.username} {chat.userrole}
+            {chat.username}, <i>{chat.userrole}</i>
           </span>
         </div>
       ) : (

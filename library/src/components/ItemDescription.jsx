@@ -243,6 +243,7 @@ const ItemDescription = () => {
     axios.post(webAPI.sendemail, { email, chat }).then((res) => {
       if (res.data.success) {
         toast.success(res.data.message);
+        window.location.href = "https://app.interactive-tutor.com/login";
       } else {
         toast.error(res.data.message);
       }
@@ -291,8 +292,8 @@ const ItemDescription = () => {
                 {chat.status ? (
                   <div className="flex gap-2 items-center">
                     <Avatar src={chat.url} alt="avatar" className="w-12 h-12" />
-                    <span className="font-semibold md:text-2xl text-lg">
-                      {chat.username} {chat.userrole}
+                    <span className="font-semibold md:text-2xl text-lg flex gap-1">
+                      {chat.username}, <i>{chat.userrole}</i>
                     </span>
                   </div>
                 ) : (
@@ -362,7 +363,7 @@ const ItemDescription = () => {
         <div className="w-full">
           <Tabs value={activeTab}>
             <TabsHeader
-              className="rounded-none border-b border-blue-gray-50 bg-transparent p-0 max-w-[20rem] pb-3"
+              className="rounded-none border-b border-blue-gray-50 bg-transparent p-0 max-w-[20rem] pb-5"
               indicatorProps={{
                 className: "bg-tabHeader shadow-none rounded-full",
               }}
@@ -391,11 +392,14 @@ const ItemDescription = () => {
           </Tabs>
         </div>
         <div className="w-full flex gap-2">
-          {chats && chats.filter(item => item.id !== chat.id).map((_chat, idx) => (
-            <div onClick={() => handleItemClick(_chat)} key={idx}>
-              <RecommendItem key={idx} data={_chat} />
-            </div>
-          ))}
+          {chats &&
+            chats
+              .filter((item) => item.id !== chat.id)
+              .map((_chat, idx) => (
+                <div onClick={() => handleItemClick(_chat)} key={idx}>
+                  <RecommendItem key={idx} data={_chat} />
+                </div>
+              ))}
         </div>
       </div>
 

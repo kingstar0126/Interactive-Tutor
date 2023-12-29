@@ -233,32 +233,19 @@ const Sidebar = () => {
   };
 
   const handlePublishOk = (chat) => {
-    if (
-      currentChat.label !== chat.label ||
-      currentChat.description !== chat.description
-    ) {
-      axios.post(webAPI.updatechat, chat).then((res) => {
-        if (!res.data.success) {
-          notification("error", res.data.message);
-        } else {
-          axios.post(webAPI.publishchat, { chat, id: user.id }).then((res) => {
-            if ((res.data.success)) {
-              notification("success", res.data.message);
-            } else {
-              notification("error", res.data.message);
-            }
-          });
-        }
-      });
-    } else {
-      axios.post(webAPI.publishchat, { chat, id: user.id }).then((res) => {
-        if ((res.data.success)) {
-          notification("success", res.data.message);
-        } else {
-          notification("error", res.data.message);
-        }
-      });
-    }
+    axios.post(webAPI.updatechat, chat).then((res) => {
+      if (!res.data.success) {
+        notification("error", res.data.message);
+      } else {
+        axios.post(webAPI.publishchat, { chat, id: user.id }).then((res) => {
+          if (res.data.success) {
+            notification("success", res.data.message);
+          } else {
+            notification("error", res.data.message);
+          }
+        });
+      }
+    });
 
     setIsPublishModalOpen(false);
   };
