@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Message
 from .models import User, Organization, Invite, Chat
+from .train import duplicate_train_data
 from . import db, mail
 import re
 import string
@@ -707,7 +708,12 @@ def setTutors():
         new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
                     access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button, inviteId=inviteId)
         db.session.add(new_chat)
-    db.session.commit()
+        db.session.commit()
+
+        train = json.dumps(duplicate_train_data(chat['train'], new_chat.uuid))
+        new_chat.train = train
+        db.session.commit()
+
     return jsonify({ 'success': True, 'message': 'Successfully set Tutors' })
 
 

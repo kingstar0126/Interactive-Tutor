@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from .auth import generate_pin_password
 from werkzeug.utils import secure_filename
 from .generate_response import generate_system_prompt_role
+from .train import duplicate_train_data
 import datetime
 import shutil
 
@@ -249,6 +250,11 @@ def send_email():
                     access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button, islibrary=islibrary)
         db.session.add(new_chat)
         db.session.commit()
+
+        train = json.dumps(duplicate_train_data(json.loads(chat.train), new_chat.uuid))
+        new_chat.train = train
+        db.session.commit()
+
         return jsonify({'success': True, 'message': 'Successfully add in your account'})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
@@ -336,12 +342,13 @@ def share_chat():
         chat_logo = json.dumps(chat['chat_logo'])
         chat_title = json.dumps(chat['chat_title'])
         chat_description = json.dumps(chat['chat_description'])
-
-
         new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
                     access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button, islibrary=islibrary)
         db.session.add(new_chat)
-    db.session.commit()
+        db.session.commit()
+        train = json.dumps(duplicate_train_data(chat['train'], new_chat.uuid))
+        new_chat.train = train
+        db.session.commit()
     return jsonify({'success': True, 'message': 'Share Chatbot'})
 
 @chat.route('/api/publishchat', methods=['POST'])
@@ -359,12 +366,14 @@ def publish_chat():
         chat_id = chat['id']
         downloads = 0
         review_id = json.dumps([])
-        role = chat['role']
-        subject = chat['subject']
-        task = chat['task']
-        fun = chat['fun']
+        username = chat['username']
+        userrole = chat['userrole']
+        menu = chat['menu']
+        submenu = chat['subMenu']
+        status = chat['status']
+        url = chat.get('url', '')
         badge = json.dumps([])
-        library = Library(chat_id=chat_id, user_id=user_id, review_id=review_id, downloads=downloads, role=role, subject=subject, task=task, fun=fun, badge=badge)
+        library = Library(chat_id=chat_id, user_id=user_id, review_id=review_id, username=username, userrole=userrole, downloads=downloads, menu=menu, submenu=submenu, status=status, url=url, badge=badge)
         db.session.add(library)
         db.session.commit()
         return jsonify({
@@ -374,38 +383,27 @@ def publish_chat():
     except Exception as e:
         return jsonify({
             'success': False,
-            'message': e
+            'message': str(e)
         })
 
 @chat.route('/api/getpublishchats', methods=['POST'])
 def get_publish_chats():
     try:
-        role = request.json['role']
-        subject = request.json['subject']
-        task = request.json['task']
-        fun = request.json['fun']
+        menu = request.json['menu']
+        submenu = request.json['subMenu']
         sortby = request.json['sortby']
         page = request.json['page']
         perpage = request.json['perpage']
         
         chats = db.session.query(Library, Chat, User).join(Chat, Library.chat_id == Chat.id).join(User, Library.user_id == User.id)
 
-        conditions = []
-        if role is not None:
-            conditions.append(Library.role == role)
-        if subject is not None:
-            conditions.append(Library.subject == subject)
-        if task is not None:
-            conditions.append(Library.task == task)
-        if fun is not None:
-            conditions.append(Library.fun == fun)
-        if conditions:
-            chats = chats.filter(or_(*conditions))
-
-        if sortby == 0:
+        if sortby == 1:
             chats = chats.order_by(desc(Library.downloads))
-        elif sortby == 1:
+        elif sortby == 0:
             chats = chats.order_by(desc(Library.create_date))
+        print(type(menu), menu)
+        if menu is not None:
+            chats = chats.filter(Library.menu == menu)
 
         chats = chats.paginate(page=page, per_page=perpage, error_out=False)
         
@@ -416,12 +414,14 @@ def get_publish_chats():
                 'chat_logo': json.loads(chat.chat_logo),
                 'label': chat.label,
                 'description': chat.description,
-                'username': user.username,
+                'name': user.username,
                 'downloads': library.downloads,
-                'role': library.role,
-                'subject': library.subject,
-                'task': library.task,
-                'fun': library.fun,
+                'menu': library.menu,
+                'submenu': library.submenu,
+                'status': library.status,
+                'url': library.url,
+                'username': library.username,
+                'userrole': library.userrole,
                 'badge': json.loads(library.badge),
                 'review_id': json.loads(library.review_id),
                 'chat_id': chat.id
