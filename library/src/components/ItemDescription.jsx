@@ -26,6 +26,7 @@ import "react-image-upload/dist/index.css";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
 import toast, { Toaster } from "react-hot-toast";
+import RecommendItem from "./RecommendItem";
 
 import image0 from "../assets/0.svg";
 import image1 from "../assets/1.svg";
@@ -80,6 +81,7 @@ const ItemDescription = () => {
   const [email, setEmail] = useState("");
   const [isAddBadgeModal, setIsAddBadgeModal] = useState(false);
   const [isAddLibraryModal, setIsAddLibraryModal] = useState(false);
+  const [chats, setChats] = useState([]);
   const location = useLocation();
   const navigate = useNavigate();
   const chat = location.state.chat;
@@ -112,7 +114,23 @@ const ItemDescription = () => {
 
   useEffect(() => {
     getAllReviews();
+    getPublishChats();
   }, []);
+
+  const getPublishChats = () => {
+    axios
+      .post(webAPI.getpublishchats, {
+        menu: chat.menu,
+        subMenu: 0,
+        sortby: 0,
+        page: 1,
+        perpage: 6,
+      })
+      .then((res) => {
+        setChats(res.data.data);
+      })
+      .catch((err) => console.error(err));
+  };
 
   const handleSubmit = () => {
     if (username && message && rating && file) {
@@ -225,12 +243,27 @@ const ItemDescription = () => {
     axios.post(webAPI.sendemail, { email, chat }).then((res) => {
       if (res.data.success) {
         toast.success(res.data.message);
+        window.location.href = "https://app.interactive-tutor.com/login";
       } else {
         toast.error(res.data.message);
       }
     });
   };
+  const handleItemClick = (chat) => {
+    navigate("/itemdescription", { state: { chat, page } });
+  };
 
+  const getSubMenus = (menu) => {
+    if (menu === 1) {
+      return "Role";
+    } else if (menu === 2) {
+      return "Subject";
+    } else if (menu === 3) {
+      return "Task";
+    } else {
+      return "Just For Fun";
+    }
+  };
   return (
     <div className="container items-center justify-center m-auto py-5">
       <Toaster />
@@ -248,39 +281,33 @@ const ItemDescription = () => {
         <div className="flex md:flex-row flex-col gap-2 md:gap-0">
           <div className="md:w-1/2 flex flex-col md:gap-4 gap-2 md:py-4 justify-between">
             <div className="flex flex-wrap gap-2 h-[4rem] py-2">
-              {chat.role > 0 && (
-                <span className="px-2 rounded-full bg-chipColor h-5 flex items-center justify-center">
-                  role
-                </span>
-              )}
-              {chat.subject > 0 && (
-                <span className="px-2 rounded-full bg-chipColor h-5 flex items-center justify-center">
-                  subject
-                </span>
-              )}
-              {chat.task > 0 && (
-                <span className="px-2 rounded-full bg-chipColor h-5 flex items-center justify-center">
-                  task
-                </span>
-              )}
-              {chat.fun > 0 && (
-                <span className="px-2 rounded-full bg-chipColor h-5 flex items-center justify-center">
-                  Just for fun
-                </span>
-              )}
+              <span className="px-2 rounded-full bg-chipColor h-5 flex items-center justify-center">
+                {getSubMenus(chat.menu)}
+              </span>
             </div>
             <span className="font-bold md:text-5xl text-2xl">{chat.label}</span>
 
             <div className="flex flex-col gap-2 justify-center">
               <div className="flex gap-2 items-center">
-                <Avatar
-                  src={chat.chat_logo.user}
-                  alt="avatar"
-                  className="w-12 h-12"
-                />
-                <span className="font-semibold md:text-2xl text-lg">
-                  {chat.username}
-                </span>
+                {chat.status ? (
+                  <div className="flex gap-2 items-center">
+                    <Avatar src={chat.url} alt="avatar" className="w-12 h-12" />
+                    <span className="font-semibold md:text-2xl text-lg flex gap-1">
+                      {chat.username}, <i>{chat.userrole}</i>
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex gap-2 items-center">
+                    <Avatar
+                      src={chat.chat_logo.user}
+                      alt="avatar"
+                      className="w-12 h-12"
+                    />
+                    <span className="font-semibold md:text-2xl text-lg">
+                      {chat.name}
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="flex gap-2 items-center pl-2">
                 <BsBookmarkFill className="text-yellow-700 w-6 h-6" />
@@ -336,7 +363,7 @@ const ItemDescription = () => {
         <div className="w-full">
           <Tabs value={activeTab}>
             <TabsHeader
-              className="rounded-none border-b border-blue-gray-50 bg-transparent p-0 max-w-[20rem] pb-3"
+              className="rounded-none border-b border-blue-gray-50 bg-transparent p-0 max-w-[20rem] pb-5"
               indicatorProps={{
                 className: "bg-tabHeader shadow-none rounded-full",
               }}
@@ -363,6 +390,16 @@ const ItemDescription = () => {
               ))}
             </TabsBody>
           </Tabs>
+        </div>
+        <div className="w-full flex gap-2">
+          {chats &&
+            chats
+              .filter((item) => item.id !== chat.id)
+              .map((_chat, idx) => (
+                <div onClick={() => handleItemClick(_chat)} key={idx}>
+                  <RecommendItem key={idx} data={_chat} />
+                </div>
+              ))}
         </div>
       </div>
 
@@ -401,7 +438,7 @@ const ItemDescription = () => {
         handler={() => setIsAddLibraryModal(false)}
         className="rounded-md shadow-lg"
       >
-        <DialogHeader>Add Badge</DialogHeader>
+        <DialogHeader></DialogHeader>
         <DialogBody divider>
           <label className="text-sitePrimary">Input your email</label>
           <input

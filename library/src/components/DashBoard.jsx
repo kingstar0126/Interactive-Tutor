@@ -10,11 +10,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 const PER_PAGE = 8;
 
 const DashBoard = () => {
-  const [role, setRole] = useState(null);
-  const [subject, setSubject] = useState(null);
-  const [task, setTask] = useState(null);
-  const [fun, setFun] = useState(null);
-  const [sortby, setSortBy] = useState(null);
+  const [menu, setMenu] = useState(null);
+  const [subMenu, setSubMenu] = useState(0);
+  const [sortby, setSortBy] = useState(0);
   const [page, setPage] = useState(1);
   const [chats, setChats] = useState([]);
   const [pageCount, setPageCount] = useState(1);
@@ -23,7 +21,7 @@ const DashBoard = () => {
 
   useEffect(() => {
     getPublishChats();
-  }, [role, subject, task, fun, sortby, page]);
+  }, [menu, subMenu, sortby, page]);
 
   useEffect(() => {
     if (location.state && location.state.page) {
@@ -34,10 +32,8 @@ const DashBoard = () => {
   const getPublishChats = () => {
     axios
       .post(webAPI.getpublishchats, {
-        role,
-        subject,
-        task,
-        fun,
+        menu,
+        subMenu,
         sortby,
         page,
         perpage: PER_PAGE,
@@ -53,42 +49,42 @@ const DashBoard = () => {
     navigate("/itemdescription", { state: { chat, page } });
   };
 
+  
+  const getSubMenus = () => {
+    if (menu === 1) {
+      return ROLES;
+    } else if (menu === 2) {
+      return SUBJECTS;
+    } else if (menu === 3) {
+      return TASKS;
+    } else {
+      return FUNS;
+    }
+  };
+
+
   return (
     <div className="container items-center justify-center m-auto py-5">
       <div className="flex flex-col gap-4">
         <div className="flex justify-between gap-4 md:flex-row flex-col">
           <div className="flex gap-4 md:w-2/3 flex-col md:flex-row w-full">
             <Select
-              onChange={(e) => setRole(e.value)}
+              onChange={(e) => setMenu(e.value)}
               className="rounded-md md:w-1/4 border border-footerPrimary"
-              placeholder="Role"
-              options={ROLES.map((item, id) => {
-                return { label: item, value: id + 1 };
-              })}
+              placeholder="Select the Menu"
+              options={[
+                { label: "Role", value: 1 },
+                { label: "Subject", value: 2 },
+                { label: "Task", value: 3 },
+                { label: "Just For Fun", value: 4 },
+              ]}
             />
 
             <Select
-              onChange={(e) => setSubject(e.value)}
+              onChange={(e) => setSubMenu(e.value)}
               className="rounded-md md:w-1/4 border border-footerPrimary"
               placeholder="Subject"
-              options={SUBJECTS.map((item, id) => {
-                return { label: item, value: id + 1 };
-              })}
-            />
-
-            <Select
-              onChange={(e) => setTask(e.value)}
-              className="rounded-md md:w-1/4 border border-footerPrimary"
-              placeholder="Task"
-              options={TASKS.map((item, id) => {
-                return { label: item, value: id + 1 };
-              })}
-            />
-            <Select
-              onChange={(e) => setFun(e.value)}
-              className="rounded-md md:w-1/4 border border-footerPrimary"
-              placeholder="Just For Fun"
-              options={FUNS.map((item, id) => {
+              options={getSubMenus().map((item, id) => {
                 return { label: item, value: id + 1 };
               })}
             />

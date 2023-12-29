@@ -5,9 +5,14 @@ import {
   DialogFooter,
   Button,
 } from "@material-tailwind/react";
+import axios from "axios";
+import { webAPI } from "../utils/constants";
+import { SERVER_URL } from "../config/constant";
 import Select from "react-select";
 import { Scrollbar } from "react-scrollbars-custom";
 import toast, { Toaster } from "react-hot-toast";
+import Switch from "./Switch";
+import Dropzone from "react-dropzone";
 
 const ROLES = [
   "Administrative and Management",
@@ -57,10 +62,13 @@ const PublishModal = (props) => {
   const [chat, setChat] = useState(null);
   const [label, setLabel] = useState("");
   const [chatdescription, setChatdescription] = useState("");
-  const [role, setRole] = useState(null);
-  const [subject, setSubject] = useState(null);
-  const [task, setTask] = useState(null);
-  const [fun, setFun] = useState(null);
+  const [menu, setMenu] = useState(0);
+  const [subMenu, setSubMenu] = useState(0);
+  const [status, setStatus] = useState(true);
+  const [file, setFile] = useState(null);
+  const [selectedLogo, setSelectedLogo] = useState(null);
+  const [username, setUsername] = useState("");
+  const [userrole, setUserrole] = useState("");
 
   useEffect(() => {
     if (props.chat.access) {
@@ -80,23 +88,60 @@ const PublishModal = (props) => {
     }
   };
 
-  const handleOk = () => {
-    if (!label || !chatdescription) {
-      notification('error', 'Please select all fileds')
+  const handleUpload = async () => {
+    if (file) {
+      const formData = new FormData();
+
+      const filename = file.name.replace(" ", "");
+
+      formData.append("file", file, filename);
+      const response = await axios.post(webAPI.imageupload, formData);
+      if (response.data) {
+        return SERVER_URL + response.data.data
+      }
+      else {
+        return null
+      }
+    }
+  };
+
+  const handleFileChange = (files) => {
+    if (files[0].size > 1024 * 1024) {
+      notification("error", "Maximum image size allowed is 1MB.");
       return;
     }
-    if (role === null && subject === null && task === null && fun === null) {
-      notification('error', 'Please select any category!')
+    const imageURL = URL.createObjectURL(files[0]);
+    setSelectedLogo(imageURL);
+    setFile(files[0]);
+  };
+  const handleOk = async () => {
+    if (!label || !chatdescription) {
+      notification("error", "Please select all fileds");
+      return;
     }
-    
+    const url = await handleUpload();
     chat.label = label;
     chat.description = chatdescription;
-    chat.role = role
-    chat.subject = subject
-    chat.task = task
-    chat.fun = fun
-    props.handleOk(chat);
+    chat.status = status;
+    chat.username = username;
+    chat.menu = menu;
+    chat.subMenu = subMenu;
+    chat.userrole = userrole;
+    chat.url = url;
 
+    props.handleOk(chat);
+  };
+
+  const getSubMenus = () => {
+    if (menu === 1) {
+      return ROLES;
+    } else if (menu === 2) {
+      return SUBJECTS;
+    } else if (menu === 3) {
+      return TASKS;
+    } else {
+      return FUNS;
+    }
   };
 
   return (
@@ -153,40 +198,85 @@ const PublishModal = (props) => {
                 </label>
                 <div className="flex gap-4 md:flex-row flex-col">
                   <Select
-                    onChange={(e) => setRole(e.value)}
+                    onChange={(e) => setMenu(e.value)}
                     className="rounded-md md:w-1/4 border border-[--site-onboarding-primary-color]"
-                    placeholder="Role"
-                    options={ROLES.map((item, id) => {
-                      return { label: item, value: id };
-                    })}
+                    placeholder="Select the Menu"
+                    options={[
+                      { label: "Role", value: 1 },
+                      { label: "Subject", value: 2 },
+                      { label: "Task", value: 3 },
+                      { label: "Just For Fun", value: 4 },
+                    ]}
                   />
 
                   <Select
-                    onChange={(e) => setSubject(e.value)}
+                    onChange={(e) => setSubMenu(e.value)}
                     className="rounded-md md:w-1/4 border border-[--site-onboarding-primary-color]"
                     placeholder="Subject"
-                    options={SUBJECTS.map((item, id) => {
-                      return { label: item, value: id };
-                    })}
-                  />
-
-                  <Select
-                    onChange={(e) => setTask(e.value)}
-                    className="rounded-md md:w-1/4 border border-[--site-onboarding-primary-color]"
-                    placeholder="Task"
-                    options={TASKS.map((item, id) => {
-                      return { label: item, value: id };
-                    })}
-                  />
-                  <Select
-                    onChange={(e) => setFun(e.value)}
-                    className="rounded-md md:w-1/4 border border-[--site-onboarding-primary-color]"
-                    placeholder="Just For Fun"
-                    options={FUNS.map((item, id) => {
-                      return { label: item, value: id };
+                    options={getSubMenus().map((item, id) => {
+                      return { label: item, value: id + 1 };
                     })}
                   />
                 </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="flex gap-2 items-center">
+                  <Switch
+                    handlechange={(toggle) => setStatus(!toggle)}
+                    toggle={status}
+                  />
+                  <label>Publish Anonymously</label>
+                </div>
+                {status && (
+                  <div>
+                  <div className="flex gap-2 md:flex-row flex-col py-2">
+                    <div className="flex flex-col md:w-1/3 py-2 gap-2 justify-between">
+                      <label>Upload Photo or Avatar</label>
+
+                      <Dropzone onDrop={handleFileChange} multiple={false}>
+                        {({ getRootProps, getInputProps }) => (
+                          <div
+                            className="flex w-full h-full dropzone"
+                            {...getRootProps()}
+                          >
+                            <input {...getInputProps()} />
+                            {selectedLogo ? (
+                              <div className="m-1">
+                                <img
+                                  src={selectedLogo}
+                                  alt="Selected"
+                                  className="rounded-md w-full object-contain border border-[--site-onboarding-primary-color]"
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-10 h-10 border border-[--site-onboarding-primary-color] rounded-md">
+                                <p>Image</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </Dropzone>
+                    </div>
+                    <div className="flex flex-col py-2 gap-4 justify-center">
+                      <input
+                        type="text"
+                        className="rounded-md p-2 border border-[--site-onboarding-primary-color] text-[--site-onboarding-primary-color]"
+                        placeholder="UserName"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                      />
+                      <input
+                        type="text"
+                        className="rounded-md p-2 border border-[--site-onboarding-primary-color] text-[--site-onboarding-primary-color]"
+                        placeholder="Role"
+                        value={userrole}
+                        onChange={(e) => setUserrole(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <span className="flex items-center justify-center">Ensure that AI bots are not published with any sensitive or confidential training data.</span>
+                  </div>
+                  )}
               </div>
             </div>
           )}
@@ -237,40 +327,82 @@ const PublishModal = (props) => {
               </label>
               <div className="flex gap-4 md:flex-row flex-col">
                 <Select
-                  onChange={(e) => setRole(e.value)}
+                  onChange={(e) => setMenu(e.value)}
                   className="rounded-md md:w-1/4 border border-[--site-onboarding-primary-color]"
-                  placeholder="Role"
-                  options={ROLES.map((item, id) => {
-                    return { label: item, value: id + 1 };
-                  })}
+                  placeholder="Select the Menu"
+                  options={[
+                    { label: "Role", value: 1 },
+                    { label: "Subject", value: 2 },
+                    { label: "Task", value: 3 },
+                    { label: "Just For Fun", value: 4 },
+                  ]}
                 />
 
                 <Select
-                  onChange={(e) => setSubject(e.value)}
+                  onChange={(e) => setSubMenu(e.value)}
                   className="rounded-md md:w-1/4 border border-[--site-onboarding-primary-color]"
                   placeholder="Subject"
-                  options={SUBJECTS.map((item, id) => {
-                    return { label: item, value: id + 1 };
-                  })}
-                />
-
-                <Select
-                  onChange={(e) => setTask(e.value)}
-                  className="rounded-md md:w-1/4 border border-[--site-onboarding-primary-color]"
-                  placeholder="Task"
-                  options={TASKS.map((item, id) => {
-                    return { label: item, value: id + 1 };
-                  })}
-                />
-                <Select
-                  onChange={(e) => setFun(e.value)}
-                  className="rounded-md md:w-1/4 border border-[--site-onboarding-primary-color]"
-                  placeholder="Just For Fun"
-                  options={FUNS.map((item, id) => {
+                  options={getSubMenus().map((item, id) => {
                     return { label: item, value: id + 1 };
                   })}
                 />
               </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2 items-center">
+                <Switch
+                  handlechange={(toggle) => setStatus(!toggle)}
+                  toggle={status}
+                />
+                <label>Publish Anonymously</label>
+              </div>
+              {status && (
+                <div className="flex gap-2 md:flex-row flex-col py-2">
+                  <div className="flex flex-col md:w-1/4 py-2 gap-2 justify-between">
+                    <label>Upload Photo or Avatar</label>
+
+                    <Dropzone onDrop={handleFileChange} multiple={false}>
+                      {({ getRootProps, getInputProps }) => (
+                        <div
+                          className="flex w-full h-full dropzone"
+                          {...getRootProps()}
+                        >
+                          <input {...getInputProps()} />
+                          {selectedLogo ? (
+                            <div className="m-1">
+                              <img
+                                src={selectedLogo}
+                                alt="Selected"
+                                className="rounded-md w-[100px] h-[100px] object-contain border border-[--site-onboarding-primary-color]"
+                              />
+                            </div>
+                          ) : (
+                            <div className="w-[100px] h-[100px] border border-[--site-onboarding-primary-color] rounded-md items-center justify-center flex">
+                              <p>Image</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </Dropzone>
+                  </div>
+                  <div className="flex flex-col py-2 gap-4 justify-end w-2/3">
+                    <input
+                      type="text"
+                      className="rounded-md p-2 border border-[--site-onboarding-primary-color] text-[--site-onboarding-primary-color]"
+                      placeholder="UserName"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                    />
+                    <input
+                      type="text"
+                      className="rounded-md p-2 border border-[--site-onboarding-primary-color] text-[--site-onboarding-primary-color]"
+                      placeholder="Role"
+                      value={userrole}
+                      onChange={(e) => setUserrole(e.target.value)}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
