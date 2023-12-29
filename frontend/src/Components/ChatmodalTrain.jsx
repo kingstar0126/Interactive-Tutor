@@ -60,7 +60,7 @@ const ChatmodalTrain = (props) => {
         setValue(res.data.data);
       })
       .catch((err) => {
-        console.log(err);
+        console.error(err);
       });
   };
 

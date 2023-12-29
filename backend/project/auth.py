@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Message
 from .models import User, Organization, Invite, Chat
+from .train import duplicate_train_data
 from . import db, mail
 import re
 import string
@@ -238,7 +239,7 @@ def signup_post():
 
     verification_token = create_access_token(identity={'username': username, 'email': email, 'password': password},
                                              expires_delta=timedelta(minutes=30))
-    verification_link = f"https://app.interactive-tutor.com/verify-email/token={verification_token}"
+    verification_link = f"http://18.133.183.77/verify-email/token={verification_token}"
     msg = Message('Welcome to Interactive Tutor', sender=os.getenv('MAIL_USERNAME'),
                   recipients=[email])
     msg.html = render_template(
@@ -566,7 +567,7 @@ def invite_email():
     db.session.commit()
     msg = Message('Invite to the interactive tutor', sender=os.getenv('MAIL_USERNAME'), recipients=[email])
     msg.html = render_template(
-        'invite.html', username=user.username, url=f"https://app.interactive-tutor.com/register?email={email}"
+        'invite.html', username=user.username, url=f"http://18.133.183.77/register?email={email}"
     )
     mail.send(msg)
     return jsonify({'success': True, 'code': 200, 'message': 'You have successfully sent the invitation!'})
@@ -621,7 +622,7 @@ def resendInvitation():
     email = request.json['email']
     msg = Message('Invite to the interactive tutor', sender=os.getenv('MAIL_USERNAME'), recipients=[email])
     msg.html = render_template(
-        'enterprise.html', username=user.username, url=f"https://app.interactive-tutor.com/register?email={email}"
+        'enterprise.html', username=user.username, url=f"http://13.133.183.77/register?email={email}"
     )
     mail.send(msg)
     return jsonify({'success': True, 'code': 200, 'message': 'You have successfully Resent the invitation!'})
@@ -644,7 +645,7 @@ def sendUserInvite():
         db.session.commit()
         msg = Message('Invite to the interactive tutor', sender=os.getenv('MAIL_USERNAME'), recipients=[email])
         msg.html = render_template(
-            'enterprise.html', username=enterpriseUser.username, url=f"https://app.interactive-tutor.com/register?email={email}"
+            'enterprise.html', username=enterpriseUser.username, url=f"http://18.133.183.77/register?email={email}"
         )
         mail.send(msg)
     return jsonify({'success': True, 'code': 200, 'message': 'You have successfully sent the invitation!'})
@@ -695,7 +696,7 @@ def setTutors():
         creativity = chat['creativity']
         behavior = chat['behavior']
         behaviormodel = chat['behaviormodel']
-        train = json.dumps(chat['train'])
+        train = json.dumps([])
         chat_copyright = json.dumps(chat['chat_copyright'])
         chat_button = json.dumps(chat['chat_button'])
         bubble = json.dumps(chat['bubble'])
@@ -707,7 +708,12 @@ def setTutors():
         new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
                     access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button, inviteId=inviteId)
         db.session.add(new_chat)
-    db.session.commit()
+        db.session.commit()
+
+        train = json.dumps(duplicate_train_data(chat['train'], new_chat.uuid))
+        new_chat.train = train
+        db.session.commit()
+
     return jsonify({ 'success': True, 'message': 'Successfully set Tutors' })
 
 

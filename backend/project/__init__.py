@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_mail import Mail
 from flask_cors import CORS
@@ -20,7 +21,7 @@ jwt = JWTManager()
 mail = Mail()
 db = SQLAlchemy()
 sendgrid_client = SendGridAPIClient(api_key=os.getenv('SENDGRID_API_KEY'))
-
+migrate = Migrate()
 app = None
 
 def create_app():
@@ -56,6 +57,7 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
     mail.init_app(app)
+    migrate.init_app(app, db)
 
     from .models import User
 

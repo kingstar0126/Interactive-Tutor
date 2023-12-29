@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, request, send_file
-from .models import Chat, Message, Train, User, Organization
+from sqlalchemy import and_, or_, desc
+from .models import Chat, Message, Train, User, Organization, Invite, Library, Review
 from . import db
 from collections import Counter
 import json
@@ -11,6 +12,7 @@ from dotenv import load_dotenv
 from .auth import generate_pin_password
 from werkzeug.utils import secure_filename
 from .generate_response import generate_system_prompt_role
+from .train import duplicate_train_data
 import datetime
 import shutil
 
@@ -85,7 +87,7 @@ def add_chat():
     api_select = 0
 
     user = db.session.query(User).filter_by(id=user_id).first()
-    ct = db.session.query(Chat).filter_by(user_id=user_id).count() + 1
+    # ct = db.session.query(Chat).filter_by(user_id=user_id).count() + 1
 
     # if not user.role == 1 or user.role == 7:
     #     if ct > user.tutors:
@@ -126,6 +128,49 @@ def upload_image():
     except Exception as e:
         return {"success": False, "message": str(e)}, 400
 
+@chat.route('/api/sendreview', methods=['POST'])
+def submit_review():
+    try:
+        library = json.loads(request.form.get('chat'))
+        username = request.form.get('username')
+        message = request.form.get('message')
+        rating = request.form.get('rating')
+        file = request.files['file']
+        filename = str(uuid.uuid4()) + secure_filename(file.filename)
+        filepath = os.path.join("project/image", filename)
+        with open(filepath, 'wb') as f:
+            while True:
+                chunk = file.stream.read(1024)
+                if not chunk:
+                    break
+                f.write(chunk)
+        review = Review(username=username, message=message, useravatar=f'http://18.133.183.77/api/imageupload/{filename}', rating=rating)
+        db.session.add(review)
+        db.session.commit()
+        current_library = db.session.query(Library).filter_by(id=library['id']).first()
+        review_id = json.loads(current_library.review_id)
+        review_id.append(review.id)
+        current_library.review_id = json.dumps(review_id)
+        db.session.commit()
+        return jsonify({'success': True, 'message': 'Success'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@chat.route('/api/getallreviews', methods=['POST'])
+def get_all_reviews():
+    library = request.json['chat']
+    response = []
+    current_library = db.session.query(Library).filter_by(id=library['id']).first()
+    for review_id in json.loads(current_library.review_id):
+        review = db.session.query(Review).filter_by(id=review_id).first()
+        new_data = {
+            'username': review.username,
+            'message': review.message,
+            'useravatar': review.useravatar,
+            'rating': review.rating
+        }
+        response.append(new_data)
+    return jsonify({'success': True, 'data': response})
 
 @chat.route('/api/sendbrandingdata', methods=['POST'])
 def update_brandingData():
@@ -160,6 +205,59 @@ def update_brandingData():
         }
     return jsonify(response)
 
+@chat.route('/api/sendemail', methods=['POST'])
+def send_email():
+    try:
+        email = request.json['email']
+        library = request.json['chat']
+        user = db.session.query(User).filter_by(email=email).first()
+        if user is None:
+            return jsonify({'success': False, 'message': 'You have to sign up before add library'})
+        
+        current_library = db.session.query(Library).filter_by(id=library['id']).first()
+        badges = json.loads(current_library.badge)
+        if library['downloads'] == 5:
+            badges.append(9)
+        elif library['downloads'] == 20:
+            badges.append(10)
+        elif library['downloads'] == 50:
+            badges.append(11)
+        else:
+            current_library.downloads = current_library.downloads + 1
+        current_library.badge = json.dumps(badges)
+        db.session.commit()
+        chat = db.session.query(Chat).filter_by(id=library['chat_id']).first()
+        if chat is None:
+            return jsonify({'success': False, 'message': 'Not Found the Tutor'})
+        user_id = user.id
+        islibrary = True
+        label = chat.label
+        description = chat.description
+        model = chat.model
+        conversation = chat.conversation
+        access = generate_pin_password()
+        creativity = chat.creativity
+        behavior = chat.behavior
+        behaviormodel = chat.behaviormodel
+        train = json.dumps([])
+        chat_copyright = json.dumps(json.loads(chat.chat_copyright))
+        chat_button = json.dumps(json.loads(chat.chat_button))
+        bubble = json.dumps(json.loads(chat.bubble))
+        chat_logo = json.dumps(json.loads(chat.chat_logo))
+        chat_title = json.dumps(json.loads(chat.chat_title))
+        chat_description = json.dumps(json.loads(chat.chat_description))
+        new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
+                    access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button, islibrary=islibrary)
+        db.session.add(new_chat)
+        db.session.commit()
+
+        train = json.dumps(duplicate_train_data(json.loads(chat.train), new_chat.uuid))
+        new_chat.train = train
+        db.session.commit()
+
+        return jsonify({'success': True, 'message': 'Successfully add in your account'})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
 
 @chat.route('/api/updatechat', methods=['POST'])
 def update_chat():
@@ -213,6 +311,141 @@ def update_chat():
     return jsonify(response)
 
 
+@chat.route('/api/sharechatbot', methods=['POST'])
+def share_chat():
+    chat = request.json['chat']
+    user_id = request.json['id']
+    
+    current_user = db.session.query(User).filter_by(id=user_id).first()
+    if current_user is None:
+        return jsonify({'success': False, 'message': 'User does not exist in the database!'})
+    if current_user.role == 7:
+        users = db.session.query(Invite, User.id).join(User, User.email == Invite.email).filter(Invite.user_id == user_id).all()
+    else:
+        users = db.session.query(Invite, User.id).join(User, User.email == Invite.email).filter(Invite.user_id == shareChat.inviteId).all()
+
+    for user in users:
+        user_id = user.id
+        islibrary = True
+        label = chat['label']
+        description = chat['description']
+        model = chat['model']
+        conversation = chat['conversation']
+        access = generate_pin_password()
+        creativity = chat['creativity']
+        behavior = chat['behavior']
+        behaviormodel = chat['behaviormodel']
+        train = json.dumps([])
+        chat_copyright = json.dumps(chat['chat_copyright'])
+        chat_button = json.dumps(chat['chat_button'])
+        bubble = json.dumps(chat['bubble'])
+        chat_logo = json.dumps(chat['chat_logo'])
+        chat_title = json.dumps(chat['chat_title'])
+        chat_description = json.dumps(chat['chat_description'])
+        new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
+                    access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button, islibrary=islibrary)
+        db.session.add(new_chat)
+        db.session.commit()
+        train = json.dumps(duplicate_train_data(chat['train'], new_chat.uuid))
+        new_chat.train = train
+        db.session.commit()
+    return jsonify({'success': True, 'message': 'Share Chatbot'})
+
+@chat.route('/api/publishchat', methods=['POST'])
+def publish_chat():
+    try:
+        chat = request.json['chat']
+        user_id = request.json['id']
+        library = db.session.query(Library).filter_by(chat_id=chat['id']).first()
+        if library:
+            return jsonify({'success': False, 'message': 'This Tutor already published'})
+
+        current_user = db.session.query(User).filter_by(id=user_id).first()
+        if current_user is None:
+            return jsonify({'success': False, 'message': 'User does not exist in the database!'})
+        chat_id = chat['id']
+        downloads = 0
+        review_id = json.dumps([])
+        username = chat['username']
+        userrole = chat['userrole']
+        menu = chat['menu']
+        submenu = chat['subMenu']
+        status = chat['status']
+        url = chat.get('url', '')
+        badge = json.dumps([])
+        library = Library(chat_id=chat_id, user_id=user_id, review_id=review_id, username=username, userrole=userrole, downloads=downloads, menu=menu, submenu=submenu, status=status, url=url, badge=badge)
+        db.session.add(library)
+        db.session.commit()
+        return jsonify({
+            'success': True,
+            'message': 'Successful'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': str(e)
+        })
+
+@chat.route('/api/getpublishchats', methods=['POST'])
+def get_publish_chats():
+    try:
+        menu = request.json['menu']
+        submenu = request.json['subMenu']
+        sortby = request.json['sortby']
+        page = request.json['page']
+        perpage = request.json['perpage']
+        
+        chats = db.session.query(Library, Chat, User).join(Chat, Library.chat_id == Chat.id).join(User, Library.user_id == User.id)
+
+        if sortby == 1:
+            chats = chats.order_by(desc(Library.downloads))
+        elif sortby == 0:
+            chats = chats.order_by(desc(Library.create_date))
+        print(type(menu), menu)
+        if menu is not None:
+            chats = chats.filter(Library.menu == menu)
+
+        chats = chats.paginate(page=page, per_page=perpage, error_out=False)
+        
+        response = []
+        for library, chat, user in chats.items:
+            response.append({
+                'id': library.id,
+                'chat_logo': json.loads(chat.chat_logo),
+                'label': chat.label,
+                'description': chat.description,
+                'name': user.username,
+                'downloads': library.downloads,
+                'menu': library.menu,
+                'submenu': library.submenu,
+                'status': library.status,
+                'url': library.url,
+                'username': library.username,
+                'userrole': library.userrole,
+                'badge': json.loads(library.badge),
+                'review_id': json.loads(library.review_id),
+                'chat_id': chat.id
+            })
+
+        return jsonify({'success': True, 'data': response, 'pageCount': chats.pages})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
+
+@chat.route('/api/addbadge', methods=['POST'])
+def add_badge():
+    library = request.json['chat']
+    badgeData = request.json['badge']
+    current_library = db.session.query(Library).filter_by(id=library['id']).first()
+    
+    badges = json.loads(current_library.badge)
+    badges.append(badgeData)
+    current_library.badge = json.dumps(badges)
+
+    db.session.commit()
+    return jsonify({'success': True, 'message': 'Success!'})
+
+
+
 @chat.route('/api/getchats', methods=['POST'])
 def get_chats():
 
@@ -253,7 +486,8 @@ def get_chats():
                 'organization': organization,
                 'role': user.role,
                 'inviteId': chat.inviteId,
-                'api_select': chat.api_select
+                'api_select': chat.api_select,
+                'islibrary': chat.islibrary,
             }
             response.append(chat_data)
 
@@ -446,6 +680,12 @@ def delete_chat(id):
             source = db.session.query(Train).filter_by(id=id).first()
             delete_vectore(source.label, chat.uuid)
             db.session.query(Train).filter_by(id=id).delete()
+        
+        library = db.session.query(Library).filter_by(chat_id=id).first()
+        if library:
+            review_ids = json.loads(library.review_id)
+            for review_id in review_ids:
+                db.session.query(Review).filter_by(id=review_id).delete()
         db.session.delete(chat)
         db.session.commit()
 
@@ -488,14 +728,6 @@ def get_report_data():
         messages.append(generate_final_report_data(data))
     messages.append(labels)
     return jsonify({'success': True, 'data': messages})
-
-
-@chat.route('/api/getaccess_ai_tutor', methods=['POST'])
-def get_access_AI_tutor():
-    email = request.json['email']
-    organization_id = db.session.query(
-        Organization).filter_by(email=email).first().uuid
-    return jsonify({'success': True, 'data': organization_id, 'code': 200})
 
 
 @chat.route('/api/transfer_tutor', methods=['POST'])

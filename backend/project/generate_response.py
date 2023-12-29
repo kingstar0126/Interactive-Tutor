@@ -89,7 +89,7 @@ def generate_message(query, behavior, temp, model, chat, template, openai_api_ke
     chain_type_kwargs = {"prompt": prompt}
 
     if model == "1":
-        llm = ChatOpenAI(model_name="gpt-3.5-turbo",
+        llm = ChatOpenAI(model_name="gpt-3.5",
                          temperature=temp,
                          streaming=True,
                          callbacks=[QueueCallback(q)],
@@ -216,7 +216,6 @@ def generate_AI_message(query, history, behavior, temp, model, openai_api_key):
             yield next_token, content
         except Empty:
             continue
-
 
 def generate_Bubble_message(query):
     load_dotenv()

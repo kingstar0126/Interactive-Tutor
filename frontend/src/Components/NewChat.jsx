@@ -89,10 +89,8 @@ const NewChat = () => {
     useEffect(() => {
         const pattern = /\/chat\/embedding\/(\w+)/;
         const result = pattern.exec(location.pathname);
-        console.log(result);
         const fetchData = async () => {
             if (chat.access) {
-                console.log(result, 'New chta', chatId);
                 setLoading(true);
                 let new_chat = chat;
                 setchatbot(dispatch, new_chat);
@@ -141,7 +139,6 @@ const NewChat = () => {
         setFiles([]);
         setImagesrc(null);
         setState(false);
-        setchatbot(dispatch, chat);
     }, [location.pathname]);
 
     useEffect(() => {
