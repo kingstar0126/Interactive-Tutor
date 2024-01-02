@@ -1,7 +1,7 @@
 import { BiCheckCircle } from "react-icons/bi";
 import BrandingTextItem from "./BrandingTextItem";
 import { useSelector, useDispatch } from "react-redux";
-import { getchat } from "../redux/actions/chatAction";
+import { getchat, updatechatbot } from "../redux/actions/chatAction";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { webAPI } from "../utils/constants";
@@ -21,7 +21,7 @@ import { Button } from "@material-tailwind/react";
 const Branding = () => {
     const dispatch = useDispatch();
     const chatState = useSelector((state) => state.chat.chat);
-    const chat = chatState && JSON.parse(chatState) || {};
+    const chat = (chatState && JSON.parse(chatState)) || {};
     const user = JSON.parse(useSelector((state) => state.user.user));
     const current_chat = chat;
 
@@ -40,185 +40,191 @@ const Branding = () => {
             .post(webAPI.send_branding, current_chat)
             .then((res) => {
                 getchat(dispatch, current_chat);
+                updatechatbot(dispatch, true);
                 notification("success", res.data.message);
             })
             .catch((err) => console.log(err));
     };
     return (
         <>
-        {chat.access && <div className="flex flex-col w-full h-full gap-5 py-5">
-                <Toaster />
-                <div className="flex justify-end">
-                    <Button
-                        type="button"
-                        onClick={handleConfirm}
-                        className="normal-case text-[--site-card-icon-color] bg-[--site-logo-text-color] hover:bg-[--site-card-icon-color]/90 focus:ring-4 focus:outline-none focus:ring-[--site-card-icon-color]/50 font-semibold rounded-md text-base px-2 py-1 text-center inline-flex items-center text-black"
-                    >
-                        <BiCheckCircle className="w-[30px] h-[30px] text-xl pointer-events-none p-1 text-[--site-success-text-color]" />
-                        Confirm
-                    </Button>
-                </div>
+            {chat.access && (
+                <div className="flex flex-col w-full h-full pb-5">
+                    <Toaster className="z-30"/>
 
-                <div className="flex flex-col gap-8">
-                    <div
-                        name="Title"
-                        className="border-[--site-chat-header-border] border rounded-xl w-full from-[--site-main-modal-from-color] bg-gradient-to-br p-5 gap-4 flex flex-col text-base text-black shadow-xl shadow-[--site-chat-header-border]"
-                    >
-                        <div>
-                            <span>Texts</span>
-                        </div>
+                    <div className="flex flex-col gap-8">
                         <div
-                            name="text"
-                            className="flex flex-col w-full gap-5 2xl:flex-row"
+                            name="Title"
+                            className="border-[--site-chat-header-border] border rounded-xl w-full p-5 gap-4 flex flex-col text-base text-black shadow-xl shadow-[--site-chat-header-border]"
                         >
-                            <div className="w-full 2xl:w-1/3">
-                                <BrandingTextItem
-                                    title={"Title"}
-                                    data={current_chat.chat_title}
-                                />
+                            <div className="flex justify-between">
+                                <h1>Texts</h1>
+
+                                <Button
+                                    type="button"
+                                    onClick={handleConfirm}
+                                    variant="outlined"
+                                    className="normal-case font-semibold rounded-md text-base px-2 py-1 border border-[--site-onboarding-primary-color] text-center inline-flex items-center text-[--site-onboarding-primary-color]"
+                                >
+                                    <BiCheckCircle className="w-[30px] h-[30px] text-xl pointer-events-none p-1" />
+                                    Confirm
+                                </Button>
                             </div>
-                            <div className="w-full 2xl:w-1/3">
-                                <BrandingTextItem
-                                    title={"Description"}
-                                    data={current_chat.chat_description}
-                                />
-                            </div>
-                            {user.role === 5 || user.role === 2 ? (
-                                <div className="w-full opacity-50 pointer-events-none 2xl:w-1/3">
-                                    <BrandingTextItem
-                                        title={"Copyright"}
-                                        data={current_chat.chat_copyright}
-                                    />
-                                </div>
-                            ) : (
+                            <div
+                                name="text"
+                                className="flex flex-col w-full gap-5 2xl:flex-row"
+                            >
                                 <div className="w-full 2xl:w-1/3">
                                     <BrandingTextItem
-                                        title={"Copyright"}
-                                        data={current_chat.chat_copyright}
+                                        title={"Title"}
+                                        data={current_chat.chat_title}
                                     />
                                 </div>
-                            )}
-                        </div>
-                    </div>
-                    <div
-                        name="bubble"
-                        className="border-[--site-chat-header-border] border rounded-xl w-full from-[--site-main-modal-from-color] bg-gradient-to-br p-5 gap-4 flex flex-col text-base text-black shadow-xl shadow-[--site-chat-header-border] bg-opacity-50"
-                    >
-                        <div>
-                            <h1>Chat Bubble</h1>
+                                <div className="w-full 2xl:w-1/3">
+                                    <BrandingTextItem
+                                        title={"Description"}
+                                        data={current_chat.chat_description}
+                                    />
+                                </div>
+                                {user.role === 5 || user.role === 2 ? (
+                                    <div className="w-full opacity-50 pointer-events-none 2xl:w-1/3">
+                                        <BrandingTextItem
+                                            title={"Copyright"}
+                                            data={current_chat.chat_copyright}
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="w-full 2xl:w-1/3">
+                                        <BrandingTextItem
+                                            title={"Copyright"}
+                                            data={current_chat.chat_copyright}
+                                        />
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <div
-                            name="text"
-                            className="flex flex-col w-full gap-5 2xl:flex-row"
+                            name="bubble"
+                            className="border-[--site-chat-header-border] border rounded-xl w-full p-5 gap-4 flex flex-col text-base text-black shadow-xl shadow-[--site-chat-header-border] bg-opacity-50"
                         >
-                            <div className="w-full 2xl:w-1/2">
-                                <BubbleItem
-                                    title={"Bubble"}
-                                    data={current_chat.bubble}
-                                />
+                            <div>
+                                <h1>Chat Bubble</h1>
                             </div>
-                            <div className="w-full 2xl:w-1/2">
-                                <NotificationBubble
-                                    title={"Notification"}
-                                    data={current_chat.bubble}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                    <div
-                        name="image"
-                        className="border-[--site-chat-header-border] border rounded-xl w-full from-[--site-main-modal-from-color] bg-gradient-to-br p-5 gap-4 flex flex-col text-base text-black shadow-xl shadow-[--site-chat-header-border] bg-opacity-50"
-                    >
-                        <div>
-                            <h1>Images</h1>
-                        </div>
-                        <div name="text" className="flex flex-col w-full gap-5">
-                            <div className="w-full">
-                                <LogoBranding
-                                    title={"Logo"}
-                                    data={current_chat.chat_logo}
-                                />
-                            </div>
-                            <div className="flex flex-col w-full gap-5 2xl:flex-row">
+                            <div
+                                name="text"
+                                className="flex flex-col w-full gap-5 2xl:flex-row"
+                            >
                                 <div className="w-full 2xl:w-1/2">
-                                    <UserAvatarBranding
-                                        title={"User avatar"}
-                                        data={current_chat.chat_logo}
+                                    <BubbleItem
+                                        title={"Bubble"}
+                                        data={current_chat.bubble}
                                     />
                                 </div>
                                 <div className="w-full 2xl:w-1/2">
-                                    <AIAvatarBranding
-                                        title={"AI avatar"}
+                                    <NotificationBubble
+                                        title={"Notification"}
+                                        data={current_chat.bubble}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            name="image"
+                            className="border-[--site-chat-header-border] border rounded-xl w-full p-5 gap-4 flex flex-col text-base text-black shadow-xl shadow-[--site-chat-header-border] bg-opacity-50"
+                        >
+                            <div>
+                                <h1>Images</h1>
+                            </div>
+                            <div
+                                name="text"
+                                className="flex flex-col w-full gap-5"
+                            >
+                                <div className="w-full">
+                                    <LogoBranding
+                                        title={"Logo"}
+                                        data={current_chat.chat_logo}
+                                    />
+                                </div>
+                                <div className="flex flex-col w-full gap-5 2xl:flex-row">
+                                    <div className="w-full 2xl:w-1/2">
+                                        <UserAvatarBranding
+                                            title={"User avatar"}
+                                            data={current_chat.chat_logo}
+                                        />
+                                    </div>
+                                    <div className="w-full 2xl:w-1/2">
+                                        <AIAvatarBranding
+                                            title={"AI avatar"}
+                                            data={current_chat.chat_logo}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            name="message"
+                            className="border-[--site-chat-header-border] border rounded-xl w-full p-5 gap-4 flex flex-col text-base text-black shadow-xl shadow-[--site-chat-header-border]"
+                        >
+                            <div>
+                                <h1>Messages & Icons</h1>
+                            </div>
+                            <div
+                                name="text"
+                                className="flex flex-col w-full gap-5 2xl:flex-row"
+                            >
+                                <div className="w-full 2xl:w-1/3 h-full">
+                                    <UserMessage
+                                        title={"User"}
+                                        data={current_chat.chat_logo}
+                                    />
+                                </div>
+                                <div className="w-full 2xl:w-1/3 h-full">
+                                    <AIMessage
+                                        title={"AI"}
+                                        data={current_chat.chat_logo}
+                                    />
+                                </div>
+                                <div className="w-full 2xl:w-1/3 f-ull">
+                                    <BackgroundColor
+                                        title={"Background"}
                                         data={current_chat.chat_logo}
                                     />
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div
-                        name="message"
-                        className="border-[--site-chat-header-border] border rounded-xl w-full from-[--site-main-modal-from-color] bg-gradient-to-br p-5 gap-4 flex flex-col text-base text-black shadow-xl shadow-[--site-chat-header-border]"
-                    >
-                        <div>
-                            <h1>Messages & Icons</h1>
-                        </div>
                         <div
-                            name="text"
-                            className="flex flex-col w-full gap-5 2xl:flex-row"
+                            name="buttons"
+                            className="border-[--site-chat-header-border] border rounded-xl w-full p-5 gap-4 flex flex-col text-base text-black shadow-xl shadow-[--site-chat-header-border]"
                         >
-                            <div className="w-full 2xl:w-1/3">
-                                <UserMessage
-                                    title={"User"}
-                                    data={current_chat.chat_logo}
-                                />
+                            <div>
+                                <h1>Buttons (Call-To-Action)</h1>
                             </div>
-                            <div className="w-full 2xl:w-1/3">
-                                <AIMessage
-                                    title={"AI"}
-                                    data={current_chat.chat_logo}
-                                />
-                            </div>
-                            <div className="w-full 2xl:w-1/3">
-                                <BackgroundColor
-                                    title={"Background"}
-                                    data={current_chat.chat_logo}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                    <div
-                        name="buttons"
-                        className="border-[--site-chat-header-border] border rounded-xl w-full from-[--site-main-modal-from-color] bg-gradient-to-br p-5 gap-4 flex flex-col text-base text-black shadow-xl shadow-[--site-chat-header-border]"
-                    >
-                        <div>
-                            <h1>Buttons (Call-To-Action)</h1>
-                        </div>
-                        <div
-                            name="text"
-                            className="grid w-full grid-rows-3 gap-5 xl:grid-rows-1 auto-rows-max xl:grid-cols-3"
-                        >
-                            <div className="min-w-[250px] sm:w-auto">
-                                <ButtonBranding1
-                                    title={"Button 1"}
-                                    data={current_chat.chat_button}
-                                />
-                            </div>
-                            <div className="min-w-[250px] sm:w-auto">
-                                <ButtonBranding2
-                                    title={"Button 2"}
-                                    data={current_chat.chat_button}
-                                />
-                            </div>
-                            <div className="min-w-[250px] sm:w-auto">
-                                <ButtonBranding3
-                                    title={"Button 3"}
-                                    data={current_chat.chat_button}
-                                />
+                            <div
+                                name="text"
+                                className="flex flex-col w-full gap-5 2xl:flex-row"
+                            >
+                                <div className="w-full 2xl:w-1/3 h-full">
+                                    <ButtonBranding1
+                                        title={"Button 1"}
+                                        data={current_chat.chat_button}
+                                    />
+                                </div>
+                                <div className="w-full 2xl:w-1/3 h-full">
+                                    <ButtonBranding2
+                                        title={"Button 2"}
+                                        data={current_chat.chat_button}
+                                    />
+                                </div>
+                                <div className="w-full 2xl:w-1/3 h-full">
+                                    <ButtonBranding3
+                                        title={"Button 3"}
+                                        data={current_chat.chat_button}
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>}
+            )}
         </>
     );
 };

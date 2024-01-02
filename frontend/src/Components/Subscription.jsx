@@ -1,28 +1,22 @@
 import { useEffect } from "react";
 import { useState } from "react";
 import { Toaster } from "react-hot-toast";
-import { BsCartPlus } from "react-icons/bs";
-import { AiOutlineTrophy, AiOutlineMenu } from "react-icons/ai";
 import { getUseraccount } from "../redux/actions/userAction";
 import { useSelector, useDispatch } from "react-redux";
 import { setquery } from "../redux/actions/queryAction";
-import ReactSpeedometer from "react-d3-speedometer";
-import { MdOutlineUpdate } from "react-icons/md";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
 import Report from "./Report";
 import { Slider, Button } from "@material-tailwind/react";
 import SubscriptionModal from "./SubscriptionModal";
-import { setOpenSidebar } from "../redux/actions/locationAction";
 import { useNavigate } from "react-router-dom";
-import { loadStripe } from "@stripe/stripe-js";
+import SubscriptionLogo from "../assets/Icons_outlined.svg";
 
 const Subscription = () => {
     const dispatch = useDispatch();
     const query = useSelector((state) => state.query.query);
     const user = JSON.parse(useSelector((state) => state.user.user));
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
-    const [trial, setTrial] = useState(0);
     const [datas, setDatas] = useState([]);
     const [labels, setLabels] = useState(null);
     const [index_length, setIndex_length] = useState(0);
@@ -33,13 +27,14 @@ const Subscription = () => {
     useEffect(() => {
         axios
             .post(webAPI.checkUserInvite, { id: user.id })
-            .then(res => {if (res.data.success) {navigate(-1)}})
-            .catch(err => console.error(err))
+            .then((res) => {
+                if (res.data.success) {
+                    navigate(-1);
+                }
+            })
+            .catch((err) => console.error(err));
         getUseraccount(dispatch, { id: user.id });
         setquery(dispatch, user.query);
-        if (user.role === 5) {
-            setTrial(user.days);
-        }
         if (chat) {
             get_traindata();
         }
@@ -83,10 +78,6 @@ const Subscription = () => {
         setIsOpenModal(!isopenModal);
     };
 
-    const handleOpenSidebar = () => {
-        dispatch(setOpenSidebar());
-    };
-
     const get_traindata = () => {
         if (chat.uuid) {
             axios
@@ -99,159 +90,68 @@ const Subscription = () => {
                 .catch((error) => console.log(error));
         }
     };
-    const getClientReferenceId = () => {
-        return (
-            (window.Rewardful && window.Rewardful.referral) ||
-            "checkout_" + new Date().getTime()
-        );
-    };
 
-    const handleMoreQuery = () => {
-        axios
-            .post(webAPI.create_checkout_query, {
-                id: user.id,
-                clientReferenceId: getClientReferenceId(),
-            })
-            .then(async (res) => {
-                // Load Stripe and redirect to the Checkout page
-                const stripe = await loadStripe(res.data.key);
-
-                const { error } = stripe.redirectToCheckout({
-                    sessionId: res.data.sessionId,
-                });
-                if (error) {
-                    console.error("Error:", error);
-                }
-            })
-            .catch((err) => {
-                console.error(err);
-            });
-    }
     return (
         <div className="w-full h-full">
-            <Toaster />
+            <Toaster className="z-30" />
 
-            <div className="flex md:items-center items-end justify-between w-full md:h-[100px] md:px-10 from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] md:border-b-[--site-chat-header-border] md:border bg-gradient-to-r px-4 py-2 max-h-min gap-1">
-                <div className="hidden md:flex gap-2 mt-9 mb-8 text-[--site-card-icon-color]">
-                    <AiOutlineTrophy className="w-8 h-8" />
+            <div className="flex md:items-center items-end w-full md:h-[80px] shadow-md md:px-10 md:border-b-[--site-chat-header-border] md:border px-4 py-2 max-h-min gap-1">
+                <div className="hidden md:flex gap-2 mt-9 mb-8 text-[--site-onboarding-primary-color]">
+                    <img
+                        src={SubscriptionLogo}
+                        alt="subscription"
+                        className="w-8 h-8"
+                    />
                     <span className="text-2xl font-semibold">
-                        Subscriptions
+                        Current Subscriptions
                     </span>
                 </div>
-                <AiOutlineMenu
-                    onClick={handleOpenSidebar}
-                    className="w-6 h-6 mb-1 md:hidden"
-                />
-                <div className="flex items-end justify-end md:mt-[27px] md:mb-[30px] md:pr-[44px] pr-9">
-                    {chat && chat.organization && (
-                        <div className="xl:flex flex-col items-start justify-center mr-2 p-2 bg-[--site-warning-text-color] rounded shadow-2xl hidden">
-                            <p>
-                                <span className="font-bold text-[14px]">
-                                    Organisation ID:{" "}
-                                </span>
-                                <span className="text-[--site-error-text-color] font-semibold">
-                                    {chat.organization}
-                                </span>
-                            </p>
-                        </div>
-                    )}
-                    {query && (
-                        <p className="bg-[--site-logo-text-color] p-2 rounded gap-2 items-center justify-center h-full flex md:mr-0">
-                            <span className="text-[--site-error-text-color] font-semibold text-[12px] md:text-base">
-                                {query}
+            </div>
+
+            <div className="px-8 py-6 h-full">
+                <div className="flex flex-col h-full gap-6 p-8 border-[--site-chat-header-border] border rounded-md shadow-xl shadow-[--site-chat-header-border]">
+                    {index_length !== 0 && (
+                        <div className="flex flex-col w-[99.33%] border-[--site-chat-header-border] border rounded-md shadow-xl shadow-[--site-chat-header-border] 2xl:min-h-[20rem] h-auto">
+                            <span className="text-[16px] items-start w-full pt-4 px-4">
+                                Users
                             </span>
-                            <span className="text-[--site-card-icon-color] text-[12px] md:text-base font-medium">
-                                Queries
-                            </span>
-                        </p>
-                    )}
-                    {trial > 0 && (
-                        <div className="flex items-end justify-end md:w-max scale-75 md:scale-100 ml-[-14px] mr-[-20px] translate-y-2 md:translate-y-0">
-                            <ReactSpeedometer
-                                maxSegmentLabels={0}
-                                segments={4}
-                                width={100}
-                                height={58}
-                                ringWidth={10}
-                                value={24 - trial}
-                                needleColor="black"
-                                needleHeightRatio={0.5}
-                                maxValue={24}
-                                startColor={"#f5da42"}
-                                endColor={"#ff0000"}
+                            <Report
+                                labels={labels}
+                                datas={datas}
+                                index={index_length}
                             />
                         </div>
                     )}
-                    <Button
-                        onClick={() => {
-                            handleOpenModel();
-                        }}
-                        className="normal-case flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
-                    >
-                        <MdOutlineUpdate className="w-4 h-4 md:w-6 md:h-6" />
-                        <span className="md:text-base text-[12px] font-medium">
-                            Upgrade
-                        </span>
-                    </Button>
-                    <Button
-                        onClick={handleMoreQuery}
-                        className="normal-case gap-1 flex p-2 rounded bg-[--site-logo-text-color] text-[--site-card-icon-color] ml-2"
-                    >
-                        <BsCartPlus className="w-4 h-4 md:w-6 md:h-6" />
-                        <span className="md:text-base text-[12px] font-medium overflow-ellipsis overflow-hidden whitespace-nowrap">
-                            Top-up Queries
-                        </span>
-                    </Button>
-                </div>
-            </div>
-            <div className="flex md:hidden gap-2 text-[--site-card-icon-color] pt-8 px-5">
-                <AiOutlineTrophy className="w-8 h-8" />
-                <span className="text-2xl font-semibold">Subscriptions</span>
-            </div>
+                    <div className="flex flex-col w-[99.33%] border-[--site-chat-header-border] border rounded-md shadow-xl shadow-[--site-chat-header-border] py-8 px-4 gap-5">
+                        <div className="w-full px-2 flex gap-3 md:items-center md:justity-between md:flex-row flex-col ">
+                            <span className="text-black text-lg font-semibold w-40">
+                                Queries
+                            </span>
 
-            <div className="flex flex-col gap-6 px-5 py-8 md:px-10">
-                {index_length !== 0 && (
-                    <div className="flex flex-col w-[99.33%]  bg-gradient-to-r from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] border-[--site-chat-header-border] border rounded-2xl shadow-xl shadow-[--site-chat-header-border] 2xl:min-h-[20rem] h-auto">
-                        <span className="text-[16px] items-start w-full pt-4 px-4">
-                            Users
-                        </span>
-                        <Report
-                            labels={labels}
-                            datas={datas}
-                            index={index_length}
-                        />
-                    </div>
-                )}
-                <div className="flex flex-col w-[99.33%]  bg-gradient-to-r from-[--site-chat-header-from-color] to-[--site-chat-header-to-color] border-[--site-chat-header-border] border rounded-2xl shadow-xl shadow-[--site-chat-header-border] 2xl:min-h-[20rem] h-auto py-8 px-4">
-                    <div className="w-full px-2">
-                        <span className="text-black text-[24px] font-semibold">
-                            Queries
-                        </span>
-                        <div className="flex items-center gap-2 mt-4">
                             {user.maxquery - query !== 0 ? (
                                 <Slider
-                                    size="lg"
+                                    size="md"
                                     id="queries"
                                     value={
                                         ((user.maxquery - query) /
                                             user.maxquery) *
                                         100
                                     }
-                                    className="text-[#6EAE1C] opacity-50"
-                                    trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
+                                    className="text-[--site-success-text-color]"
+                                    trackClassName="[&::-webkit-slider-runnable-track]:bg-gray-300 [&::-moz-range-track]:bg-[--site-success-text-color] rounded-full !bg---site-success-text-color] pointer-events-none"
                                 />
                             ) : (
                                 <Slider
-                                    size="lg"
+                                    size="md"
                                     id="queries123"
                                     defaultValue={0}
-                                    className="text-[#6EAE1C] opacity-50"
-                                    trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
+                                    className="text-[--site-success-text-color]"
+                                    trackClassName="[&::-webkit-slider-runnable-track]:bg-gray-300 [&::-moz-range-track]:bg-[--site-success-text-color] rounded-full !bg-[--site-success-text-color] pointer-events-none"
                                 />
                             )}
                             <Button
                                 variant="outlined"
-                                className="ring-[--site-logo-text-color] border-0 ring-2 text-[12px] sm:text-[16px] font-semibold text-[--site-card-icon-color] rounded-full px-1 py-1 sm:py-3 sm:px-6"
+                                className="normal-case text-[--site-onboarding-primary-color] border border-[--site-onboarding-primary-color] font-medium text-base text-center items-center gap-2 p-2 flex w-36 justify-center"
                                 onClick={() => {
                                     handleOpenModel();
                                 }}
@@ -259,36 +159,35 @@ const Subscription = () => {
                                 Upgrade
                             </Button>
                         </div>
-                    </div>
-                    {datas && (
-                        <div className="w-full px-2">
-                            <span className="text-black text-[24px] font-semibold">
-                                Tutors
-                            </span>
-                            <div className="flex items-center gap-2 mt-4">
+                        {datas && (
+                            <div className="w-full px-2 flex gap-3 md:items-center md:justity-between md:flex-row flex-col ">
+                                <span className="text-black text-lg font-semibold w-40">
+                                    Tutors
+                                </span>
+
                                 {datas.length !== 0 ? (
                                     <Slider
-                                        size="lg"
+                                        size="md"
                                         id="tutors"
                                         value={
                                             (datas.length / user.tutors) * 100
                                         }
-                                        className="text-[#6EAE1C] opacity-50"
-                                        trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
+                                        className="text-[--site-success-text-color]"
+                                        trackClassName="[&::-webkit-slider-runnable-track]:bg-gray-300 [&::-moz-range-track]:bg-[--site-success-text-color] rounded-full !bg---site-success-text-color] pointer-events-none"
                                     />
                                 ) : (
                                     <Slider
-                                        size="lg"
-                                        id="tutors123"
+                                        size="md"
+                                        id="queries123"
                                         defaultValue={0}
-                                        className="text-[#6EAE1C] opacity-50"
-                                        trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
+                                        className="text-[--site-success-text-color]"
+                                        trackClassName="[&::-webkit-slider-runnable-track]:bg-gray-300 [&::-moz-range-track]:bg-[--site-success-text-color] rounded-full !bg-[--site-success-text-color] pointer-events-none"
                                     />
                                 )}
 
                                 <Button
                                     variant="outlined"
-                                    className="ring-[--site-logo-text-color] border-0 ring-2 sm:text-[16px] font-semibold text-[--site-card-icon-color] rounded-full px-1 py-1 sm:py-3 sm:px-6 text-[12px]"
+                                    className="normal-case text-[--site-onboarding-primary-color] border border-[--site-onboarding-primary-color] font-medium text-base text-center items-center gap-2 p-2 flex w-36 justify-center"
                                     onClick={() => {
                                         handleOpenModel();
                                     }}
@@ -296,16 +195,15 @@ const Subscription = () => {
                                     Upgrade
                                 </Button>
                             </div>
-                        </div>
-                    )}
-                    {datasources > 0 ? (
-                        <div className="w-full px-2">
-                            <span className="text-black text-[24px] font-semibold">
-                                Data Sources
-                            </span>
-                            <div className="flex items-center gap-2 mt-4">
+                        )}
+                        {datasources > 0 ? (
+                            <div className="w-full px-2 flex gap-3 md:items-center md:justity-between md:flex-row flex-col ">
+                                <span className="text-black text-lg font-semibold w-40">
+                                    Data Sources
+                                </span>
+
                                 <Slider
-                                    size="lg"
+                                    size="md"
                                     id="datasources"
                                     value={
                                         ((datasources < user.training_datas
@@ -314,12 +212,12 @@ const Subscription = () => {
                                             user.training_datas) *
                                         100
                                     }
-                                    className="text-[#6EAE1C] opacity-50"
-                                    trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
+                                    className="text-[--site-success-text-color]"
+                                    trackClassName="[&::-webkit-slider-runnable-track]:bg-gray-300 [&::-moz-range-track]:bg-[--site-success-text-color] rounded-full !bg---site-success-text-color] pointer-events-none"
                                 />
                                 <Button
                                     variant="outlined"
-                                    className="ring-[--site-logo-text-color] border-0 ring-2 font-semibold text-[--site-card-icon-color] rounded-full px-1 py-1 sm:py-3 sm:px-6 text-[12px] sm:text-[16px]"
+                                    className="normal-case text-[--site-onboarding-primary-color] border border-[--site-onboarding-primary-color] font-medium text-base text-center items-center gap-2 p-2 flex w-36 justify-center"
                                     onClick={() => {
                                         handleOpenModel();
                                     }}
@@ -327,23 +225,22 @@ const Subscription = () => {
                                     Upgrade
                                 </Button>
                             </div>
-                        </div>
-                    ) : (
-                        <div className="w-full px-2">
-                            <span className="text-black text-[24px] font-semibold">
-                                Data Sources
-                            </span>
-                            <div className="flex items-center gap-2 mt-4">
+                        ) : (
+                            <div className="w-full px-2 flex gap-3 items-center justity-center">
+                                <span className="text-black text-lg font-semibold w-40">
+                                    Data Sources
+                                </span>
+
                                 <Slider
-                                    size="lg"
+                                    size="md"
                                     id="datasources"
                                     defaultValue={0}
-                                    className="text-[#6EAE1C] opacity-50"
-                                    trackClassName="[&::-webkit-slider-runnable-track]:bg-[--site-logo-text-color] [&::-moz-range-track]:bg-[--site-logo-text-color] rounded-full !bg-[--site-logo-text-color] border border-[--site-logo-text-color] pointer-events-none"
+                                    className="text-[--site-success-text-color]"
+                                    trackClassName="[&::-webkit-slider-runnable-track]:bg-gray-300 [&::-moz-range-track]:bg-[--site-success-text-color] rounded-full !bg---site-success-text-color] pointer-events-none"
                                 />
                                 <Button
                                     variant="outlined"
-                                    className="ring-[--site-logo-text-color] border-0 ring-2 font-semibold text-[--site-card-icon-color] rounded-full px-1 py-1 sm:py-3 sm:px-6 text-[12px] sm:text-[16px]"
+                                    className="normal-case text-[--site-onboarding-primary-color] border border-[--site-onboarding-primary-color] font-medium text-base text-center items-center gap-2 p-2 flex w-36 justify-center"
                                     onClick={() => {
                                         handleOpenModel();
                                     }}
@@ -351,8 +248,8 @@ const Subscription = () => {
                                     Upgrade
                                 </Button>
                             </div>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
             <SubscriptionModal

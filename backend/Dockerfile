@@ -12,7 +12,7 @@ RUN apk add py3-yaml py3-setuptools py3-wheel python3-dev &&\
     pip install PyYAML==6.0 --no-build-isolation
 
 RUN source venv/bin/activate && \
-    pip install wheel 
+    pip install wheel Flask-Migrate
 RUN pip install -r requirements.txt 
 RUN pip install python-docx 
 

@@ -58,11 +58,11 @@ def compare_token_words(ct, chatbot):
     current_chat = db.session.query(Chat).filter_by(uuid=chatbot).first()
     user = db.session.query(User).filter_by(id=current_chat.user_id).first()
 
-    if user.role == 1 or user.role == 7:
-        return True
+    # if user.role == 1 or user.role == 7:
+    #     return True
 
-    elif ct >= user.training_words:
-        return False
+    # elif ct >= user.training_words:
+    #     return False
     return True
 
 
@@ -174,6 +174,7 @@ def text_to_docs(text, filename, chat):
             doc.metadata["source"] = f"{filename}"
             doc.metadata["chat"] = f"{chat}"
             doc_chunks.append(doc)
+        print(doc_chunks)
     return doc_chunks
 
 
@@ -234,8 +235,8 @@ def web_scraping(url, max_depth=0, depth=0, visited_urls=set()):
         return []
 
 
-def create_train(label, _type, status, chat):
-    new_train = Train(label=label, type=_type, status=status, chat=chat)
+def create_train(label, _type, status, chat, file_path=False):
+    new_train = Train(label=label, type=_type, status=status, chat=chat, path=file_path)
     db.session.add(new_train)
     db.session.flush()
     db.session.commit()
@@ -250,11 +251,10 @@ def train_status_chanage(train_id):
 def compare_role_user(chatbot):
     current_chat = db.session.query(Chat).filter_by(uuid=chatbot).first()
     traindata = json.loads(current_chat.train)
-    ct = len(traindata)
     user = db.session.query(User).filter_by(id=current_chat.user_id).first()
-    if not user.role == 1 or user.role == 7:
-        if ct >= user.training_datas:
-            return False
+    # if not user.role == 1 or user.role == 7:
+    #     if ct >= user.training_datas:
+    #         return False
     return True
 
 
@@ -290,13 +290,54 @@ def insert_train_chat(chatbot, train_id):
     else:
         return None
 
+def duplicate_train_data(ids, chatbot_uuid):
+    try:
+        response = []
+        for id in ids:
+            print('This is Train Data ID: ', id)
+            train = db.session.query(Train).filter_by(id=id).first()
+            if train:
+                label = train.label
+                train_type = train.type
+                path = train.path
+                new_train = Train(label=label, type=train_type, status=True, chat=chatbot_uuid, path=path)
+                db.session.add(new_train)
+                db.session.commit()
+                
+                if train_type == 'url':
+                    data = web_scraping(path, 1)
+                    result = text_to_docs(data, url, chatbot_uuid)
+                    create_vector(result)
+                elif train_type == 'file':
+                    with open(path, 'rb') as f:
+                        if (path.split('.')[-1] == 'pdf'):
+                            output = parse_pdf(f)
+                        elif (path.split('.')[-1] == 'csv'):
+                            output = parse_csv(f)
+                        elif (path.split('.')[-1] == 'docx'):
+                            output = parse_docx(f)
+                        elif path.split('.')[-1] in ['srt', 'txt', 'md', 'json']:
+                            output = parse_srt(f)
+                        elif (path.split('.')[-1] == 'epub'):
+                            output = parse_epub(path.split('/')[-1])
+                        result = text_to_docs(output, path.split('/')[-1], chatbot_uuid)
+                        create_vector(result)
+                else:
+                    result = text_to_docs(text, text[:20], chatbot_uuid)
+                    create_vector(result)
+                response.append(new_train.id)
+        print(' >>>>>>>>>>>>> This is TrainDatas: ', response)
+        return response
+    except Exception as e:
+        print('ERROR >>>>>>>>>>>>>>>>', str(e))
+        return []
+
 @train.route('/api/data/sendurl', methods=['POST'])
 def create_train_url():
     url = request.json['url']
     chatbot = request.json['chatbot']
     if compare_role_user(chatbot):
-        data = web_scraping(url, 0)
-        # print(data)
+        data = web_scraping(url, 1)
         if data == False:
             return jsonify({
                 'success': False,
@@ -308,7 +349,7 @@ def create_train_url():
         for text in data:
             ct += count_tokens(text)
         if compare_token_words(ct, chatbot):
-            trainid = create_train(url, 'url', True, chatbot)
+            trainid = create_train(url, 'url', True, chatbot, url)
             result = text_to_docs(data, url, chatbot)
 
             if (trainid == False):
@@ -344,7 +385,7 @@ def create_train_text():
     text = request.json['text']
     chatbot = request.json['chatbot']
     if compare_role_user(chatbot):
-        trainid = create_train(text[:20], 'text', True, chatbot)
+        trainid = create_train(text[:20], 'text', True, chatbot, text)
         result = text_to_docs(text, text[:20], chatbot)
 
         if (trainid == False):
@@ -368,7 +409,6 @@ def create_train_text():
             'message': "No more creating training data!",
         })
 
-
 @train.route('/api/data/sendfile', methods=['POST'])
 def create_train_file():
     try:
@@ -379,9 +419,13 @@ def create_train_file():
             return {"success": False, "message": "Invalid file or chatbot data"}, 400
 
         filename = secure_filename(file.filename)
-        file.save(filename)
+        full_chart_path = f"exports/charts/{chatbot}"
+        if not os.path.exists(full_chart_path):
+            os.makedirs(full_chart_path)
+        file_path = os.path.join(full_chart_path, filename)
+        file.save(file_path)
 
-        with open(filename, 'rb') as f:
+        with open(file_path, 'rb') as f:
             if (filename.split('.')[-1] == 'pdf'):
                 output = parse_pdf(f)
             elif (filename.split('.')[-1] == 'csv'):
@@ -392,42 +436,31 @@ def create_train_file():
                 output = parse_srt(f)
             elif (filename.split('.')[-1] == 'epub'):
                 output = parse_epub(filename)
-            os.remove(filename)
 
-            ct = 0
-            for text in output:
-                ct += count_tokens(text)
-            if compare_role_user(chatbot):
-                if compare_token_words(ct, chatbot):
-                    result = text_to_docs(output, filename, chatbot)
-                    # print(result)
-                    trainid = create_train(filename, 'file', True, chatbot)
-                    if (trainid == False):
-                        return jsonify({
-                            'success': False,
-                            'code': 401,
-                            'message': 'Training data already exist.',
-                        })
-                    create_vector(result)
-
-                    chat = insert_train_chat(chatbot, trainid)
-                    return jsonify({
-                        'success': True,
-                        'code': 200,
-                        'data': chat,
-                        'message': "create train successfully",
-                    })
+            result = text_to_docs(output, filename, chatbot)
+            # print(result)
+            trainid = create_train(filename, 'file', True, chatbot, file_path)
+            if (trainid == False):
                 return jsonify({
                     'success': False,
                     'code': 401,
-                    'message': "Training word limit exceeded. Please reduce the number of training words.",
+                    'message': 'Training data already exist.',
                 })
-            else:
-                return jsonify({
-                    'success': False,
-                    'code': 401,
-                    'message': "No more creating training data!",
-                })
+            create_vector(result)
+
+            chat = insert_train_chat(chatbot, trainid)
+            return jsonify({
+                'success': True,
+                'code': 200,
+                'data': chat,
+                'message': "create train successfully",
+            })
+            return jsonify({
+                'success': False,
+                'code': 401,
+                'message': "Training word limit exceeded. Please reduce the number of training words.",
+            })
+
 
     except Exception as e:
         print(str(e))
@@ -498,7 +531,6 @@ def get_traindatas():
         return jsonify({'data': data, 'success': True})
     else:
         return jsonify({'success': False, 'message': 'Not found', 'code': 404})
-
 
 @train.route('/api/data/deletetrain', methods=['POST'])
 def delete_traindatas():

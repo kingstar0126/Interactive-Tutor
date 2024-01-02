@@ -8,6 +8,7 @@ import { webAPI } from "../utils/constants";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
+import { Button } from "@material-tailwind/react";
 
 const Register = () => {
     const [checkbox, setCheckbox] = useState(0);
@@ -23,22 +24,22 @@ const Register = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const searchParams = new URLSearchParams(location.search);
-    const email = searchParams.get('email') || '';
+    const email = searchParams.get("email") || "";
     const {
         register,
         formState: { errors },
         handleSubmit,
         getValues,
-      } = useForm({
+    } = useForm({
         defaultValues: {
-          username: '', // Example initial value for the username field
-          email: `${email}`, // Example initial value for the email field
-          password: '', // Example initial value for the password field
-          confirm: '', // Example initial value for the confirm field
-      },
+            username: "", // Example initial value for the username field
+            email: `${email}`, // Example initial value for the email field
+            password: "", // Example initial value for the password field
+            confirm: "", // Example initial value for the confirm field
+        },
     });
     const onSubmit = async (data) => {
-        console.log(data)
+        console.log(data);
         axios.post(webAPI.register, data).then((res) => {
             if (res.data.success) {
                 notification("success", res.data.message);
@@ -49,26 +50,34 @@ const Register = () => {
         });
     };
     return (
-        <div className="bg-[--site-main-color-home] font-logo h-screen pb-10 px-2 flex flex-col">
+        <div className="font-logo pb-10 px-2 flex flex-col">
             <Header />
-            <Toaster />
-            <div className="mt-[100px]">
-                <div className="w-full p-6 m-auto bg-[--site-main-color3] rounded-md h-full lg:max-w-xl">
-                    <h1 className="text-3xl font-semibold text-center text-[--site-main-Login] underline uppercase">
-                        Register
-                    </h1>
-                    <form className="mt-6" onSubmit={handleSubmit(onSubmit)}>
-                        <div className="mb-2">
+            <Toaster className="z-30"/>
+            <div>
+            <div className="container p-6 m-auto rounded-md lg:max-w-xl flex flex-col gap-5">
+                    <div className="flex flex-col gap-2">
+                        <span className="text-3xl font-semibold text-start text-[--site-main-Login1]">
+                            Register
+                        </span>
+                        <span className="text-start">
+                            Register to create an account
+                        </span>
+                    </div>
+                    <form
+                        className="flex flex-col gap-3 py-3"
+                        onSubmit={handleSubmit(onSubmit)}
+                    >
+                        <div className="gap-2 flex flex-col">
                             <label
                                 htmlFor="username"
-                                className="block text-sm font-semibold text-[--site-main-Login-Text]"
+                                className="text-md font-medium text-[--site-main-Login-Text]"
                             >
                                 Full name
                             </label>
                             <input
                                 type="text"
                                 name="username"
-                                className="block w-full px-4 py-2 mt-2 mb-2 text-[--site-main-Login] bg-[--site-main-color3] border rounded-md focus:border-[--site-main-Login-border-focus] focus:ring-[--site-main-Login-border-focus] focus:outline-none focus:ring focus:ring-opacity-40"
+                                className="w-full p-4 text-[--site-main-Login] border rounded-md border-gray-800"
                                 required
                                 placeholder="Please input your full name"
                                 {...register("username", {
@@ -85,44 +94,46 @@ const Register = () => {
                                     {errors.username.message}
                                 </p>
                             )}
-                            <label
-                                htmlFor="email"
-                                className="block text-sm font-semibold text-[--site-main-Login-Text]"
-                            >
-                                Email
-                            </label>
-                            <input
-                                type="email"
-                                name="email"
-                                className="block w-full px-4 py-2 mt-2 text-[--site-main-Login] bg-[--site-main-color3] border rounded-md focus:border-[--site-main-Login-border-focus] focus:ring-[--site-main-Login-border-focus] focus:outline-none focus:ring focus:ring-opacity-40"
-                                required
-                                placeholder="Please input your email address"
-                                {...register("email", {
-                                    required: "Email is required",
-                                    pattern: {
-                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
-                                        message: "Invalid email address",
-                                    },
-                                })}
-                            />
-                            {errors.email && (
-                                <p className="text-xs italic text-red-500">
-                                    {errors.email.message}
-                                </p>
-                            )}
+                            <div className="gap-2 flex flex-col">
+                                <label
+                                    htmlFor="email"
+                                    className="text-md font-medium text-[--site-main-Login-Text]"
+                                >
+                                    Email
+                                </label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    className="w-full p-4 text-[--site-main-Login] border rounded-md border-gray-800"
+                                    required
+                                    placeholder="Please input your email address"
+                                    {...register("email", {
+                                        required: "Email is required",
+                                        pattern: {
+                                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                                            message: "Invalid email address",
+                                        },
+                                    })}
+                                />
+                                {errors.email && (
+                                    <p className="text-xs italic text-red-500">
+                                        {errors.email.message}
+                                    </p>
+                                )}
+                            </div>
                         </div>
-                        <div className="mb-2">
+                        <div className="gap-2 flex flex-col">
                             <label
                                 htmlFor="password"
-                                className="block text-sm font-semibold text-[--site-main-Login-Text]"
+                                className="text-md font-medium text-[--site-main-Login-Text]"
                             >
                                 Password
                             </label>
                             <input
                                 type="password"
                                 name="password"
-                                className="block w-full px-4 py-2 mt-2 text-[--site-main-Login] bg-[--site-main-color3] border rounded-md focus:border-[--site-main-Login-border-focus] focus:ring-[--site-main-Login-border-focus] focus:outline-none focus:ring focus:ring-opacity-40"
-                                placeholder="********"
+                                className="w-full p-4 text-[--site-main-Login] border rounded-md border-gray-800"
+                                placeholder="Please input your password"
                                 {...register("password", {
                                     required: "Password is required",
                                     minLength: {
@@ -138,18 +149,18 @@ const Register = () => {
                                 </p>
                             )}
                         </div>
-                        <div className="mb-2">
+                        <div className="gap-2 flex flex-col">
                             <label
                                 htmlFor="confirm"
-                                className="block text-sm font-semibold text-[--site-main-Login-Text]"
+                                className="text-md font-medium text-[--site-main-Login-Text]"
                             >
                                 Confirm Password
                             </label>
                             <input
                                 type="password"
                                 name="confirm"
-                                className="block w-full px-4 py-2 mt-2 text-[--site-main-Login] bg-[--site-main-color3] border rounded-md focus:border-[--site-main-Login-border-focus] focus:ring-[--site-main-Login-border-focus] focus:outline-none focus:ring focus:ring-opacity-40"
-                                placeholder="********"
+                                className="w-full p-4 text-[--site-main-Login] border rounded-md border-gray-800"
+                                placeholder="Please re-enter your password"
                                 {...register("confirm", {
                                     required: "Confirm password is required",
                                     validate: (value) =>
@@ -163,54 +174,51 @@ const Register = () => {
                                 </p>
                             )}
                         </div>
-                        <div className="mb-2">
-                            <div className="flex items-start w-full select-none">
-                                <input
-                                    id="link-checkbox"
-                                    type="checkbox"
-                                    onChange={() => setCheckbox(!checkbox)}
-                                    className="mt-[2px] w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                                />
-                                <label
-                                    htmlFor="link-checkbox"
-                                    className="ml-2 text-sm font-thin text-gray-900 dark:text-[--site-card-icon]"
+
+                        <div className="flex items-start w-full select-none gap-2">
+                            <input
+                                id="link-checkbox"
+                                type="checkbox"
+                                onChange={() => setCheckbox(!checkbox)}
+                                className="mt-[2px] w-6 h-6 text-blue-600 bg-gray-100 border-gray-300 rounded"
+                            />
+                            <label
+                                htmlFor="link-checkbox"
+                                className="text-md font-medium text-[--site-main-Login-Text] flex gap-2 flex-col"
+                            >
+                                By registering for Interactive Tutor you hereby
+                                accept our user
+                                <a
+                                    href="https://www.interactive-tutor.com/user-terms-and-conditions"
+                                    className="text-blue-600 dark:text-blue-500 hover:underline"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                 >
-                                    By registering for Interactive Tutor you
-                                    hereby accept our user{" "}
-                                    <a
-                                        href="https://www.interactive-tutor.com/user-terms-and-conditions"
-                                        className="text-blue-600 dark:text-blue-500 hover:underline"
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                    >
-                                        terms and conditions
-                                    </a>
-                                    .
-                                </label>
-                            </div>
+                                    terms and conditions
+                                </a>
+                            </label>
                         </div>
                         <div className="mt-6">
                             {checkbox ? (
-                                <button className="normal-case w-full px-4 py-2 tracking-wide text-[--site-main-color3] transition-colors duration-200 transform bg-[--site-main-Login] rounded-md hover:bg-[--site-main-Login1] focus:outline-none focus:bg-[--site-main-Login1]">
+                                <Button type="submit" className="normal-case w-full p-4 text-md rounded-md bg-[--site-main-Login1] text-[--site-file-upload]">
                                     Register
-                                </button>
+                                </Button>
                             ) : (
-                                <button
-                                    className="normal-case w-full px-4 py-2 tracking-wide text-[--site-main-color3] transition-colors duration-200 transform bg-[--site-main-Login] rounded-md opacity-50 cursor-not-allowed"
+                                <Button
+                                    className="normal-case w-full p-4 text-md rounded-md bg-[--site-main-Login1] text-[--site-file-upload] opacity-50 cursor-not-allowed"
                                     disabled
                                 >
                                     Register
-                                </button>
+                                </Button>
                             )}
                         </div>
                     </form>
 
-                    <p className="mt-8 text-xs font-light text-center text-[--site-main-Login-Text]">
-                        {" "}
-                        Do you have an account?{" "}
+                    <p className="text-sm text-gray-600 flex gap-2 justify-center">
+                        <span>Already have an account?</span>
                         <Link
                             to="/"
-                            className="font-bold text-[--site-main-Login1] hover:underline"
+                            className="font-bold text-[--site-main-Login1]"
                         >
                             Login
                         </Link>

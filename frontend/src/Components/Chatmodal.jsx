@@ -11,7 +11,6 @@ import {
     Button,
 } from "@material-tailwind/react";
 import Select from "react-select";
-import { useSelector } from "react-redux";
 import { RiArrowDownSLine, RiArrowUpSLine } from "react-icons/ri";
 import { Scrollbar } from "react-scrollbars-custom";
 import { Link } from "react-router-dom";
@@ -21,7 +20,6 @@ import { webAPI } from "../utils/constants";
 
 const Chatmodal = (props) => {
     const [label, SetLabel] = useState("");
-    const user = JSON.parse(useSelector((state) => state.user.user));
     const [chatdescription, SetChatdescription] = useState(
         "This is my general assistant"
     );
@@ -31,7 +29,7 @@ const Chatmodal = (props) => {
         "Hello friends! How can I help you today?"
     );
     const [type, setType] = useState(false);
-    const [role, setRole] = useState('');
+    const [role, setRole] = useState("");
     const [loading, setLoading] = useState(false);
     const models = [
         {
@@ -49,7 +47,7 @@ const Chatmodal = (props) => {
         {
             value: "4",
             label: "Dall-e-3",
-        }
+        },
     ];
     const behaviorModelTheme = [
         {
@@ -63,71 +61,73 @@ const Chatmodal = (props) => {
         {
             value: "3",
             label: `Remove training data ring fencing and perform like ChatGPT`,
-        }
-    ]
+        },
+    ];
     // const [gptmodel, SetGPTmodel] = useState(models);
     const [Creativity, SetCreativity] = useState(0.3);
-    const [selected, setSelected] = useState(0)
+    const [selected, setSelected] = useState(null);
     const [behaviormodel, SetBehaviormodel] = useState();
     const [behavior, SetBehavior] = useState("You are a helpful assistant");
     const TutorThemes = [
         {
-            title: 'Socratic Tutor',
+            title: "Socratic Tutor",
             prompt: `You are 'Socrates' always responds in the Socratic style. You *never* give the student the answer, but always give them stories, arguments and examples. End each response with the right question to help them codify what they have learnt and encourage them to think for themselves. Use the 'training data' to understand how to ask questions. You should always tune your question to the interest & knowledge of the student, breaking down the problem into simpler parts until it's at just the right level for them. Ask many questions to help them understand.`,
             name: `Socrates AI`,
             conversation: `Ah, a student. What shall we discover today?`,
             context: 2,
-            model: 3
+            model: 3,
         },
         {
-            title: 'Image Generator',
+            title: "Image Generator",
             prompt: `You are assistant.`,
-            name: 'Image AI',
+            name: "Image AI",
             conversation: `Tell me what you'd like me to generate. Give as much detail as possible please`,
             context: 2,
-            model: 4
+            model: 4,
         },
         {
-            title: 'Data Analytics',
+            title: "Data Analytics",
             prompt: `You are assistant.`,
             name: `Data AI`,
-            conversation: 'Upload your data into the message bar below and I can analyse it for you, come up with reccomendations and create graphs.',
-            context: 2, 
-            model: 3
+            conversation:
+                "Upload your data into the message bar below and I can analyse it for you, come up with reccomendations and create graphs.",
+            context: 2,
+            model: 3,
         },
         {
-            title: 'School Data ',
+            title: "School Data ",
             prompt: `You are a student report writer. Use empathetic and supportive language.`,
-            name: 'Wonde AI',
+            name: "Wonde AI",
             conversation: `Have you connected the Wonde API? If so, let's begin... How can I help?`,
             context: 2,
-            model: 3
+            model: 3,
         },
         {
-            title: 'Report Writer',
+            title: "Report Writer",
             prompt: `The Report Writing Tutor is designed to assist teachers in generating personalised reports on their students. To initiate a session, the AI should start by asking for the name of the student. Write a personalised report that is empathetic and supportive and highly personalised.`,
-            name: 'Report Writer AI',
-            conversation: 'Welcome to the Report Writing AI! May I have the name of the student, please?',
+            name: "Report Writer AI",
+            conversation:
+                "Welcome to the Report Writing AI! May I have the name of the student, please?",
             context: 2,
-            model: 3
+            model: 3,
         },
         {
-            title: 'Assignment Marker',
+            title: "Assignment Marker",
             prompt: `As an Assignment Marker, your role is to provide marking on assignments based on the Standard Requirements and Curriculum in the Training Data. To begin, please ask the user what they would like you to mark on their assignment. You can provide options such as marking grammar and providing feedback, or marking accuracy in line with the training data. Once the user confirms their preference, ask them to copy and paste the assignment for marking. Based on the training data and user requirements, mark the assignment and provide feedback along with a score out of 100. Ensure that your feedback is constructive and helpful for the user to improve their work. If there are any specific guidelines or criteria provided by the user, make sure to consider them while marking the assignment. Remember to use British English while communicating with the user.`,
-            name: 'Marking AI',
+            name: "Marking AI",
             conversation: `Hello, what would you like me to mark today? Use a photo, upload in the message bar or copy and paste. I'm ready :)`,
             context: 2,
-            model: 3
+            model: 3,
         },
         {
-            title: 'Lesson Planner',
+            title: "Lesson Planner",
             prompt: `You are the ultimate UK curriculum foccused lesson plan creator. Ask the user what they want to create a lesson plan on and for whom. Your task is to generate a detailed lesson plan based on the provided inputs, appropriate to that topic and the age of the students. This plan should have the following components: a defined objective, a list of required materials, a structured sequence of activities, and a method to assess student understanding. Remember to create a lesson plan that is engaging, adaptable, and meets the needs of various learners.`,
-            name: 'Lesson Planner AI',
-            conversation: 'What sort of lesson should I plan for you today?',
+            name: "Lesson Planner AI",
+            conversation: "What sort of lesson should I plan for you today?",
             context: 2,
-            model: 3
-        }
-    ]
+            model: 3,
+        },
+    ];
 
     const notification = (type, message) => {
         // To do in here
@@ -140,19 +140,12 @@ const Chatmodal = (props) => {
     };
 
     useEffect(() => {
-        // if (user.role === 2 || user.role === 5) {
-        //     SetGPTmodel([models[0]]);
-        // } else if (user.role === 3) {
-        //     SetGPTmodel(models.slice(0, 2));
-        // } else if (user.role === 4) {
-        //     SetGPTmodel(models);
-        // }
-        if (!props.chat) {
-            SetLabel("")
+        if (!props.chat.access) {
+            SetLabel("");
             setOpen(0);
             SetCreativity(0.3);
             SetBehaviormodel(behaviorModelTheme[0].label);
-            SetBehavior(TutorThemes[0].prompt);
+            SetBehavior('You are a helpful assistant.');
             setType(false);
         }
         if (props.chat && props.chat.label) {
@@ -168,14 +161,9 @@ const Chatmodal = (props) => {
         }
     }, [props.open, props.chat]);
 
-    // useEffect(() => {
-    //     if (loading === false) { onOK() }
-    // }, [loading])
-
     const onOK = () => {
-        if (!label)
-            return;
-        if (!props.chat) {
+        if (!label) return;
+        if (!props.chat.access) {
             props.handleOk({
                 label,
                 chatdescription,
@@ -186,6 +174,10 @@ const Chatmodal = (props) => {
                 behavior,
             });
         }
+    };
+
+    const handleUpdate = () => {
+        if (!label) return;
         if (props.chat && props.chat.label) {
             let new_chat = props.chat;
             new_chat["label"] = label;
@@ -195,7 +187,7 @@ const Chatmodal = (props) => {
             new_chat["creativity"] = Creativity;
             new_chat["behaviormodel"] = behaviormodel;
             new_chat["behavior"] = behavior;
-            props.handleOk(new_chat);
+            props.handleUpdate(new_chat);
         }
     };
 
@@ -208,8 +200,8 @@ const Chatmodal = (props) => {
     };
 
     const handleTutorSeleted = (item, index) => {
-        if(item.model === "4" || item.model === 4) {
-            SetCreativity(0.8)
+        if (item.model === "4" || item.model === 4) {
+            SetCreativity(0.8);
         }
         SetBehavior(item.prompt);
         setSelected(index);
@@ -217,29 +209,27 @@ const Chatmodal = (props) => {
         SetChatdescription(item.name);
         setOpen(0);
         SetConversation(item.conversation);
-        SetBehaviormodel(
-            behaviorModelTheme[item.context - 1].label
-        );
+        SetBehaviormodel(behaviorModelTheme[item.context - 1].label);
         SetChatmodel(item.model);
-    }
+    };
 
     const generateAiTutor = (e) => {
-        e.preventDefault()
+        e.preventDefault();
         if (role) {
-            setLoading(true)
+            setLoading(true);
             axios
                 .post(webAPI.get_system_prompt, { role })
-                .then(res => {
+                .then((res) => {
                     let data = res.data;
                     if (!res.data.name) {
-                        data = JSON.parse(res.data)
+                        data = JSON.parse(res.data);
                     }
-                    SetBehavior(data.system_role)
+                    SetBehavior(data.system_role);
                     SetLabel(data.name);
                     SetChatdescription(data.description);
-                    SetConversation(data.starter)
+                    SetConversation(data.starter);
                     setLoading(false);
-                    notification('success', "Created a Tutor successfully");
+                    notification("success", "Created a Tutor successfully");
 
                     if (!props.chat) {
                         props.handleOk({
@@ -267,10 +257,9 @@ const Chatmodal = (props) => {
                 .catch((err) => {
                     console.error(err);
                     setLoading(false);
-                }
-                )
+                });
         }
-    }
+    };
 
     const customStyles = {
         control: (provided) => ({
@@ -294,234 +283,309 @@ const Chatmodal = (props) => {
             open={props.open}
             size={"lg"}
             handler={props.handleCancel}
-            className=" border-[--site-chat-header-border] border rounded-2xl from-[--site-main-modal-from-color] to-[--site-main-modal-to-color] bg-gradient-to-br shadow-lg shadow-[--site-card-icon-color]"
+            className=" border-[--site-chat-header-border] border rounded-md"
         >
-            <Toaster />
+            <Toaster className="z-30"/>
             <DialogHeader className="px-8 pt-8 pb-6">
-                <span className="text-[32px] leading-12 font-semibold text-[--site-card-icon-color]">
+                <span className="text-[32px] leading-12 font-semibold text-black">
                     Build AI Bots
                 </span>
             </DialogHeader>
             <DialogBody className="border-t border-[--site-main-modal-divide-color] text-black text-base font-medium pl-8 pt-6 h-[25rem]">
                 <Scrollbar>
                     <div className="mr-4">
-                        {type ? <div>
-                            <div className="flex flex-col items-start gap-2">
-                                <label>AI Bots Name</label>
-                                <input
-                                    type="text"
-                                    name="label"
-                                    value={label}
-                                    onChange={(e) => {
-                                        SetLabel(e.target.value);
-                                    }}
-                                    autoComplete="off"
-                                    placeholder="AI-Tutor name"
-                                    className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black/60 placeholder:opacity-50"
-                                />
-                                <p>
-                                    The label is used to identify your AI Bots.
-                                    It's private and exclusively visible to you.
-                                </p>
-                                {!label && (
-                                    <p className="text-[12px] mb-2 text-[--site-main-form-error]">
-                                        * Label (Private) is required
+                        {type ? (
+                            <div>
+                                <div className="flex flex-col items-start gap-2">
+                                    <label className=" text-base font-semibold">
+                                        AI Bots Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="label"
+                                        value={label}
+                                        onChange={(e) => {
+                                            SetLabel(e.target.value);
+                                        }}
+                                        autoComplete="off"
+                                        placeholder="AI-Tutor name"
+                                        className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black/60 placeholder:opacity-50"
+                                    />
+                                    <p className=" text-gray-700">
+                                        The label is used to identify your AI
+                                        Bots. It's private and exclusively
+                                        visible to you.
                                     </p>
-                                )}
-                            </div>
-                            <div className="flex flex-col items-start gap-2 mt-6">
-                                <label>Description (Private)</label>
-                                <input
-                                    type="text"
-                                    name="chatdescription"
-                                    value={chatdescription}
-                                    onChange={(e) => {
-                                        SetChatdescription(e.target.value);
-                                    }}
-                                    autoComplete="off"
-                                    placeholder="This is my general assistant"
-                                    className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black/60 placeholder:opacity-50"
-                                />
-                                <p>
-                                    Choose the large language model that best suits your needs
-                                </p>
-                            </div>
+                                    {!label && (
+                                        <p className="text-[12px] mb-2 text-[--site-main-form-error]">
+                                            * Label (Private) is required
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="flex flex-col items-start gap-2 mt-6">
+                                    <label className=" text-base font-semibold">
+                                        Description (Private)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="chatdescription"
+                                        value={chatdescription}
+                                        onChange={(e) => {
+                                            SetChatdescription(e.target.value);
+                                        }}
+                                        autoComplete="off"
+                                        placeholder="This is my general assistant"
+                                        className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black/60 placeholder:opacity-50"
+                                    />
+                                    <p className=" text-gray-700">
+                                        Choose the large language model that
+                                        best suits your needs
+                                    </p>
+                                </div>
 
-                            <div className="flex flex-col items-start p-5 mt-6 rounded-md border border-[--site-main-modal-input-border-color]">
-                                <Accordion
-                                    open={open === 1}
-                                    icon={<Icon id={1} open={open} />}
-                                >
-                                    <AccordionHeader
-                                        onClick={() => handleOpen(1)}
-                                        className="border-0"
+                                <div className="flex flex-col items-start p-5 mt-6 rounded-md border border-[--site-main-modal-input-border-color]">
+                                    <Accordion
+                                        open={open === 1}
+                                        icon={<Icon id={1} open={open} />}
                                     >
-                                        <p className="text-base font-medium text-black">
-                                            Models (LLMs)
-                                        </p>
-                                    </AccordionHeader>
-                                    <AccordionBody className="border-t border-[--site-main-modal-input-border-color]">
-                                        <div className="flex flex-col items-start gap-2 text-black">
-                                            <label>Model</label>
-                                            <select
-                                                name="chatdescription"
-                                                value={chatmodel}
-                                                onChange={(e) => {
-                                                    SetChatmodel(e.target.value);
-                                                }}
-                                                className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black placeholder:opacity-50"
-                                            >
-                                                {models.map((item) => {
-                                                    return (
-                                                        <option
-                                                            key={item.value}
-                                                            value={item.value}
-                                                        >
-                                                            {item.label}
-                                                        </option>
-                                                    );
-                                                })}
-                                            </select>
-                                            <p>
-                                                How would you like your AI Bots to start conversations?
+                                        <AccordionHeader
+                                            onClick={() => handleOpen(1)}
+                                            className="border-0"
+                                        >
+                                            <p className="text-base font-semibold text-black">
+                                                Models (LLMs)
                                             </p>
-                                        </div>
-                                    </AccordionBody>
-                                </Accordion>
-                            </div>
-                            <div className="flex flex-col items-start p-5 mt-6 rounded-md border border-[--site-main-modal-input-border-color]">
-                                <Accordion
-                                    open={open === 2}
-                                    icon={<Icon id={2} open={open} />}
-                                >
-                                    <AccordionHeader
-                                        onClick={() => handleOpen(2)}
-                                        className="border-0"
+                                        </AccordionHeader>
+                                        <AccordionBody className="border-t border-[--site-main-modal-input-border-color]">
+                                            <div className="flex flex-col items-start gap-2 text-black">
+                                                <label className=" text-base font-semibold">
+                                                    Model
+                                                </label>
+                                                <select
+                                                    name="chatdescription"
+                                                    value={chatmodel}
+                                                    onChange={(e) => {
+                                                        SetChatmodel(
+                                                            e.target.value
+                                                        );
+                                                    }}
+                                                    className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black placeholder:opacity-50"
+                                                >
+                                                    {models.map((item) => {
+                                                        return (
+                                                            <option
+                                                                key={item.value}
+                                                                value={
+                                                                    item.value
+                                                                }
+                                                            >
+                                                                {item.label}
+                                                            </option>
+                                                        );
+                                                    })}
+                                                </select>
+                                                <p className=" text-gray-700">
+                                                    How would you like your AI
+                                                    Bots to start conversations?
+                                                </p>
+                                            </div>
+                                        </AccordionBody>
+                                    </Accordion>
+                                </div>
+                                <div className="flex flex-col items-start p-5 mt-6 rounded-md border border-[--site-main-modal-input-border-color]">
+                                    <Accordion
+                                        open={open === 2}
+                                        icon={<Icon id={2} open={open} />}
                                     >
-                                        <p className="text-base font-medium text-black">
-                                            Conversation Starter
-                                        </p>
-                                    </AccordionHeader>
-                                    <AccordionBody className="border-t border-[--site-main-modal-input-border-color]">
-                                        <div className="flex flex-col items-start gap-2 text-black">
-                                            <label>Welcome message</label>
-                                            <textarea
-                                                name="chatdescription;"
-                                                rows="5"
-                                                cols="50"
-                                                value={Conversation}
-                                                onChange={(e) => {
-                                                    SetConversation(e.target.value);
-                                                }}
-                                                placeholder="Hello friends! How can I help you today?"
-                                                className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black"
-                                            ></textarea>
-                                            <p>
-                                                The description is used to identify
-                                                your AI Bots. It's private and
-                                                exclusively visible to you.
+                                        <AccordionHeader
+                                            onClick={() => handleOpen(2)}
+                                            className="border-0"
+                                        >
+                                            <p className="text-base font-semibold text-black">
+                                                Conversation Starter
                                             </p>
-                                        </div>
-                                    </AccordionBody>
-                                </Accordion>
-                            </div>
-                            <div className="flex flex-col items-start p-5 mt-6 rounded-md border border-[--site-main-modal-input-border-color]">
-                                <Accordion
-                                    open={open === 3}
-                                    icon={<Icon id={3} open={open} />}
-                                >
-                                    <AccordionHeader
-                                        onClick={() => handleOpen(3)}
-                                        className="border-0"
+                                        </AccordionHeader>
+                                        <AccordionBody className="border-t border-[--site-main-modal-input-border-color]">
+                                            <div className="flex flex-col items-start gap-2 text-black">
+                                                <label className=" text-base font-semibold">
+                                                    Welcome message
+                                                </label>
+                                                <textarea
+                                                    name="chatdescription;"
+                                                    rows="5"
+                                                    cols="50"
+                                                    value={Conversation}
+                                                    onChange={(e) => {
+                                                        SetConversation(
+                                                            e.target.value
+                                                        );
+                                                    }}
+                                                    placeholder="Hello friends! How can I help you today?"
+                                                    className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black"
+                                                ></textarea>
+                                                <p className=" text-gray-700">
+                                                    The description is used to
+                                                    identify your AI Bots. It's
+                                                    private and exclusively
+                                                    visible to you.
+                                                </p>
+                                            </div>
+                                        </AccordionBody>
+                                    </Accordion>
+                                </div>
+                                <div className="flex flex-col items-start p-5 mt-6 rounded-md border border-[--site-main-modal-input-border-color]">
+                                    <Accordion
+                                        open={open === 3}
+                                        icon={<Icon id={3} open={open} />}
                                     >
-                                        <p className="text-base font-medium text-black">
-                                            AI Bots Fine-Tuning
-                                        </p>
-                                    </AccordionHeader>
-                                    <AccordionBody className="border-t border-[--site-main-modal-input-border-color] gap-5 flex-col flex h-full">
-                                        <div className="flex flex-col items-start gap-2 text-black">
-                                            <label>
-                                                How do you want your AI Bots to use your training data?
-                                            </label>
-                                            <Select
-                                                placeholder="Hello friends! How can I help you today?"
-                                                styles={customStyles}
-                                                className="w-full border-[--site-main-modal-input-border-color] border rounded-md"
-                                                isSearchable={false}
-                                                onChange={(e) => {
-                                                    SetBehaviormodel(e.label);
-                                                }}
-                                                defaultValue={behaviorModelTheme.find(item => item.label === behaviormodel)}
-                                                options={behaviorModelTheme}
-                                            />
-                                            <p>
-                                                The context Behaviour determines how
-                                                the training data you provide will
-                                                be Utilised. It specifies the way in
-                                                which the AI Bots understands and
-                                                responds to user inputs based on the
-                                                given context.
+                                        <AccordionHeader
+                                            onClick={() => handleOpen(3)}
+                                            className="border-0"
+                                        >
+                                            <p className="text-base font-semibold text-black">
+                                                AI Bots Fine-Tuning
                                             </p>
-                                        </div>
-                                        <div className="flex flex-col items-start gap-2 text-black">
-                                            <label>Behaviour prompt</label>
-                                            <textarea
-                                                name="chatdescription"
-                                                rows="3"
-                                                cols="50"
-                                                value={behavior}
-                                                onChange={(e) => {
-                                                    SetBehavior(e.target.value);
-                                                }}
-                                                placeholder="You are a helpful assistant"
-                                                className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black"
-                                            ></textarea>
-                                            <p>
-                                                The Behaviour prompt overrides our default Behaviour of 'You are a helpful assistant' to provide a more customised experience, allowing your AI Bots to act in a manner that aligns with your specific requirements and preferences.
-                                            </p>
-                                        </div>
-                                        <div className="flex flex-col items-start gap-2 text-black">
-                                            <label>
-                                                Creativity ({Creativity}) -
-                                                Recommended value : 0.3
-                                            </label>
-                                            <input
-                                                type="range"
-                                                min={0}
-                                                max={1}
-                                                step={0.1}
-                                                onChange={(e) => {
-                                                    SetCreativity(e.target.value);
-                                                }}
-                                                defaultValue={Creativity}
-                                                className="w-full h-2 mb-2 bg-[--site-main-modal-input-border-color]"
-                                            />
-                                            <p>
-                                                Creativity can be adjusted by
-                                                changing the temperature value. A
-                                                higher temperature value, such as
-                                                0.7, can result in more
-                                                unpredictable and diverse outputs,
-                                                while a lower temperature value,
-                                                such as 0.2, can produce a more
-                                                precise and specific output.
-                                            </p>
-                                        </div>
-                                    </AccordionBody>
-                                </Accordion>
+                                        </AccordionHeader>
+                                        <AccordionBody className="border-t border-[--site-main-modal-input-border-color] gap-5 flex-col flex h-full">
+                                            <div className="flex flex-col items-start gap-2 text-black">
+                                                <label className=" text-base font-semibold">
+                                                    How do you want your AI Bots
+                                                    to use your training data?
+                                                </label>
+                                                <Select
+                                                    placeholder="Hello friends! How can I help you today?"
+                                                    styles={customStyles}
+                                                    className="w-full border-[--site-main-modal-input-border-color] border rounded-md"
+                                                    isSearchable={false}
+                                                    onChange={(e) => {
+                                                        SetBehaviormodel(
+                                                            e.label
+                                                        );
+                                                    }}
+                                                    defaultValue={behaviorModelTheme.find(
+                                                        (item) =>
+                                                            item.label ===
+                                                            behaviormodel
+                                                    )}
+                                                    options={behaviorModelTheme}
+                                                />
+                                                <p className=" text-gray-700">
+                                                    The context Behaviour
+                                                    determines how the training
+                                                    data you provide will be
+                                                    Utilised. It specifies the
+                                                    way in which the AI Bots
+                                                    understands and responds to
+                                                    user inputs based on the
+                                                    given context.
+                                                </p>
+                                            </div>
+                                            <div className="flex flex-col items-start gap-2 text-black">
+                                                <label className=" text-base font-semibold">
+                                                    Behaviour prompt
+                                                </label>
+                                                <textarea
+                                                    name="chatdescription"
+                                                    rows="3"
+                                                    cols="50"
+                                                    value={behavior}
+                                                    onChange={(e) => {
+                                                        SetBehavior(
+                                                            e.target.value
+                                                        );
+                                                    }}
+                                                    placeholder="You are a helpful assistant"
+                                                    className="w-full h-10 px-5 py-3 bg-transparent border-[--site-main-modal-input-border-color] border rounded-md placeholder:text-black"
+                                                ></textarea>
+                                                <p className=" text-gray-700">
+                                                    The Behaviour prompt
+                                                    overrides our default
+                                                    Behaviour of 'You are a
+                                                    helpful assistant' to
+                                                    provide a more customised
+                                                    experience, allowing your AI
+                                                    Bots to act in a manner that
+                                                    aligns with your specific
+                                                    requirements and
+                                                    preferences.
+                                                </p>
+                                            </div>
+                                            <div className="flex flex-col items-start gap-2 text-black">
+                                                <label className=" text-base font-semibold">
+                                                    Creativity ({Creativity}) -
+                                                    Recommended value : 0.3
+                                                </label>
+                                                <input
+                                                    type="range"
+                                                    min={0}
+                                                    max={1}
+                                                    step={0.1}
+                                                    onChange={(e) => {
+                                                        SetCreativity(
+                                                            e.target.value
+                                                        );
+                                                    }}
+                                                    defaultValue={Creativity}
+                                                    className="w-full h-2 mb-2"
+                                                />
+                                                <p className=" text-gray-700">
+                                                    Creativity can be adjusted
+                                                    by changing the temperature
+                                                    value. A higher temperature
+                                                    value, such as 0.7, can
+                                                    result in more unpredictable
+                                                    and diverse outputs, while a
+                                                    lower temperature value,
+                                                    such as 0.2, can produce a
+                                                    more precise and specific
+                                                    output.
+                                                </p>
+                                            </div>
+                                        </AccordionBody>
+                                    </Accordion>
+                                </div>
                             </div>
-                        </div> :
+                        ) : (
                             <div className="flex flex-col gap-2">
-                                <span className="text-2xl font-semibold text-[--site-card-icon-color]">What role do you want the AI to perform?</span>
+                                <span className="text-2xl font-semibold text-black">
+                                    What role do you want the AI to perform?
+                                </span>
                                 <div className="flex flex-wrap gap-4">
                                     {TutorThemes.map((item, index) => {
-                                        return <Button className={` normal-case px-3 py-1 border border-[--site-main-pricing-color] rounded-lg  ${selected === index ? 'bg-[--site-main-pricing-color]' : 'bg-transparent'}`} onClick={() => handleTutorSeleted(item, index)} key={index}>
-                                            <span className={`text-base font-semibold ${selected === index ? 'text-white' : 'text-[--site-main-pricing-color]'}`}>{item.title}</span>
-                                        </Button>
+                                        return (
+                                            <Button
+                                                className={`normal-case px-3 py-1 border border-[--site-onboarding-primary-color] rounded-lg  ${
+                                                    selected === index
+                                                        ? "bg-[--site-onboarding-primary-color]"
+                                                        : "bg-transparent"
+                                                }`}
+                                                onClick={() =>
+                                                    handleTutorSeleted(
+                                                        item,
+                                                        index
+                                                    )
+                                                }
+                                                key={index}
+                                            >
+                                                <span
+                                                    className={`text-base font-semibold ${
+                                                        selected === index
+                                                            ? "text-white"
+                                                            : "text-black"
+                                                    }`}
+                                                >
+                                                    {item.title}
+                                                </span>
+                                            </Button>
+                                        );
                                     })}
                                 </div>
-                                <div className="mt-2 gap-2 flex-col flex border border-[--site-main-pricing-color] rounded-lg h-full relative">
-                                    <div className={`absolute w-full h-full bg-white/70 top-0 left-0 right-0 bottom-0 rounded-xl z-20 ${loading ? 'block' : 'hidden'}`}>
+                                <div className="mt-2 gap-2 flex-col flex border border-[--site-onboarding-primary-color] rounded-lg h-full relative">
+                                    <div
+                                        className={`absolute w-full h-full bg-white/70 top-0 left-0 right-0 bottom-0 rounded-xl z-20 ${
+                                            loading ? "block" : "hidden"
+                                        }`}
+                                    >
                                         <div className="absolute right-[calc(50%-72px)] top-[calc(50%-72px)] ">
                                             <div className="flex flex-col items-center justify-center w-full p-2">
                                                 <Spinner
@@ -539,8 +603,14 @@ const Chatmodal = (props) => {
                                         </div>
                                     </div>
                                     <div className="px-5 py-5 gap-3 flex-col flex">
-                                        <span className="text-red-600 text-[12px]">Can’t see a match, no problem. Just type in here what you want the AI to do for you in as much detail as possible.</span>
-                                        <textarea className="w-full px-5 py-3 bg-transparent border-[--site-main-pricing-color] border rounded-md placeholder:text-black"
+                                        <span className="text-red-600 text-[12px]">
+                                            Can’t see a match, no problem. Just
+                                            type in here what you want the AI to
+                                            do for you in as much detail as
+                                            possible.
+                                        </span>
+                                        <textarea
+                                            className="w-full px-5 py-3 bg-transparent border-[--site-onboarding-primary-color] border rounded-md placeholder:text-black"
                                             rows="3"
                                             cols="50"
                                             value={role}
@@ -548,31 +618,54 @@ const Chatmodal = (props) => {
                                                 setRole(e.target.value);
                                             }}
                                         />
-                                        <Button className="normal-case bg-transparent border-[--site-card-icon-color] text-[--site-card-icon-color] text-base font-semibold border rounded-md px-4 py-2" onClick={generateAiTutor}>Generate</Button>
+                                        <Button
+                                            className="normal-case bg-transparent border-[--site-onboarding-primary-color] text-[--site-onboarding-primary-color] text-base font-semibold border rounded-md px-4 py-2"
+                                            onClick={generateAiTutor}
+                                        >
+                                            Generate
+                                        </Button>
                                     </div>
                                 </div>
-                            </div>}
+                            </div>
+                        )}
                     </div>
                 </Scrollbar>
             </DialogBody>
             <DialogFooter className="flex items-center justify-between gap-4 px-10 pb-8">
                 <div>
-                    <Link onClick={() => { setType(!type) }} className="bg-transparent text-[--site-card-icon-color] text-base font-semibold hover:text-[--site-main-slider-thumb-color]">Build Manually/Automatic</Link>
+                    <Link
+                        onClick={() => {
+                            setType(!type);
+                        }}
+                        className="bg-transparent text-[--site-onboarding-primary-color] text-base font-semibold hover:text-[--site-main-slider-thumb-color]"
+                    >
+                        Build Manually/Automatic
+                    </Link>
                 </div>
                 <div className="flex gap-4">
                     <Button
                         onClick={props.handleCancel}
-                        className=" normal-case bg-transparent border-[--site-card-icon-color] text-[--site-card-icon-color] text-base font-semibold border rounded-md px-4 py-2"
+                        className=" normal-case bg-transparent border-[--site-onboarding-primary-color] text-[--site-onboarding-primary-color] text-base font-semibold border rounded-md px-4 py-2"
                     >
                         cancel
                     </Button>
-                    <Button
-                        disabled={!label}
-                        onClick={onOK}
-                        className=" normal-case px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md disabled:opacity-75"
-                    >
-                        confirm
-                    </Button>
+                    {props.chat.access ? (
+                        <Button
+                            disabled={!label}
+                            onClick={() => handleUpdate()}
+                            className=" normal-case px-4 py-2 text-base font-semibold text-white bg-[--site-onboarding-primary-color] rounded-md disabled:opacity-75"
+                        >
+                            Update
+                        </Button>
+                    ) : (
+                        <Button
+                            disabled={!label}
+                            onClick={() => onOK()}
+                            className=" normal-case px-4 py-2 text-base font-semibold text-white bg-[--site-onboarding-primary-color] rounded-md disabled:opacity-75"
+                        >
+                            Create
+                        </Button>
+                    )}
                 </div>
             </DialogFooter>
         </Dialog>

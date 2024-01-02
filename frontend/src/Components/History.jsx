@@ -2,18 +2,18 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Scrollbar } from "react-scrollbars-custom";
 import { dracula, CopyBlock } from "react-code-blocks";
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeMathjax from 'rehype-mathjax';
-import remarkMath from 'remark-math';
-import rehypeRaw from 'rehype-raw';
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeMathjax from "rehype-mathjax";
+import remarkMath from "remark-math";
+import rehypeRaw from "rehype-raw";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { webAPI } from "../utils/constants";
 import axios from "axios";
 
 const History = (props) => {
     const [history, setHistory] = useState([]);
-    const [message, setMessage] = useState([]);
+    const [index, setIndex] = useState(0);
     const chat = JSON.parse(useSelector((state) => state.chat.chat));
     const chatbot = useSelector((state) => state.chat.chatbot);
     useEffect(() => {
@@ -21,7 +21,7 @@ const History = (props) => {
     }, [props.data]);
 
     const handleMessage = (index) => {
-        setMessage(history[index].message);
+        setIndex(index);
     };
 
     const handleDelete = (item, index) => {
@@ -38,18 +38,18 @@ const History = (props) => {
     };
     return (
         <div className="flex flex-col w-full h-screen p-6 sm:flex-row">
-            <div className="flex flex-col h-1/3 sm:w-1/3 sm:h-screen text-[--site-card-icon-color] pb-6">
+            <div className="flex flex-col h-1/3 sm:w-1/3 sm:h-screen text-[--site-hisotry-text] pb-6">
                 <Scrollbar>
-                    {history.map((item, index) => {
+                    {history.map((item, id) => {
                         return (
                             <div
-                                key={index}
-                                onClick={() => handleMessage(index)}
-                                className={
-                                    index % 2
-                                        ? "p-2 flex items-center justify-center w-full gap-3 bg-[#C1FF72] rounded-xl mb-2"
-                                        : "p-2 flex items-center justify-center w-full gap-3 bg-[#2DC937] rounded-xl mb-2"
-                                }
+                                key={id}
+                                onClick={() => handleMessage(id)}
+                                className={`p-2 flex items-center justify-center w-full gap-3 ${
+                                    index === id
+                                        ? "bg-[--site-threedot-background]"
+                                        : "bg-[--site-history-background]"
+                                }  rounded-xl mb-2`}
                             >
                                 <img
                                     src={chat.chat_logo.user}
@@ -62,10 +62,8 @@ const History = (props) => {
                                         <span>{item.update_data}</span>
                                     </span>
                                     <RiDeleteBin6Line
-                                        className="active:fill-[--site-card-icon-color] fill-[--site-error-text-color]"
-                                        onClick={() =>
-                                            handleDelete(item, index)
-                                        }
+                                        className="active:fill-[--site-card-icon-color] fill-[--site-history-delete-color]"
+                                        onClick={() => handleDelete(item, id)}
                                     />
                                 </div>
                             </div>
@@ -74,10 +72,10 @@ const History = (props) => {
                 </Scrollbar>
             </div>
             <div className="sm:h-screen h-2/3 sm:w-2/3">
-                {message && (
+                {history[index] && history[index].message && (
                     <Scrollbar name="scroll content">
-                        {message &&
-                            message.map((data, index) => {
+                        {history[index].message &&
+                            history[index].message.map((data, index) => {
                                 return data.role === "human" && data.content ? (
                                     <div
                                         name="human_bg"
@@ -123,55 +121,169 @@ const History = (props) => {
                                                 className="flex flex-col w-full p-2 break-words whitespace-normal"
                                             >
                                                 <ReactMarkdown
-                                                        remarkPlugins={[remarkGfm, remarkMath]}
-                                                        rehypePlugins={[rehypeMathjax, rehypeRaw]}
-                                                        children={data.content}
-                                                        className="break-words whitespace-normal"
-                                                        components={{
-                                                            code({ inline, className, children, ...props }) {
-                                                                const match = /language-(\w+)/.exec(className || '')
-                                                                if (!inline && match) {
-                                                                    // remove the newline character at the end of children, if it exists
-                                                                    const codeString = String(children).replace(/\n$/, '');
-
-                                                                    return (
-                                                                        <CopyBlock
-                                                                            text={codeString}
-                                                                            language={match[1]}
-                                                                            showLineNumbers={false}
-                                                                            wrapLongLines
-                                                                            theme={dracula}
-                                                                            {...props}
-                                                                        />
-                                                                    );
-                                                                }
-                                                                return <code className={className} {...props}>{children}</code>;
-                                                            },
-                                                            table({ children, ...props }) {
-                                                                return (
-                                                                    <table style={{ borderCollapse: 'collapse', width: '100%', fontFamily: 'Arial, sans-serif', fontSize: '14px' }} {...props}>
-                                                                        {children}
-                                                                    </table>
+                                                    remarkPlugins={[
+                                                        remarkGfm,
+                                                        remarkMath,
+                                                    ]}
+                                                    rehypePlugins={[
+                                                        rehypeMathjax,
+                                                        rehypeRaw,
+                                                    ]}
+                                                    children={data.content}
+                                                    className="break-words whitespace-normal"
+                                                    components={{
+                                                        code({
+                                                            inline,
+                                                            className,
+                                                            children,
+                                                            ...props
+                                                        }) {
+                                                            const match =
+                                                                /language-(\w+)/.exec(
+                                                                    className ||
+                                                                        ""
                                                                 );
-                                                            },
-                                                            tr({ children, ...props }) {
-                                                                return <tr style={{ backgroundColor: '#f8f8f8' }} {...props}>{children}</tr>;
-                                                            },
-                                                            td({ children, ...props }) {
-                                                                return <td style={{ padding: '8px', border: '1px solid #ddd' }} {...props}>{children}</td>;
-                                                            },
-                                                            th({ children, ...props }) {
-                                                                return <th style={{ padding: '8px', border: '1px solid #ddd', fontWeight: 'bold', textAlign: 'left' }} {...props}>{children}</th>;
-                                                            },
-                                                            a({ href, children, ...props }) {
+                                                            if (
+                                                                !inline &&
+                                                                match
+                                                            ) {
+                                                                // remove the newline character at the end of children, if it exists
+                                                                const codeString =
+                                                                    String(
+                                                                        children
+                                                                    ).replace(
+                                                                        /\n$/,
+                                                                        ""
+                                                                    );
+
                                                                 return (
-                                                                    <a style={{ color: '#007bff', textDecoration: 'none' }} href={href} target="_blank" rel="noopener noreferrer" {...props}>
-                                                                        {children}
-                                                                    </a>
+                                                                    <CopyBlock
+                                                                        text={
+                                                                            codeString
+                                                                        }
+                                                                        language={
+                                                                            match[1]
+                                                                        }
+                                                                        showLineNumbers={
+                                                                            false
+                                                                        }
+                                                                        wrapLongLines
+                                                                        theme={
+                                                                            dracula
+                                                                        }
+                                                                        {...props}
+                                                                    />
                                                                 );
                                                             }
-                                                        }}
-                                                    />
+                                                            return (
+                                                                <code
+                                                                    className={
+                                                                        className
+                                                                    }
+                                                                    {...props}
+                                                                >
+                                                                    {children}
+                                                                </code>
+                                                            );
+                                                        },
+                                                        table({
+                                                            children,
+                                                            ...props
+                                                        }) {
+                                                            return (
+                                                                <table
+                                                                    style={{
+                                                                        borderCollapse:
+                                                                            "collapse",
+                                                                        width: "100%",
+                                                                        fontFamily:
+                                                                            "Arial, sans-serif",
+                                                                        fontSize:
+                                                                            "14px",
+                                                                    }}
+                                                                    {...props}
+                                                                >
+                                                                    {children}
+                                                                </table>
+                                                            );
+                                                        },
+                                                        tr({
+                                                            children,
+                                                            ...props
+                                                        }) {
+                                                            return (
+                                                                <tr
+                                                                    style={{
+                                                                        backgroundColor:
+                                                                            "#f8f8f8",
+                                                                    }}
+                                                                    {...props}
+                                                                >
+                                                                    {children}
+                                                                </tr>
+                                                            );
+                                                        },
+                                                        td({
+                                                            children,
+                                                            ...props
+                                                        }) {
+                                                            return (
+                                                                <td
+                                                                    style={{
+                                                                        padding:
+                                                                            "8px",
+                                                                        border: "1px solid #ddd",
+                                                                    }}
+                                                                    {...props}
+                                                                >
+                                                                    {children}
+                                                                </td>
+                                                            );
+                                                        },
+                                                        th({
+                                                            children,
+                                                            ...props
+                                                        }) {
+                                                            return (
+                                                                <th
+                                                                    style={{
+                                                                        padding:
+                                                                            "8px",
+                                                                        border: "1px solid #ddd",
+                                                                        fontWeight:
+                                                                            "bold",
+                                                                        textAlign:
+                                                                            "left",
+                                                                    }}
+                                                                    {...props}
+                                                                >
+                                                                    {children}
+                                                                </th>
+                                                            );
+                                                        },
+                                                        a({
+                                                            href,
+                                                            children,
+                                                            ...props
+                                                        }) {
+                                                            return (
+                                                                <a
+                                                                    style={{
+                                                                        color: "#007bff",
+                                                                        textDecoration:
+                                                                            "none",
+                                                                    }}
+                                                                    href={href}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    {...props}
+                                                                >
+                                                                    {children}
+                                                                </a>
+                                                            );
+                                                        },
+                                                    }}
+                                                />
                                             </div>
                                         </div>
                                     </div>

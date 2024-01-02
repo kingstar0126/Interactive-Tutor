@@ -18,7 +18,7 @@ const Switch = (props) => {
             className={
                 "flex items-center w-12 h-6 p-1 border border-white rounded-full cursor-pointer md:w-14 md:h-7 " +
                 (toggle
-                    ? "bg-[--site-main-color6]"
+                    ? "bg-gray-400"
                     : "bg-[--site-card-icon-color]")
             }
             onClick={() => {
@@ -28,7 +28,7 @@ const Switch = (props) => {
             {/* Switch */}
             <div
                 className={
-                    "bg-[--site-logo-text-color] md:w-6 md:h-6 h-5 w-5 rounded-full shadow-md transform duration-300 ease-in-out" +
+                    "bg-[--site-main-color1] md:w-6 md:h-6 h-5 w-5 rounded-full shadow-md transform duration-300 ease-in-out" +
                     (toggle ? null : toggleClass)
                 }
             ></div>

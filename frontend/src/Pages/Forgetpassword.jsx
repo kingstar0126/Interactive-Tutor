@@ -5,6 +5,7 @@ import axios from "axios";
 import { webAPI } from "../utils/constants";
 import toast, { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
+import { Button } from "@material-tailwind/react";
 
 const Forgetpassword = () => {
     const {
@@ -30,25 +31,30 @@ const Forgetpassword = () => {
     };
 
     return (
-        <div className="bg-[--site-main-color-home] font-logo h-screen px-2 pb-10">
+        <div className="font-logo pb-10 px-2 flex flex-col">
             <Header />
-            <Toaster />
-            <div className="mt-[100px]">
-                <div className="w-full p-6 m-auto bg-[--site-main-color3] rounded-md lg:max-w-xl">
-                    <h1 className="text-3xl font-semibold text-center text-[--site-main-Login] underline uppercase">
-                        Password reset
-                    </h1>
-                    <form className="mt-6" onSubmit={handleSubmit(onSubmit)}>
-                        <div className="mb-2">
+            <Toaster className="z-30"/>
+            <div>
+                <div className="container p-6 m-auto rounded-md lg:max-w-xl flex flex-col gap-5">
+                    <div className="flex flex-col gap-2">
+                        <span className="text-3xl font-semibold text-start text-[--site-main-Login1]">
+                            Password reset
+                        </span>
+                    </div>
+                    <form
+                        className="flex flex-col gap-3 py-3"
+                        onSubmit={handleSubmit(onSubmit)}
+                    >
+                        <div className="gap-2 flex flex-col">
                             <label
                                 htmlFor="email"
-                                className="block text-sm font-semibold text-[--site-main-Login-Text]"
+                                className="text-md font-medium text-[--site-main-Login-Text]"
                             >
                                 Email
                             </label>
                             <input
                                 type="email"
-                                className="block w-full px-4 py-2 mt-2 text-[--site-main-Login] bg-[--site-main-color3] border rounded-md focus:border-[--site-main-Login-border-focus] focus:ring-[--site-main-Login-border-focus] focus:outline-none focus:ring focus:ring-opacity-40"
+                                className="w-full p-4 text-[--site-main-Login] border rounded-md border-gray-800"
                                 placeholder="Please input your email address"
                                 {...register("email", {
                                     required:
@@ -66,18 +72,18 @@ const Forgetpassword = () => {
                             )}
                         </div>
                         <div className="mt-6">
-                            <button className="normal-case w-full px-4 py-2 tracking-wide text-[--site-main-color3] transition-colors duration-200 transform bg-[--site-main-Login] rounded-md hover:bg-[--site-main-Login1] focus:outline-none focus:bg-[--site-main-Login1]">
+                            <Button type="submit" className="normal-case w-full p-4 text-md rounded-md bg-[--site-main-Login1] text-[--site-file-upload]">
                                 Reset
-                            </button>
+                            </Button>
                         </div>
                     </form>
 
-                    <p className="mt-8 text-xs font-light text-center text-[--site-main-Login-Text]">
+                    <p className="text-sm text-gray-600 flex gap-2 justify-center">
                         {" "}
                         Don't have an account?{" "}
                         <Link
                             to="/"
-                            className="font-bold text-[--site-main-Login1] hover:underline"
+                            className="font-bold text-[--site-main-Login1]"
                         >
                             Login
                         </Link>

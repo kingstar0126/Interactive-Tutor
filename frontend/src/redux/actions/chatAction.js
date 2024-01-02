@@ -4,6 +4,7 @@ import { ADD_CHAT } from "../type";
 import { GET_CHAT } from "../type";
 import { SET_CHATBOT } from "../type";
 import { GET_CHATBOT } from "../type";
+import { UPDATE_CHAT } from "../type";
 
 import axios from "axios";
 
@@ -42,4 +43,8 @@ export const getchatbot = (dispatch, data) => {
             else notification("error", stringConstant.FAILED_GET_DATA);
         })
         .catch((err) => console.log(err));
+};
+
+export const updatechatbot = (dispatch, data) => {
+    dispatch({ type: UPDATE_CHAT, payload: data });
 };

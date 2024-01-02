@@ -49,17 +49,15 @@ export const webAPI = {
     create_product: SERVER_URL + "/api/create/product", // user_id
     // get_products: SERVER_URL + "/api/getproducts",
     get_all_products: SERVER_URL + "/api/getallproducts",
-    update_product: SERVER_URL + "/api/update/product", //user_id, product_id
+    updateProducts: SERVER_URL + "/api/updateproducts",
+
     cancel_subscription: SERVER_URL + "/api/cancel/subscription",
-    delete_product: SERVER_URL + "/api/delete/product", //user_id, product_id
-    delete_all_product: SERVER_URL + "/api/delete/all_products", //user_id
 
     create_checkout: SERVER_URL + "/api/create/checkout/session",
     create_checkout_query: SERVER_URL + "/api/create/checkout/session/query",
     create_customer: SERVER_URL + "/api/create-customer",
     updateSubscription: SERVER_URL + "/api/update/subscription",
 
-    getaccess_AI_Tutor: SERVER_URL + "/api/getaccess_ai_tutor", //chatbot uuid to get pin code and organization code
     getquery: SERVER_URL + "/api/getquery",
     getChatwithPIN: SERVER_URL + "/api/getchatwithpin",
     change_user_limitation: SERVER_URL + "/api/change_user_limitation",
@@ -79,4 +77,8 @@ export const webAPI = {
 
     streamingTest: SERVER_URL + "/api/testStreaming",
     closeAccount: SERVER_URL + "/api/closeAccunt",
+
+    dashboard: SERVER_URL + "/api/dashboardchat",
+    sharechatbot: SERVER_URL + "/api/sharechatbot",
+    publishchat: SERVER_URL + "/api/publishchat",
 };

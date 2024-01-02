@@ -36,10 +36,10 @@ const Embedded = (props) => {
             open={props.open}
             size={"lg"}
             handler={props.handleCancel}
-            className="border-[--site-chat-header-border] border rounded-2xl from-[--site-main-modal-from-color] to-[--site-main-modal-to-color] bg-gradient-to-br shadow-lg shadow-[--site-card-icon-color]"
+            className="border-[--site-chat-header-border] border rounded-md shadow-lg shadow-[--site-onboarding-primary-color]"
         >
             <DialogHeader className="px-8 pt-8 pb-6">
-                <span className="text-[32px] leading-12 font-semibold text-[--site-card-icon-color]">
+                <span className="text-[32px] leading-12 font-semibold text-[--site-onboarding-primary-color]">
                     Embed or Share
                 </span>
             </DialogHeader>
@@ -60,11 +60,11 @@ const Embedded = (props) => {
                                         ref={chatbot_organization}
                                         defaultValue={chat.organization}
                                         readOnly
-                                        className="w-full rounded-xl text-[--site-card-icon-color] p-5 bg-transparent border-[--site-chat-header-border] border"
+                                        className="w-full rounded-xl text-[--site-onboarding-primary-color] p-5 bg-transparent border-[--site-chat-header-border] border"
                                     />
                                 </div>
                                 <button
-                                    className="bg-[--site-card-icon-color] text-white py-2 px-4 gap-2 rounded-md mx-5"
+                                    className="bg-[--site-onboarding-primary-color] text-white py-2 px-4 gap-2 rounded-md mx-5"
                                     onClick={() => {
                                         chatbot_organization.current.select();
                                         document.execCommand("copy");
@@ -79,11 +79,11 @@ const Embedded = (props) => {
                                         ref={chatbot_access}
                                         defaultValue={chat.access}
                                         readOnly
-                                        className="w-full rounded-xl text-[--site-card-icon-color] p-5 bg-transparent border-[--site-chat-header-border] border"
+                                        className="w-full rounded-xl text-[--site-onboarding-primary-color] p-5 bg-transparent border-[--site-chat-header-border] border"
                                     />
                                 </div>
                                 <button
-                                    className="bg-[--site-card-icon-color] text-white py-2 px-4 gap-2 rounded-md mx-5"
+                                    className="bg-[--site-onboarding-primary-color] text-white py-2 px-4 gap-2 rounded-md mx-5"
                                     onClick={() => {
                                         chatbot_access.current.select();
                                         document.execCommand("copy");
@@ -112,11 +112,11 @@ const Embedded = (props) => {
                                         cols={40}
                                         defaultValue={chatURL}
                                         readOnly
-                                        className="w-full rounded-xl text-[--site-card-icon-color] p-5 bg-transparent border-[--site-chat-header-border] border"
+                                        className="w-full rounded-xl text-[--site-onboarding-primary-color] p-5 bg-transparent border-[--site-chat-header-border] border"
                                     />
                                 </div>
                                 <button
-                                    className="bg-[--site-card-icon-color] text-white py-2 px-4 gap-2 rounded-md mx-5"
+                                    className="bg-[--site-onboarding-primary-color] text-white py-2 px-4 gap-2 rounded-md mx-5"
                                     onClick={() => {
                                         chatbot_URL.current.select();
                                         document.execCommand("copy");
@@ -143,11 +143,11 @@ const Embedded = (props) => {
                                         cols={40}
                                         readOnly
                                         defaultValue={chatwindow}
-                                        className="w-full rounded-xl text-[--site-card-icon-color] p-5 bg-transparent border-[--site-chat-header-border] border"
+                                        className="w-full rounded-xl text-[--site-onboarding-primary-color] p-5 bg-transparent border-[--site-chat-header-border] border"
                                     />
                                 </div>
                                 <button
-                                    className="bg-[--site-card-icon-color] text-white py-2 px-4 gap-2 rounded-md mx-5"
+                                    className="bg-[--site-onboarding-primary-color] text-white py-2 px-4 gap-2 rounded-md mx-5"
                                     onClick={() => {
                                         chatbot_window.current.select();
                                         document.execCommand("copy");
@@ -174,11 +174,11 @@ const Embedded = (props) => {
                                         cols={40}
                                         defaultValue={bubble}
                                         readOnly
-                                        className="w-full rounded-xl text-[--site-card-icon-color] p-5 bg-transparent border-[--site-chat-header-border] border"
+                                        className="w-full rounded-xl text-[--site-onboarding-primary-color] p-5 bg-transparent border-[--site-chat-header-border] border"
                                     />
                                 </div>
                                 <button
-                                    className="bg-[--site-card-icon-color] text-white py-2 px-4 gap-2 rounded-md mx-5"
+                                    className="bg-[--site-onboarding-primary-color] text-white py-2 px-4 gap-2 rounded-md mx-5"
                                     onClick={() => {
                                         chatbot_bubble.current.select();
                                         document.execCommand("copy");
@@ -194,14 +194,14 @@ const Embedded = (props) => {
             <DialogFooter className="flex items-center justify-end gap-4 px-10 pb-8">
                 <button
                     onClick={props.handleCancel}
-                    className="bg-transparent border-[--site-card-icon-color] text-[--site-card-icon-color] text-base font-semibold border rounded-md px-4 py-2"
+                    className="bg-transparent border-[--site-onboarding-primary-color] text-[--site-onboarding-primary-color] text-base font-semibold border rounded-md px-4 py-2"
                 >
                     cancel
                 </button>
 
                 <button
                     onClick={props.handleOk}
-                    className="px-4 py-2 text-base font-semibold text-white bg-[--site-card-icon-color] rounded-md"
+                    className="px-4 py-2 text-base font-semibold text-white bg-[--site-onboarding-primary-color] rounded-md"
                 >
                     confirm
                 </button>

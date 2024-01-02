@@ -3,6 +3,7 @@ import notification from "../../utils/notification";
 import { SET_USER, GET_USER_ACCOUNT } from "../type";
 import axios from "axios";
 import { CHANGE_USER } from "../type";
+import { SET_QUERY } from "../type";
 
 export const getUser = (dispatch, data) => {
     axios
@@ -31,6 +32,7 @@ export const getUseraccount = (dispatch, data) => {
         .then((res) => {
             if (res.status === 200) {
                 if (res.data.success) {
+                    dispatch({ type: SET_QUERY, payload: res.data.data.query });
                     dispatch({
                         type: GET_USER_ACCOUNT,
                         payload: JSON.stringify(res.data.data),

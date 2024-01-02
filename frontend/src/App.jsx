@@ -1,5 +1,5 @@
 import { useRoutes } from "react-router-dom";
-import {AppRoutes, AppRoutes_login} from "./routes";
+import {AppRoutes} from "./routes";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import "./App.css";

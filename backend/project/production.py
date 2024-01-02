@@ -32,6 +32,7 @@ def get_all_product():
     for production in sorted_productions:
         price = stripe.Price.retrieve(production.price_id)
         data = {
+            'id': production.id,
             'price': price.unit_amount/100,
             'price_id': production.price_id,
             'name': production.name,
@@ -45,6 +46,25 @@ def get_all_product():
         'data': current_user,
         'code': 200
     })
+
+@product.route('/api/updateproducts', methods=['POST'])
+def update_product():
+    id = request.json['id']
+    price_id = request.json['price_id']
+    name = request.json['name']
+    price = request.json['price']
+    description = request.json['description']
+    product = db.session.query(Production).filter_by(id=id).first()
+    if product:
+        product.price_id = price_id
+        product.name = name
+        product.price = price
+        product.description = json.dumps(description)
+        db.session.commit()
+    return jsonify({
+        'success': True
+    })
+
 
 
 @product.route('/api/createproduct', methods=['POST'])
