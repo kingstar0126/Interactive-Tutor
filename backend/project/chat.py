@@ -209,6 +209,7 @@ def update_brandingData():
 def send_email():
     try:
         email = request.json['email']
+        email = email.lower()
         library = request.json['chat']
         user = db.session.query(User).filter_by(email=email).first()
         if user is None:
@@ -760,6 +761,7 @@ def get_report_data():
 @chat.route('/api/transfer_tutor', methods=['POST'])
 def transfer_tutor_customer():
     email = request.json['email']
+    email = email.lower()
     id = request.json['id']
     chat = db.session.query(Chat).filter_by(id=id).first()
     user = db.session.query(User).filter_by(email=email).first()

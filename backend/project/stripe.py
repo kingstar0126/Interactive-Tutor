@@ -20,6 +20,7 @@ def create_customer():
     id = request.json['id']
     username = request.json['name']
     email = request.json['email']
+    email = email.lower()
     city = request.json['city']
     state = request.json['state']
     country = request.json['country']
