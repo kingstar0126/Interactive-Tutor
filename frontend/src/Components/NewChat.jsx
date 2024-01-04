@@ -117,7 +117,8 @@ const NewChat = () => {
   }, []);
 
   const chatbot_start = useMemo(() => {
-    if (chat.conversation !== "" && chathistory.length == 0) {
+    console.log('hhhih', chat, chathistory)
+    if (chat.conversation && chat.conversation !== "" && chathistory.length == 0) {
       setChathistory([
         ...chathistory,
         { role: "ai", content: chat.conversation },
