@@ -71,7 +71,7 @@ const PublishModal = (props) => {
   const [userrole, setUserrole] = useState("");
 
   useEffect(() => {
-    if (props.chat.access) {
+    if (props.chat) {
       setChat(props.chat);
       setLabel(props.chat.label);
       setChatdescription(props.chat.description);

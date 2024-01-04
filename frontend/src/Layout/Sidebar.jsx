@@ -58,7 +58,7 @@ const Sidebar = () => {
   const isUpdate = useSelector((state) => state.chat.isUpdate);
   const query = useSelector((state) => state.query.query);
   const [chats, setChats] = useState([]);
-  const [currentChat, setCurrentChat] = useState({});
+  const [currentChat, setCurrentChat] = useState(null);
 
   const notification = (type, message) => {
     // To do in here
@@ -136,7 +136,7 @@ const Sidebar = () => {
   };
 
   const handleCancel = () => {
-    getChats();
+    // getChats();
     setIsChatModalOpen(false);
     setIsPublishModalOpen(false);
   };
@@ -196,18 +196,29 @@ const Sidebar = () => {
       notification("error", "You have to subscribe to use this feature!");
     } else {
       setCurrentChat(chat);
-      getchat(dispatch, chat);
-      navigate(`chat/newchat/${chat.uuid}`);
     }
   };
 
+  useEffect(() => {
+    setCurrentChat(chats?.find((chat) => chat.id === currentChat?.id));
+  }, [chats]);
+
+  useEffect(() => {
+    if (currentChat?.id) {
+      getchat(dispatch, currentChat);
+      navigate(`chat/newchat/${currentChat.uuid}`);
+    }
+  }, [currentChat]);
+
   const handleEditBot = (chat) => {
     if (user.role !== 0 && user.role !== 5) {
+      setCurrentChat(chat);
       setIsChatModalOpen(true);
     }
   };
   const handleShareBot = (chat) => {
     if (user.role !== 0 && user.role !== 5) {
+      setCurrentChat(chat);
       axios
         .post(webAPI.sharechatbot, { chat, id: user.id })
         .then((res) => {
@@ -222,6 +233,7 @@ const Sidebar = () => {
   };
   const handlePublishBot = (chat) => {
     if (user.role !== 0 && user.role !== 5) {
+      setCurrentChat(chat);
       setIsPublishModalOpen(true);
     }
   };
@@ -257,7 +269,7 @@ const Sidebar = () => {
       <div className="flex flex-col w-full h-1/2">
         <div className="flex pr-8 pl-6 w-full">
           <div
-            className="w-1/3 flex p-3"
+            className="w-1/3 flex p-3 hover:cursor-pointer"
             onClick={() => navigate("chat/dashboard")}
           >
             <img
@@ -288,7 +300,7 @@ const Sidebar = () => {
             <Button
               onClick={() => {
                 if (user && user.role !== 0 && user.role !== 5) {
-                  setCurrentChat({});
+                  setCurrentChat(null)
                   setIsChatModalOpen(true);
                 } else {
                   notification(
@@ -323,9 +335,11 @@ const Sidebar = () => {
                             className="w-full relative flex gap-2 items-center hover:bg-[--site-bot-background-hover] rounded-md text-white hover:text-black group hover:cursor-default transition-all duration-300 ease-in-out p-2"
                             style={{
                               backgroundColor:
-                                currentChat.uuid === chat.uuid ? "#C7C7F2" : "",
+                                currentChat?.uuid === chat.uuid
+                                  ? "#C7C7F2"
+                                  : "",
                               color:
-                                currentChat.uuid === chat.uuid ? "black" : "",
+                                currentChat?.uuid === chat.uuid ? "black" : "",
                             }}
                             key={chat.access}
                             onClick={() => handleBotClick(chat)}
@@ -429,9 +443,11 @@ const Sidebar = () => {
                             className="w-full relative flex gap-2 items-center hover:bg-[--site-bot-background-hover] rounded-md text-white hover:text-black group hover:cursor-default transition-all duration-300 ease-in-out p-2"
                             style={{
                               backgroundColor:
-                                currentChat.uuid === chat.uuid ? "#C7C7F2" : "",
+                                currentChat?.uuid === chat.uuid
+                                  ? "#C7C7F2"
+                                  : "",
                               color:
-                                currentChat.uuid === chat.uuid ? "black" : "",
+                                currentChat?.uuid === chat.uuid ? "black" : "",
                             }}
                             key={chat.access}
                             onClick={() => handleBotClick(chat)}
@@ -608,7 +624,7 @@ const Sidebar = () => {
           <button
             onClick={() => {
               axios
-                .delete(`${webAPI.deletechat}/${currentChat.id}`)
+                .delete(`${webAPI.deletechat}/${currentChat?.id}`)
                 .then((res) => {
                   notification("success", res.data.message);
                   getChats();
