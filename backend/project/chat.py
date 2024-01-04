@@ -280,7 +280,6 @@ def update_chat():
         }
     else:
         # Update the chat's properties with the new values
-
         chats = db.session.query(Chat).filter_by(inviteId=chat.user_id).all()
         for item in chats:
             if item.label == chat.label and item.description == chat.description and item.model == chat.model and item.conversation == chat.conversation and item.creativity == chat.creativity and item.behavior == chat.behavior:
@@ -291,6 +290,7 @@ def update_chat():
                 item.creativity = creativity
                 item.behavior = behavior
                 item.behaviormodel = behaviormodel
+                item.uuid = str(uuid.uuid4())
         chat.label = label
         chat.description = description
         chat.model = model
@@ -298,6 +298,7 @@ def update_chat():
         chat.creativity = creativity
         chat.behavior = behavior
         chat.behaviormodel = behaviormodel
+        chat.uuid = str(uuid.uuid4())
         # Save the updated chat to the database
         db.session.commit()
 
