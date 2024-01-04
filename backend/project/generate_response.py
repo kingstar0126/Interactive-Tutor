@@ -89,7 +89,7 @@ def generate_message(query, behavior, temp, model, chat, template, openai_api_ke
     chain_type_kwargs = {"prompt": prompt}
 
     if model == "1":
-        llm = ChatOpenAI(model_name="gpt-3.5",
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo-1106",
                          temperature=temp,
                          streaming=True,
                          callbacks=[QueueCallback(q)],
