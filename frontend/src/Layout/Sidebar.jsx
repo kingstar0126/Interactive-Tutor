@@ -251,7 +251,7 @@ const Sidebar = () => {
   };
 
   const handleOpen = (value) => setOpen(open === value ? 0 : value);
-
+  const logoUrl = 'https://interactive-tutor-prod-public-assets.s3.eu-west-2.amazonaws.com/logo.png';
   return (
     <div className="flex h-full flex-col">
       <div className="flex flex-col w-full h-1/2">
@@ -261,7 +261,7 @@ const Sidebar = () => {
             onClick={() => navigate("chat/dashboard")}
           >
             <img
-              src={`${SERVER_URL}${Logo}`}
+              src={logoUrl}
               alt="logo"
               className="w-full h-full"
             />

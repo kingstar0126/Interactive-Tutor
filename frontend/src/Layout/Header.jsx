@@ -3,6 +3,7 @@ import Logo from "../assets/logo.png";
 import { SERVER_URL } from "../config/constant";
 
 const Header = () => {
+    const logoUrl = 'https://interactive-tutor-prod-public-assets.s3.eu-west-2.amazonaws.com/logo.png';
     let location = useLocation();
 
     return (
@@ -12,7 +13,7 @@ const Header = () => {
                     <div className="flex">
                         <a href="/">
                             <img
-                                src={`${SERVER_URL}${Logo}`}
+                                src={logoUrl}
                                 className="w-[100px] h-full "
                                 alt="logo"
                             />
