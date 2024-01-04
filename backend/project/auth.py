@@ -56,6 +56,7 @@ auth = Blueprint('auth', __name__)
 @auth.route('/api/login',  methods=['POST'])
 def login_post():
     email = request.json['email']
+    email = email.lower()
     password = request.json['password']
     user = db.session.query(User).filter_by(email=email).first()
 
@@ -184,6 +185,7 @@ def register_new_user(username, email, password):
 @auth.route('/api/reset', methods=['POST'])
 def reset():
     email = request.json['email']
+    email = email.lower()
     user = User.verify_email(email)
     if user:
         password = send_email(user)
@@ -197,6 +199,7 @@ def reset():
 @auth.route('/api/change', methods=['POST'])
 def changepassword():
     email = request.json['email']
+    email = email.lower()
     current_password = request.json['old password']
     password = request.json['password']
 
@@ -224,6 +227,7 @@ def changepassword():
 def signup_post():
     username = request.json['username']
     email = request.json['email']
+    email = email.lower()
     password = request.json['password']
     user = db.session.query(User).filter_by(email=email).first()
 
@@ -268,6 +272,7 @@ def email_verification():
 def add_user_account():
     username = request.json['username']
     email = request.json['email']
+    email = email.lower()
     password = request.json['password']
     role = 5
     status = 0
@@ -484,6 +489,7 @@ def change_account_status():
 @auth.route('/api/change_user_limitation', methods=['POST'])
 def Change_user_limitation():
     email = request.json['email']
+    email = email.lower()
     query = request.json['query']
     train = request.json['train']
     tutors = request.json['tutor']
@@ -513,6 +519,7 @@ def change_useraccount():
     id = request.json['id']
     username = request.json['username']
     email = request.json['email']
+    email = email.lower()
     contact = request.json['phone']
     state = request.json['state']
     city = request.json['city']
@@ -556,6 +563,7 @@ def upgrade_custom_plan():
 def invite_email():
     id = request.json['id']
     email = request.json['email']
+    email = email.lower()
     index = request.json['index']
     user = db.session.query(User).filter_by(id=id).first()
     invite_user = db.session.query(User).filter_by(email=email).first()
@@ -609,6 +617,7 @@ def get_invite_emails():
 def remove_invite_email():
     id = request.json['id']
     email = request.json['email']
+    email = email.lower()
     invite = db.session.query(Invite).filter_by(user_id=id, email=email)
     if invite:
         invite.delete()
@@ -620,6 +629,7 @@ def resendInvitation():
     id = request.json['id']
     user = db.session.query(User).filter_by(id=id).first()
     email = request.json['email']
+    email = email.lower()
     msg = Message('Invite to the interactive tutor', sender=os.getenv('MAIL_USERNAME'), recipients=[email])
     msg.html = render_template(
         'enterprise.html', username=user.username, url=f"http://13.133.183.77/register?email={email}"
@@ -655,6 +665,7 @@ def sendUserInvite():
 def removeUserInvite():
     id = request.json['id']
     email = request.json['email']
+    email = email.lower()
     user = db.session.query(User).filter_by(email=email).first()
     if user:
         chats = db.session.query(Chat).filter_by(user_id=user.id, inviteId=id).all()
@@ -676,6 +687,7 @@ def removeUserInvite():
 def setTutors():
     id = request.json['id']
     email = request.json['email']
+    email = email.lower()
     chats = request.json['chats']
     user = db.session.query(User).filter_by(id=id).first()
     invite_user = db.session.query(User).filter_by(email=email).first()

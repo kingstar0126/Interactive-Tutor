@@ -141,9 +141,8 @@ def generate_message(query, behavior, temp, model, chat, template, openai_api_ke
             continue
 
 
-def generate_AI_message(query, history, behavior, temp, model, openai_api_key):
+def generate_AI_message_langchain(query, history, behavior, temp, model, openai_api_key):
     load_dotenv()
-
     if openai_api_key is None:
         openai_api_key = os.getenv('OPENAI_API_KEY')
 
@@ -216,6 +215,38 @@ def generate_AI_message(query, history, behavior, temp, model, openai_api_key):
             yield next_token, content
         except Empty:
             continue
+
+def generate_AI_message(query, history, behavior, temp, model, openai_api_key):
+    client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+    messages = []
+    messages.append({'role': 'system', 'content': behavior})
+    for item in history:
+        if item['role'] == 'human':
+            messages.append({'role': 'user', 'content': item['content']})
+        else:
+            messages.append({'role': 'assistant', 'content': item['content']})
+    messages.append({'role': 'user', 'content': query})
+
+
+    if model == "1":
+        model_name="gpt-3.5-turbo"
+    elif model == "2":
+        model_name="gpt-3.5-turbo-1106"
+    elif model == "3":
+        model_name="gpt-4-1106-preview"
+    response = client.chat.completions.create(
+        model=model_name,
+        temperature=temp,
+        stream=True,
+        messages=messages
+    )
+    content = ''
+    for chunk in response:
+        next_token = chunk.choices[0].delta.content
+        if next_token is not None:
+            content += next_token
+            yield next_token, content
+
 
 def generate_Bubble_message(query):
     load_dotenv()
