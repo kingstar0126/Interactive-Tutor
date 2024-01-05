@@ -314,7 +314,6 @@ def get_useraccount():
             'tutors': user.tutors,
             'training_datas': user.training_datas,
             'training_words': user.training_words,
-            'days': days
         }
         return jsonify({'success': True, 'data': new_user, 'code': 200})
     else:
