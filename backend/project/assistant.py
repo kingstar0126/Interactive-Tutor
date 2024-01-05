@@ -90,7 +90,6 @@ def delete_assistant_file(assistant_id, file_id):
                 file_id=file_id
             )
     client.files.delete(file_id)
-    print(response, '\n', assistant_id, '\n', file_id)
     # assistants = client.beta.assistants.list()    
     # delete_all_assistants(assistants)
     client.beta.assistants.delete(assistant_id)

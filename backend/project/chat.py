@@ -564,7 +564,13 @@ def get_chat_with_pin_organization():
 def get_chat():
     json_data = request.get_json()
     if json_data:
-        uuid = request.json['id']
+        uuid = json_data.get('id')
+        if uuid is None:
+            return jsonify({
+                    'success': False,
+                    'code': 404,
+                    'message': 'The Data not excited'
+                })
         chat = db.session.query(Chat).filter_by(uuid=uuid).first()
         if chat is None:
             return jsonify({
