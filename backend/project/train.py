@@ -517,8 +517,8 @@ def get_traindatas():
         
         user = db.session.query(User).filter_by(id=chat.user_id).first()
         invite_account = db.session.query(Invite).filter_by(email=user.email).first()
-        user_check = db.session.query(User).filter_by(id=invite_account.user_id).first() if invite_account else None
-        if user_check and user_check.role == 7:
+        user_check = db.session.query(User).filter_by(id=invite_account.user_id).first() if invite_account else user
+        if user_check and user_check.role == 7 and chat.api_select == 1:
             user = user_check
             if user.wonde_key:
                 data.append({'label': 'Wonde API',
@@ -536,8 +536,8 @@ def get_traindatas():
 def delete_traindatas():
     uuid = request.json['uuid']
     id = request.json.get('id')
+    chat = db.session.query(Chat).filter_by(uuid=uuid).first()
     if id:
-        chat = db.session.query(Chat).filter_by(uuid=uuid).first()
         train_ids = json.loads(chat.train)
         train_ids.remove(id)
         chat.train = json.dumps(train_ids)
@@ -576,10 +576,32 @@ def delete_traindatas():
             'success': True
         }
     else:
+        chat.api_select = 0 # Diselect the wonde API key
+        db.session.commit()
+        chat_data = {
+            'id': chat.id,
+            'label': chat.label,
+            'description': chat.description,
+            'model': chat.model,
+            'conversation': chat.conversation,
+            'access': chat.access,
+            'creativity': chat.creativity,
+            'behavior': chat.behavior,
+            'behaviormodel': chat.behaviormodel,
+            'uuid': chat.uuid,
+            'train': json.loads(chat.train),
+            'chat_logo': json.loads(chat.chat_logo),
+            'chat_title': json.loads(chat.chat_title),
+            'chat_description': json.loads(chat.chat_description),
+            'chat_copyright': json.loads(chat.chat_copyright),
+            'chat_button': json.loads(chat.chat_button),
+            'bubble': json.loads(chat.bubble),
+        }
         data = {
-            'code': 403,
-            'message': "You can't delete this traindata",
-            'success': False
+            'code': 200,
+            'message': "Succesfullu delete",
+            'data': chat_data,
+            'success': True
         }
     return jsonify(data)
 

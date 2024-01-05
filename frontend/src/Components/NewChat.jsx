@@ -117,8 +117,11 @@ const NewChat = () => {
   }, []);
 
   const chatbot_start = useMemo(() => {
-    console.log('hhhih', chat, chathistory)
-    if (chat.conversation && chat.conversation !== "" && chathistory.length == 0) {
+    if (
+      chat.conversation &&
+      chat.conversation !== "" &&
+      chathistory.length == 0
+    ) {
       setChathistory([
         ...chathistory,
         { role: "ai", content: chat.conversation },
@@ -882,7 +885,7 @@ const NewChat = () => {
                 onChange={handleUploadFile}
                 accept=".pdf,.docx,.doc,.csv"
               />
-              <div className="flex items-center w-full divide-x-2 sm:w-4/5 md:gap-2 gap-1">
+              <div className="flex flex-col items-center w-full divide-x-2 sm:w-4/5 md:gap-2 gap-1">
                 <div className="flex w-full flex-col py-2.5 relative">
                   <div className="flex p-3 absolute left-0 top-1/2 -translate-y-1/2">
                     <Menu placement="top">
@@ -928,79 +931,6 @@ const NewChat = () => {
                     className="w-full text-[--site-card-icon-color] px-10 py-3 border border-gray-600 focus:outline-none rounded-md"
                     placeholder="Type message"
                   ></textarea>
-                  <div className="flex flex-wrap gap-2">
-                    {image &&
-                      image.length > 0 &&
-                      image.map((item, index) => {
-                        return (
-                          <div className="relative" key={index}>
-                            <img
-                              src={URL.createObjectURL(item)}
-                              alt="file"
-                              className="w-10 h-10"
-                            />
-                            <AiOutlineClose
-                              onClick={() => handleRemoveImage(index)}
-                              className="absolute w-4 h-4 top-0 right-0 text-white rounded-full bg-red-600"
-                            />
-                          </div>
-                        );
-                      })}
-                    {files &&
-                      files.length > 0 &&
-                      files.map((file, index) => {
-                        let FileIcon;
-                        switch (file.type) {
-                          case "application/pdf":
-                            FileIcon = (
-                              <img
-                                src={PDF}
-                                alt="pdf-icon"
-                                className="w-10 h-10"
-                              />
-                            );
-                            break;
-                          case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-                            FileIcon = (
-                              <img
-                                src={WORD}
-                                alt="word-icon"
-                                className="w-10 h-10"
-                              />
-                            );
-                            break;
-                          case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                            FileIcon = (
-                              <img
-                                src={XLSX}
-                                alt="xlsx-icon"
-                                className="w-10 h-10"
-                              />
-                            );
-                            break;
-                          default:
-                            FileIcon = (
-                              <img
-                                src={CSV}
-                                alt="csv-icon"
-                                className="w-10 h-10"
-                              />
-                            );
-                            break;
-                          // If the type is not one of the above, display a default icon or simply omit this case
-                        }
-                        return (
-                          <div className="relative" key={index}>
-                            {FileIcon}
-                            <p className="truncate w-16">{file.name}</p>
-                            <AiOutlineClose
-                              onClick={() => handleRemoveFile(index)}
-                              className="absolute w-4 h-4 top-0 right-0 text-white rounded-full bg-red-600"
-                            />
-                          </div>
-                        );
-                      })}
-                  </div>
                   <span
                     onClick={handleSubmitIcon}
                     className="flex p-3 absolute right-0 top-1/2 -translate-y-1/2"
@@ -1009,6 +939,79 @@ const NewChat = () => {
                       <BsFillSendPlusFill className="w-5 h-5" />
                     </IconButton>
                   </span>
+                </div>
+                <div className="flex flex-wrap gap-2 w-full">
+                  {image &&
+                    image.length > 0 &&
+                    image.map((item, index) => {
+                      return (
+                        <div className="relative" key={index}>
+                          <img
+                            src={URL.createObjectURL(item)}
+                            alt="file"
+                            className="w-10 h-10"
+                          />
+                          <AiOutlineClose
+                            onClick={() => handleRemoveImage(index)}
+                            className="absolute w-4 h-4 top-0 right-0 text-white rounded-full bg-red-600"
+                          />
+                        </div>
+                      );
+                    })}
+                  {files &&
+                    files.length > 0 &&
+                    files.map((file, index) => {
+                      let FileIcon;
+                      switch (file.type) {
+                        case "application/pdf":
+                          FileIcon = (
+                            <img
+                              src={PDF}
+                              alt="pdf-icon"
+                              className="w-10 h-10"
+                            />
+                          );
+                          break;
+                        case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                          FileIcon = (
+                            <img
+                              src={WORD}
+                              alt="word-icon"
+                              className="w-10 h-10"
+                            />
+                          );
+                          break;
+                        case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                          FileIcon = (
+                            <img
+                              src={XLSX}
+                              alt="xlsx-icon"
+                              className="w-10 h-10"
+                            />
+                          );
+                          break;
+                        default:
+                          FileIcon = (
+                            <img
+                              src={CSV}
+                              alt="csv-icon"
+                              className="w-10 h-10"
+                            />
+                          );
+                          break;
+                        // If the type is not one of the above, display a default icon or simply omit this case
+                      }
+                      return (
+                        <div className="relative" key={index}>
+                          {FileIcon}
+                          <p className="truncate w-16">{file.name}</p>
+                          <AiOutlineClose
+                            onClick={() => handleRemoveFile(index)}
+                            className="absolute w-4 h-4 top-0 right-0 text-white rounded-full bg-red-600"
+                          />
+                        </div>
+                      );
+                    })}
                 </div>
               </div>
 

@@ -31,6 +31,11 @@ const Chatmodal = (props) => {
   const [type, setType] = useState(false);
   const [role, setRole] = useState("");
   const [loading, setLoading] = useState(false);
+  // const [gptmodel, SetGPTmodel] = useState(models);
+  const [Creativity, SetCreativity] = useState(0.3);
+  const [selected, setSelected] = useState(null);
+  const [behaviormodel, SetBehaviormodel] = useState();
+  const [behavior, SetBehavior] = useState("You are a helpful assistant");
   const models = [
     {
       value: "1",
@@ -63,11 +68,6 @@ const Chatmodal = (props) => {
       label: `Remove training data ring fencing and perform like ChatGPT`,
     },
   ];
-  // const [gptmodel, SetGPTmodel] = useState(models);
-  const [Creativity, SetCreativity] = useState(0.3);
-  const [selected, setSelected] = useState(null);
-  const [behaviormodel, SetBehaviormodel] = useState();
-  const [behavior, SetBehavior] = useState("You are a helpful assistant");
   const TutorThemes = [
     {
       title: "Socratic Tutor",
@@ -141,11 +141,14 @@ const Chatmodal = (props) => {
 
   useEffect(() => {
     if (!props.chat) {
+      setSelected(null);
       SetLabel("");
+      SetChatdescription('');
       setOpen(0);
       SetCreativity(0.3);
       SetBehaviormodel(behaviorModelTheme[0].label);
       SetBehavior("You are a helpful assistant.");
+      SetConversation('Hello')
       setType(false);
     }
     if (props.chat && props.chat.label) {
@@ -163,7 +166,7 @@ const Chatmodal = (props) => {
 
   const onOK = () => {
     if (!label) return;
-    if (!props.chat.access) {
+    if (!props.chat) {
       props.handleOk({
         label,
         chatdescription,
