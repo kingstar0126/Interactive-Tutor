@@ -106,7 +106,7 @@ const Sidebar = () => {
   }, []);
 
   useEffect(() => {
-    if (location.pathname.includes('dashboard')) {
+    if (location.pathname.includes("dashboard")) {
       getChats();
     }
   }, [location]);
@@ -197,7 +197,7 @@ const Sidebar = () => {
   };
 
   const handleBotClick = (chat) => {
-    if (user.role === 0 || user.role === 5) {
+    if (user.role === 0 || user.role === 5 || chats.length === 0) {
       notification("error", "You have to subscribe to use this feature!");
     } else {
       setCurrentChat(chat);
@@ -205,7 +205,9 @@ const Sidebar = () => {
   };
 
   useEffect(() => {
-    setCurrentChat(chats?.find((chat) => chat.id === currentChat?.id));
+    if (!location.pathname.includes("dashboard")) {
+      setCurrentChat(chats?.find((chat) => chat.id === currentChat?.id));
+    }
   }, [chats]);
 
   useEffect(() => {
