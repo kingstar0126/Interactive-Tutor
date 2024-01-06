@@ -45,11 +45,13 @@ const SubscriptionModal = (props) => {
   };
 
   useEffect(() => {
-    getSubscription();
-    getInviteEmails();
-    getUseraccount(dispatch, { id: user.id });
-    setType(true);
-  }, []);
+    if (props.open) {
+      getSubscription();
+      getInviteEmails();
+      getUseraccount(dispatch, { id: user.id });
+      setType(true);
+    }
+  }, [props.open]);
 
   const getClientReferenceId = () => {
     return (

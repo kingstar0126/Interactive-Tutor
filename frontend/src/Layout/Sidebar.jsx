@@ -31,7 +31,7 @@ import { Scrollbar } from "react-scrollbars-custom";
 import Chatmodal from "../Components/Chatmodal";
 import PublishModal from "../Components/PublishModal";
 import { CiEdit } from "react-icons/ci";
-
+import { getUseraccount } from "../redux/actions/userAction";
 import Share from "../assets/noun-books.svg";
 import Publish from "../assets/noun-publish.svg";
 import Subscription from "../assets/Icons.svg";
@@ -91,6 +91,7 @@ const Sidebar = () => {
       if (location) {
         setlocation(dispatch, location.pathname);
       }
+      getUseraccount(dispatch, {id: user.id});
       getChats();
       axios
         .post(webAPI.checkUserInvite, { id: user.id })
