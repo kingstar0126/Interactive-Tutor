@@ -102,7 +102,11 @@ const OnBoarding = () => {
             .post(webAPI.addchat, new_chat)
             .then((res) => {
               setLoading(false);
-              navigate("/chatbot/chat", { state: { forceRefresh: Date.now() }});
+              if (user.role !== 5 && user.role !== 0) {
+                navigate("/chatbot/chat", {
+                  state: { forceRefresh: Date.now() },
+                });
+              }
             })
             .catch((err) => setLoading(false));
         })
