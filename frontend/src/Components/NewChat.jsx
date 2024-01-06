@@ -233,7 +233,7 @@ const NewChat = () => {
       ai_background.current.style.color = chat.chat_logo.ai_color;
       ai_background.current.style["font-size"] = chat.chat_logo.ai_size + "px";
     }
-  }, [chathistory, streamData]);
+  }, [chathistory]);
 
   const handleSubmit = async (event) => {
     if (!event.shiftKey && event.keyCode === 13 && spinner === false) {
