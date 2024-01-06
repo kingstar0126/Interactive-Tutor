@@ -94,7 +94,6 @@ const NewChat = () => {
         setLoading(false);
       } else if (!chat.access || result) {
         setLoading(true);
-        console.log(result, "Here Embedded code", chatId);
         axios
           .post(webAPI.getchat, chatId)
           .then(async (res) => {
