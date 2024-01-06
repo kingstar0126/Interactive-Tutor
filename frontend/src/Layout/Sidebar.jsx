@@ -70,6 +70,20 @@ const Sidebar = () => {
     }
   };
 
+  const getChats = async () => {
+    let data = {
+      user_id: user.id,
+    };
+
+    await axios.post(webAPI.getchats, data).then((res) => {
+      if (res.data.success) {
+        setChats(res.data.data);
+      } else {
+        notification("error", res.data.message);
+      }
+    });
+  };
+
   useEffect(() => {
     if (!user) {
       navigate("/login");
@@ -77,7 +91,6 @@ const Sidebar = () => {
       if (location) {
         setlocation(dispatch, location.pathname);
       }
-      navigate("chat/dashboard");
       getChats();
       axios
         .post(webAPI.checkUserInvite, { id: user.id })
@@ -91,6 +104,12 @@ const Sidebar = () => {
         .catch((err) => console.error(err));
     }
   }, []);
+
+  useEffect(() => {
+    if (location.pathname.includes('dashboard')) {
+      getChats();
+    }
+  }, [location]);
 
   const selection = useMemo(() => {
     let url = location.pathname.split("/").slice(-1);
@@ -139,20 +158,6 @@ const Sidebar = () => {
     // getChats();
     setIsChatModalOpen(false);
     setIsPublishModalOpen(false);
-  };
-
-  const getChats = async () => {
-    let data = {
-      user_id: user.id,
-    };
-
-    await axios.post(webAPI.getchats, data).then((res) => {
-      if (res.data.success) {
-        setChats(res.data.data);
-      } else {
-        notification("error", res.data.message);
-      }
-    });
   };
 
   useEffect(() => {
@@ -300,7 +305,7 @@ const Sidebar = () => {
             <Button
               onClick={() => {
                 if (user && user.role !== 0 && user.role !== 5) {
-                  setCurrentChat(null)
+                  setCurrentChat(null);
                   setIsChatModalOpen(true);
                 } else {
                   notification(
@@ -327,7 +332,7 @@ const Sidebar = () => {
               <div className="w-full md:h-96 h-36">
                 <Scrollbar>
                   <div className="flex flex-col md:gap-2 truncate px-2">
-                    {chats.length &&
+                    {chats.length > 0 &&
                       chats
                         .filter((item) => item.islibrary !== true)
                         .map((chat) => (
@@ -435,7 +440,7 @@ const Sidebar = () => {
               <div className="w-full flex-col md:h-96 h-36">
                 <Scrollbar>
                   <div className="flex flex-col md:gap-2 truncate px-2">
-                    {chats.length &&
+                    {chats.length > 0 &&
                       chats
                         .filter((item) => item.islibrary === true)
                         .map((chat) => (
