@@ -11,6 +11,7 @@ const Chat = () => {
   const user = JSON.parse(useSelector((state) => state.user.user));
   const [isLoading, setIsLoading] = useState(false);
   const { state } = useLocation();
+  const location = useLocation();
 
   const getChats = async () => {
     setIsLoading(true);
@@ -25,7 +26,7 @@ const Chat = () => {
         ).length;
         if (user.role === 5 || user.role === 0 || count == 0) {
           navigate("onboarding");
-        } else {
+        } else if (!location.pathname.includes("newchat")) {
           navigate("dashboard");
         }
       } else {

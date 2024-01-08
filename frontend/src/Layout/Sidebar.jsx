@@ -201,6 +201,7 @@ const Sidebar = () => {
     if (user.role === 0 || user.role === 5 || chats.length === 0) {
       notification("error", "You have to subscribe to use this feature!");
     } else {
+      navigate(`chat/newchat/${chat.uuid}`);
       setCurrentChat(chat);
     }
   };
