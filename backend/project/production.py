@@ -18,7 +18,7 @@ def get_all_product():
     id = request.json['id']
     user = db.session.query(User).filter_by(id=id).first()
     current_user = {}
-    if user is not None:
+    if user is None:
         return jsonify({
             'success': False,
             'code': 500,
