@@ -31,7 +31,7 @@ import { Scrollbar } from "react-scrollbars-custom";
 import Chatmodal from "../Components/Chatmodal";
 import PublishModal from "../Components/PublishModal";
 import { CiEdit } from "react-icons/ci";
-
+import { getUseraccount } from "../redux/actions/userAction";
 import Share from "../assets/noun-books.svg";
 import Publish from "../assets/noun-publish.svg";
 import Subscription from "../assets/Icons.svg";
@@ -70,6 +70,20 @@ const Sidebar = () => {
     }
   };
 
+  const getChats = async () => {
+    let data = {
+      user_id: user.id,
+    };
+
+    await axios.post(webAPI.getchats, data).then((res) => {
+      if (res.data.success) {
+        setChats(res.data.data);
+      } else {
+        notification("error", res.data.message);
+      }
+    });
+  };
+
   useEffect(() => {
     if (!user) {
       navigate("/login");
@@ -77,7 +91,7 @@ const Sidebar = () => {
       if (location) {
         setlocation(dispatch, location.pathname);
       }
-      navigate("chat/dashboard");
+      getUseraccount(dispatch, {id: user.id});
       getChats();
       axios
         .post(webAPI.checkUserInvite, { id: user.id })
@@ -91,6 +105,12 @@ const Sidebar = () => {
         .catch((err) => console.error(err));
     }
   }, []);
+
+  useEffect(() => {
+    if (location.pathname.includes("dashboard")) {
+      getChats();
+    }
+  }, [location]);
 
   const selection = useMemo(() => {
     let url = location.pathname.split("/").slice(-1);
@@ -141,20 +161,6 @@ const Sidebar = () => {
     setIsPublishModalOpen(false);
   };
 
-  const getChats = async () => {
-    let data = {
-      user_id: user.id,
-    };
-
-    await axios.post(webAPI.getchats, data).then((res) => {
-      if (res.data.success) {
-        setChats(res.data.data);
-      } else {
-        notification("error", res.data.message);
-      }
-    });
-  };
-
   useEffect(() => {
     if (isUpdate) {
       updatechatbot(dispatch, false);
@@ -192,15 +198,18 @@ const Sidebar = () => {
   };
 
   const handleBotClick = (chat) => {
-    if (user.role === 0 || user.role === 5) {
+    if (user.role === 0 || user.role === 5 || chats.length === 0) {
       notification("error", "You have to subscribe to use this feature!");
     } else {
+      navigate(`chat/newchat/${chat.uuid}`);
       setCurrentChat(chat);
     }
   };
 
   useEffect(() => {
-    setCurrentChat(chats?.find((chat) => chat.id === currentChat?.id));
+    if (!location.pathname.includes("dashboard")) {
+      setCurrentChat(chats?.find((chat) => chat.id === currentChat?.id));
+    }
   }, [chats]);
 
   useEffect(() => {
@@ -300,7 +309,7 @@ const Sidebar = () => {
             <Button
               onClick={() => {
                 if (user && user.role !== 0 && user.role !== 5) {
-                  setCurrentChat(null)
+                  setCurrentChat(null);
                   setIsChatModalOpen(true);
                 } else {
                   notification(
@@ -327,7 +336,7 @@ const Sidebar = () => {
               <div className="w-full md:h-96 h-36">
                 <Scrollbar>
                   <div className="flex flex-col md:gap-2 truncate px-2">
-                    {chats.length &&
+                    {chats.length > 0 &&
                       chats
                         .filter((item) => item.islibrary !== true)
                         .map((chat) => (
@@ -435,7 +444,7 @@ const Sidebar = () => {
               <div className="w-full flex-col md:h-96 h-36">
                 <Scrollbar>
                   <div className="flex flex-col md:gap-2 truncate px-2">
-                    {chats.length &&
+                    {chats.length > 0 &&
                       chats
                         .filter((item) => item.islibrary === true)
                         .map((chat) => (

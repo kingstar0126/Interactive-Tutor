@@ -39,7 +39,7 @@ const PROMPTS = [
   "Change the reading age of this text",
   `I’d like feedback on what I have written`,
 ];
-
+// const chatbotID = "9e66b93c-2801-476e-82fe-1f065c1a5797";
 const chatbotID = "5cb0f7ca-825b-40eb-b403-e6bf1555b609";
 const STEP = 30;
 const DashBoard = () => {
@@ -70,22 +70,21 @@ const DashBoard = () => {
   };
 
   useEffect(() => {
+    console.log("Dashboard");
     if (!user) {
       navigate("/login");
     } else {
-      if (user.role === 5 || user.role === 0) {
-        navigate("/chatbot/chat/onboarding");
-      } else {
-        axios
-          .post(webAPI.getchat, {
-            id: chatbotID,
-          })
-          .then((res) => {
+      axios
+        .post(webAPI.getchat, {
+          id: chatbotID,
+        })
+        .then((res) => {
+          if (res.data.success) {
             getchat(dispatch, res.data.data);
             setchatbot(dispatch, res.data.data);
-            setChathistory([])
-          });
-      }
+            setChathistory([]);
+          }
+        });
     }
   }, []);
 
