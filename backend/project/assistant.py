@@ -52,7 +52,7 @@ def show_answer(response, thread, uuid):
                 file_data_byte = file_data.read()
                 with open(f"{full_chart_path}/{file_id}.png", "wb") as file:
                     file.write(file_data_byte)
-                    file_path = f"![chart](https://app.interactive-tutor.com/image/{full_chart_path}/{file_id}.png)"
+                    file_path = f"![chart](http://18.133.183.77/image/{full_chart_path}/{file_id}.png)"
     return last_printed_text, file_path
 
 def wait_on_run(run, thread):
@@ -271,7 +271,7 @@ def create_image_file(prompt, behavior, uuid, image = False):
             image_content = requests.get(image_url).content
             with open(local_image_path, 'wb') as handle:
                 handle.write(image_content)
-        return f"![image](https://app.interactive-tutor.com/image/{local_image_path})"
+        return f"![image](http://18.133.183.77/image/{local_image_path})"
     except openai.BadRequestError as e:
         print(e)
         dict_str = re.search(r"\{.*\}", str(e)).group()

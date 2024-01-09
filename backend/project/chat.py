@@ -77,7 +77,7 @@ def add_chat():
     behavior = request.json['behavior']
     behaviormodel = request.json['behaviormodel']
     train = json.dumps([])
-    chat_logo = json.dumps({"user": "https://app.interactive-tutor.com/api/imageupload/default_user.png", "ai": "https://app.interactive-tutor.com/api/imageupload/default_ai.png"})
+    chat_logo = json.dumps({"user": "http://18.133.183.77/api/imageupload/default_user.png", "ai": "http://18.133.183.77/api/imageupload/default_ai.png"})
     chat_title = json.dumps({})
     chat_description = json.dumps({})
     chat_copyright = json.dumps(
@@ -144,7 +144,7 @@ def submit_review():
                 if not chunk:
                     break
                 f.write(chunk)
-        review = Review(username=username, message=message, useravatar=f'https://app.interactive-tutor.com/api/imageupload/{filename}', rating=rating)
+        review = Review(username=username, message=message, useravatar=f'http://18.133.183.77/api/imageupload/{filename}', rating=rating)
         db.session.add(review)
         db.session.commit()
         current_library = db.session.query(Library).filter_by(id=library['id']).first()
@@ -675,7 +675,7 @@ def get_bubble(widgetID):
         'organization': organization,
         'role': user.role,
         'api_select': chat.api_select,
-        'embed_url': 'https://app.interactive-tutor.com/chat/embedding/',
+        'embed_url': 'http://18.133.183.77/chat/embedding/',
     }
 
     data = {

@@ -351,7 +351,7 @@ const DashBoard = () => {
           <div className="flex flex-col items-center justify-center gap-10 h-4/5">
             <div className="h-2/3 flex flex-col items-center justify-center gap-10">
               <img
-                src="https://app.interactive-tutor.com/api/imageupload/default_ai.png"
+                src="http://18.133.183.77/api/imageupload/default_ai.png"
                 alt="Logo"
                 className="w-20 h-20"
               />
@@ -390,7 +390,7 @@ const DashBoard = () => {
                   >
                     <div className="flex justify-start w-full px-10">
                       <img
-                        src="https://app.interactive-tutor.com/api/imageupload/default_user.png"
+                        src="http://18.133.183.77/api/imageupload/default_user.png"
                         alt="human"
                         className="w-10 h-10 rounded-full"
                       />
@@ -448,7 +448,7 @@ const DashBoard = () => {
                   >
                     <div className="flex justify-start px-10 w-full">
                       <img
-                        src="https://app.interactive-tutor.com/api/imageupload/default_ai.png"
+                        src="http://18.133.183.77/api/imageupload/default_ai.png"
                         className="w-10 h-10 rounded-full"
                         alt="AI"
                       />
@@ -588,7 +588,7 @@ const DashBoard = () => {
                 >
                   <div className="flex justify-start px-10 w-full">
                     <img
-                      src="https://app.interactive-tutor.com/api/imageupload/default_ai.png"
+                      src="http://18.133.183.77/api/imageupload/default_ai.png"
                       className="w-10 h-10 rounded-full"
                       alt="AI"
                     />

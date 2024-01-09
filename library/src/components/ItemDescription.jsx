@@ -243,7 +243,7 @@ const ItemDescription = () => {
     axios.post(webAPI.sendemail, { email, chat }).then((res) => {
       if (res.data.success) {
         toast.success(res.data.message);
-        window.location.href = "https://app.interactive-tutor.com/login";
+        window.location.href = "http://18.133.183.77/login";
       } else {
         toast.error(res.data.message);
       }
