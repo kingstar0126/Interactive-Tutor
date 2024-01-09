@@ -148,57 +148,58 @@ def create_image_prompt(prompt):
         response = client.chat.completions.create(
             model='gpt-4-1106-preview',
             messages=[
-                {"role": "system", "content": '''
-                I want you generate the perfect and detail prompt.
+                # {"role": "system", "content": '''
+                # I want you generate the perfect and detail prompt.
 
-                Change the user's prompt to the perfect and good prompt.
+                # Change the user's prompt to the perfect and good prompt.
 
-                Here is the formula of the perfect and detail prompt.
+                # Here is the formula of the perfect and detail prompt.
 
-                Prompt = subject + activity + background + light + angle + style + artist.
+                # Prompt = subject + activity + background + light + angle + style + artist.
 
-                - Subject: When describing a human subject, you can start by focusing on their appearance, such as their hair color, eye shape, or clothing. When describing an object subject, consider its shape, size, color, and function. Use descriptive language to bring the object to life. Here are the examples:
-                    Prompt 1 : A colorful butterfly resting on a flower with its wings spread open.
-                    Prompt 2: A colorful hot air balloon with bold stripes and a woven basket.
-                    Prompt 3: An elegant ballerina with a tutu and ballet slippers, mid-pirouette.
-                    Prompt 4 : A tired mother with dark circles under her eyes, holding a crying baby.
-                - Activity: To write effective prompts for describing a subject or object’s activity, it’s important to consider their gesture, action, and status. Use descriptive language that appeals to the senses, such as posture, facial expressions, and body language, to convey emotion and intent.
-                    Think about the timing and speed of the action and use specific details, such as clothing or surroundings, to create a clear image for the AI.
+                # - Subject: When describing a human subject, you can start by focusing on their appearance, such as their hair color, eye shape, or clothing. When describing an object subject, consider its shape, size, color, and function. Use descriptive language to bring the object to life. Here are the examples:
+                #     Prompt 1 : A colorful butterfly resting on a flower with its wings spread open.
+                #     Prompt 2: A colorful hot air balloon with bold stripes and a woven basket.
+                #     Prompt 3: An elegant ballerina with a tutu and ballet slippers, mid-pirouette.
+                #     Prompt 4 : A tired mother with dark circles under her eyes, holding a crying baby.
+                # - Activity: To write effective prompts for describing a subject or object’s activity, it’s important to consider their gesture, action, and status. Use descriptive language that appeals to the senses, such as posture, facial expressions, and body language, to convey emotion and intent.
+                #     Think about the timing and speed of the action and use specific details, such as clothing or surroundings, to create a clear image for the AI.
 
-                    Prompt 1: A bird building its nest in a tree, with meticulous movements and a sense of purpose.
-                    Prompt 2: A painter creating a masterpiece in their studio, with deliberate brushstrokes and a focused expression.
-                    Prompt 3: A hummingbird sipping nectar from a flower in a vibrant garden, with rapid flapping wings and delicate movements.
-                    Prompt 4: A surfer riding a massive wave in the ocean, with a look of exhilaration and skillful maneuvers.
+                #     Prompt 1: A bird building its nest in a tree, with meticulous movements and a sense of purpose.
+                #     Prompt 2: A painter creating a masterpiece in their studio, with deliberate brushstrokes and a focused expression.
+                #     Prompt 3: A hummingbird sipping nectar from a flower in a vibrant garden, with rapid flapping wings and delicate movements.
+                #     Prompt 4: A surfer riding a massive wave in the ocean, with a look of exhilaration and skillful maneuvers.
 
-                - Background: When it comes to background, start by considering the overall setting, such as the time of day or the weather conditions.
-                    Then, think about specific objects or elements that would appear in the scene, such as trees, buildings, or bodies of water. It can be helpful to also consider the perspective of the viewer and any focal points in the background.
+                # - Background: When it comes to background, start by considering the overall setting, such as the time of day or the weather conditions.
+                #     Then, think about specific objects or elements that would appear in the scene, such as trees, buildings, or bodies of water. It can be helpful to also consider the perspective of the viewer and any focal points in the background.
 
-                    Prompt 1: A misty forest with shafts of sunlight streaming through the trees.
-                    Prompt 2: A bustling city street at night, with neon signs and steam rising from the pavement.
-                    Prompt 3: A serene mountain lake with snow-capped peaks in the distance.
-                    Prompt 4: A sun-drenched field of wildflowers, with a lone tree casting a long shadow.
+                #     Prompt 1: A misty forest with shafts of sunlight streaming through the trees.
+                #     Prompt 2: A bustling city street at night, with neon signs and steam rising from the pavement.
+                #     Prompt 3: A serene mountain lake with snow-capped peaks in the distance.
+                #     Prompt 4: A sun-drenched field of wildflowers, with a lone tree casting a long shadow.
 
-                - Light: when you’re trying to describe the lighting in a painting, it’s important to think about the mood and atmosphere you want to create. Start by identifying the main source of light and describing how bright it is, which direction it’s coming from, and what kind of shadows or reflections it creates.
-                    Also, think about the color temperature of the light – is it warm or cool – and how it interacts with the environment and the objects in the painting.
+                # - Light: when you’re trying to describe the lighting in a painting, it’s important to think about the mood and atmosphere you want to create. Start by identifying the main source of light and describing how bright it is, which direction it’s coming from, and what kind of shadows or reflections it creates.
+                #     Also, think about the color temperature of the light – is it warm or cool – and how it interacts with the environment and the objects in the painting.
 
-                    Prompt 1: Soft, warm sunlight filtering through a canopy of leaves in a forest.
-                    Prompt 2: Bright, midday sun casting strong shadows on a sandy beach.
-                    Prompt 3: Dramatic, golden hour light illuminating a city skyline.
-                    Prompt 4: Soft, diffused light from a cloudy sky creating a moody atmosphere.
+                #     Prompt 1: Soft, warm sunlight filtering through a canopy of leaves in a forest.
+                #     Prompt 2: Bright, midday sun casting strong shadows on a sandy beach.
+                #     Prompt 3: Dramatic, golden hour light illuminating a city skyline.
+                #     Prompt 4: Soft, diffused light from a cloudy sky creating a moody atmosphere.
 
-                - Style: 
-                    Prompt 1: A colorful, abstract painting with bold brushstrokes and splatters.
-                    Prompt 2: A minimalist black and white photograph with strong lines and contrast.
-                    Prompt 3: A whimsical illustration with playful characters and bright colors.
-                    Prompt 4: A realistic portrait with soft, natural lighting and subtle shading.
-                    Prompt 6: A retro-inspired photograph with a vintage filter and faded edges.
-                    Prompt 5: A graphic design poster with bold typography and vibrant colors.
-                    Prompt 7: A surreal digital art piece with unexpected combinations of objects and colors.
-                    Prompt 8: A cartoon-style illustration with exaggerated features and expressive lines.
-                    Prompt 9: A mixed media collage with a variety of textures and materials.
-                    Prompt 10: A traditional oil painting with realistic details and a classical composition.
+                # - Style: 
+                #     Prompt 1: A colorful, abstract painting with bold brushstrokes and splatters.
+                #     Prompt 2: A minimalist black and white photograph with strong lines and contrast.
+                #     Prompt 3: A whimsical illustration with playful characters and bright colors.
+                #     Prompt 4: A realistic portrait with soft, natural lighting and subtle shading.
+                #     Prompt 6: A retro-inspired photograph with a vintage filter and faded edges.
+                #     Prompt 5: A graphic design poster with bold typography and vibrant colors.
+                #     Prompt 7: A surreal digital art piece with unexpected combinations of objects and colors.
+                #     Prompt 8: A cartoon-style illustration with exaggerated features and expressive lines.
+                #     Prompt 9: A mixed media collage with a variety of textures and materials.
+                #     Prompt 10: A traditional oil painting with realistic details and a classical composition.
 
-                Only output the updated prompt.'''},
+                # Only output the updated prompt.'''},
+                {'role': "system", 'content': 'you should reply user the image description and no more word at all. You can make image more detailed. With a description of what kind of image you want to generate, it can be a scenario, a portrait or even a visual UI.'},
                 {"role": "user", "content": f"{prompt}"},
             ]
 
@@ -247,7 +248,7 @@ def create_image_file(prompt, behavior, uuid, image = False):
                 )
             image_url = response.data[0].url
         else:
-            prompt = behavior + '\n\n' + create_image_prompt(prompt)
+            # prompt = behavior + '\n\n' + create_image_prompt(prompt)
             # prompt = behavior + '\n' + prompt
             response = client.images.generate(
                 model="dall-e-3",
@@ -278,7 +279,50 @@ def create_image_file(prompt, behavior, uuid, image = False):
         message = dict_obj['error']['message']
         return message
 
+def create_image_file_(prompt, behavior, uuid, image = False):
+    url = "https://backend-k8s.flowgpt.com/image-generation"
 
+    # The headers for the request
+    headers = {
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'en-US,en;q=0.9,ko;q=0.8',
+        'Authorization': 'Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjRaejhONE9TMWxwQUgxR3NPWmhoViIsImVtYWlsIjoicG9wc3RhcjA5ODJAZ21haWwuY29tIiwic3ViIjoiNFp6OE40T1MxbHBBSDFHc09aaGhWIiwiaWF0IjoxNzA0NTU5MTg4LjYwMiwiZXhwIjoxNzA1MTYzOTg4fQ.GNp_B3IF48Vw-y5mONciapbuFm0W_TCOEI7aU42sN6rjMtRBLtiBCNoOiwI5MSbHudxkrZ-EnNDsUZiyJzS4pyACMPyXXC5K1O2s7S-bPUahrkAQ5sCZ7fGgc012G2jTZUw3aHuPf1EVqTyG_ZjlgMUhnVe7bCokUSgSV5bouRH58kseO0hOhNccYoR7uQ1fEFx8vTr_diafxgeo0g7ZYyg2wo1kYI6pzu9qC6nxtOk_VNPZdmBqkj6-912ECnjk8Otn_S1wl3j6hwg89LzOGD288aXYLErK9i3loAEff1LrZFmFivmIKrB1CUhRKf27RxkltBnOva33JihRSSGkbg',  # Replace with your actual token
+        'Content-Type': 'application/json',
+        'Origin': 'https://flowgpt.com',
+        'Referer': 'https://flowgpt.com/',
+        'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+        'Sec-Ch-Ua-Mobile': '?0',
+        'Sec-Ch-Ua-Platform': '"Windows"',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-site',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    }
+    # prompt = create_image_prompt(prompt)
+    # The payload for the POST request, replace with your actual payload
+    payload = {'model': "Realistic", 'prompt': prompt}
+    # model = ['Pollinations', 'Realistic', 'DALLE3', 'CyberPunk', 'NijiAnime', 'CounterfeitAnime', '3dCartoon', 'GhibliStyle', 'Genshin', 'StableDiffusionXL']
+    # payload = {
+    #     'chatFileDocumentIds': [], 'documentIds': [], 'history':[], 'imageModel': "Realistic", 'model': "gpt-3.5-turbo", 'nsfw': True, 'promptId': "model-gpt-3.5-turbo", 'question': prompt, 'streaming': True, 'temperature': 0.7, 'userId': "4Zz8N4OS1lpAH1GsOZhhV", 'system': " you should reply user the image description and no more word at all. You can make image more detailed. With a description of what kind of image you want to generate, it can be a scenario, a portrait or even a visual UI."
+    # }
+
+    # Convert the payload to JSON format
+    payload_json = json.dumps(payload)
+
+    # Send the POST request
+    response = requests.post(url, headers=headers, data=payload_json)
+
+    # Check if the request was successful
+    if response.status_code == 200:
+        print("Request was successful.")
+        print(response.headers['Content-Type'])
+        json_response = response.json()
+        image_url = json_response.get('url')
+        return f'![image]({image_url})'
+    else:
+        print(f"Request failed with status code: {response.status_code}")
+        return response.status_code
 #############################################
 
 def delete_all_assistants(items):
