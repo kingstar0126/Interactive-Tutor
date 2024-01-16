@@ -32,6 +32,11 @@ env:
   SENDGRID_ENTERPRISE_USERS_LIST_ID: ${{secrets.STAGING_SENDGRID_ENTERPRISE_USERS_LIST_ID}}
   E2B_API_KEY: ${{secrets.STAGING_E2B_API_KEY}}
   DATABASE_CONNECTION_STRING: ${{secrets.STAGING_DATABASE_CONNECTION_STRING}}
+  REGION: ${{secrets.STAGING_S3_REGION}}
+  ACCESS_KEY_ID: ${{secrets.STAGING_S3_ACCESS_KEY_ID}}
+  ACCESS_SECRET_KEY: ${{secrets.STAGING_S3_ACCESS_SECRET_KEY}}
+  S3_PUBLIC: ${{secrets.STAGING_S3_PUBLIC}}
+  S3_PRIVATE: ${{secrets.STAGING_S3_PRIVATE}}
   AWS_REGION: eu-west-2
   ECR_REPOSITORY: 987025303706.dkr.ecr.eu-west-2.amazonaws.com/interactive-tutor-staging-backend
   ECS_SERVICE: interactive-tutor-staging-backend-service 
@@ -79,6 +84,12 @@ jobs:
         echo "SENDGRID_ENTERPRISE_USERS_LIST_ID=${{env.SENDGRID_ENTERPRISE_USERS_LIST_ID}}" >> .env
         echo "E2B_API_KEY=${{env.E2B_API_KEY}}" >> .env
         echo "DATABASE_CONNECTION_STRING=${{env.DATABASE_CONNECTION_STRING}}" >> .env
+
+        echo "REGION=${{env.REGION}}" >> .env
+        echo "ACCESS_KEY_ID=${{env.ACCESS_KEY_ID}}" >> .env
+        echo "ACCESS_SECRET_KEY=${{env.ACCESS_SECRET_KEY}}" >> .env
+        echo "S3_PUBLIC=${{env.S3_PUBLIC}}" >> .env
+        echo "S3_PRIVATE=${{env.S3_PRIVATE}}" >> .env
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -157,6 +168,12 @@ jobs:
             echo "REACT_APP_EMBED_SERVER_URL=${{env.REACT_APP_EMBED_SERVER_URL}}" >> .env
             echo "REACT_APP_GOOGLE_MAP_API=${{env.REACT_APP_GOOGLE_MAP_API}}" >> .env
             echo "REACT_APP_STRIPE_PUBLISH_KEY=${{env.REACT_APP_STRIPE_PUBLISH_KEY}}" >> .env
+
+            echo "REACT_APP_REGION=${{env.REGION}}" >> .env
+            echo "REACT_APP_ACCESS_KEY_ID=${{env.ACCESS_KEY_ID}}" >> .env
+            echo "REACT_APP_ACCESS_SECRET_KEY=${{env.ACCESS_SECRET_KEY}}" >> .env
+            echo "REACT_APP_S3_PUBLIC=${{env.S3_PUBLIC}}" >> .env
+            echo "REACT_APP_S3_PRIVATE=${{env.S3_PRIVATE}}" >> .env
  
        - name: Configure AWS credentials
          uses: aws-actions/configure-aws-credentials@v1
@@ -169,6 +186,7 @@ jobs:
          run: |
            cd frontend
            yarn install
+           export NODE_OPTIONS="--max_old_space_size=4096"
            TSC_COMPILE_ON_ERROR=true yarn build
  
        - name: Deploy to S3

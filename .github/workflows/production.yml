@@ -37,6 +37,12 @@ env:
   ECS_SERVICE: interactive-tutor-prod-backend-service 
   ECS_CLUSTER: interactive-tutor-prod-ecs-cluster
   CONTAINER_NAME: interactive-tutor-prod-backend-td
+
+  REGION: ${{secrets.PRODUCTION_S3_REGION}}
+  ACCESS_KEY_ID: ${{secrets.PRODUCTION_S3_ACCESS_KEY_ID}}
+  ACCESS_SECRET_KEY: ${{secrets.PRODUCTION_S3_ACCESS_SECRET_KEY}}
+  S3_PUBLIC: ${{secrets.PRODUCTION_S3_PUBLIC}}
+  S3_PRIVATE: ${{secrets.PRODUCTION_S3_PRIVATE}}
   
   ## frontend
   REACT_APP_SERVER_URL: ${{secrets.PRODUCTION_REACT_APP_SERVER_URL}}
@@ -79,6 +85,12 @@ jobs:
         echo "SENDGRID_ENTERPRISE_USERS_LIST_ID=${{env.SENDGRID_ENTERPRISE_USERS_LIST_ID}}" >> .env
         echo "E2B_API_KEY=${{env.E2B_API_KEY}}" >> .env
         echo "DATABASE_CONNECTION_STRING=${{env.DATABASE_CONNECTION_STRING}}" >> .env
+
+        echo "REGION=${{env.REGION}}" >> .env
+        echo "ACCESS_KEY_ID=${{env.ACCESS_KEY_ID}}" >> .env
+        echo "ACCESS_SECRET_KEY=${{env.ACCESS_SECRET_KEY}}" >> .env
+        echo "S3_PUBLIC=${{env.S3_PUBLIC}}" >> .env
+        echo "S3_PRIVATE=${{env.S3_PRIVATE}}" >> .env
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -157,6 +169,12 @@ jobs:
             echo "REACT_APP_EMBED_SERVER_URL=${{env.REACT_APP_EMBED_SERVER_URL}}" >> .env
             echo "REACT_APP_GOOGLE_MAP_API=${{env.REACT_APP_GOOGLE_MAP_API}}" >> .env
             echo "REACT_APP_STRIPE_PUBLISH_KEY=${{env.REACT_APP_STRIPE_PUBLISH_KEY}}" >> .env
+
+            echo "REACT_APP_REGION=${{env.REGION}}" >> .env
+            echo "REACT_APP_ACCESS_KEY_ID=${{env.ACCESS_KEY_ID}}" >> .env
+            echo "REACT_APP_ACCESS_SECRET_KEY=${{env.ACCESS_SECRET_KEY}}" >> .env
+            echo "REACT_APP_S3_PUBLIC=${{env.S3_PUBLIC}}" >> .env
+            echo "REACT_APP_S3_PRIVATE=${{env.S3_PRIVATE}}" >> .env
  
        - name: Configure AWS credentials
          uses: aws-actions/configure-aws-credentials@v1
@@ -169,6 +187,7 @@ jobs:
          run: |
            cd frontend
            yarn install
+           export NODE_OPTIONS="--max_old_space_size=4096"
            TSC_COMPILE_ON_ERROR=true yarn build
  
        - name: Deploy to S3
