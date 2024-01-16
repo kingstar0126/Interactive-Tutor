@@ -25,6 +25,7 @@ import ImageUploader from "react-image-upload";
 import "react-image-upload/dist/index.css";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
+import { SERVER_URL } from "../config/constant";
 import toast, { Toaster } from "react-hot-toast";
 import RecommendItem from "./RecommendItem";
 
@@ -243,7 +244,7 @@ const ItemDescription = () => {
     axios.post(webAPI.sendemail, { email, chat }).then((res) => {
       if (res.data.success) {
         toast.success(res.data.message);
-        window.location.href = "http://18.133.183.77/login";
+        window.location.href = `${SERVER_URL}/login`;
       } else {
         toast.error(res.data.message);
       }
