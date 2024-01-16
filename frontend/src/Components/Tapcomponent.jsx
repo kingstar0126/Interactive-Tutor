@@ -26,6 +26,7 @@ import { updatechatbot } from "../redux/actions/chatAction";
 export default function Example() {
   const chatState = useSelector((state) => state.chat.chat);
   const chat = (chatState && JSON.parse(chatState)) || {};
+  const isUpdate = useSelector((state) => state.chat.isUpdate);
   const [activeTab, setActiveTab] = useState("preview");
   const [message_history, setMessage_history] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -76,7 +77,7 @@ export default function Example() {
 
   useEffect(() => {
     setNewChatKey((prevKey) => prevKey + 1);
-  }, [location.pathname]);
+  }, [location.pathname, isUpdate]);
 
   const handleUpdate = (e) => {
     setUpdateModalOpen(true);
