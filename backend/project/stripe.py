@@ -13,7 +13,7 @@ load_dotenv()
 
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 payment = Blueprint('payment', __name__)
-
+SERVER_URL = os.getenv('SERVER_URL')
 
 @payment.route('/api/create-customer', methods=['POST'])
 def create_customer():
@@ -190,8 +190,8 @@ def create_checkout_session_query():
             'tax_rates': [os.getenv('TAX_RATE_ID')],
         }],
         mode='payment',
-        success_url="http://18.133.183.77/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url='http://18.133.183.77/chatbot/subscription',
+        success_url=f"{SERVER_URL}/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url=f'{SERVER_URL}/chatbot/subscription',
         customer=user.customer_id,
         allow_promotion_codes=True,
         client_reference_id=clientReferenceId,
@@ -217,8 +217,8 @@ def create_checkout_session():
         subscription_data={
             'default_tax_rates': [os.getenv('TAX_RATE_ID')],
         },
-        success_url="http://18.133.183.77/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url='http://18.133.183.77/chatbot/subscription',
+        success_url=f"{SERVER_URL}/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url=f'{SERVER_URL}/chatbot/subscription',
         customer=user.customer_id,
         allow_promotion_codes=True,
         client_reference_id=clientReferenceId,
@@ -300,7 +300,7 @@ def cancel_subscription():
     user = db.session.query(User).filter_by(id=id).first()
     session = stripe.billing_portal.Session.create(
         customer=user.customer_id,
-        return_url="http://18.133.183.77/"
+        return_url=f"{SERVER_URL}/"
     )
     return jsonify({'message': 'Canceled the Subscription', 'code': 200, 'success': True, 'url': session.url})
 
@@ -323,8 +323,8 @@ def update_subscription():
         subscription_data={
             'default_tax_rates': [os.getenv('TAX_RATE_ID')],
         },
-        success_url="http://18.133.183.77/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url='http://18.133.183.77/chatbot/subscription',
+        success_url=f"{SERVER_URL}/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
+        cancel_url=f'{SERVER_URL}/chatbot/subscription',
         customer=user.customer_id,
         allow_promotion_codes=True,
         client_reference_id=clientReferenceId,
