@@ -32,7 +32,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from urllib.parse import urljoin
 from urllib.parse import urlparse
-import tiktoken
+import boto3
 
 load_dotenv()
 
@@ -47,12 +47,13 @@ pretty.install()
 
 train = Blueprint('train', __name__)
 
-
-def count_tokens(string):
-    encoding = tiktoken.get_encoding('cl100k_base')
-    num_tokens = len(encoding.encode(string))
-    return num_tokens
-
+S3_CLIENT = boto3.client(
+    's3',
+    aws_access_key_id=os.getenv('ACCESS_KEY_ID'),
+    aws_secret_access_key=os.getenv('ACCESS_SECRET_KEY'),
+    region_name=os.getenv('REGION')
+)
+S3_PRIVATE_BUCKET = os.getenv('S3_PRIVATE')
 
 def compare_token_words(ct, chatbot):
     current_chat = db.session.query(Chat).filter_by(uuid=chatbot).first()
@@ -118,8 +119,6 @@ def parse_docx(file):
     return '\n'.join(fullText)
 
 # This is that change the .srt, .txt, .json, .md
-
-
 def parse_srt(file):
     lines = file.read().decode("utf-8")
     string = lines
@@ -257,7 +256,6 @@ def compare_role_user(chatbot):
     #         return False
     return True
 
-
 def insert_train_chat(chatbot, train_id):
     current_chat = db.session.query(Chat).filter_by(uuid=chatbot).first()
     if current_chat:
@@ -294,7 +292,6 @@ def duplicate_train_data(ids, chatbot_uuid):
     try:
         response = []
         for id in ids:
-            print('This is Train Data ID: ', id)
             train = db.session.query(Train).filter_by(id=id).first()
             if train:
                 label = train.label
@@ -309,19 +306,21 @@ def duplicate_train_data(ids, chatbot_uuid):
                     result = text_to_docs(data, url, chatbot_uuid)
                     create_vector(result)
                 elif train_type == 'file':
-                    with open(path, 'rb') as f:
-                        if (path.split('.')[-1] == 'pdf'):
-                            output = parse_pdf(f)
-                        elif (path.split('.')[-1] == 'csv'):
-                            output = parse_csv(f)
-                        elif (path.split('.')[-1] == 'docx'):
-                            output = parse_docx(f)
-                        elif path.split('.')[-1] in ['srt', 'txt', 'md', 'json']:
-                            output = parse_srt(f)
-                        elif (path.split('.')[-1] == 'epub'):
-                            output = parse_epub(path.split('/')[-1])
-                        result = text_to_docs(output, path.split('/')[-1], chatbot_uuid)
-                        create_vector(result)
+                    file_obj = S3_CLIENT.get_object(Bucket=S3_PRIVATE_BUCKET, Key=filename)
+                    file_content = file_obj['Body'].read()
+                    file = BytesIO(file_content)
+                    if (path.split('.')[-1].lower() == 'pdf'):
+                        output = parse_pdf(file)
+                    elif (path.split('.')[-1].lower() == 'csv'):
+                        output = parse_csv(file)
+                    elif (path.split('.')[-1].lower() == 'docx'):
+                        output = parse_docx(file)
+                    elif path.split('.')[-1].lower() in ['srt', 'txt', 'md', 'json']:
+                        output = parse_srt(file)
+                    elif (path.split('.')[-1].lower() == 'epub'):
+                        output = parse_epub(path.split('/')[-1])
+                    result = text_to_docs(output, path.split('/')[-1], chatbot_uuid)
+                    create_vector(result)
                 else:
                     result = text_to_docs(text, text[:20], chatbot_uuid)
                     create_vector(result)
@@ -345,33 +344,23 @@ def create_train_url():
                 'message': 'Invalid URL.',
             })
 
-        ct = 0
-        for text in data:
-            ct += count_tokens(text)
-        if compare_token_words(ct, chatbot):
-            trainid = create_train(url, 'url', True, chatbot, url)
-            result = text_to_docs(data, url, chatbot)
+        trainid = create_train(url, 'url', True, chatbot, url)
+        result = text_to_docs(data, url, chatbot)
 
-            if (trainid == False):
-                return jsonify({
-                    'success': False,
-                    'code': 405,
-                    'message': 'Training data already exist.',
-                })
-            create_vector(result)
-            chat = insert_train_chat(chatbot, trainid)
-            return jsonify({
-                'success': True,
-                'code': 200,
-                'data': chat,
-                'message': "create train successfully",
-            })
-        else:
+        if (trainid == False):
             return jsonify({
                 'success': False,
-                'code': 401,
-                'message': "Training word limit exceeded. Please reduce the number of training words.",
+                'code': 405,
+                'message': 'Training data already exist.',
             })
+        create_vector(result)
+        chat = insert_train_chat(chatbot, trainid)
+        return jsonify({
+            'success': True,
+            'code': 200,
+            'data': chat,
+            'message': "create train successfully",
+        })
     else:
         return jsonify({
             'success': False,
@@ -412,54 +401,45 @@ def create_train_text():
 @train.route('/api/data/sendfile', methods=['POST'])
 def create_train_file():
     try:
-        file = request.files.get('file', None)
-        chatbot = request.form.get('chatbot', None)
+        filename = request.json['filename']
+        chatbot = request.json['chatbot']
 
-        if not file or not chatbot:
-            return {"success": False, "message": "Invalid file or chatbot data"}, 400
+        file_obj = S3_CLIENT.get_object(Bucket=S3_PRIVATE_BUCKET, Key=filename)
+        file_content = file_obj['Body'].read()
+        file = BytesIO(file_content)
+        if (filename.split('.')[-1].lower() == 'pdf'):
+            output = parse_pdf(file)
+        elif (filename.split('.')[-1].lower() == 'csv'):
+            output = parse_csv(file)
+        elif (filename.split('.')[-1].lower() == 'docx'):
+            output = parse_docx(file)
+        elif filename.split('.')[-1].lower() in ['srt', 'txt', 'md', 'json']:
+            output = parse_srt(file)
+        elif (filename.split('.')[-1].lower() == 'epub'):
+            output = parse_epub(filename)
 
-        filename = secure_filename(file.filename)
-        full_chart_path = f"exports/charts/{chatbot}"
-        if not os.path.exists(full_chart_path):
-            os.makedirs(full_chart_path)
-        file_path = os.path.join(full_chart_path, filename)
-        file.save(file_path)
-
-        with open(file_path, 'rb') as f:
-            if (filename.split('.')[-1] == 'pdf'):
-                output = parse_pdf(f)
-            elif (filename.split('.')[-1] == 'csv'):
-                output = parse_csv(f)
-            elif (filename.split('.')[-1] == 'docx'):
-                output = parse_docx(f)
-            elif filename.split('.')[-1] in ['srt', 'txt', 'md', 'json']:
-                output = parse_srt(f)
-            elif (filename.split('.')[-1] == 'epub'):
-                output = parse_epub(filename)
-
-            result = text_to_docs(output, filename, chatbot)
-            # print(result)
-            trainid = create_train(filename, 'file', True, chatbot, file_path)
-            if (trainid == False):
-                return jsonify({
-                    'success': False,
-                    'code': 401,
-                    'message': 'Training data already exist.',
-                })
-            create_vector(result)
-
-            chat = insert_train_chat(chatbot, trainid)
-            return jsonify({
-                'success': True,
-                'code': 200,
-                'data': chat,
-                'message': "create train successfully",
-            })
+        result = text_to_docs(output, filename, chatbot)
+        trainid = create_train(filename, 'file', True, chatbot, filename)
+        if (trainid == False):
             return jsonify({
                 'success': False,
                 'code': 401,
-                'message': "Training word limit exceeded. Please reduce the number of training words.",
+                'message': 'Training data already exist.',
             })
+        create_vector(result)
+
+        chat = insert_train_chat(chatbot, trainid)
+        return jsonify({
+            'success': True,
+            'code': 200,
+            'data': chat,
+            'message': "create train successfully",
+        })
+        return jsonify({
+            'success': False,
+            'code': 401,
+            'message': "Training word limit exceeded. Please reduce the number of training words.",
+        })
 
 
     except Exception as e:
@@ -517,8 +497,8 @@ def get_traindatas():
         
         user = db.session.query(User).filter_by(id=chat.user_id).first()
         invite_account = db.session.query(Invite).filter_by(email=user.email).first()
-        user_check = db.session.query(User).filter_by(id=invite_account.user_id).first() if invite_account else None
-        if user_check and user_check.role == 7:
+        user_check = db.session.query(User).filter_by(id=invite_account.user_id).first() if invite_account else user
+        if user_check and user_check.role == 7 and chat.api_select == 1:
             user = user_check
             if user.wonde_key:
                 data.append({'label': 'Wonde API',
@@ -536,8 +516,8 @@ def get_traindatas():
 def delete_traindatas():
     uuid = request.json['uuid']
     id = request.json.get('id')
+    chat = db.session.query(Chat).filter_by(uuid=uuid).first()
     if id:
-        chat = db.session.query(Chat).filter_by(uuid=uuid).first()
         train_ids = json.loads(chat.train)
         train_ids.remove(id)
         chat.train = json.dumps(train_ids)
@@ -576,10 +556,32 @@ def delete_traindatas():
             'success': True
         }
     else:
+        chat.api_select = 0 # Diselect the wonde API key
+        db.session.commit()
+        chat_data = {
+            'id': chat.id,
+            'label': chat.label,
+            'description': chat.description,
+            'model': chat.model,
+            'conversation': chat.conversation,
+            'access': chat.access,
+            'creativity': chat.creativity,
+            'behavior': chat.behavior,
+            'behaviormodel': chat.behaviormodel,
+            'uuid': chat.uuid,
+            'train': json.loads(chat.train),
+            'chat_logo': json.loads(chat.chat_logo),
+            'chat_title': json.loads(chat.chat_title),
+            'chat_description': json.loads(chat.chat_description),
+            'chat_copyright': json.loads(chat.chat_copyright),
+            'chat_button': json.loads(chat.chat_button),
+            'bubble': json.loads(chat.bubble),
+        }
         data = {
-            'code': 403,
-            'message': "You can't delete this traindata",
-            'success': False
+            'code': 200,
+            'message': "Succesfullu delete",
+            'data': chat_data,
+            'success': True
         }
     return jsonify(data)
 

@@ -16,7 +16,7 @@ from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from flask_jwt_extended import create_access_token, decode_token
 import csv
-
+import tempfile
 from . import add_email_to_sendgrid_marketing, get_sendgrid_list_ids, delete_email_to_sendgrid_marketing
 
 load_dotenv()
@@ -115,6 +115,9 @@ def send_email(user):
 
 
 def register_new_user(username, email, password):
+    user = db.session.query(User).filter_by(email=email).first()
+    if user is not None:
+        return False
     db.session.add(Organization(email=email))
 
     invite_user = db.session.query(Invite).filter_by(email=email).first()
@@ -268,38 +271,37 @@ def email_verification():
         return jsonify({'message': 'Your token expired', 'success': False})
 
 
-@auth.route('/api/adduseraccount', methods=['POST'])
-def add_user_account():
-    username = request.json['username']
-    email = request.json['email']
-    email = email.lower()
-    password = request.json['password']
-    role = 5
-    status = 0
-    query = 500
-    usage = 0
-    tutors = 1
-    training_datas = 1
-    training_words = 100000
-    user = db.session.query(User).filter_by(email=email).first()
+# @auth.route('/api/adduseraccount', methods=['POST'])
+# def add_user_account():
+#     username = request.json['username']
+#     email = request.json['email']
+#     email = email.lower()
+#     password = request.json['password']
+#     role = 5
+#     status = 0
+#     query = 500
+#     usage = 0
+#     tutors = 1
+#     training_datas = 1
+#     training_words = 100000
+#     user = db.session.query(User).filter_by(email=email).first()
 
-    if user:
-        return jsonify({'message': 'Email address already exists', 'success': False})
+#     if user:
+#         return jsonify({'message': 'Email address already exists', 'success': False})
 
-    new_user = User(username=username, query=query, status=status, email=email, usage=usage, tutors=tutors, training_words=training_words, training_datas=training_datas, role=role,
-                    password=generate_password_hash(password, method='sha256'))
+#     new_user = User(username=username, query=query, status=status, email=email, usage=usage, tutors=tutors, training_words=training_words, training_datas=training_datas, role=role,
+#                     password=generate_password_hash(password, method='sha256'))
 
-    db.session.add(new_user)
-    db.session.commit()
+#     db.session.add(new_user)
+#     db.session.commit()
 
-    return jsonify({'success': True})
+#     return jsonify({'success': True})
 
 
 @auth.route('/api/getaccount', methods=['POST'])
 def get_useraccount():
     id = request.json['id']
     user = db.session.query(User).filter_by(id=id).first()
-    invite_account = db.session.query(Invite).filter_by(email=user.email).first()
     if user.role == 5:
         new_user = {
             'id': user.id,
@@ -315,10 +317,10 @@ def get_useraccount():
             'tutors': user.tutors,
             'training_datas': user.training_datas,
             'training_words': user.training_words,
-            'days': days
         }
         return jsonify({'success': True, 'data': new_user, 'code': 200})
     else:
+        invite_account = db.session.query(Invite).filter_by(email=user.email).first()
         if invite_account:
             invite_user = db.session.query(User).filter_by(id=invite_account.user_id).first()
             if invite_user and invite_user.role == 7:
@@ -632,7 +634,7 @@ def resendInvitation():
     email = email.lower()
     msg = Message('Invite to the interactive tutor', sender=os.getenv('MAIL_USERNAME'), recipients=[email])
     msg.html = render_template(
-        'enterprise.html', username=user.username, url=f"http://13.133.183.77/register?email={email}"
+        'enterprise.html', username=user.username, url=f"http://18.133.183.77/register?email={email}"
     )
     mail.send(msg)
     return jsonify({'success': True, 'code': 200, 'message': 'You have successfully Resent the invitation!'})
@@ -641,16 +643,23 @@ def resendInvitation():
 def sendUserInvite():
     id = request.json['id']
     emails = request.json['email']
+    enterpriseUser = db.session.query(User).filter_by(id=id).first()
     for email in emails:
-        enterpriseUser = db.session.query(User).filter_by(id=id).first()
+        if email == enterpriseUser.email:
+            continue
+        existInvite = db.session.query(Invite).filter_by(email=email).first()
+        if existInvite is not None:
+            continue
         user = db.session.query(User).filter_by(email=email).first()
-        invite_count = db.session.query(Invite).filter_by(user_id=id).all()
-        if invite_count and len(invite_count) > 50:
-            return jsonify({'success': False, 'code': 405, 'message': 'Your limitation is full'})
         if user is None:
             new_invite = Invite(user_id=id, email=email, index=0, status=False)
         else:
             new_invite = Invite(user_id=id, email=email, index=0, status=True)
+            user.role = 4
+            user.query = 30000
+            user.tutors = 100
+            user.training_datas = 100
+            user.training_words = 20000000
         db.session.add(new_invite)
         db.session.commit()
         msg = Message('Invite to the interactive tutor', sender=os.getenv('MAIL_USERNAME'), recipients=[email])
@@ -747,11 +756,16 @@ def uploadInviteFile():
     if not file:
         return {"success": False, "message": "Invalid file data"}, 400
     filename = secure_filename(file.filename)
-    file.save(filename)
-    with open(filename, 'r') as f:
-        data = parse_csv(f)
-    os.remove(filename)
-    return {"success": True, "data": data,"message": "Successfully"}, 200
+    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    file.save(temp_file.name)
+    try:
+        with open(temp_file.name, 'r') as f:
+            data = parse_csv(f)
+    finally:
+        temp_file.close()
+        os.unlink(temp_file.name)
+    
+    return {"success": True, "data": data, "message": "Successfully"}, 200
 
 
 def parse_csv(file):

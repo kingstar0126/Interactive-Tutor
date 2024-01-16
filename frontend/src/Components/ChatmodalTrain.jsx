@@ -14,8 +14,18 @@ import {
   Spinner,
   Button,
 } from "@material-tailwind/react";
-
+import AWS from "aws-sdk";
 import WONDE from "../assets/wonde.gif";
+
+AWS.config.update({
+  accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
+  secretAccessKey: process.env.REACT_APP_ACCESS_SECRET_KEY,
+});
+const S3_BUCKET = process.env.REACT_APP_S3_PRIVATE;
+const s3 = new AWS.S3({
+  params: { Bucket: S3_BUCKET },
+  region: process.env.REACT_APP_REGION,
+});
 
 const ChatmodalTrain = (props) => {
   const [type, SetType] = useState(1);
@@ -40,7 +50,6 @@ const ChatmodalTrain = (props) => {
       toast.success(message);
     }
   };
-  let poll;
 
   const handleClick = () => {
     setIsChecked(!isChecked);
@@ -64,7 +73,7 @@ const ChatmodalTrain = (props) => {
       });
   };
 
-  const onOK = () => {
+  const onOK = async () => {
     let chatbot = chat.uuid;
     if (type === "1") {
       if (urlPatternValidation(url)) {
@@ -88,34 +97,40 @@ const ChatmodalTrain = (props) => {
       }
     } else if (type === "2") {
       if (file && file.name) {
-        let data = new FormData();
-        let chatbot = chat.uuid;
-        const filename = file.name.replaceAll(" ", "");
-        data.append("file", file, filename);
-        data.append("chatbot", chatbot);
-        const config = {
-          onUploadProgress: (progressEvent) => {
-            const progress = Math.round(
-              (progressEvent.loaded / progressEvent.total) * 100
-            );
-            setProgress(progress);
-          },
+        const filename = chatbot + file.name.replaceAll(" ", "");
+        const params = {
+          Bucket: S3_BUCKET,
+          Key: filename,
+          Body: file,
         };
-        axios
-          .post(webAPI.sendfile, data, config)
-          .then((res) => {
-            setIsloading(false);
-            if (!res.data.success) {
-              notification("error", res.data.message);
-              props.handleCancel();
-            } else {
-              notification("success", res.data.message);
-              props.handleOk(res.data.data);
-            }
-            props.handleOk(res.data.data);
+        var upload = s3
+          .putObject(params)
+          .on("httpUploadProgress", (evt) => {
+            const progress = parseInt((evt.loaded * 100) / evt.total);
+            setProgress(progress);
+          })
+          .promise();
+        await upload
+          .then(() => {
+            axios
+              .post(webAPI.sendfile, { chatbot, filename })
+              .then((res) => {
+                setIsloading(false);
+                if (!res.data.success) {
+                  notification("error", res.data.message);
+                  props.handleCancel();
+                } else {
+                  notification("success", res.data.message);
+                  props.handleOk(res.data.data);
+                }
+                props.handleOk(res.data.data);
+              })
+              .catch((err) => {
+                setIsloading(false);
+              });
           })
           .catch((err) => {
-            notification("error", "Failed Uploading File");
+            notification("error", err.message);
             setIsloading(false);
           });
       }
@@ -216,7 +231,6 @@ const ChatmodalTrain = (props) => {
     setText("");
     getapikey();
     // SetType("1")
-    clearInterval(poll);
     if (chat.api_select && chat.api_select === 1) {
       setIsChecked(true);
     } else {
@@ -233,21 +247,19 @@ const ChatmodalTrain = (props) => {
   const customStyles = {
     control: (provided) => ({
       ...provided,
-      background: "transparent", // Adjust as needed
+      background: "transparent",
     }),
     placeholder: (provided) => ({
       ...provided,
-      color: "black", // Replace with your placeholder text color
+      color: "black",
     }),
     menu: (provided) => ({
       ...provided,
       background:
-        "linear-gradient(to bottom right, [--site-main-modal-from-color], [--site-main-modal-to-color])", // Replace with your gradient colors
-      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.25)", // Replace with your shadow style
+        "linear-gradient(to bottom right, [--site-main-modal-from-color], [--site-main-modal-to-color])",
+      boxShadow: "0 2px 4px rgba(0, 0, 0, 0.25)",
     }),
   };
-
-  // const displayValue = value.replace(/.(?=.{4})/g, '*');
 
   const handleInputChange = (e) => {
     setValue(e.target.value);

@@ -98,7 +98,7 @@
     // Execution
     const querystring = getQueryString();
     const urlParams = getUrlParams(querystring);
-    const API_URL = window.API_URL ? window.API_URL : "https://app.interactive-tutor.com";
+    const API_URL = window.API_URL ? window.API_URL : "http://18.133.183.77";
 
     const WIDGET_ID = window.ICG_WIDGET_ID
         ? window.ICG_WIDGET_ID

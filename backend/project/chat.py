@@ -15,6 +15,8 @@ from .generate_response import generate_system_prompt_role
 from .train import duplicate_train_data
 import datetime
 import shutil
+import boto3
+
 
 load_dotenv()
 
@@ -28,6 +30,13 @@ openai.openai_api_key = OPENAI_API_KEY
 
 chat = Blueprint('chat', __name__)
 
+S3_CLIENT = boto3.client(
+    's3',
+    aws_access_key_id=os.getenv('ACCESS_KEY_ID'),
+    aws_secret_access_key=os.getenv('ACCESS_SECRET_KEY'),
+    region_name=os.getenv('REGION')
+)
+S3_PRIVATE_BUCKET = os.getenv('S3_PRIVATE')
 
 def delete_vectore(source, chat):
     index = pinecone.Index(PINECONE_INDEX_NAME)
@@ -77,7 +86,7 @@ def add_chat():
     behavior = request.json['behavior']
     behaviormodel = request.json['behaviormodel']
     train = json.dumps([])
-    chat_logo = json.dumps({"user": "https://app.interactive-tutor.com/api/imageupload/default_user.png", "ai": "https://app.interactive-tutor.com/api/imageupload/default_ai.png"})
+    chat_logo = json.dumps({"user": "http://18.133.183.77/api/imageupload/default_user.png", "ai": "http://18.133.183.77/api/imageupload/default_ai.png"})
     chat_title = json.dumps({})
     chat_description = json.dumps({})
     chat_copyright = json.dumps(
@@ -291,7 +300,6 @@ def update_chat():
                 item.creativity = creativity
                 item.behavior = behavior
                 item.behaviormodel = behaviormodel
-                item.uuid = str(uuid.uuid4())
         chat.label = label
         chat.description = description
         chat.model = model
@@ -299,7 +307,6 @@ def update_chat():
         chat.creativity = creativity
         chat.behavior = behavior
         chat.behaviormodel = behaviormodel
-        chat.uuid = str(uuid.uuid4())
         # Save the updated chat to the database
         db.session.commit()
 
@@ -324,8 +331,34 @@ def share_chat():
     if current_user.role == 7:
         users = db.session.query(Invite, User.id).join(User, User.email == Invite.email).filter(Invite.user_id == user_id).all()
     else:
-        users = db.session.query(Invite, User.id).join(User, User.email == Invite.email).filter(Invite.user_id == shareChat.inviteId).all()
+        ownerID = db.session.query(Invite).filter_by(email=current_user.email).first()
+        users = db.session.query(Invite, User.id).join(User, User.email == Invite.email).filter(Invite.user_id == ownerID.user_id).all()
 
+    if ownerID:
+        user_id = ownerID.user_id
+        islibrary = True
+        label = chat['label']
+        description = chat['description']
+        model = chat['model']
+        conversation = chat['conversation']
+        access = generate_pin_password()
+        creativity = chat['creativity']
+        behavior = chat['behavior']
+        behaviormodel = chat['behaviormodel']
+        train = json.dumps([])
+        chat_copyright = json.dumps(chat['chat_copyright'])
+        chat_button = json.dumps(chat['chat_button'])
+        bubble = json.dumps(chat['bubble'])
+        chat_logo = json.dumps(chat['chat_logo'])
+        chat_title = json.dumps(chat['chat_title'])
+        chat_description = json.dumps(chat['chat_description'])
+        new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
+                    access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button, islibrary=islibrary)
+        db.session.add(new_chat)
+        db.session.commit()
+        train = json.dumps(duplicate_train_data(chat['train'], new_chat.uuid))
+        new_chat.train = train
+        db.session.commit()
     for user in users:
         user_id = user.id
         islibrary = True
@@ -564,7 +597,13 @@ def get_chat_with_pin_organization():
 def get_chat():
     json_data = request.get_json()
     if json_data:
-        uuid = request.json['id']
+        uuid = json_data.get('id')
+        if uuid is None:
+            return jsonify({
+                    'success': False,
+                    'code': 404,
+                    'message': 'The Data not excited'
+                })
         chat = db.session.query(Chat).filter_by(uuid=uuid).first()
         if chat is None:
             return jsonify({
@@ -645,7 +684,7 @@ def get_bubble(widgetID):
         'organization': organization,
         'role': user.role,
         'api_select': chat.api_select,
-        'embed_url': 'https://app.interactive-tutor.com/chat/embedding/',
+        'embed_url': 'http://18.133.183.77/chat/embedding/',
     }
 
     data = {
@@ -656,6 +695,22 @@ def get_bubble(widgetID):
 
     return jsonify(data)
 
+def delete_objects_with_uuid(uuid, bucket):
+    # List all objects within the bucket
+    response = S3_CLIENT.list_objects_v2(Bucket=bucket)
+
+    # Filter out objects that contain the UUID
+    objects_to_delete = [obj for obj in response.get('Contents', []) if uuid in obj['Key']]
+
+    # Prepare the list of objects to be deleted
+    delete_keys = {'Objects': [{'Key': obj['Key']} for obj in objects_to_delete]}
+
+    # Delete the objects
+    if delete_keys['Objects']:
+        S3_CLIENT.delete_objects(Bucket=bucket, Delete=delete_keys)
+        print(f"Deleted {len(delete_keys['Objects'])} objects containing the UUID {uuid}")
+    else:
+        print(f"No objects found containing the UUID {uuid}")
 
 @chat.route('/api/deletechat/<int:id>', methods=['DELETE'])
 def delete_chat(id):
@@ -665,10 +720,8 @@ def delete_chat(id):
         for message in messages:
             ###################################
             # Remove the chart folder of message.
-            folder_path = f'exports/charts/{message.uuid}'
-            if os.path.exists(folder_path):
-                folders_to_remove.append(folder_path)
-            db.session.delete(message)
+            delete_objects_with_uuid(message.uuid, S3_PRIVATE_BUCKET)
+            delete_objects_with_uuid(message.uuid, S3_PUBLIC_BUCKET)
             ###################################
         db.session.commit()
         
@@ -677,17 +730,19 @@ def delete_chat(id):
 
         train_ids = json.loads(chat.train)
         # delete index in the pinecone
-
-        for id in train_ids:
-            source = db.session.query(Train).filter_by(id=id).first()
-            delete_vectore(source.label, chat.uuid)
-            db.session.query(Train).filter_by(id=id).delete()
-        
-        library = db.session.query(Library).filter_by(chat_id=id).first()
-        if library:
-            review_ids = json.loads(library.review_id)
-            for review_id in review_ids:
-                db.session.query(Review).filter_by(id=review_id).delete()
+        try: 
+            for id in train_ids:
+                source = db.session.query(Train).filter_by(id=id).first()
+                delete_vectore(source.label, chat.uuid)
+                db.session.query(Train).filter_by(id=id).delete()
+            
+            library = db.session.query(Library).filter_by(chat_id=id).first()
+            if library:
+                review_ids = json.loads(library.review_id)
+                for review_id in review_ids:
+                    db.session.query(Review).filter_by(id=review_id).delete()
+        except Exception as e:
+            print(e)
         db.session.delete(chat)
         db.session.commit()
 

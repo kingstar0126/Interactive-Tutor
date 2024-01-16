@@ -72,7 +72,6 @@ def get_name_from_prompt(query):
     peoples = result.people
     print(peoples)
     names = [person.name for person in peoples]
-    print('THIS IS THE NAME: ', names)
     return names
 
 def generate_message(query, behavior, temp, model, chat, template, openai_api_key = None):
@@ -83,13 +82,12 @@ def generate_message(query, behavior, temp, model, chat, template, openai_api_ke
 
     q = Queue()
     job_done = object()
-    print('This is template : \n\n', template)
     prompt = PromptTemplate(
         input_variables=["context", "question"], template=template)
     chain_type_kwargs = {"prompt": prompt}
 
     if model == "1":
-        llm = ChatOpenAI(model_name="gpt-3.5",
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo-1106",
                          temperature=temp,
                          streaming=True,
                          callbacks=[QueueCallback(q)],
@@ -113,7 +111,7 @@ def generate_message(query, behavior, temp, model, chat, template, openai_api_ke
         index_name=PINECONE_INDEX_NAME, embedding=embeddings)
 
     docs = docsearch.similarity_search_with_score(" ", filter={"chat": str(chat)})
-
+    print('docs: ', docs)
     qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=docsearch.as_retriever(search_kwargs={'filter': {"chat": str(chat)}}), chain_type_kwargs=chain_type_kwargs)
     
     def task():

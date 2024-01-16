@@ -35,8 +35,18 @@ import PDF from "../assets/pdf.png";
 import WORD from "../assets/word.jpg";
 import XLSX from "../assets/xlsx.png";
 import CSV from "../assets/csv.png";
-
+import AWS from "aws-sdk";
 const STEP = 30;
+
+AWS.config.update({
+  accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
+  secretAccessKey: process.env.REACT_APP_ACCESS_SECRET_KEY,
+});
+const S3_BUCKET = process.env.REACT_APP_S3_PRIVATE;
+const s3 = new AWS.S3({
+  params: { Bucket: S3_BUCKET },
+  region: process.env.REACT_APP_REGION,
+});
 
 const NewChat = () => {
   const chatState = useSelector((state) => state.chat.chat);
@@ -94,7 +104,6 @@ const NewChat = () => {
         setLoading(false);
       } else if (!chat.access || result) {
         setLoading(true);
-        console.log(result, "Here Embedded code", chatId);
         axios
           .post(webAPI.getchat, chatId)
           .then(async (res) => {
@@ -117,8 +126,11 @@ const NewChat = () => {
   }, []);
 
   const chatbot_start = useMemo(() => {
-    console.log('hhhih', chat, chathistory)
-    if (chat.conversation && chat.conversation !== "" && chathistory.length == 0) {
+    if (
+      chat.conversation &&
+      chat.conversation !== "" &&
+      chathistory.length == 0
+    ) {
       setChathistory([
         ...chathistory,
         { role: "ai", content: chat.conversation },
@@ -231,7 +243,7 @@ const NewChat = () => {
       ai_background.current.style.color = chat.chat_logo.ai_color;
       ai_background.current.style["font-size"] = chat.chat_logo.ai_size + "px";
     }
-  }, [chathistory, streamData]);
+  }, [chathistory]);
 
   const handleSubmit = async (event) => {
     if (!event.shiftKey && event.keyCode === 13 && spinner === false) {
@@ -252,11 +264,11 @@ const NewChat = () => {
       } else {
         setChathistory((prevHistory) => [...prevHistory, human]);
       }
-
+      setMessage("");
       await sendMessage(id, _message);
 
       event.preventDefault();
-      setMessage("");
+      
     }
   };
 
@@ -279,11 +291,11 @@ const NewChat = () => {
       } else {
         setChathistory((prevHistory) => [...prevHistory, human]);
       }
-
+      setMessage("");
       await sendMessage(id, _message);
 
       event.preventDefault();
-      setMessage("");
+      
     }
   };
 
@@ -301,18 +313,47 @@ const NewChat = () => {
     formData.append("behaviormodel", behaviormodel);
     formData.append("train", train);
     formData.append("model", model);
-    if (image.length) {
-      image.map((item) => {
-        formData.append("image", item);
-      });
-      setImage([]);
-    }
-    if (files.length) {
-      files.map((item) => {
-        formData.append("file", item);
-      });
-      setFiles([]);
-    }
+    const imageUploadPromises = image.map(async (item) => {
+      const filename = chat.uuid + item.name.replaceAll(" ", "");
+      const params = {
+        Bucket: S3_BUCKET,
+        Key: filename,
+        Body: item,
+      };
+      return s3
+        .putObject(params)
+        .promise()
+        .then(() => {
+          formData.append("image", filename);
+        })
+        .catch((err) => {
+          notification("error", err.message);
+        });
+    });
+
+    // Use Promise.all to wait for all file uploads to finish
+    const fileUploadPromises = files.map(async (item) => {
+      const filename = chat.uuid + item.name.replaceAll(" ", "");
+      const params = {
+        Bucket: S3_BUCKET,
+        Key: filename,
+        Body: item,
+      };
+      return s3
+        .putObject(params)
+        .promise()
+        .then(() => {
+          console.log("FILE");
+          formData.append("file", filename);
+        })
+        .catch((err) => {
+          notification("error", err.message);
+        });
+    });
+    setImage([]);
+    setFiles([]);
+    // Wait for all uploads to finish
+    await Promise.all([...imageUploadPromises, ...fileUploadPromises]);
 
     // Send the formData to the streaming API
     fetch(webAPI.sendchat, {
@@ -882,7 +923,7 @@ const NewChat = () => {
                 onChange={handleUploadFile}
                 accept=".pdf,.docx,.doc,.csv"
               />
-              <div className="flex items-center w-full divide-x-2 sm:w-4/5 md:gap-2 gap-1">
+              <div className="flex flex-col items-center w-full divide-x-2 sm:w-4/5 md:gap-2 gap-1">
                 <div className="flex w-full flex-col py-2.5 relative">
                   <div className="flex p-3 absolute left-0 top-1/2 -translate-y-1/2">
                     <Menu placement="top">
@@ -928,79 +969,6 @@ const NewChat = () => {
                     className="w-full text-[--site-card-icon-color] px-10 py-3 border border-gray-600 focus:outline-none rounded-md"
                     placeholder="Type message"
                   ></textarea>
-                  <div className="flex flex-wrap gap-2">
-                    {image &&
-                      image.length > 0 &&
-                      image.map((item, index) => {
-                        return (
-                          <div className="relative" key={index}>
-                            <img
-                              src={URL.createObjectURL(item)}
-                              alt="file"
-                              className="w-10 h-10"
-                            />
-                            <AiOutlineClose
-                              onClick={() => handleRemoveImage(index)}
-                              className="absolute w-4 h-4 top-0 right-0 text-white rounded-full bg-red-600"
-                            />
-                          </div>
-                        );
-                      })}
-                    {files &&
-                      files.length > 0 &&
-                      files.map((file, index) => {
-                        let FileIcon;
-                        switch (file.type) {
-                          case "application/pdf":
-                            FileIcon = (
-                              <img
-                                src={PDF}
-                                alt="pdf-icon"
-                                className="w-10 h-10"
-                              />
-                            );
-                            break;
-                          case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-                            FileIcon = (
-                              <img
-                                src={WORD}
-                                alt="word-icon"
-                                className="w-10 h-10"
-                              />
-                            );
-                            break;
-                          case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
-                            FileIcon = (
-                              <img
-                                src={XLSX}
-                                alt="xlsx-icon"
-                                className="w-10 h-10"
-                              />
-                            );
-                            break;
-                          default:
-                            FileIcon = (
-                              <img
-                                src={CSV}
-                                alt="csv-icon"
-                                className="w-10 h-10"
-                              />
-                            );
-                            break;
-                          // If the type is not one of the above, display a default icon or simply omit this case
-                        }
-                        return (
-                          <div className="relative" key={index}>
-                            {FileIcon}
-                            <p className="truncate w-16">{file.name}</p>
-                            <AiOutlineClose
-                              onClick={() => handleRemoveFile(index)}
-                              className="absolute w-4 h-4 top-0 right-0 text-white rounded-full bg-red-600"
-                            />
-                          </div>
-                        );
-                      })}
-                  </div>
                   <span
                     onClick={handleSubmitIcon}
                     className="flex p-3 absolute right-0 top-1/2 -translate-y-1/2"
@@ -1009,6 +977,79 @@ const NewChat = () => {
                       <BsFillSendPlusFill className="w-5 h-5" />
                     </IconButton>
                   </span>
+                </div>
+                <div className="flex flex-wrap gap-2 w-full">
+                  {image &&
+                    image.length > 0 &&
+                    image.map((item, index) => {
+                      return (
+                        <div className="relative" key={index}>
+                          <img
+                            src={URL.createObjectURL(item)}
+                            alt="file"
+                            className="w-10 h-10"
+                          />
+                          <AiOutlineClose
+                            onClick={() => handleRemoveImage(index)}
+                            className="absolute w-4 h-4 top-0 right-0 text-white rounded-full bg-red-600"
+                          />
+                        </div>
+                      );
+                    })}
+                  {files &&
+                    files.length > 0 &&
+                    files.map((file, index) => {
+                      let FileIcon;
+                      switch (file.type) {
+                        case "application/pdf":
+                          FileIcon = (
+                            <img
+                              src={PDF}
+                              alt="pdf-icon"
+                              className="w-10 h-10"
+                            />
+                          );
+                          break;
+                        case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+                          FileIcon = (
+                            <img
+                              src={WORD}
+                              alt="word-icon"
+                              className="w-10 h-10"
+                            />
+                          );
+                          break;
+                        case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                          FileIcon = (
+                            <img
+                              src={XLSX}
+                              alt="xlsx-icon"
+                              className="w-10 h-10"
+                            />
+                          );
+                          break;
+                        default:
+                          FileIcon = (
+                            <img
+                              src={CSV}
+                              alt="csv-icon"
+                              className="w-10 h-10"
+                            />
+                          );
+                          break;
+                        // If the type is not one of the above, display a default icon or simply omit this case
+                      }
+                      return (
+                        <div className="relative" key={index}>
+                          {FileIcon}
+                          <p className="truncate w-16">{file.name}</p>
+                          <AiOutlineClose
+                            onClick={() => handleRemoveFile(index)}
+                            className="absolute w-4 h-4 top-0 right-0 text-white rounded-full bg-red-600"
+                          />
+                        </div>
+                      );
+                    })}
                 </div>
               </div>
 

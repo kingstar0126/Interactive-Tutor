@@ -18,6 +18,12 @@ def get_all_product():
     id = request.json['id']
     user = db.session.query(User).filter_by(id=id).first()
     current_user = {}
+    if user is None:
+        return jsonify({
+            'success': False,
+            'code': 500,
+            'message': 'No Data'
+        })
     if user.subscription_id:
         subscription = stripe.Subscription.retrieve(user.subscription_id)
         if subscription['status'] != 'past_due' and subscription['status'] != 'canceled' and subscription['status'] != 'unpaid':
