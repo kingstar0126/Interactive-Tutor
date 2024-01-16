@@ -194,9 +194,9 @@ def reset():
         password = send_email(user)
         user.password = generate_password_hash(password, method='sha256')
         db.session.commit()
-        data = {
-            'message': 'An email has been sent with instructions to reset your password.', 'success': True}
+        data = {'message': 'An email has been sent with instructions to reset your password.', 'success': True}
         return jsonify(data)
+    return jsonify({'message': 'Your data does not exist in our app.', 'success': False})
 
 
 @auth.route('/api/change', methods=['POST'])
@@ -235,15 +235,16 @@ def signup_post():
     user = db.session.query(User).filter_by(email=email).first()
 
     if user:
-        return jsonify({'message': 'Email address already exists', 'success': False})
+        return jsonify({'message': 'The email address already exists. Please try logging in.', 'success': False})
     
     invite_account = db.session.query(Invite).filter_by(email=email).first()
     if invite_account:
         invite_user = db.session.query(User).filter_by(id=invite_account.user_id).first()
         if invite_user.role == 7:
-            register_new_user(username, email, password)
-            return jsonify({'success': True, 'message': 'You have registered successfully!'})
-
+            if register_new_user(username, email, password):
+                return jsonify({'success': True, 'message': 'You have registered successfully!'})
+            else:
+                return jsonify({'success': True, 'message': 'You have already registered. Please login again.'})
     verification_token = create_access_token(identity={'username': username, 'email': email, 'password': password},
                                              expires_delta=timedelta(minutes=30))
     verification_link = f"https://app.interactive-tutor.com/verify-email/token={verification_token}"
@@ -266,7 +267,7 @@ def email_verification():
         if register_new_user(token['sub']['username'], token['sub']['email'], token['sub']['password']):
             return jsonify({'message': 'You have successfully registered!', 'success': True})
         else:
-            return jsonify({'message': 'Something is wrong!', 'success': False})
+            return jsonify({'success': True, 'message': 'You have already registered. Please login again.'})
     except Exception as e:
         return jsonify({'message': 'Your token expired', 'success': False})
 
@@ -409,7 +410,6 @@ def get_all_useraccount():
     
     else:
         invite_users = db.session.query(Invite).filter_by(user_id=id).all()
-        
         for invite_user in invite_users:
             if invite_user.status: #already signed up user
                 _user = db.session.query(User).filter_by(email=invite_user.email).first()
@@ -645,6 +645,7 @@ def sendUserInvite():
     emails = request.json['email']
     enterpriseUser = db.session.query(User).filter_by(id=id).first()
     for email in emails:
+        email = email.lower()
         if email == enterpriseUser.email:
             continue
         existInvite = db.session.query(Invite).filter_by(email=email).first()
@@ -740,14 +741,17 @@ def setTutors():
 
 @auth.route('/api/checkUserInvite', methods=['POST'])
 def checkUserInvite():
-    id = request.json['id']
-    user = db.session.query(User).filter_by(id=id).first()
-    invite_account = db.session.query(Invite).filter_by(email=user.email).first()
-    if invite_account:
-            invite_user = db.session.query(User).filter_by(id=invite_account.user_id).first()
-            if invite_user and invite_user.role == 7:
-                return jsonify({'success': True})
-    return jsonify({'success': False})
+    try:
+        id = request.json['id']
+        user = db.session.query(User).filter_by(id=id).first()
+        invite_account = db.session.query(Invite).filter_by(email=user.email).first()
+        if invite_account:
+                invite_user = db.session.query(User).filter_by(id=invite_account.user_id).first()
+                if invite_user and invite_user.role == 7:
+                    return jsonify({'success': True})
+        return jsonify({'success': False})
+    except Exception as e:
+        return jsonify({'success': False})
 
 
 @auth.route('/api/uploadInviteFile', methods=['POST'])
@@ -755,13 +759,18 @@ def uploadInviteFile():
     file = request.files.get('file', None)
     if not file:
         return {"success": False, "message": "Invalid file data"}, 400
+    if not allowed_file(file.filename):
+        return {"success": False, "message": "Invalid file type"}, 400
     filename = secure_filename(file.filename)
     file.save(filename)
-    with open(filename, 'r') as f:
-        data = parse_csv(f)
+    try:
+        with open(filename, 'r', encoding='utf-8', errors='ignore') as f:
+            data = parse_csv(f)
+    except Exception as e:
+        os.remove(filename)
+        return {"success": False, "message": str(e)}, 500
     os.remove(filename)
-    return {"success": True, "data": data,"message": "Successfully"}, 200
-
+    return {"success": True, "data": data, "message": "File processed successfully"}, 200
 
 def parse_csv(file):
     data = csv.reader(file)
@@ -769,12 +778,16 @@ def parse_csv(file):
     for row in data:
         for col in row:
             if is_email(col):
+                col = col.lower()
                 email.append(col)
     return email
 
 def is_email(s):
     pattern = r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"
     return bool(re.match(pattern, s))
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'csv'}
 
 
 @auth.route('/api/closeAccunt', methods=['POST'])

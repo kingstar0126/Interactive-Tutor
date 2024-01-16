@@ -75,46 +75,49 @@ def search_google():
 
 @message.route('/api/createmessage', methods=['POST'])
 def init_message():
-    chat_id = request.json['id']
-    behavior = request.json['behavior']
-    creativity = request.json['creativity']
-    conversation = request.json['conversation']
-    # country = request.json['country']
-    response = generate_Bubble_message('any country')
-    name = f"{response}"
+    try:
+        chat_id = request.json['id']
+        behavior = request.json['behavior']
+        creativity = request.json['creativity']
+        conversation = request.json['conversation']
+        # country = request.json['country']
+        response = generate_Bubble_message('any country')
+        name = f"{response}"
 
-    current_date = datetime.datetime.now()
-    messages = db.session.query(Message).filter(
-        and_(
-            Message.chat_id == chat_id, 
-            Message.update_date < current_date
-        )
-    ).all()
-    for row in messages:
-        _messages = json.loads(row.message)
-        if len(_messages) < 2:
-            db.session.delete(row)
-    db.session.commit()
-    
+        current_date = datetime.datetime.now()
+        messages = db.session.query(Message).filter(
+            and_(
+                Message.chat_id == chat_id, 
+                Message.update_date < current_date
+            )
+        ).all()
+        for row in messages:
+            _messages = json.loads(row.message)
+            if len(_messages) < 2:
+                db.session.delete(row)
+        db.session.commit()
+        
 
-    if conversation == "":
-        message = json.dumps([])
-    else:
-        message = json.dumps([{"role": "ai", "content": conversation}])
-    new_message = Message(chat_id=chat_id, message=message,
-                          behavior=behavior, creativity=creativity, name=name)
-    db.session.add(new_message)
-    db.session.commit()
+        if conversation == "":
+            message = json.dumps([])
+        else:
+            message = json.dumps([{"role": "ai", "content": conversation}])
+        new_message = Message(chat_id=chat_id, message=message,
+                            behavior=behavior, creativity=creativity, name=name)
+        db.session.add(new_message)
+        db.session.commit()
 
-    if assistants:
-        if chat_id in assistants and assistants[chat_id] is not None:
-            delete_assistant_file(assistants[chat_id], files[chat_id])
-    threads[chat_id] = None
-    assistants[chat_id] = None
-    files[chat_id] = None
-    response = {'success': True, 'code': 200,
-                'message': "Successfuly created", 'data': new_message.uuid}
-    return jsonify(response)
+        if assistants:
+            if chat_id in assistants and assistants[chat_id] is not None:
+                delete_assistant_file(assistants[chat_id], files[chat_id])
+        threads[chat_id] = None
+        assistants[chat_id] = None
+        files[chat_id] = None
+        response = {'success': True, 'code': 200,
+                    'message': "Successfuly created", 'data': new_message.uuid}
+        return jsonify(response)
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
 
 
 @message.route('/api/getquery', methods=['POST'])
@@ -400,26 +403,29 @@ def get_message():
 
 @message.route('/api/getmessages', methods=['POST'])
 def get_messages():
-    chat_id = request.json['id']
-    current_messages = db.session.query(Message).filter_by(chat_id=chat_id).order_by(Message.update_date.desc()).all()
-    response = []
-    for _message in current_messages:
-        if len(json.loads(_message.message)) > 1:
-            message_data = {
-                'uuid': _message.uuid,
-                'name': _message.name,
-                'message': json.loads(_message.message),
-                'update_data': _message.update_date.strftime('%d-%m-%Y')
-            }
-            response.append(message_data)
+    try:
+        chat_id = request.json['id']
+        current_messages = db.session.query(Message).filter_by(chat_id=chat_id).order_by(Message.update_date.desc()).all()
+        response = []
+        for _message in current_messages:
+            if len(json.loads(_message.message)) > 1:
+                message_data = {
+                    'uuid': _message.uuid,
+                    'name': _message.name,
+                    'message': json.loads(_message.message),
+                    'update_data': _message.update_date.strftime('%d-%m-%Y')
+                }
+                response.append(message_data)
 
-    _response = {
-        'success': True,
-        'code': 200,
-        'message': 'Your messageBot selected successfully!!!',
-        'data': response
-    }
-    return jsonify(_response)
+        _response = {
+            'success': True,
+            'code': 200,
+            'message': 'Your messageBot selected successfully!!!',
+            'data': response
+        }
+        return jsonify(_response)
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
 
 
 @message.route('/api/deletemessage', methods=['POST'])

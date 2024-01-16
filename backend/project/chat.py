@@ -67,46 +67,49 @@ def generate_final_report_data(source_data):
 
 @chat.route('/api/addchat', methods=['POST'])
 def add_chat():
-    user_id = request.json['user_id']
-    label = request.json['label']
-    description = request.json['chatdescription']
-    model = request.json['chatmodel']
-    conversation = request.json['Conversation']
-    access = generate_pin_password()
-    creativity = request.json['Creativity']
-    behavior = request.json['behavior']
-    behaviormodel = request.json['behaviormodel']
-    train = json.dumps([])
-    chat_logo = json.dumps({"user": "https://app.interactive-tutor.com/api/imageupload/default_user.png", "ai": "https://app.interactive-tutor.com/api/imageupload/default_ai.png"})
-    chat_title = json.dumps({})
-    chat_description = json.dumps({})
-    chat_copyright = json.dumps(
-        {'description': 'powered by interactive-tutor.com', 'status': 'false', 'color': '#ff0000'})
-    chat_button = json.dumps({})
-    bubble = json.dumps({"position": {"value": 0, "label": "Right"}})
-    api_select = 0
+    try:
+        user_id = request.json['user_id']
+        label = request.json['label']
+        description = request.json['chatdescription']
+        model = request.json['chatmodel']
+        conversation = request.json['Conversation']
+        access = generate_pin_password()
+        creativity = request.json['Creativity']
+        behavior = request.json['behavior']
+        behaviormodel = request.json['behaviormodel']
+        train = json.dumps([])
+        chat_logo = json.dumps({"user": "https://app.interactive-tutor.com/api/imageupload/default_user.png", "ai": "https://app.interactive-tutor.com/api/imageupload/default_ai.png"})
+        chat_title = json.dumps({})
+        chat_description = json.dumps({})
+        chat_copyright = json.dumps(
+            {'description': 'powered by interactive-tutor.com', 'status': 'false', 'color': '#ff0000'})
+        chat_button = json.dumps({})
+        bubble = json.dumps({"position": {"value": 0, "label": "Right"}})
+        api_select = 0
 
-    user = db.session.query(User).filter_by(id=user_id).first()
-    # ct = db.session.query(Chat).filter_by(user_id=user_id).count() + 1
+        user = db.session.query(User).filter_by(id=user_id).first()
+        # ct = db.session.query(Chat).filter_by(user_id=user_id).count() + 1
 
-    # if not user.role == 1 or user.role == 7:
-    #     if ct > user.tutors:
-    #         return jsonify({
-    #             'success': False,
-    #             'code': 401,
-    #             'message': "You can no longer create AI Bots.",
-    #         })
-    new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
-                    access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button, api_select=api_select)
-    db.session.add(new_chat)
-    db.session.commit()
+        # if not user.role == 1 or user.role == 7:
+        #     if ct > user.tutors:
+        #         return jsonify({
+        #             'success': False,
+        #             'code': 401,
+        #             'message': "You can no longer create AI Bots.",
+        #         })
+        new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
+                        access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button, api_select=api_select)
+        db.session.add(new_chat)
+        db.session.commit()
 
-    response = {
-        'success': True,
-        'code': 200,
-        'message': 'Your ChatBot created successfully!!!'
-    }
-    return jsonify(response)
+        response = {
+            'success': True,
+            'code': 200,
+            'message': 'Your ChatBot created successfully!!!'
+        }
+        return jsonify(response)
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
 
 
 @chat.route('/api/imageupload', methods=['POST'])
