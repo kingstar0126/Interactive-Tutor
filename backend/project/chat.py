@@ -15,6 +15,8 @@ from .generate_response import generate_system_prompt_role
 from .train import duplicate_train_data
 import datetime
 import shutil
+import boto3
+
 
 load_dotenv()
 
@@ -28,6 +30,13 @@ openai.openai_api_key = OPENAI_API_KEY
 
 chat = Blueprint('chat', __name__)
 
+S3_CLIENT = boto3.client(
+    's3',
+    aws_access_key_id=os.getenv('ACCESS_KEY_ID'),
+    aws_secret_access_key=os.getenv('ACCESS_SECRET_KEY'),
+    region_name=os.getenv('REGION')
+)
+S3_PRIVATE_BUCKET = os.getenv('S3_PRIVATE')
 
 def delete_vectore(source, chat):
     index = pinecone.Index(PINECONE_INDEX_NAME)
@@ -686,6 +695,22 @@ def get_bubble(widgetID):
 
     return jsonify(data)
 
+def delete_objects_with_uuid(uuid, bucket):
+    # List all objects within the bucket
+    response = S3_CLIENT.list_objects_v2(Bucket=bucket)
+
+    # Filter out objects that contain the UUID
+    objects_to_delete = [obj for obj in response.get('Contents', []) if uuid in obj['Key']]
+
+    # Prepare the list of objects to be deleted
+    delete_keys = {'Objects': [{'Key': obj['Key']} for obj in objects_to_delete]}
+
+    # Delete the objects
+    if delete_keys['Objects']:
+        S3_CLIENT.delete_objects(Bucket=bucket, Delete=delete_keys)
+        print(f"Deleted {len(delete_keys['Objects'])} objects containing the UUID {uuid}")
+    else:
+        print(f"No objects found containing the UUID {uuid}")
 
 @chat.route('/api/deletechat/<int:id>', methods=['DELETE'])
 def delete_chat(id):
@@ -695,10 +720,8 @@ def delete_chat(id):
         for message in messages:
             ###################################
             # Remove the chart folder of message.
-            folder_path = f'exports/charts/{message.uuid}'
-            if os.path.exists(folder_path):
-                folders_to_remove.append(folder_path)
-            db.session.delete(message)
+            delete_objects_with_uuid(message.uuid, S3_PRIVATE_BUCKET)
+            delete_objects_with_uuid(message.uuid, S3_PUBLIC_BUCKET)
             ###################################
         db.session.commit()
         
@@ -707,17 +730,19 @@ def delete_chat(id):
 
         train_ids = json.loads(chat.train)
         # delete index in the pinecone
-
-        for id in train_ids:
-            source = db.session.query(Train).filter_by(id=id).first()
-            delete_vectore(source.label, chat.uuid)
-            db.session.query(Train).filter_by(id=id).delete()
-        
-        library = db.session.query(Library).filter_by(chat_id=id).first()
-        if library:
-            review_ids = json.loads(library.review_id)
-            for review_id in review_ids:
-                db.session.query(Review).filter_by(id=review_id).delete()
+        try: 
+            for id in train_ids:
+                source = db.session.query(Train).filter_by(id=id).first()
+                delete_vectore(source.label, chat.uuid)
+                db.session.query(Train).filter_by(id=id).delete()
+            
+            library = db.session.query(Library).filter_by(chat_id=id).first()
+            if library:
+                review_ids = json.loads(library.review_id)
+                for review_id in review_ids:
+                    db.session.query(Review).filter_by(id=review_id).delete()
+        except Exception as e:
+            print(e)
         db.session.delete(chat)
         db.session.commit()
 

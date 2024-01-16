@@ -16,7 +16,7 @@ from werkzeug.utils import secure_filename
 from datetime import datetime, timedelta
 from flask_jwt_extended import create_access_token, decode_token
 import csv
-
+import tempfile
 from . import add_email_to_sendgrid_marketing, get_sendgrid_list_ids, delete_email_to_sendgrid_marketing
 
 load_dotenv()
@@ -756,11 +756,16 @@ def uploadInviteFile():
     if not file:
         return {"success": False, "message": "Invalid file data"}, 400
     filename = secure_filename(file.filename)
-    file.save(filename)
-    with open(filename, 'r') as f:
-        data = parse_csv(f)
-    os.remove(filename)
-    return {"success": True, "data": data,"message": "Successfully"}, 200
+    temp_file = tempfile.NamedTemporaryFile(delete=False)
+    file.save(temp_file.name)
+    try:
+        with open(temp_file.name, 'r') as f:
+            data = parse_csv(f)
+    finally:
+        temp_file.close()
+        os.unlink(temp_file.name)
+    
+    return {"success": True, "data": data, "message": "Successfully"}, 200
 
 
 def parse_csv(file):

@@ -4,6 +4,7 @@ from .models import Message, Train, User, Chat, Invite
 from bs4 import BeautifulSoup
 from sqlalchemy import and_
 import requests
+from io import BytesIO
 import uuid
 from . import db
 import io
@@ -23,24 +24,20 @@ from google.cloud import vision
 import tiktoken
 import threading
 from werkzeug.utils import secure_filename
+import boto3
 
 message = Blueprint('message', __name__)
 threads = {}
 assistants = {}
 files = {}
 
-def analyze_image_from_bytes(
-    image_bytes: bytes,
-    feature_types: Sequence,
-) -> vision.AnnotateImageResponse:
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "interactive-tutor-4400973b0735.json"
-    client = vision.ImageAnnotatorClient()
-
-    image = vision.Image(content=image_bytes)
-    features = [vision.Feature(type_=feature_type) for feature_type in feature_types]
-    request = vision.AnnotateImageRequest(image=image, features=features)
-
-    return client.annotate_image(request=request)
+S3_CLIENT = boto3.client(
+    's3',
+    aws_access_key_id=os.getenv('ACCESS_KEY_ID'),
+    aws_secret_access_key=os.getenv('ACCESS_SECRET_KEY'),
+    region_name=os.getenv('REGION')
+)
+S3_PRIVATE_BUCKET = os.getenv('S3_PRIVATE')
 
 @message.route('/api/search', methods=['POST'])
 def search_google():
@@ -138,9 +135,15 @@ def get_query():
         return jsonify({'success': False, 'code': 404})
 
 def handle_image_uploads(request, query):
-    if 'image' in request.files:
-        images = request.files.getlist('image')  # Get all files under 'image' key
-        text = image_understanding(images, query)
+    if 'image' in request.form:
+        images = request.form.getlist('image')  # Get all files under 'image' key
+        files = []
+        for image in images:
+            file_obj = S3_CLIENT.get_object(Bucket=S3_PRIVATE_BUCKET, Key=image)
+            file_content = file_obj['Body'].read()
+            file = BytesIO(file_content)
+            files.append(file)
+        text = image_understanding(files, query)
         return text
     else:
         return None
@@ -152,14 +155,12 @@ def send_message():
     behaviormodel = request.form.get('behaviormodel')
     model = request.form.get('model')
     user_id = request.form.get('user_id')
-
     context = ""
     count = 0
     file_link = None
     model_check = None
     file_upload_check = False
     openai_api_key = None
-
     current_message = db.session.query(Message).filter_by(uuid=uuid).first()
     if current_message is None:
         return jsonify({
@@ -171,25 +172,20 @@ def send_message():
     chat = db.session.query(Chat).filter_by(id=current_message.chat_id).first()
     
     if model != "4" or model != "5":
-        if 'file' in request.files:
-            file = request.files['file']
-            if file:
-                file_upload_check = True
-                filename = secure_filename(file.filename)
-                file.save(filename)
-
-                if assistants:
-                    if chat.id in assistants and assistants[chat.id] is not None:
-                        delete_assistant_file(assistants[chat.id], files[chat.id])
-                        assistants[chat.id] = None
-                        files[chat.id] = None
-                    if chat.id in threads and threads[chat.id] is not None:
-                        threads[chat.id] = None
-                assistants[chat.id], files[chat.id] = create_assistant_file(filename)
-                context, file_link, thread = ask_question(assistants[chat.id], query, threads[chat.id], uuid)
-                threads[chat.id] = thread
-                os.remove(filename)
-                count = 18
+        file = request.form.get('file')
+        if file:
+            file_upload_check = True
+            if assistants:
+                if chat.id in assistants and assistants[chat.id] is not None:
+                    delete_assistant_file(assistants[chat.id], files[chat.id])
+                    assistants[chat.id] = None
+                    files[chat.id] = None
+                if chat.id in threads and threads[chat.id] is not None:
+                    threads[chat.id] = None
+            assistants[chat.id], files[chat.id] = create_assistant_file(file)
+            context, file_link, thread = ask_question(assistants[chat.id], query, threads[chat.id], uuid)
+            threads[chat.id] = thread
+            count = 18
         if chat.id in assistants and assistants[chat.id] is not None and file_upload_check == False:
             file_upload_check = True
             context, file_link, thread = ask_question(assistants[chat.id], query, threads[chat.id], uuid)
@@ -260,14 +256,16 @@ def send_message():
     """
 
     if model == "4":
-        if 'image' in request.files:
-            images = request.files.getlist('image')
-            image_data = images[0].read()
+        if 'image' in request.form:
+            images = request.form.getlist('image')
+            file_obj = S3_CLIENT.get_object(Bucket=S3_PRIVATE_BUCKET, Key=images[0])
+            file_content = file_obj['Body'].read()
+            image_data = BytesIO(file_content)
             response = create_image_file(query, current_message.behavior, uuid, image_data)
         else:
             response = create_image_file(query, current_message.behavior, uuid)
     elif model == "5":
-        response = create_pollinations_prompt(query, current_message.behavior)
+        response = create_pollinations_prompt(query)
     elif text is not None:
         response = text
     elif file_upload_check:
@@ -425,13 +423,6 @@ def get_messages():
 @message.route('/api/deletemessage', methods=['POST'])
 def delete_message():
     uuid = request.json['id']
-
-    ###################################
-    # Remove the chart folder of message.
-    if os.path.exists(f'exports/charts/{uuid}/'):
-        shutil.rmtree(f'exports/charts/{uuid}/')
-    ###################################
-
     db.session.query(Message).filter_by(uuid=uuid).delete()
     db.session.commit()
     _response = {
