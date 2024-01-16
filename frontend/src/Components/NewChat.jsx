@@ -35,8 +35,18 @@ import PDF from "../assets/pdf.png";
 import WORD from "../assets/word.jpg";
 import XLSX from "../assets/xlsx.png";
 import CSV from "../assets/csv.png";
-
+import AWS from "aws-sdk";
 const STEP = 30;
+
+AWS.config.update({
+  accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
+  secretAccessKey: process.env.REACT_APP_ACCESS_SECRET_KEY,
+});
+const S3_BUCKET = process.env.REACT_APP_S3_PRIVATE;
+const s3 = new AWS.S3({
+  params: { Bucket: S3_BUCKET },
+  region: process.env.REACT_APP_REGION,
+});
 
 const NewChat = () => {
   const chatState = useSelector((state) => state.chat.chat);
@@ -254,11 +264,11 @@ const NewChat = () => {
       } else {
         setChathistory((prevHistory) => [...prevHistory, human]);
       }
-
+      setMessage("");
       await sendMessage(id, _message);
 
       event.preventDefault();
-      setMessage("");
+      
     }
   };
 
@@ -281,11 +291,11 @@ const NewChat = () => {
       } else {
         setChathistory((prevHistory) => [...prevHistory, human]);
       }
-
+      setMessage("");
       await sendMessage(id, _message);
 
       event.preventDefault();
-      setMessage("");
+      
     }
   };
 
@@ -303,18 +313,47 @@ const NewChat = () => {
     formData.append("behaviormodel", behaviormodel);
     formData.append("train", train);
     formData.append("model", model);
-    if (image.length) {
-      image.map((item) => {
-        formData.append("image", item);
-      });
-      setImage([]);
-    }
-    if (files.length) {
-      files.map((item) => {
-        formData.append("file", item);
-      });
-      setFiles([]);
-    }
+    const imageUploadPromises = image.map(async (item) => {
+      const filename = chat.uuid + item.name.replaceAll(" ", "");
+      const params = {
+        Bucket: S3_BUCKET,
+        Key: filename,
+        Body: item,
+      };
+      return s3
+        .putObject(params)
+        .promise()
+        .then(() => {
+          formData.append("image", filename);
+        })
+        .catch((err) => {
+          notification("error", err.message);
+        });
+    });
+
+    // Use Promise.all to wait for all file uploads to finish
+    const fileUploadPromises = files.map(async (item) => {
+      const filename = chat.uuid + item.name.replaceAll(" ", "");
+      const params = {
+        Bucket: S3_BUCKET,
+        Key: filename,
+        Body: item,
+      };
+      return s3
+        .putObject(params)
+        .promise()
+        .then(() => {
+          console.log("FILE");
+          formData.append("file", filename);
+        })
+        .catch((err) => {
+          notification("error", err.message);
+        });
+    });
+    setImage([]);
+    setFiles([]);
+    // Wait for all uploads to finish
+    await Promise.all([...imageUploadPromises, ...fileUploadPromises]);
 
     // Send the formData to the streaming API
     fetch(webAPI.sendchat, {
