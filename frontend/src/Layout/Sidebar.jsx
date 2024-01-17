@@ -91,7 +91,7 @@ const Sidebar = () => {
       if (location) {
         setlocation(dispatch, location.pathname);
       }
-      getUseraccount(dispatch, {id: user.id});
+      getUseraccount(dispatch, { id: user.id });
       getChats();
       axios
         .post(webAPI.checkUserInvite, { id: user.id })
@@ -274,36 +274,33 @@ const Sidebar = () => {
   const handleOpen = (value) => setOpen(open === value ? 0 : value);
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex flex-col w-full h-1/2">
-        <div className="flex pr-8 pl-6 w-full">
-          <div
-            className="w-1/3 flex p-3 hover:cursor-pointer"
-            onClick={() => navigate("chat/dashboard")}
-          >
-            <img
-              src={`${SERVER_URL}${Logo}`}
-              alt="logo"
-              className="w-full h-full"
-            />
-          </div>
-          {query && (
-            <div className="justify-center items-center flex w-2/3">
-              <Button
-                className="bg-[--site-logo-text-color] rounded-md normal-case text-sm w-full"
-                onClick={handleMoreQuery}
-              >
-                <div className="gap-2 justify-center items-center flex">
-                  <span className="text-[--site-error-text-color]">
-                    {query}
-                  </span>
-                  <span className="text-[--site-card-icon-color]">Queries</span>
-                </div>
-              </Button>
-            </div>
-          )}
+    <div className="flex flex-col h-full overflow-auto">
+      <div className="flex pr-8 pl-6 w-full">
+        <div
+          className="w-1/3 flex p-3 hover:cursor-pointer"
+          onClick={() => navigate("chat/dashboard")}
+        >
+          <img
+            src={`${SERVER_URL}${Logo}`}
+            alt="logo"
+            className="w-full h-full"
+          />
         </div>
-
+        {query && (
+          <div className="justify-center items-center flex w-2/3">
+            <Button
+              className="bg-[--site-logo-text-color] rounded-md normal-case text-sm w-full"
+              onClick={handleMoreQuery}
+            >
+              <div className="gap-2 justify-center items-center flex">
+                <span className="text-[--site-error-text-color]">{query}</span>
+                <span className="text-[--site-card-icon-color]">Queries</span>
+              </div>
+            </Button>
+          </div>
+        )}
+      </div>
+      <div className="flex flex-col flex-grow justify-between">
         <div className="flex justify-end md:py-2 px-4 w-full flex-col">
           <div>
             <Button
@@ -542,7 +539,7 @@ const Sidebar = () => {
             </AccordionBody>
           </Accordion>
         </div>
-        <div className="flex-col py-4 items-center justify-start fixed md:bottom-10 md:gap-4 bottom-0">
+        <div className="flex-col py-4 items-center justify-start md:bottom-10 md:gap-4 bottom-0">
           {check && (
             <Link
               to="subscription"
