@@ -12,6 +12,7 @@ from sendgrid import SendGridAPIClient
 # from sendgrid.helpers.mail import Mail
 import requests
 import json
+import sys
 
 pretty.install()
 
@@ -37,7 +38,7 @@ def create_app():
     # app.logger.addHandler(handler)
 
     # Create a StreamHandler for console logging
-    console_handler = logging.StreamHandler()
+    console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(logging.INFO)  # Set to INFO to log INFO and ERROR messages
 
     # Create a formatter
@@ -48,7 +49,7 @@ def create_app():
     app.logger.addHandler(console_handler)
 
     # Set the logger's level to INFO
-    app.logger.setLevel(logging.INFO)
+    app.logger.setLevel(logging.DEBUG)
 
     app.config['SECRET_KEY'] = 'key-goes-here'
     app.config['SQLALCHEMY_DATABASE_URI'] = f'postgresql+psycopg2://{database_credential}'

@@ -20,6 +20,7 @@ import boto3
 
 load_dotenv()
 
+SERVER_URL = os.getenv('SERVER_URL')
 PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
 PINECONE_ENV = os.getenv('PINECONE_ENV')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
@@ -86,7 +87,7 @@ def add_chat():
     behavior = request.json['behavior']
     behaviormodel = request.json['behaviormodel']
     train = json.dumps([])
-    chat_logo = json.dumps({"user": "http://18.133.183.77/api/imageupload/default_user.png", "ai": "http://18.133.183.77/api/imageupload/default_ai.png"})
+    chat_logo = json.dumps({"user": "https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_user.png", "ai": "https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"})
     chat_title = json.dumps({})
     chat_description = json.dumps({})
     chat_copyright = json.dumps(
@@ -153,7 +154,7 @@ def submit_review():
                 if not chunk:
                     break
                 f.write(chunk)
-        review = Review(username=username, message=message, useravatar=f'http://18.133.183.77/api/imageupload/{filename}', rating=rating)
+        review = Review(username=username, message=message, useravatar=f'{SERVER_URL}/api/imageupload/{filename}', rating=rating)
         db.session.add(review)
         db.session.commit()
         current_library = db.session.query(Library).filter_by(id=library['id']).first()
@@ -684,7 +685,7 @@ def get_bubble(widgetID):
         'organization': organization,
         'role': user.role,
         'api_select': chat.api_select,
-        'embed_url': 'http://18.133.183.77/chat/embedding/',
+        'embed_url': f'{SERVER_URL}/chat/embedding/',
     }
 
     data = {

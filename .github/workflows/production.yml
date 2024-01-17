@@ -32,6 +32,8 @@ env:
   SENDGRID_ENTERPRISE_USERS_LIST_ID: ${{secrets.PRODUCTION_SENDGRID_ENTERPRISE_USERS_LIST_ID}}
   E2B_API_KEY: ${{secrets.PRODUCTION_E2B_API_KEY}}
   DATABASE_CONNECTION_STRING: ${{secrets.PRODUCTION_DATABASE_CONNECTION_STRING}}
+  BE_SERVER_URL: ${{secrets.STAGING_BE_SERVER_URL}}
+
   AWS_REGION: eu-west-2
   ECR_REPOSITORY: 987025303706.dkr.ecr.eu-west-2.amazonaws.com/interactive-tutor-prod-backend
   ECS_SERVICE: interactive-tutor-prod-backend-service 
@@ -85,6 +87,7 @@ jobs:
         echo "SENDGRID_ENTERPRISE_USERS_LIST_ID=${{env.SENDGRID_ENTERPRISE_USERS_LIST_ID}}" >> .env
         echo "E2B_API_KEY=${{env.E2B_API_KEY}}" >> .env
         echo "DATABASE_CONNECTION_STRING=${{env.DATABASE_CONNECTION_STRING}}" >> .env
+        echo "SERVER_URL=${{env.BE_SERVER_URL}}" >> .env
 
         echo "REGION=${{env.REGION}}" >> .env
         echo "ACCESS_KEY_ID=${{env.ACCESS_KEY_ID}}" >> .env

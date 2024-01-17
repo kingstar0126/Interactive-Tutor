@@ -149,7 +149,7 @@ const Sidebar = () => {
         notification("error", res.data.message);
       } else {
         notification("success", res.data.message);
-        getChats();
+        updatechatbot(dispatch, true);
       }
     });
     setIsChatModalOpen(false);
