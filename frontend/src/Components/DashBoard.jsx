@@ -475,7 +475,7 @@ const DashBoard = () => {
                         ) : (
                           <></>
                         )}
-                        <span>{data.content}</span>
+                        <span className="break-words whitespace-normal">{data.content}</span>
                       </div>
                     </div>
                   </div>
