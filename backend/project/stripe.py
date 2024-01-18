@@ -190,7 +190,7 @@ def create_checkout_session_query():
             'tax_rates': [os.getenv('TAX_RATE_ID')],
         }],
         mode='payment',
-        success_url=f"{SERVER_URL}/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
+        success_url= SERVER_URL + "/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
         cancel_url=f'{SERVER_URL}/chatbot/subscription',
         customer=user.customer_id,
         allow_promotion_codes=True,
@@ -217,7 +217,7 @@ def create_checkout_session():
         subscription_data={
             'default_tax_rates': [os.getenv('TAX_RATE_ID')],
         },
-        success_url=f"{SERVER_URL}/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
+        success_url= SERVER_URL + "/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
         cancel_url=f'{SERVER_URL}/chatbot/subscription',
         customer=user.customer_id,
         allow_promotion_codes=True,
@@ -323,7 +323,7 @@ def update_subscription():
         subscription_data={
             'default_tax_rates': [os.getenv('TAX_RATE_ID')],
         },
-        success_url=f"{SERVER_URL}/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
+        success_url= SERVER_URL + "/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
         cancel_url=f'{SERVER_URL}/chatbot/subscription',
         customer=user.customer_id,
         allow_promotion_codes=True,
