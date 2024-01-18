@@ -281,7 +281,7 @@ const Sidebar = () => {
           onClick={() => navigate("chat/dashboard")}
         >
           <img
-            src={`${SERVER_URL}${Logo}`}
+            src={"https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"}
             alt="logo"
             className="w-full h-full"
           />
