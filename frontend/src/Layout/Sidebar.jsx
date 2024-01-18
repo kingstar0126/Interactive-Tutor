@@ -354,7 +354,7 @@ const Sidebar = () => {
                               src={
                                 chat.chat_logo.url
                                   ? chat.chat_logo.url
-                                  : chat.chat_logo.ai
+                                  : chat.chat_logo.ai || 'https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png'
                               }
                               alt="logo"
                               className="w-8 h-8 p-1"
@@ -462,7 +462,7 @@ const Sidebar = () => {
                               src={
                                 chat.chat_logo.url
                                   ? chat.chat_logo.url
-                                  : chat.chat_logo.ai
+                                  : chat.chat_logo.ai || "https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"
                               }
                               alt="logo"
                               className="w-8 h-8 p-1"

@@ -592,7 +592,7 @@ const NewChat = () => {
           <div className="flex flex-col justify-center w-full h-full p-2 lg:items-center lg:px-10 lg:py-0 min-h-max">
             {chatbot_start ? (
               <div className="flex flex-col items-center justify-center h-full gap-5">
-                <img src={chat.chat_logo.url} ref={chatbot_logo} alt="Logo" />
+                <img src={chat.chat_logo.url || "https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"} ref={chatbot_logo} alt="Logo" />
                 <h1 ref={chatbot_title}>{chat.chat_title.description}</h1>
                 <span ref={chatbot_description}>
                   {chat.chat_description.description}
@@ -614,7 +614,7 @@ const NewChat = () => {
                       >
                         <div className="flex justify-start lg:w-4/5">
                           <img
-                            src={chat.chat_logo.user}
+                            src={chat.chat_logo.user || "https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_user.png"}
                             alt="human"
                             className="w-10 h-10 rounded-full"
                           />
@@ -832,7 +832,7 @@ const NewChat = () => {
                     >
                       <div className="flex justify-start lg:w-4/5">
                         <img
-                          src={chat.chat_logo.ai}
+                          src={chat.chat_logo.ai || "https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"}
                           className="w-10 h-10 rounded-full"
                           alt="AI"
                         />
