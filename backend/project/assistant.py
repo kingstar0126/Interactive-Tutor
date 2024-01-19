@@ -79,22 +79,25 @@ def wait_on_run(run, thread):
 
 ################   START  ###################
 def create_assistant_file(filepath):
-    file_obj = S3_CLIENT.get_object(Bucket=S3_PRIVATE_BUCKET, Key=filepath)
-    file_content = file_obj['Body'].read()
-    file = BytesIO(file_content)
-    print(file)
-    _file = client.files.create(
-        file=file,
-        purpose="assistants",
-    )
-    assistant = client.beta.assistants.create(
-        name="Data Analtze",
-        instructions="You are a personal data analytics instructor. Please provide detailed information about the prompt in the uploaded file.",
-        model="gpt-4-1106-preview",
-        tools=[{"type": "code_interpreter"}],
-        file_ids=[_file.id]
-    )
-    return assistant.id, _file.id
+    try:
+        file_obj = S3_CLIENT.get_object(Bucket=S3_PRIVATE_BUCKET, Key=filepath)
+        file_content = file_obj['Body'].read()
+        file = BytesIO(file_content)
+        print(file)
+        _file = client.files.create(
+            file=file,
+            purpose="assistants",
+        )
+        assistant = client.beta.assistants.create(
+            name="Data Analtze",
+            instructions="You are a personal data analytics instructor. Please provide detailed information about the prompt in the uploaded file.",
+            model="gpt-4-1106-preview",
+            tools=[{"type": "code_interpreter"}],
+            file_ids=[_file.id]
+        )
+        return assistant.id, _file.id
+    except Exception as e:
+        return None, None
 
 def delete_assistant_file(assistant_id, file_id):
     response = client.beta.assistants.files.delete(

@@ -164,9 +164,7 @@ def send_message():
     current_message = db.session.query(Message).filter_by(uuid=uuid).first()
     if current_message is None:
         return jsonify({
-            'success': False,
-            'code': 404,
-            'message': 'Not found your Tutor. Please recreate Tutor.',
+            'Message': 'Not found your Tutor. Please recreate Tutor.',
         })
 
     chat = db.session.query(Chat).filter_by(id=current_message.chat_id).first()
@@ -183,6 +181,10 @@ def send_message():
                 if chat.id in threads and threads[chat.id] is not None:
                     threads[chat.id] = None
             assistants[chat.id], files[chat.id] = create_assistant_file(file)
+            if assistants[chat.id] is None:
+                return jsonify({
+                    'Message': '''Interactive Tutor can only read certain file types, please ensure your files are in one of the following formats: 'c', 'cpp', 'css', 'csv', 'docx', 'gif', 'html', 'java', 'jpeg', 'jpg', 'js', 'json', 'md', 'pdf', 'php', 'png', 'pptx', 'py', 'rb', 'tar', 'tex', 'ts', 'txt', 'xlsx', 'xml', 'zip'.''',
+                })
             context, file_link, thread = ask_question(assistants[chat.id], query, threads[chat.id], uuid)
             threads[chat.id] = thread
             count = 18
