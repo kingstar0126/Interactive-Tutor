@@ -22,7 +22,7 @@ from langchain.chains.openai_functions import (
 )
 from langchain.pydantic_v1 import BaseModel, Field
 
-
+load_dotenv()
 
 PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
 PINECONE_ENV = os.getenv('PINECONE_ENV')
@@ -75,7 +75,7 @@ def get_name_from_prompt(query):
     return names
 
 def generate_message(query, behavior, temp, model, chat, template, openai_api_key = None):
-    load_dotenv()
+    
 
     if openai_api_key is None:
         openai_api_key = os.getenv('OPENAI_API_KEY')
@@ -140,7 +140,6 @@ def generate_message(query, behavior, temp, model, chat, template, openai_api_ke
 
 
 def generate_AI_message_langchain(query, history, behavior, temp, model, openai_api_key):
-    load_dotenv()
     if openai_api_key is None:
         openai_api_key = os.getenv('OPENAI_API_KEY')
 
@@ -247,8 +246,6 @@ def generate_AI_message(query, history, behavior, temp, model, openai_api_key):
 
 
 def generate_Bubble_message(query):
-    load_dotenv()
-
     template = "Generate a title for a fantasy animal, character or fairy in {query}. A title must two words, first is adjective and second is noun. Do not provide any explanations. Do not respond with anything except the output of the title."
 
     prompt = PromptTemplate(
@@ -270,45 +267,45 @@ def generate_Bubble_message(query):
     return response
 
 def generate_system_prompt_role(role):
-    load_dotenv()
+    try:
+        template = '''You are a OpenAI GPT system role expert. Your job is to analyze the needs of users and generate system roles for users' 'Interactive Tutors' that they embed to change the role of the 'tutor' powered by OpenAI API to deliver on what they need. The user will give you details on what they need the system behavior prompt to deliver. 
 
-    template = '''You are a OpenAI GPT system role expert. Your job is to analyze the needs of users and generate system roles for users' 'Interactive Tutors' that they embed to change the role of the 'tutor' powered by OpenAI API to deliver on what they need. The user will give you details on what they need the system behavior prompt to deliver. 
+                Once you have this information, do not ask any further questions and please provide JSON object: A short name, description, a conversation starter and the system role written out in full.
 
-            Once you have this information, do not ask any further questions and please provide JSON object: A short name, description, a conversation starter and the system role written out in full.
+                {{
+                "name": "",
+                "system_role": "",
+                "starter" : "",
+                "description": ""
+                }}
 
-            {{
-            "name": "",
-            "system_role": "",
-            "starter" : "",
-            "description": ""
-            }}
+                The system role should be well detailed, clearly detail what steps the AI should take and to use British English if communicating in English. Most importantly, the system role's maximum character length must be less than 65500.
 
-            The system role should be well detailed, clearly detail what steps the AI should take and to use British English if communicating in English. Most importantly, the system role's maximum character length must be less than 65500.
+                Consider this: The output must be a JSON object.
+                =========================
+                user: {role}
+                '''
 
-            Consider this: The output must be a JSON object.
-            =========================
-            user: {role}
-            '''
+        prompt = PromptTemplate(
+            input_variables=["role"], template=template)
 
-    prompt = PromptTemplate(
-        input_variables=["role"], template=template)
-
-    llm = ChatOpenAI(model_name="gpt-3.5-turbo",
-                     temperature=0.2,
-                     openai_api_key=os.getenv('OPENAI_API_KEY'))
-    conversation = LLMChain(
-        llm=llm,
-        prompt=prompt
-    )
-    response = conversation.run(
-        role=role
-    )
-    if type(response) == str:
-        response = json.loads(response)
-    return response
+        llm = ChatOpenAI(model_name="gpt-3.5-turbo",
+                        temperature=0.2,
+                        openai_api_key=os.getenv('OPENAI_API_KEY'))
+        conversation = LLMChain(
+            llm=llm,
+            prompt=prompt
+        )
+        response = conversation.run(
+            role=role
+        )
+        if type(response) == str:
+            response = json.loads(response)
+        return response
+    except Exception as e:
+        return jsonify({ "name": "", "system_role": "", "starter" : "", "description": "" })
 
 def generate_part_file(prompt, data):
-    load_dotenv()
     template = '''Answer using the sentences below Context. If you cannot find an appropriate answer to the question in the Context, return "".
             Context: {{ {text} }}
             =========================
