@@ -26,7 +26,7 @@ import {
   MenuItem,
   IconButton,
 } from "@material-tailwind/react";
-import ReactLoading from "react-loading";
+import { Spinner } from "@material-tailwind/react";
 import PDF from "../assets/pdf.png";
 import WORD from "../assets/word.jpg";
 import XLSX from "../assets/xlsx.png";
@@ -391,15 +391,8 @@ const DashBoard = () => {
     <>
       <div className="flex flex-col justify-center w-full h-screen p-2 lg:items-center lg:px-10 lg:py-0 min-h-max">
         {loading && (
-          <div className="flex flex-col items-center justify-center w-full min-h-[20rem]">
-            <ReactLoading
-              type="spin"
-              color="#FF2fff"
-              height={40}
-              width={40}
-              delay={15}
-            ></ReactLoading>
-            <span className="text-[--site-card-icon-color]">loading ...</span>
+          <div className="w-full h-full flex items-center justify-center">
+            <Spinner color="pink" className="w-32 h-32" />
           </div>
         )}
         {loading === false && (
