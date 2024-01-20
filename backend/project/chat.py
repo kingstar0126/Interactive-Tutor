@@ -38,6 +38,7 @@ S3_CLIENT = boto3.client(
     region_name=os.getenv('REGION')
 )
 S3_PRIVATE_BUCKET = os.getenv('S3_PRIVATE')
+S3_PUBLIC_BUCKET = os.getenv('S3_PUBLIC')
 
 def delete_vectore(source, chat):
     index = pinecone.Index(PINECONE_INDEX_NAME)
