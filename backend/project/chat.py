@@ -149,16 +149,8 @@ def submit_review():
         username = request.form.get('username')
         message = request.form.get('message')
         rating = request.form.get('rating')
-        file = request.files['file']
-        filename = str(uuid.uuid4()) + secure_filename(file.filename)
-        filepath = os.path.join("project/image", filename)
-        with open(filepath, 'wb') as f:
-            while True:
-                chunk = file.stream.read(1024)
-                if not chunk:
-                    break
-                f.write(chunk)
-        review = Review(username=username, message=message, useravatar=f'{SERVER_URL}/api/imageupload/{filename}', rating=rating)
+        fileURL = request.form.get('file')
+        review = Review(username=username, message=message, useravatar=fileURL, rating=rating)
         db.session.add(review)
         db.session.commit()
         current_library = db.session.query(Library).filter_by(id=library['id']).first()
@@ -441,7 +433,6 @@ def get_publish_chats():
             chats = chats.order_by(desc(Library.downloads))
         elif sortby == 0:
             chats = chats.order_by(desc(Library.create_date))
-        print(type(menu), menu)
         if menu is not None:
             chats = chats.filter(Library.menu == menu)
 
@@ -464,7 +455,8 @@ def get_publish_chats():
                 'userrole': library.userrole,
                 'badge': json.loads(library.badge),
                 'review_id': json.loads(library.review_id),
-                'chat_id': chat.id
+                'chat_id': chat.id,
+                'uuid': chat.uuid,
             })
 
         return jsonify({'success': True, 'data': response, 'pageCount': chats.pages})
