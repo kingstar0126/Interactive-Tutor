@@ -271,7 +271,7 @@ const ItemDescription = () => {
     axios.post(webAPI.sendemail, { email, chat }).then((res) => {
       if (res.data.success) {
         toast.success(res.data.message);
-        window.location.href = `${SERVER_URL}/login`;
+        window.location.href = `https://app.interactive-tutor.com/login`;
       } else {
         toast.error(res.data.message);
       }
