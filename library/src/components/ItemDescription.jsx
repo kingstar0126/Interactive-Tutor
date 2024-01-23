@@ -77,7 +77,7 @@ AWS.config.update({
   accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
   secretAccessKey: process.env.REACT_APP_ACCESS_SECRET_KEY,
 });
-const S3_BUCKET = process.env.REACT_APP_S3_PRIVATE;
+const S3_BUCKET = process.env.REACT_APP_S3_PUBLIC;
 const s3 = new AWS.S3({
   params: { Bucket: S3_BUCKET },
   region: process.env.REACT_APP_REGION,
@@ -144,13 +144,26 @@ const ItemDescription = () => {
       .catch((err) => console.error(err));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (username && message && rating && file) {
       const formData = new FormData();
-      const filename = file.name.replace(" ", "");
-      formData.append("file", file, filename);
-
-
+      const filename = chat.uuid + file.name.replaceAll(" ", "");
+      const params = {
+        Bucket: S3_BUCKET,
+        Key: filename,
+        Body: file,
+      };
+      try {
+        await s3.putObject(params).promise();
+        const fileUrl = `https://${S3_BUCKET}.s3.${process.env.REACT_APP_REGION}.amazonaws.com/${filename}`;
+        formData.append("file", fileUrl);
+      } 
+      catch (error) {
+        console.error('Error uploading file:', error);
+        toast.error(error.message);
+        throw error;
+      }
+      
       formData.append("username", username);
       formData.append("message", message);
       formData.append("rating", rating);
@@ -434,6 +447,7 @@ const ItemDescription = () => {
                   mount: { scale: 1, y: 0 },
                   unmount: { scale: 0, y: 25 },
                 }}
+                key={id}
               >
                 <img
                   src={item}
