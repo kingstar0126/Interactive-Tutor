@@ -8,7 +8,7 @@ import {
 import { useSelector } from "react-redux";
 import { Scrollbar } from "react-scrollbars-custom";
 
-const EMBED_SERVER_URL = process.env.REACT_APP_SERVER_URL;
+const EMBED_SERVER_URL = window.location.origin;
 const Embedded = (props) => {
     const [chatwindow, setChatwindow] = useState("");
     const [chatURL, setChatURL] = useState("");

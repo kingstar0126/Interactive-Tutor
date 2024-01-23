@@ -330,32 +330,31 @@ def share_chat():
     else:
         ownerID = db.session.query(Invite).filter_by(email=current_user.email).first()
         users = db.session.query(Invite, User.id).join(User, User.email == Invite.email).filter(Invite.user_id == ownerID.user_id).all()
-
-    if ownerID:
-        user_id = ownerID.user_id
-        islibrary = True
-        label = chat['label']
-        description = chat['description']
-        model = chat['model']
-        conversation = chat['conversation']
-        access = generate_pin_password()
-        creativity = chat['creativity']
-        behavior = chat['behavior']
-        behaviormodel = chat['behaviormodel']
-        train = json.dumps([])
-        chat_copyright = json.dumps(chat['chat_copyright'])
-        chat_button = json.dumps(chat['chat_button'])
-        bubble = json.dumps(chat['bubble'])
-        chat_logo = json.dumps(chat['chat_logo'])
-        chat_title = json.dumps(chat['chat_title'])
-        chat_description = json.dumps(chat['chat_description'])
-        new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
-                    access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button, islibrary=islibrary)
-        db.session.add(new_chat)
-        db.session.commit()
-        train = json.dumps(duplicate_train_data(chat['train'], new_chat.uuid))
-        new_chat.train = train
-        db.session.commit()
+        if ownerID:
+            user_id = ownerID.user_id
+            islibrary = True
+            label = chat['label']
+            description = chat['description']
+            model = chat['model']
+            conversation = chat['conversation']
+            access = generate_pin_password()
+            creativity = chat['creativity']
+            behavior = chat['behavior']
+            behaviormodel = chat['behaviormodel']
+            train = json.dumps([])
+            chat_copyright = json.dumps(chat['chat_copyright'])
+            chat_button = json.dumps(chat['chat_button'])
+            bubble = json.dumps(chat['bubble'])
+            chat_logo = json.dumps(chat['chat_logo'])
+            chat_title = json.dumps(chat['chat_title'])
+            chat_description = json.dumps(chat['chat_description'])
+            new_chat = Chat(user_id=user_id, label=label, description=description, model=model, conversation=conversation,
+                        access=access, creativity=creativity, behavior=behavior, behaviormodel=behaviormodel, train=train, bubble=bubble, chat_logo=chat_logo, chat_title=chat_title, chat_description=chat_description, chat_copyright=chat_copyright, chat_button=chat_button, islibrary=islibrary)
+            db.session.add(new_chat)
+            db.session.commit()
+            train = json.dumps(duplicate_train_data(chat['train'], new_chat.uuid))
+            new_chat.train = train
+            db.session.commit()
     for user in users:
         user_id = user.id
         islibrary = True
@@ -693,11 +692,12 @@ def get_bubble(widgetID):
     return jsonify(data)
 
 def delete_objects_with_uuid(uuid, bucket):
+    uuid_str = str(uuid)
     # List all objects within the bucket
     response = S3_CLIENT.list_objects_v2(Bucket=bucket)
 
     # Filter out objects that contain the UUID
-    objects_to_delete = [obj for obj in response.get('Contents', []) if uuid in obj['Key']]
+    objects_to_delete = [obj for obj in response.get('Contents', []) if uuid_str in obj['Key']]
 
     # Prepare the list of objects to be deleted
     delete_keys = {'Objects': [{'Key': obj['Key']} for obj in objects_to_delete]}
@@ -705,9 +705,9 @@ def delete_objects_with_uuid(uuid, bucket):
     # Delete the objects
     if delete_keys['Objects']:
         S3_CLIENT.delete_objects(Bucket=bucket, Delete=delete_keys)
-        print(f"Deleted {len(delete_keys['Objects'])} objects containing the UUID {uuid}")
+        print(f"Deleted {len(delete_keys['Objects'])} objects containing the UUID {uuid_str}")
     else:
-        print(f"No objects found containing the UUID {uuid}")
+        print(f"No objects found containing the UUID {uuid_str}")
 
 @chat.route('/api/deletechat/<int:id>', methods=['DELETE'])
 def delete_chat(id):
