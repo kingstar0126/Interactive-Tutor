@@ -28,6 +28,7 @@ import { webAPI } from "../utils/constants";
 import { SERVER_URL } from "../config/constant";
 import toast, { Toaster } from "react-hot-toast";
 import RecommendItem from "./RecommendItem";
+import AWS from "aws-sdk";
 
 import image0 from "../assets/0.svg";
 import image1 from "../assets/1.svg";
@@ -71,6 +72,16 @@ const ToolTips = [
   "20 Downloads",
   "50 Downloads",
 ];
+
+AWS.config.update({
+  accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
+  secretAccessKey: process.env.REACT_APP_ACCESS_SECRET_KEY,
+});
+const S3_BUCKET = process.env.REACT_APP_S3_PRIVATE;
+const s3 = new AWS.S3({
+  params: { Bucket: S3_BUCKET },
+  region: process.env.REACT_APP_REGION,
+});
 
 const ItemDescription = () => {
   const [activeTab, setActiveTab] = useState("description");
@@ -138,10 +149,13 @@ const ItemDescription = () => {
       const formData = new FormData();
       const filename = file.name.replace(" ", "");
       formData.append("file", file, filename);
+
+
       formData.append("username", username);
       formData.append("message", message);
       formData.append("rating", rating);
       formData.append("chat", JSON.stringify(chat));
+
       axios.post(webAPI.sendreview, formData).then((res) => {
         if (res.data.success) {
           toast.success("You successfully submitted");

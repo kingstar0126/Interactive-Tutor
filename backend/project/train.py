@@ -303,10 +303,10 @@ def duplicate_train_data(ids, chatbot_uuid):
                 
                 if train_type == 'url':
                     data = web_scraping(path, 1)
-                    result = text_to_docs(data, url, chatbot_uuid)
+                    result = text_to_docs(data, path, chatbot_uuid)
                     create_vector(result)
                 elif train_type == 'file':
-                    file_obj = S3_CLIENT.get_object(Bucket=S3_PRIVATE_BUCKET, Key=filename)
+                    file_obj = S3_CLIENT.get_object(Bucket=S3_PRIVATE_BUCKET, Key=path)
                     file_content = file_obj['Body'].read()
                     file = BytesIO(file_content)
                     if (path.split('.')[-1].lower() == 'pdf'):
@@ -322,7 +322,7 @@ def duplicate_train_data(ids, chatbot_uuid):
                     result = text_to_docs(output, path.split('/')[-1], chatbot_uuid)
                     create_vector(result)
                 else:
-                    result = text_to_docs(text, text[:20], chatbot_uuid)
+                    result = text_to_docs(path, path[:20], chatbot_uuid)
                     create_vector(result)
                 response.append(new_train.id)
         print(' >>>>>>>>>>>>> This is TrainDatas: ', response)
@@ -435,12 +435,6 @@ def create_train_file():
             'data': chat,
             'message': "create train successfully",
         })
-        return jsonify({
-            'success': False,
-            'code': 401,
-            'message': "Training word limit exceeded. Please reduce the number of training words.",
-        })
-
 
     except Exception as e:
         print(str(e))
