@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 from . import db
 from rich import print, pretty
 import datetime
@@ -33,6 +33,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from urllib.parse import urljoin
 from urllib.parse import urlparse
 import boto3
+from threading import Thread
 
 load_dotenv()
 
@@ -244,6 +245,7 @@ def create_train(label, _type, status, chat, file_path=False):
 
 def train_status_chanage(train_id):
     train_data = db.session.query(Train).filter_by(id=train_id).first()
+    print(train_data, train_id)
     train_data.status = True
     db.session.commit()
 
@@ -297,14 +299,15 @@ def duplicate_train_data(ids, chatbot_uuid):
                 label = train.label
                 train_type = train.type
                 path = train.path
-                new_train = Train(label=label, type=train_type, status=True, chat=chatbot_uuid, path=path)
+                new_train = Train(label=label, type=train_type, status=False, chat=chatbot_uuid, path=path)
                 db.session.add(new_train)
                 db.session.commit()
                 
                 if train_type == 'url':
                     data = web_scraping(path, 1)
-                    result = text_to_docs(data, url, chatbot_uuid)
-                    create_vector(result)
+                    app = current_app._get_current_object()
+                    thread = Thread(target=train_data_thread, args=(new_train.id, data, url, chatbot_uuid, app))
+                    thread.start()
                 elif train_type == 'file':
                     file_obj = S3_CLIENT.get_object(Bucket=S3_PRIVATE_BUCKET, Key=filename)
                     file_content = file_obj['Body'].read()
@@ -319,11 +322,13 @@ def duplicate_train_data(ids, chatbot_uuid):
                         output = parse_srt(file)
                     elif (path.split('.')[-1].lower() == 'epub'):
                         output = parse_epub(path.split('/')[-1])
-                    result = text_to_docs(output, path.split('/')[-1], chatbot_uuid)
-                    create_vector(result)
+                    app = current_app._get_current_object()
+                    thread = Thread(target=train_data_thread, args=(new_train.id, output, path.split('/')[-1], chatbot_uuid, app))
+                    thread.start()
                 else:
-                    result = text_to_docs(text, text[:20], chatbot_uuid)
-                    create_vector(result)
+                    app = current_app._get_current_object()
+                    thread = Thread(target=train_data_thread, args=(new_train.id, text, text[:20], chatbot_uuid, app))
+                    thread.start()
                 response.append(new_train.id)
         print(' >>>>>>>>>>>>> This is TrainDatas: ', response)
         return response
@@ -331,72 +336,68 @@ def duplicate_train_data(ids, chatbot_uuid):
         print('ERROR >>>>>>>>>>>>>>>>', str(e))
         return []
 
+def train_data_thread(train_id, output, filename, chatbot, app):
+    with app.app_context():  # This pushes an application context
+        try:
+            result = text_to_docs(output, filename, chatbot)
+            create_vector(result)
+            train_status_chanage(train_id)
+            print('Finish')
+        except Exception as e:
+            print(e)
+
 @train.route('/api/data/sendurl', methods=['POST'])
 def create_train_url():
     url = request.json['url']
     chatbot = request.json['chatbot']
-    if compare_role_user(chatbot):
-        data = web_scraping(url, 1)
-        if data == False:
-            return jsonify({
-                'success': False,
-                'code': 405,
-                'message': 'Invalid URL.',
-            })
-
-        trainid = create_train(url, 'url', True, chatbot, url)
-        result = text_to_docs(data, url, chatbot)
-
-        if (trainid == False):
-            return jsonify({
-                'success': False,
-                'code': 405,
-                'message': 'Training data already exist.',
-            })
-        create_vector(result)
-        chat = insert_train_chat(chatbot, trainid)
-        return jsonify({
-            'success': True,
-            'code': 200,
-            'data': chat,
-            'message': "create train successfully",
-        })
-    else:
+    data = web_scraping(url, 1)
+    if data == False:
         return jsonify({
             'success': False,
-            'code': 401,
-            'message': "No more creating training data!",
+            'code': 405,
+            'message': 'Invalid URL.',
         })
+
+    trainid = create_train(url, 'url', False, chatbot, url)
+    if (trainid == False):
+        return jsonify({
+            'success': False,
+            'code': 405,
+            'message': 'Training data already exist.',
+        })
+    chat = insert_train_chat(chatbot, trainid)
+    app = current_app._get_current_object()
+    thread = Thread(target=train_data_thread, args=(trainid, data, url, chatbot, app))
+    thread.start()
+
+    return jsonify({
+        'success': True,
+        'code': 200,
+        'data': chat,
+        'message': "create train successfully",
+    })
 
 
 @train.route('/api/data/sendtext', methods=['POST'])
 def create_train_text():
     text = request.json['text']
     chatbot = request.json['chatbot']
-    if compare_role_user(chatbot):
-        trainid = create_train(text[:20], 'text', True, chatbot, text)
-        result = text_to_docs(text, text[:20], chatbot)
-
-        if (trainid == False):
-            return jsonify({
-                'success': False,
-                'code': 405,
-                'message': 'Training data already exist.',
-            })
-        create_vector(result)
-        chat = insert_train_chat(chatbot, trainid)
-        return jsonify({
-            'success': True,
-            'code': 200,
-            'data': chat,
-            'message': "create train successfully",
-        })
-    else:
+    trainid = create_train(text[:20], 'text', True, chatbot, text)
+    result = text_to_docs(text, text[:20], chatbot)
+    if (trainid == False):
         return jsonify({
             'success': False,
-            'code': 401,
-            'message': "No more creating training data!",
+            'code': 405,
+            'message': 'Training data already exist.',
         })
+    create_vector(result)
+    chat = insert_train_chat(chatbot, trainid)
+    return jsonify({
+        'success': True,
+        'code': 200,
+        'data': chat,
+        'message': "create train successfully",
+    })
 
 @train.route('/api/data/sendfile', methods=['POST'])
 def create_train_file():
@@ -418,30 +419,25 @@ def create_train_file():
         elif (filename.split('.')[-1].lower() == 'epub'):
             output = parse_epub(filename)
 
-        result = text_to_docs(output, filename, chatbot)
-        trainid = create_train(filename, 'file', True, chatbot, filename)
+        
+        trainid = create_train(filename, 'file', False, chatbot, filename)
         if (trainid == False):
             return jsonify({
                 'success': False,
                 'code': 401,
                 'message': 'Training data already exist.',
             })
-        create_vector(result)
-
         chat = insert_train_chat(chatbot, trainid)
+        app = current_app._get_current_object()
+        thread = Thread(target=train_data_thread, args=(trainid, output, filename, chatbot, app))
+        thread.start()
+        
         return jsonify({
             'success': True,
             'code': 200,
             'data': chat,
-            'message': "create train successfully",
+            'message': "Train data transmission was successful. Processing in background.",
         })
-        return jsonify({
-            'success': False,
-            'code': 401,
-            'message': "Training word limit exceeded. Please reduce the number of training words.",
-        })
-
-
     except Exception as e:
         print(str(e))
         return {"success": False, "message": str(e)}, 400

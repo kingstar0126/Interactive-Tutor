@@ -502,7 +502,7 @@ def get_chats():
                 _messages = json.loads(row.message)
                 if len(_messages) < 2:
                     db.session.delete(row)
-            db.session.commit()
+                    db.session.commit()
             chat_data = {
                 'id': chat.id,
                 'label': chat.label,
