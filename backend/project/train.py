@@ -162,7 +162,7 @@ def text_to_docs(text, filename, chat):
     for i, doc in enumerate(page_docs):
         text_splitter = RecursiveCharacterTextSplitter(
             separators=["\n\n", "\n"],
-            chunk_size=10000,
+            chunk_size=5000,
             chunk_overlap=200,
         )
         if doc.page_content == "":
