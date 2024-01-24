@@ -486,6 +486,7 @@ const ChatmodalTrain = (props) => {
           cancel
         </Button>
         <Button
+          disabled={isloading}
           onClick={onOK}
           className=" normal-case px-4 py-2 text-base font-semibold text-white bg-[--site-onboarding-primary-color] rounded-md disabled:opacity-75"
         >
