@@ -28,7 +28,11 @@ export const setchatbot = (dispatch, data) => {
         .post(webAPI.start_message, data)
         .then((res) => {
             if (res.status === 200) {
-                dispatch({ type: SET_CHATBOT, payload: res.data.data });
+                if (res.data.success) {
+                    dispatch({ type: SET_CHATBOT, payload: res.data.data });
+                } else {
+                    notification("error", 'Failed to create chat!');
+                }
             } else notification("error", stringConstant.FAILED_GET_DATA);
         })
         .catch((err) => console.log(err));

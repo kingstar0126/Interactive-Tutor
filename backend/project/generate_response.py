@@ -3,6 +3,7 @@ import json
 import base64
 import requests
 import langchain
+from flask import jsonify
 from langchain.chat_models import ChatOpenAI
 from typing import Sequence
 from threading import Thread

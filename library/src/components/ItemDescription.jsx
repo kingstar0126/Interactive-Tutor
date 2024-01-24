@@ -28,6 +28,7 @@ import { webAPI } from "../utils/constants";
 import { SERVER_URL } from "../config/constant";
 import toast, { Toaster } from "react-hot-toast";
 import RecommendItem from "./RecommendItem";
+import AWS from "aws-sdk";
 
 import image0 from "../assets/0.svg";
 import image1 from "../assets/1.svg";
@@ -71,6 +72,16 @@ const ToolTips = [
   "20 Downloads",
   "50 Downloads",
 ];
+
+AWS.config.update({
+  accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
+  secretAccessKey: process.env.REACT_APP_ACCESS_SECRET_KEY,
+});
+const S3_BUCKET = process.env.REACT_APP_S3_PUBLIC;
+const s3 = new AWS.S3({
+  params: { Bucket: S3_BUCKET },
+  region: process.env.REACT_APP_REGION,
+});
 
 const ItemDescription = () => {
   const [activeTab, setActiveTab] = useState("description");
@@ -133,15 +144,31 @@ const ItemDescription = () => {
       .catch((err) => console.error(err));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (username && message && rating && file) {
       const formData = new FormData();
-      const filename = file.name.replace(" ", "");
-      formData.append("file", file, filename);
+      const filename = chat.uuid + file.name.replaceAll(" ", "");
+      const params = {
+        Bucket: S3_BUCKET,
+        Key: filename,
+        Body: file,
+      };
+      try {
+        await s3.putObject(params).promise();
+        const fileUrl = `https://${S3_BUCKET}.s3.${process.env.REACT_APP_REGION}.amazonaws.com/${filename}`;
+        formData.append("file", fileUrl);
+      } 
+      catch (error) {
+        console.error('Error uploading file:', error);
+        toast.error(error.message);
+        throw error;
+      }
+      
       formData.append("username", username);
       formData.append("message", message);
       formData.append("rating", rating);
       formData.append("chat", JSON.stringify(chat));
+
       axios.post(webAPI.sendreview, formData).then((res) => {
         if (res.data.success) {
           toast.success("You successfully submitted");
@@ -244,7 +271,7 @@ const ItemDescription = () => {
     axios.post(webAPI.sendemail, { email, chat }).then((res) => {
       if (res.data.success) {
         toast.success(res.data.message);
-        window.location.href = `${SERVER_URL}/login`;
+        window.location.href = `https://app.interactive-tutor.com/login`;
       } else {
         toast.error(res.data.message);
       }
@@ -420,6 +447,7 @@ const ItemDescription = () => {
                   mount: { scale: 1, y: 0 },
                   unmount: { scale: 0, y: 25 },
                 }}
+                key={id}
               >
                 <img
                   src={item}

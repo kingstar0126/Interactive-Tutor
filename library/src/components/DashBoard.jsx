@@ -39,8 +39,12 @@ const DashBoard = () => {
         perpage: PER_PAGE,
       })
       .then((res) => {
-        setChats(res.data.data);
-        setPageCount(res.data.pageCount);
+        if (res.data.success) {
+          setChats(res.data.data);
+          setPageCount(res.data.pageCount);
+        } else {
+          console.error(res.data.message);
+        }
       })
       .catch((err) => console.error(err));
   };
@@ -49,7 +53,6 @@ const DashBoard = () => {
     navigate("/itemdescription", { state: { chat, page } });
   };
 
-  
   const getSubMenus = () => {
     if (menu === 1) {
       return ROLES;
@@ -61,7 +64,6 @@ const DashBoard = () => {
       return FUNS;
     }
   };
-
 
   return (
     <div className="container items-center justify-center m-auto py-5">
@@ -110,7 +112,7 @@ const DashBoard = () => {
         </div>
         <div className="chatItem">
           {chats.map((chat, idx) => (
-            <div onClick={() => handleItemClick(chat)}>
+            <div onClick={() => handleItemClick(chat)} key={idx}>
               <ChatItem key={idx} data={chat} />
             </div>
           ))}

@@ -306,10 +306,10 @@ def duplicate_train_data(ids, chatbot_uuid):
                 if train_type == 'url':
                     data = web_scraping(path, 1)
                     app = current_app._get_current_object()
-                    thread = Thread(target=train_data_thread, args=(new_train.id, data, url, chatbot_uuid, app))
+                    thread = Thread(target=train_data_thread, args=(new_train.id, data, path, chatbot_uuid, app))
                     thread.start()
                 elif train_type == 'file':
-                    file_obj = S3_CLIENT.get_object(Bucket=S3_PRIVATE_BUCKET, Key=filename)
+                    file_obj = S3_CLIENT.get_object(Bucket=S3_PRIVATE_BUCKET, Key=path)
                     file_content = file_obj['Body'].read()
                     file = BytesIO(file_content)
                     if (path.split('.')[-1].lower() == 'pdf'):
@@ -327,7 +327,7 @@ def duplicate_train_data(ids, chatbot_uuid):
                     thread.start()
                 else:
                     app = current_app._get_current_object()
-                    thread = Thread(target=train_data_thread, args=(new_train.id, text, text[:20], chatbot_uuid, app))
+                    thread = Thread(target=train_data_thread, args=(new_train.id, path, path[:20], chatbot_uuid, app))
                     thread.start()
                 response.append(new_train.id)
         print(' >>>>>>>>>>>>> This is TrainDatas: ', response)

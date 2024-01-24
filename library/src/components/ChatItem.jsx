@@ -45,19 +45,19 @@ const ChatItem = (props) => {
           {getSubMenus(chat.menu)}
         </span>
       </div>
-      <span className="font-bold text-xl">{chat.label}</span>
+      <span className="font-bold text-xl truncate">{chat.label}</span>
       <span className="h-10 truncate">{chat.description}</span>
       {chat.status ? (
         <div className="flex gap-2 items-center">
           <Avatar src={chat.url} alt="avatar" className="w-8 h-8" />
-          <span className="flex gap-1">
+          <span className="flex gap-1 h-10">
             {chat.username}, <i>{chat.userrole}</i>
           </span>
         </div>
       ) : (
         <div className="flex gap-2 items-center">
           <Avatar src={chat.chat_logo.user} alt="avatar" className="w-8 h-8" />
-          <span>{chat.name}</span>
+          <span className="h-10">{chat.name}</span>
         </div>
       )}
       <div className="flex gap-2 items-center">
