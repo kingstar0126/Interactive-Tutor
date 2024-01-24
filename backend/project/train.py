@@ -68,13 +68,17 @@ def compare_token_words(ct, chatbot):
 
 
 def delete_vectore(source, chat):
-    index = pinecone.Index(PINECONE_INDEX_NAME)
-    return index.delete(
-        filter={
-            "source": f"{source}",
-            "chat": f"{chat}"
-        }
-    )
+    try:
+        print('This is delete_vectore', source, chat)
+        index = pinecone.Index(PINECONE_INDEX_NAME)
+        return index.delete(
+            filter={
+                "source": f"{source}",
+                "chat": f"{chat}"
+            }
+        )
+    except Exception as e:
+        print(e)
 
 
 def create_vector(docs):
