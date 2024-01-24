@@ -70,7 +70,6 @@ def compare_token_words(ct, chatbot):
 
 def delete_vectore(source, chat):
     try:
-        print('This is delete_vectore', source, chat)
         index = pinecone.Index(PINECONE_INDEX_NAME)
         return index.delete(
             filter={
@@ -163,7 +162,7 @@ def text_to_docs(text, filename, chat):
     for i, doc in enumerate(page_docs):
         text_splitter = RecursiveCharacterTextSplitter(
             separators=["\n\n", "\n"],
-            chunk_size=3000,
+            chunk_size=10000,
             chunk_overlap=200,
         )
         if doc.page_content == "":
@@ -178,7 +177,6 @@ def text_to_docs(text, filename, chat):
             doc.metadata["source"] = f"{filename}"
             doc.metadata["chat"] = f"{chat}"
             doc_chunks.append(doc)
-        print(doc_chunks)
     return doc_chunks
 
 
@@ -334,10 +332,8 @@ def duplicate_train_data(ids, chatbot_uuid):
                     thread = Thread(target=train_data_thread, args=(new_train.id, path, path[:20], chatbot_uuid, app))
                     thread.start()
                 response.append(new_train.id)
-        print(' >>>>>>>>>>>>> This is TrainDatas: ', response)
         return response
     except Exception as e:
-        print('ERROR >>>>>>>>>>>>>>>>', str(e))
         return []
 
 def train_data_thread(train_id, output, filename, chatbot, app):

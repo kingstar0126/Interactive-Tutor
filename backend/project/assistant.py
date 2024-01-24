@@ -83,7 +83,6 @@ def create_assistant_file(filepath):
         file_obj = S3_CLIENT.get_object(Bucket=S3_PRIVATE_BUCKET, Key=filepath)
         file_content = file_obj['Body'].read()
         file = BytesIO(file_content)
-        print(file)
         _file = client.files.create(
             file=file,
             purpose="assistants",
@@ -120,7 +119,6 @@ def ask_question(assistant_id, prompt, thread, uuid):
     return text, file_path, thread
 
 def create_image_prompt(prompt):
-    print(prompt)
     try:
         response = client.chat.completions.create(
             model='gpt-4-1106-preview',
@@ -149,14 +147,12 @@ def create_image_prompt(prompt):
             ]
 
         )
-        print(response)
         return response.choices[0].message.content
     except Exception as e:
         print('This is the Error: ', e)
         return None
 
 def create_pollinations_prompt(prompt):
-    print(prompt)
     try:
         response = client.chat.completions.create(
             model='gpt-3.5-turbo',
@@ -199,14 +195,11 @@ def create_image_file(prompt, behavior, uuid, image = False):
                 response_format="url",
                 n=1
             )
-            print(response)
 
             image_url=response.data[0].url
             image_content = requests.get(image_url).content
             image_url = uuid + datetime.datetime.now().strftime('%Y%m%d_%H%M%S') + '.png'
             S3_CLIENT.put_object(Bucket=S3_PUBLIC_BUCKET, Key=image_url,  Body=image_content)
-            print(f"![image](https://{S3_PUBLIC_BUCKET}.s3.{os.getenv('REGION')}.amazonaws.com/{image_url})")
-
         return f"![image](https://{S3_PUBLIC_BUCKET}.s3.{os.getenv('REGION')}.amazonaws.com/{image_url})"
     except openai.BadRequestError as e:
         print(e)

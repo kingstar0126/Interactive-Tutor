@@ -210,7 +210,6 @@ def send_message():
         if behaviormodel != "Remove training data ring fencing and perform like ChatGPT":
             behaviormodel = "Remove training data ring fencing and perform like ChatGPT"
         context = answer_question_csv(query, user.id)
-        print('This is Context: \n\n', context)
         count = 3
         model_check = True
         openai_api_key = os.getenv('OPENAI_API_KEY_PRO')
