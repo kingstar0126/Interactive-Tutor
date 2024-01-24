@@ -167,7 +167,7 @@ export default function TraindataTable(props) {
                                     </td>
                                     <td className={classes}>
                                         <div className="flex items-center justify-center h-full w-max">
-                                            {data["status"] ? (
+                                            {data["status"] === "true" ? (
                                                 <Chip
                                                     variant="ghost"
                                                     size="sm"

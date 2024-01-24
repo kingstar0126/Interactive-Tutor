@@ -95,6 +95,9 @@ const DashBoard = () => {
             getchat(dispatch, res.data.data);
             setchatbot(dispatch, res.data.data);
             setChathistory([]);
+          } else {
+            notification('error', res.data.message);
+            setLoading(false);
           }
         });
     }
@@ -390,6 +393,7 @@ const DashBoard = () => {
   return (
     <>
       <div className="flex flex-col justify-center w-full h-screen p-2 lg:items-center lg:px-10 lg:py-0 min-h-max">
+        <Toaster />
         {loading && (
           <div className="w-full h-full flex items-center justify-center">
             <Spinner color="pink" className="w-32 h-32" />

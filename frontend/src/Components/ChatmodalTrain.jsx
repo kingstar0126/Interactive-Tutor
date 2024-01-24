@@ -97,20 +97,22 @@ const ChatmodalTrain = (props) => {
       }
     } else if (type === "2") {
       if (file && file.name) {
+        console.log({
+          accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
+          secretAccessKey: process.env.REACT_APP_ACCESS_SECRET_KEY,
+        });
         const filename = chatbot + file.name.replaceAll(" ", "");
         const params = {
           Bucket: S3_BUCKET,
           Key: filename,
           Body: file,
         };
-        var upload = s3
-          .putObject(params)
+        s3.putObject(params)
           .on("httpUploadProgress", (evt) => {
             const progress = parseInt((evt.loaded * 100) / evt.total);
             setProgress(progress);
           })
-          .promise();
-        await upload
+          .promise()
           .then(() => {
             axios
               .post(webAPI.sendfile, { chatbot, filename })
