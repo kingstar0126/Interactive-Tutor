@@ -20,7 +20,7 @@ import boto3
 
 load_dotenv()
 
-SERVER_URL = os.getenv('SERVER_URL')
+SERVER_URL = 'https://app.interactive-tutor.com'
 PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
 PINECONE_ENV = os.getenv('PINECONE_ENV')
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')

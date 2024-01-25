@@ -24,7 +24,7 @@ load_dotenv()
 pretty.install()
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
-SERVER_URL = os.getenv('SERVER_URL')
+SERVER_URL = 'https://app.interactive-tutor.com'
 
 def generate_password(length=12):
     """Generate a random password."""
