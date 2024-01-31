@@ -1,23 +1,23 @@
-import Login from "./Pages/Login";
-import Register from "./Pages/Register";
-import Forgetpassword from "./Pages/Forgetpassword";
-import Changepassword from "./Pages/Changepassword";
-import Layout from "./Layout/Layout";
-import Chat from "./Components/Chat";
-import Subscription from "./Components/Subscription";
-import Tapcomponent from "./Components/Tapcomponent";
-import NewChat from "./Components/NewChat";
-import Thankyou from "./Pages/Thankyou";
-import Notfound from "./Pages/Notfound";
-import Enterprise from "./Components/Enterprise";
-import Manager from "./Components/Manager";
-import ManageAccount from "./Components/ManageAccount";
-import Report from "./Components/Report";
-import AccessChatbot from "./Pages/AccessChatbot";
-import VerifyEmail from "./Pages/VerifyEmail";
-import EmbeddingChat from "./Components/EmbeddingChat";
-import OnBoarding from "./Components/OnBoarding";
-import DashBoard from "./Components/DashBoard";
+import Login from "../pages/Login";
+import Register from "../pages/Register";
+import Forgetpassword from "../pages/Forgetpassword";
+import Changepassword from "../pages/Changepassword";
+import Layout from "../layout/Layout";
+import Chat from "../components/Chat";
+import Subscription from "../components/Subscription";
+import Tapcomponent from "../components/Tapcomponent";
+import NewChat from "../components/NewChat";
+import Thankyou from "../pages/Thankyou";
+import Notfound from "../pages/Notfound";
+import Enterprise from "../components/Enterprise";
+import Manager from "../components/Manager";
+import ManageAccount from "../components/ManageAccount";
+import Report from "../components/Report";
+import AccessChatbot from "../pages/AccessChatbot";
+import VerifyEmail from "../pages/VerifyEmail";
+import EmbeddingChat from "../components/EmbeddingChat";
+import OnBoarding from "../components/OnBoarding";
+import DashBoard from "../components/DashBoard";
 
 const AppRoutes = [
     {
@@ -117,54 +117,4 @@ const AppRoutes = [
     },
 ];
 
-const AppRoutes_login = [
-    {
-        path: "/",
-        children: [
-            {
-                path: "/",
-                element: <Login />,
-            },
-            {
-                path: "/login",
-                element: <Login />,
-            },
-            {
-                path: "/register",
-                element: <Register />,
-            },
-            {
-                path: "/resetpassword",
-                element: <Forgetpassword />,
-            },
-            {
-                path: "/changepassword",
-                element: <Changepassword />,
-            },
-            {
-                path: "/chatbot/share/url",
-                element: <AccessChatbot />,
-                children: [
-                    {
-                        path: "newchat",
-                        element: <NewChat />,
-                    },
-                ],
-            },
-            {
-                path: "/chat/embedding/:id",
-                element: <EmbeddingChat />,
-            },
-            {
-                path: "/verify-email/:token",
-                element: <VerifyEmail />,
-            },
-        ],
-    },
-    {
-        path: "*",
-        element: <Notfound />,
-    },
-];
-
-export { AppRoutes, AppRoutes_login };
+export { AppRoutes };

@@ -1,5 +1,5 @@
 import React from "react";
-import Header from "../Layout/Header";
+import Header from "../layout/Header";
 import { Outlet } from "react-router-dom";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
