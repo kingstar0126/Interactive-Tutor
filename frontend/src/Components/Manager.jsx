@@ -116,7 +116,7 @@ const Manager = () => {
             case 4:
                 return (
                     <span className="px-2 py-1 font-semibold leading-tight rounded-lg bg-[#5d18e6] text-[white]">
-                        School
+                        Enterprise User
                     </span>
                 );
             case 5:
@@ -134,7 +134,7 @@ const Manager = () => {
             case 7:
                 return (
                     <span className="px-2 py-1 font-semibold leading-tight rounded-lg bg-[#89ee45] text-[white]">
-                        Enter Prise
+                        School
                     </span>
                 );
             default:
@@ -178,27 +178,19 @@ const Manager = () => {
         },
         {
             value: "2",
-            label: "Starter",
-        },
-        {
-            value: "3",
-            label: "Standard",
+            label: "Teacher",
         },
         {
             value: "4",
-            label: "Pro",
+            label: "Enterprise user",
         },
         {
             value: "5",
             label: "Free trial",
         },
         {
-            value: "6",
-            label: "Customer",
-        },
-        {
             value: "7",
-            label: "EnterPrise",
+            label: "School",
         }
     ]
 
