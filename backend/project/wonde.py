@@ -119,7 +119,6 @@ def cleanup_empty_folders(path):
     return "Cleanup completed."
 
 def search_data_in_wonde(keys, wondekey):
-    print('This is the wondekey', wondekey)
     headers = {'Authorization': f'Bearer {wondekey}'}
     response = requests.get(
             f'https://api.wonde.com/v1.0/schools',
@@ -129,7 +128,6 @@ def search_data_in_wonde(keys, wondekey):
     for item in data:
         school_id = item.get('id')
         response = requests.get(f'https://api.wonde.com/v1.0/schools/{school_id}/students', headers=headers)
-        print('This is the response of Requests test: ', response.status_code)
         if response.status_code == 200:
             students = []
             
@@ -171,7 +169,6 @@ def search_data_in_wonde(keys, wondekey):
                                 )
                                 response.raise_for_status()
                                 student_related_data = response.json()
-                                print('This is student_related_data: \n', student_related_data)
                                 students.append(student_related_data)
                         else:
                             if student.get('forename').lower() == names[0].lower() or student.get('surname').lower() == names[0].lower():
@@ -194,9 +191,7 @@ def search_data_in_wonde(keys, wondekey):
                     cleaned_data['attendance_summary'] = cleaned_data['attendance_summary']['data']
                     cleaned_data['behaviours'] = cleaned_data['behaviours']['data']
                     cleaned_data['classes'] = cleaned_data['classes']['data']
-                    print('This is classes: \n\n', cleaned_data['classes'])
                     for i in range(len(cleaned_data['classes'])):
-                        print('This is type of i: ', cleaned_data['classes'][i])
                         cleaned_data['classes'][i]['subject.data.name'] = cleaned_data['classes'][i]['subject']['data']['name']
                         cleaned_data['classes'][i]['subject.data.active'] = cleaned_data['classes'][i]['subject']['data']['active']
                         del cleaned_data['classes'][i]['subject']

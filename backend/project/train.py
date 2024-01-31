@@ -494,15 +494,21 @@ def get_traindatas():
         user = db.session.query(User).filter_by(id=chat.user_id).first()
         invite_account = db.session.query(Invite).filter_by(email=user.email).first()
         user_check = db.session.query(User).filter_by(id=invite_account.user_id).first() if invite_account else user
-        if user_check and user_check.role == 7 and chat.api_select == 1:
-            user = user_check
-            if user.wonde_key:
-                data.append({'label': 'Wonde API',
-                            'type': 'API', 'status': True})
+        # if user_check and user_check.role == 7 and chat.api_select == 1:
+        #     user = user_check
+        #     if user.wonde_key:
+        #         data.append({'label': 'Wonde API',
+        #                     'type': 'API', 'status': True})
         for id in train_ids:
             train_data = db.session.query(Train).filter_by(id=id).first()
             if train_data:
-                data.append({'id': train_data.id, 'label': train_data.label,
+                if train_data.type == 'API':
+                    if user_check and user_check.role == 7 and chat.api_select == 1:
+                        user = user_check
+                        if user.wonde_key:
+                            data.append({'id': train_data.id, 'label': train_data.label, 'type': train_data.type, 'status': train_data.status})
+                else:
+                    data.append({'id': train_data.id, 'label': train_data.label,
                         'type': train_data.type, 'status': train_data.status})
         return jsonify({'data': data, 'success': True})
     else:
