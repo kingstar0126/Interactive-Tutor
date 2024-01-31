@@ -1,9 +1,9 @@
+from gevent.pywsgi import WSGIServer
 from project import create_app
 import os
 
 app = create_app()
 
 if __name__ == '__main__':
-    from wsgiref.simple_server import make_server
-    httpd = make_server('0.0.0.0', 5000, app)
-    httpd.serve_forever()
+    http_server = WSGIServer(('', 5000), app)
+    http_server.serve_forever()

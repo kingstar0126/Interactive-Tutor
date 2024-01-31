@@ -176,19 +176,22 @@ def send_message():
         file = request.form.get('file')
         if file:
             file_upload_check = True
-            if assistants:
-                if chat.id in assistants and assistants[chat.id] is not None:
-                    delete_assistant_file(assistants[chat.id], files[chat.id])
-                    assistants[chat.id] = None
-                    files[chat.id] = None
-                if chat.id in threads and threads[chat.id] is not None:
-                    threads[chat.id] = None
+        # if assistants:
+            if chat.id in assistants and assistants[chat.id] is not None:
+                delete_assistant_file(assistants[chat.id], files[chat.id])
+                assistants[chat.id] = None
+                files[chat.id] = None
+            if chat.id in threads and threads[chat.id] is not None:
+                threads[chat.id] = None
             assistants[chat.id], files[chat.id] = create_assistant_file(file)
             if assistants[chat.id] is None:
                 return jsonify({
                     'Message': '''Interactive Tutor can only read certain file types, please ensure your files are in one of the following formats: 'c', 'cpp', 'css', 'csv', 'docx', 'gif', 'html', 'java', 'jpeg', 'jpg', 'js', 'json', 'md', 'pdf', 'php', 'png', 'pptx', 'py', 'rb', 'tar', 'tex', 'ts', 'txt', 'xlsx', 'xml', 'zip'.''',
                 })
-            context, file_link, thread = ask_question(assistants[chat.id], query, threads[chat.id], uuid)
+
+            assistant_id=assistants.get(chat.id, None)
+            thread_id_from_assistant=threads.get(chat.id, None)
+            context, file_link, thread = ask_question(assistant_id, query, thread_id_from_assistant, uuid)
             threads[chat.id] = thread
             count = 18
         if chat.id in assistants and assistants[chat.id] is not None and file_upload_check == False:
