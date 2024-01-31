@@ -3,7 +3,7 @@ import requests
 import os
 import json
 from dotenv import load_dotenv
-from .models import User
+from .models import User, Chat
 from . import db
 import shutil
 
@@ -39,9 +39,12 @@ def init_wonde_api():
     if school_id is None:
         return jsonify({'success': False, 'message': 'Your API key is not correct'})
     user.wonde_key = apikey
-    db.session.commit()
 
     train_id = create_train('Wonde API', 'API', True, chatbot)
+    _chat = db.session.query(Chat).filter_by(uuid=chatbot).first()
+    _chat.api_select = 1
+    db.session.commit()
+
     chat = insert_train_chat(chatbot, train_id)
     return jsonify({'success': True, 'message': 'Successful!', 'data': chat})
 

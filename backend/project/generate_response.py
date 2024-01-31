@@ -111,7 +111,6 @@ def generate_message(query, behavior, temp, model, chat, template, openai_api_ke
         index_name=PINECONE_INDEX_NAME, embedding=embeddings)
 
     docs = docsearch.similarity_search_with_score(" ", filter={"chat": str(chat)})
-    print('DOCS: ', docs)
     qa = RetrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=docsearch.as_retriever(search_kwargs={'filter': {"chat": str(chat)}}), chain_type_kwargs=chain_type_kwargs)
     
     def task():
