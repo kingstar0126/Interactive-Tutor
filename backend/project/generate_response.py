@@ -117,7 +117,7 @@ def generate_message(query, behavior, temp, model, chat, template, openai_api_ke
         try:
             qa.run(query)
         except Exception as e:
-            print(f"An error occurred: {e}")
+            print(f"generate_message task error: {e}")
         finally:
             q.put(job_done)
 
@@ -192,7 +192,7 @@ def generate_AI_message_langchain(query, history, behavior, temp, model, openai_
                 behavior=behavior,
             )
         except Exception as e:
-            print(f"An error occurred: {e}")
+            print(f"generate_AI_message_langchain task error: {e}")
         finally:
             q.put(job_done)
 
@@ -302,7 +302,8 @@ def generate_system_prompt_role(role):
             response = json.loads(response)
         return response
     except Exception as e:
-        return jsonify({ "name": "", "system_role": "", "starter" : "", "description": "" })
+        print(f"generate_system_prompt_role error: {e}")
+        return jsonify({ "name": "", "system_role": "", "starter" : "", "description": "" , 'message': e.message, 'success': False})
 
 def generate_part_file(prompt, data):
     template = '''Answer using the sentences below Context. If you cannot find an appropriate answer to the question in the Context, return "".

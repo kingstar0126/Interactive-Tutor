@@ -270,6 +270,7 @@ def email_verification():
         else:
             return jsonify({'success': True, 'message': 'You have already registered. Please login again.'})
     except Exception as e:
+        print(f"show_answer error: {e}")
         return jsonify({'message': 'Your token expired', 'success': False})
 
 
@@ -752,6 +753,7 @@ def checkUserInvite():
                     return jsonify({'success': True})
         return jsonify({'success': False})
     except Exception as e:
+        print(f"checkUserInvite error: {e}")
         return jsonify({'success': False})
 
 
@@ -771,6 +773,7 @@ def uploadInviteFile():
     except Exception as e:
         temp_file.close()
         os.unlink(temp_file.name)
+        print(f"uploadInviteFile error: {e}")
         return {"success": False, "message": str(e)}, 500
     temp_file.close()
     os.unlink(temp_file.name)

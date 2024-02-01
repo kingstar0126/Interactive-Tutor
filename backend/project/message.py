@@ -114,6 +114,7 @@ def init_message():
                     'message': "Successfuly created", 'data': new_message.uuid}
         return jsonify(response)
     except Exception as e:
+        print(f"init_message error: {e}")
         return jsonify({'success': False, 'message': str(e)})
 
 
@@ -329,10 +330,12 @@ def send_message():
                 current_message.update_date = datetime.datetime.now()
                 db.session.commit()
         except Exception as e:
+            print(f"generate function error: {e}")
             yield f"Error in generate function: {str(e)}".encode('utf-8')
     try:
         return Response(stream_with_context(generate()), mimetype="text/event-stream", direct_passthrough=True, headers={'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
     except Exception as e:
+        print(f"generate function stream_with_context error: {e}")
         return jsonify({
             'success': False,
             'code': 500,
@@ -371,6 +374,7 @@ def send_chat_bubble():
     try:
         return Response(stream_with_context(generate()), mimetype="text/event-stream", direct_passthrough=True, headers={'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})
     except Exception as e:
+        print(f"send_chat_bubble function stream_with_context error: {e}")
         return jsonify({
             'success': False,
             'code': 500,
@@ -427,6 +431,7 @@ def get_messages():
         }
         return jsonify(_response)
     except Exception as e:
+        print(f"get_messages error: {e}")
         return jsonify({'success': False, 'message': str(e)})
 
 

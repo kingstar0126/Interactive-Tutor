@@ -63,7 +63,7 @@ def show_answer(response, thread, uuid):
                     S3_CLIENT.put_object(Bucket=S3_PUBLIC_BUCKET, Key=file_id,  Body=file_data_byte)
                     file_path = f"![image](https://{S3_PUBLIC_BUCKET}.s3.{os.getenv('REGION')}.amazonaws.com/{file_id})"
                 except Exception as e:
-                    print(e)
+                    print(f"show_answer error: {e}")
                     file_path = ''
     return last_printed_text, file_path
 
@@ -97,6 +97,7 @@ def create_assistant_file(filepath):
         )
         return assistant.id, _file.id
     except Exception as e:
+        print(f"create_assistant_file error: {e}")
         return None, None
 
 def delete_assistant_file(assistant_id, file_id):
@@ -150,7 +151,7 @@ def create_image_prompt(prompt):
         )
         return response.choices[0].message.content
     except Exception as e:
-        print('This is the Error: ', e)
+        print('create_image_prompt Error: ', e)
         return None
 
 def create_pollinations_prompt(prompt):
@@ -172,7 +173,7 @@ def create_pollinations_prompt(prompt):
         )
         return response.choices[0].message.content
     except Exception as e:
-        print('This is the Error: ', e)
+        print('create_pollinations_prompt error: ', e)
         return None
 
 def create_image_file(prompt, behavior, uuid, image = False):

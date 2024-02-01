@@ -120,6 +120,7 @@ def add_chat():
         }
         return jsonify(response)
     except Exception as e:
+        print(f"add_chat error: {e}")
         return jsonify({'success': False, 'message': str(e)})
 
 
@@ -140,6 +141,7 @@ def upload_image():
                 f.write(chunk)
         return jsonify({'success': True, 'data': f"/api/imageupload/{filename}", 'code': 200})
     except Exception as e:
+        print(f"upload_image error: {e}")
         return {"success": False, "message": str(e)}, 400
 
 @chat.route('/api/sendreview', methods=['POST'])
@@ -160,6 +162,7 @@ def submit_review():
         db.session.commit()
         return jsonify({'success': True, 'message': 'Success'})
     except Exception as e:
+        
         return jsonify({'success': False, 'message': str(e)})
 
 @chat.route('/api/getallreviews', methods=['POST'])
@@ -264,6 +267,7 @@ def send_email():
 
         return jsonify({'success': True, 'message': 'Successfully add in your account'})
     except Exception as e:
+        print(f"send_email error: {e}")
         return jsonify({'success': False, 'message': str(e)})
 
 @chat.route('/api/updatechat', methods=['POST'])
@@ -412,6 +416,7 @@ def publish_chat():
             'message': 'Successful'
         })
     except Exception as e:
+        print(f"publish_chat error: {e}")
         return jsonify({
             'success': False,
             'message': str(e)
@@ -460,6 +465,7 @@ def get_publish_chats():
 
         return jsonify({'success': True, 'data': response, 'pageCount': chats.pages})
     except Exception as e:
+        print(f"get_publish_chats error: {e}")
         return jsonify({'success': False, 'message': str(e)})
 
 @chat.route('/api/addbadge', methods=['POST'])
@@ -739,7 +745,7 @@ def delete_chat(id):
                 for review_id in review_ids:
                     db.session.query(Review).filter_by(id=review_id).delete()
         except Exception as e:
-            print(e)
+            print(f"delete_chat error: {e}")
         db.session.delete(chat)
         db.session.commit()
 

@@ -78,7 +78,7 @@ def delete_vectore(source, chat):
             }
         )
     except Exception as e:
-        print(e)
+        print(f"delete_vectore error: {e}")
 
 
 def create_vector(docs):
@@ -233,7 +233,7 @@ def web_scraping(url, max_depth=0, depth=0, visited_urls=set()):
         driver.quit()
         return result
     except Exception as e:
-        print(f"An error occurred: {e}")
+        print(f"web_scraping function error occurred: {e}")
         return []
 
 
@@ -334,6 +334,7 @@ def duplicate_train_data(ids, chatbot_uuid):
                 response.append(new_train.id)
         return response
     except Exception as e:
+        print(f"duplicate_train_data function error occurred: {e}")
         return []
 
 def train_data_thread(train_id, output, filename, chatbot, app):
@@ -344,7 +345,7 @@ def train_data_thread(train_id, output, filename, chatbot, app):
             train_status_chanage(train_id)
             print('Finish')
         except Exception as e:
-            print(e)
+            print(f"train_data_thread function error occurred: {e}")
 
 @train.route('/api/data/sendurl', methods=['POST'])
 def create_train_url():
@@ -439,7 +440,7 @@ def create_train_file():
             'message': "Train data transmission was successful. Processing in background.",
         })
     except Exception as e:
-        print(str(e))
+        print(f"create_train_file function error occurred: {e}")
         return {"success": False, "message": str(e)}, 400
 
 @train.route('/api/data/sendapi', methods=['POST'])
