@@ -3,7 +3,7 @@ name: Deploy to AWS ECS
 on:
   push:
     branches:
-      - production-v2
+      - production
 env:
   BUILD_RUN_ID: ${{github.run_number}}
 
