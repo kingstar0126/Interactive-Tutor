@@ -196,6 +196,7 @@ jobs:
        - name: Deploy to S3
          run: |
            cd frontend
+           aws s3 rm s3://interactive-tutor-staging-app-bucket/ --recursive
            aws s3 sync ./build s3://interactive-tutor-staging-app-bucket/
            aws cloudfront create-invalidation --distribution-id EXV975SRMLZ0X --paths "/*"
 

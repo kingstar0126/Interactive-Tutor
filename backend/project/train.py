@@ -554,7 +554,7 @@ def delete_traindatas():
         }
         data = {
             'code': 200,
-            'message': "Succesfullu delete",
+            'message': "Succesfully delete",
             'data': chat_data,
             'success': True
         }
