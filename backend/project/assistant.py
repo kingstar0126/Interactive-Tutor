@@ -73,6 +73,7 @@ def wait_on_run(run, thread):
             thread_id=thread.id,
             run_id=run.id,
         )
+        print(run.status)
         time.sleep(0.5)
     return run
 
@@ -90,7 +91,7 @@ def create_assistant_file(filepath):
         assistant = client.beta.assistants.create(
             name="Data Analtze",
             instructions="You are a personal data analytics instructor. Please provide detailed information about the prompt in the uploaded file.",
-            model="gpt-4-1106-preview",
+            model="gpt-3.5-turbo",
             tools=[{"type": "code_interpreter"}],
             file_ids=[_file.id]
         )
