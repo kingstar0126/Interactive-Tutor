@@ -1,7 +1,7 @@
 import React from "react";
-import DashBoard from "./components/DashBoard";
-import Header from "./components/Header";
-import ItemDescription from "./components/ItemDescription";
+import DashBoard from "./Components/DashBoard";
+import Header from "./Components/Header";
+import ItemDescription from "./Components/ItemDescription";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 function App() {
