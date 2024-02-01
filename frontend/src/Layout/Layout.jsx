@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
-import Chatbubble from "../components/Chatbubble";
-import Header from "../components/HeaderComponent";
+import Chatbubble from "../Components/Chatbubble";
+import Header from "../Components/HeaderComponent";
 
 const Layout = () => {
     return (
