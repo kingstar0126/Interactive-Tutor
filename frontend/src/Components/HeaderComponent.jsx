@@ -4,7 +4,7 @@ import { setOpenSidebar } from "../redux/actions/locationAction";
 import { useSelector, useDispatch } from "react-redux";
 import Logo from "../assets/logo.png";
 import { Drawer } from "@material-tailwind/react";
-import Sidebar from "../Layout/Sidebar";
+import Sidebar from "../layout/Sidebar";
 
 const Header = () => {
     const [openSidebar, setOpenSidebar] = useState(false);

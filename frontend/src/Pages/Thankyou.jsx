@@ -1,5 +1,5 @@
 import React from "react";
-import Header from "../Layout/Header";
+import Header from "../layout/Header";
 import { FiCheckCircle } from "react-icons/fi"
 import Confetti from 'react-confetti'
 import useWindowSize from 'react-use/lib/useWindowSize'

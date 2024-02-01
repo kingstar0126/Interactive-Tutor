@@ -1,6 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import Header from "../Layout/Header";
+import Header from "../layout/Header";
 import axios from "axios";
 import { webAPI } from "../utils/constants";
 import toast, { Toaster } from "react-hot-toast";
