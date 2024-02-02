@@ -7,11 +7,14 @@
 }
 
 .chatbox-wrapper {
+    position: relative;
     display: flex;
-    margin-bottom: 24px;
 
-    &.ai-bot > .chatbox-message {
-        padding-bottom: 25px;
+    &:last-child,
+    &:hover {
+        > .chatbox-action {
+            display: block;
+        }
     }
 
     > .chatbox-img {
@@ -24,21 +27,20 @@
         position: relative;
         font-family: $roboto-font;
         color: $text-color;
-        padding: 15px 30px 20px;
-        border: 1px solid $border-color;
-        border-radius: 10px;
-        box-shadow: rgba($theme-color, .8) 5px 15px 20px -20px;
+        font-size: 16px;
+        padding: 8px 10px 25px;
+        margin: 0;
+    }
 
-        > .chatbox-action {
-            position: absolute;
-            right: 0;
-            bottom: 0;
-            padding: 2px 15px;
+    > .chatbox-action {
+        display: none;
+        position: absolute;
+        left: 65px;
+        bottom: 5px;
 
-            > .action-button img {
-                width: 18px;
-                opacity: 0.5;
-            }
+        > .action-button img {
+            width: 16px;
+            opacity: 0.5;
         }
     }
 }
