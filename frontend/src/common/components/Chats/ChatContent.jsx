@@ -1,6 +1,5 @@
-import { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import "./styles.scss";
-import { Scrollbar } from "react-scrollbars-custom";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeMathjax from "rehype-mathjax";
@@ -14,6 +13,8 @@ import toast from "react-hot-toast";
 const ChatContent = (props) => {
     const { chat, isStreamData } = props;
 
+    const chatRef = useRef(null);
+
     const downloadImage = (src) => {
         const link = document.createElement("a");
         link.href = src;
@@ -24,16 +25,34 @@ const ChatContent = (props) => {
         document.body.removeChild(link);
     };
 
-    const handleCopyText = () => {
-        toast.success('Text Copied!')
+    const copyToClipboard = async () => {
+        try {
+        const html = chatRef.current;
+    
+            const success = await navigator.clipboard.write([
+                new ClipboardItem({
+                'text/html': new Blob([html.innerHTML], {
+                    type: 'text/html',
+                }),
+                }),
+            ]);
+            toast.success('Text Copied')
+            return success;
+        } catch (e) {
+            toast.error('Copy Unsuccessful')
+        }
     }
 
-    useEffect(() => {
-        console.log('ChatContent', chat);
-    }, [chat]);
+    const handleCopyText = () => {
+        if (!chatRef.current) {
+            toast.error('Copy Unsuccessful')
+            return;
+        }
+        copyToClipboard();
+    }
 
     return chat.role === "human" && chat.content ? (
-        <div className="chatbox-wrapper">
+        <React.Fragment>
             <img
                 className="chatbox-img"
                 src="https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_user.png"
@@ -42,15 +61,15 @@ const ChatContent = (props) => {
             <div className="chatbox-message">
                 {chat.content}
             </div>
-        </div>
+        </React.Fragment>
     ) : chat.role === "ai" && chat.content ? (
-        <div className="chatbox-wrapper ai-bot">
+        <React.Fragment>
             <img
                 className="chatbox-img"
                 src="https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"
                 alt="AI Image"
             />
-            <div className="chatbox-message">
+            <div className="chatbox-message" ref={chatRef}>
                 <ReactMarkdown
                     remarkPlugins={[remarkGfm, remarkMath]}
                     rehypePlugins={[rehypeMathjax, rehypeRaw]}
@@ -176,13 +195,13 @@ const ChatContent = (props) => {
                         },
                     }}
                 />
-                {!isStreamData && <div className="chatbox-action">
-                    <button className="action-button" title="Copy Text" onClick={handleCopyText}>
-                        <img src={CopyIcon} alt="Copy Icon" />
-                    </button>
-                </div>}
             </div>
-        </div>
+            {!isStreamData && <div className="chatbox-action">
+                <button className="action-button" title="Copy" onClick={handleCopyText}>
+                    <img src={CopyIcon} alt="Copy Icon" />
+                </button>
+            </div>}
+        </React.Fragment>
     ) : null;
 };
 
