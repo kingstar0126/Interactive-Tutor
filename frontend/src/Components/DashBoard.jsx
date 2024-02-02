@@ -33,6 +33,8 @@ import XLSX from "../assets/xlsx.png";
 import CSV from "../assets/csv.png";
 import { useNavigate } from "react-router-dom";
 import AWS from "aws-sdk";
+import ChatBox from "../common/components/Chats/ChatBox";
+import ChatContent from "../common/components/Chats/ChatContent";
 
 const PROMPTS = [
   "Help me create the ultimate lesson plan",
@@ -413,7 +415,7 @@ const DashBoard = () => {
                     How can I help you today?
                   </span>
                 </div>
-                <div className="h-1/3 w-full flex flex-wrap-reverse justify-between overflow-hidden lg:px-8 mb-10">
+                <div className="h-1/3 w-full flex flex-wrap-reverse justify-between overflow-hidden lg:px-8 mb-4">
                   {PROMPTS.map((item, index) => (
                     <div
                       key={index}
@@ -430,358 +432,23 @@ const DashBoard = () => {
                 </div>
               </div>
             ) : (
+
               <div
                 className="w-full pt-10 text-base font-medium h-4/5"
                 name="main_scroll"
               >
                 <Scrollbar ref={messagesEndRef} name="scroll content">
-                  {chathistory.map((data, index) => {
-                    return data.role === "human" && data.content ? (
-                      <div
-                        name="human_bg"
-                        className="flex items-center justify-start p-2 lg:justify-center"
-                        key={index}
-                      >
-                        <div className="flex justify-start w-full px-10">
-                          <img
-                            src="https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_user.png"
-                            alt="human"
-                            className="w-10 h-10 rounded-full"
-                          />
-                          <div
-                            name="human"
-                            className="flex flex-col w-full p-2 break-words whitespace-normal"
-                          >
-                            {data.images && data.images.length ? (
-                              <div className="flex flex-wrap">
-                                {data.images.map((item) => {
-                                  return (
-                                    <>
-                                      <img
-                                        src={item}
-                                        alt="image"
-                                        className="w-[100px] h-[100px]"
-                                        onClick={() => {
-                                          setImagesrc(item);
-                                          handleImageClick();
-                                        }}
-                                      />
-                                      <Dialog
-                                        size="lg"
-                                        open={isModalOpen}
-                                        handler={handleImageClick}
-                                      >
-                                        <DialogBody className="h-[30rem] flex items-center justify-center">
-                                          <img
-                                            src={imagesrc}
-                                            alt="image"
-                                            className={`${
-                                              isModalOpen
-                                                ? "max-h-[28rem] max-w-[28rem]"
-                                                : ""
-                                            }`}
-                                          />
-                                        </DialogBody>
-                                      </Dialog>
-                                    </>
-                                  );
-                                })}
-                              </div>
-                            ) : (
-                              <></>
-                            )}
-                            <span className="break-words whitespace-normal">
-                              {data.content}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ) : data.role === "ai" && data.content ? (
-                      <div
-                        name="ai_bg"
-                        className="flex items-center justify-start p-2 lg:justify-center"
-                        key={index}
-                      >
-                        <div className="flex justify-start px-10 w-full">
-                          <img
-                            src="https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"
-                            className="w-10 h-10 rounded-full"
-                            alt="AI"
-                          />
-                          <div
-                            name="ai"
-                            className="flex flex-col w-full p-2 break-words whitespace-normal"
-                          >
-                            <ReactMarkdown
-                              remarkPlugins={[remarkGfm, remarkMath]}
-                              rehypePlugins={[rehypeMathjax, rehypeRaw]}
-                              children={data.content}
-                              className="break-words whitespace-normal"
-                              components={{
-                                code({
-                                  inline,
-                                  className,
-                                  children,
-                                  ...props
-                                }) {
-                                  const match = /language-(\w+)/.exec(
-                                    className || ""
-                                  );
-                                  if (!inline && match) {
-                                    // remove the newline character at the end of children, if it exists
-                                    const codeString = String(children).replace(
-                                      /\n$/,
-                                      ""
-                                    );
-
-                                    return (
-                                      <CopyBlock
-                                        text={codeString}
-                                        language={match[1]}
-                                        showLineNumbers={false}
-                                        wrapLongLines
-                                        theme={dracula}
-                                        {...props}
-                                      />
-                                    );
-                                  }
-                                  return (
-                                    <code className={className} {...props}>
-                                      {children}
-                                    </code>
-                                  );
-                                },
-                                table({ children, ...props }) {
-                                  return (
-                                    <table
-                                      style={{
-                                        borderCollapse: "collapse",
-                                        width: "100%",
-                                        fontFamily: "Arial, sans-serif",
-                                        fontSize: "14px",
-                                      }}
-                                      {...props}
-                                    >
-                                      {children}
-                                    </table>
-                                  );
-                                },
-                                tr({ children, ...props }) {
-                                  return (
-                                    <tr
-                                      style={{
-                                        backgroundColor: "#f8f8f8",
-                                      }}
-                                      {...props}
-                                    >
-                                      {children}
-                                    </tr>
-                                  );
-                                },
-                                td({ children, ...props }) {
-                                  return (
-                                    <td
-                                      style={{
-                                        padding: "8px",
-                                        border: "1px solid #ddd",
-                                      }}
-                                      {...props}
-                                    >
-                                      {children}
-                                    </td>
-                                  );
-                                },
-                                th({ children, ...props }) {
-                                  return (
-                                    <th
-                                      style={{
-                                        padding: "8px",
-                                        border: "1px solid #ddd",
-                                        fontWeight: "bold",
-                                        textAlign: "left",
-                                      }}
-                                      {...props}
-                                    >
-                                      {children}
-                                    </th>
-                                  );
-                                },
-                                a({ href, children, ...props }) {
-                                  return (
-                                    <a
-                                      style={{
-                                        color: "#007bff",
-                                        textDecoration: "none",
-                                      }}
-                                      href={href}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      {...props}
-                                    >
-                                      {children}
-                                    </a>
-                                  );
-                                },
-                                img({ node, src, alt }) {
-                                  return (
-                                    <div className="relative">
-                                      <img src={src} alt={alt} />
-                                      <button
-                                        onClick={() => downloadImage(src)}
-                                        className="absolute top-2 right-2 text-black bg-transparent border-none"
-                                      >
-                                        <BsDownload />
-                                      </button>
-                                    </div>
-                                  );
-                                },
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ) : null;
-                  })}
+                  <ChatBox chats={chathistory} isStreamData={false} />
                   {spinner === true && (
-                    <div
-                      name="ai_bg"
-                      className="flex items-center justify-start p-2 lg:justify-center"
-                    >
-                      <div className="flex justify-start px-10 w-full">
-                        <img
-                          src="https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"
-                          className="w-10 h-10 rounded-full"
-                          alt="AI"
-                        />
-                        <div
-                          name="ai"
-                          className="flex flex-col w-full p-2 break-words whitespace-normal"
-                        >
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm, remarkMath]}
-                            rehypePlugins={[rehypeMathjax, rehypeRaw]}
-                            children={streamData}
-                            className="break-words whitespace-normal"
-                            components={{
-                              code({ inline, className, children, ...props }) {
-                                const match = /language-(\w+)/.exec(
-                                  className || ""
-                                );
-                                if (!inline && match) {
-                                  // remove the newline character at the end of children, if it exists
-                                  const codeString = String(children).replace(
-                                    /\n$/,
-                                    ""
-                                  );
-
-                                  return (
-                                    <CopyBlock
-                                      text={codeString}
-                                      language={match[1]}
-                                      showLineNumbers={false}
-                                      wrapLongLines
-                                      theme={dracula}
-                                      {...props}
-                                    />
-                                  );
-                                }
-                                return (
-                                  <code className={className} {...props}>
-                                    {children}
-                                  </code>
-                                );
-                              },
-                              table({ children, ...props }) {
-                                return (
-                                  <table
-                                    style={{
-                                      borderCollapse: "collapse",
-                                      width: "100%",
-                                      fontFamily: "Arial, sans-serif",
-                                      fontSize: "14px",
-                                    }}
-                                    {...props}
-                                  >
-                                    {children}
-                                  </table>
-                                );
-                              },
-                              tr({ children, ...props }) {
-                                return (
-                                  <tr
-                                    style={{
-                                      backgroundColor: "#f8f8f8",
-                                    }}
-                                    {...props}
-                                  >
-                                    {children}
-                                  </tr>
-                                );
-                              },
-                              td({ children, ...props }) {
-                                return (
-                                  <td
-                                    style={{
-                                      padding: "8px",
-                                      border: "1px solid #ddd",
-                                    }}
-                                    {...props}
-                                  >
-                                    {children}
-                                  </td>
-                                );
-                              },
-                              th({ children, ...props }) {
-                                return (
-                                  <th
-                                    style={{
-                                      padding: "8px",
-                                      border: "1px solid #ddd",
-                                      fontWeight: "bold",
-                                      textAlign: "left",
-                                    }}
-                                    {...props}
-                                  >
-                                    {children}
-                                  </th>
-                                );
-                              },
-                              a({ href, children, ...props }) {
-                                return (
-                                  <a
-                                    style={{
-                                      color: "#007bff",
-                                      textDecoration: "none",
-                                    }}
-                                    href={href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    {...props}
-                                  >
-                                    {children}
-                                  </a>
-                                );
-                              },
-                            }}
-                          />
-                          {state && (
-                            <ThreeDots
-                              height="50"
-                              width="50"
-                              color="#4fa94d"
-                              ariaLabel="three-dots-loading"
-                              radius="12.5"
-                              visible={true}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                    <ChatBox chats={[{
+                      role: "ai",
+                      content: streamData
+                    }]} isStreamData={true} />
                   )}
                 </Scrollbar>
               </div>
             )}
-            <div className="flex flex-col items-center justify-start w-full h-1/5 lg:px-10 px-2">
+            <div className="flex flex-col items-center justify-start w-full h-1/5 lg:px-10 px-2 mt-6">
               <input
                 type="file"
                 className="hidden"
