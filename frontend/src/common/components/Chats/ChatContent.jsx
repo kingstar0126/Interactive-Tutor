@@ -25,30 +25,36 @@ const ChatContent = (props) => {
         document.body.removeChild(link);
     };
 
-    const copyToClipboard = async () => {
+    const copyToClipboard = async (content) => {
         try {
         const html = chatRef.current;
     
             const success = await navigator.clipboard.write([
                 new ClipboardItem({
-                'text/html': new Blob([html.innerHTML], {
-                    type: 'text/html',
-                }),
-                }),
+                    "text/plain": new Blob(
+                        [html.innerText],
+                        { type: "text/plain" }
+                    ),
+                    "text/html": new Blob(
+                        [html.outerHTML],
+                        { type: "text/html" }
+                    ),
+                })
             ]);
             toast.success('Text Copied')
             return success;
         } catch (e) {
+            console.log('e', e)
             toast.error('Copy Unsuccessful')
         }
     }
 
-    const handleCopyText = () => {
+    const handleCopyText = (content) => {
         if (!chatRef.current) {
             toast.error('Copy Unsuccessful')
             return;
         }
-        copyToClipboard();
+        copyToClipboard(content);
     }
 
     return chat.role === "human" && chat.content ? (
@@ -197,7 +203,7 @@ const ChatContent = (props) => {
                 />
             </div>
             {!isStreamData && <div className="chatbox-action">
-                <button className="action-button" title="Copy" onClick={handleCopyText}>
+                <button className="action-button" title="Copy" onClick={() => handleCopyText(chat.content)}>
                     <img src={CopyIcon} alt="Copy Icon" />
                 </button>
             </div>}
