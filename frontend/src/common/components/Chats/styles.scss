@@ -30,6 +30,10 @@
         font-size: 16px;
         padding: 8px 10px 25px;
         margin: 0;
+
+        > .chatbox-loader {
+            width: 40px;
+        }
     }
 
     > .chatbox-action {

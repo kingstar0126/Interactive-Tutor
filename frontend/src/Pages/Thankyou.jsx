@@ -17,7 +17,7 @@ const ThankYou = () => {
             height={height}
             />
             <div className=" flex-1 flex flex-col justify-center items-center bg-no-repeat bg-cover relative text-center">
-                <FiCheckCircle className="text-[rgba(0,255,8,0.75)] text-[400px] top-[calc(50%-200px)] md:left-[calc(50%-400px)] left-[calc(50%-200px)] opacity-75 absolute" />
+                <FiCheckCircle className="check-circle-icon text-[400px] top-[calc(50%-200px)] md:left-[calc(50%-400px)] left-[calc(50%-200px)] absolute" />
                 <h1 className="mb-5 font-bold text-gray-800 text-7xl drop-shadow-lg">
                     Success
                 </h1>
