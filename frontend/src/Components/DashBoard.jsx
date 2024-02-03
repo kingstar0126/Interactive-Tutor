@@ -52,6 +52,7 @@ const DashBoard = () => {
   const [message, setMessage] = useState("");
   const [chathistory, setChathistory] = useState([]);
   const [spinner, setSpinner] = useState(false);
+  const [state, setState] = useState(false);
   const [loading, setLoading] = useState(false);
   const [streamData, setStreamData] = useState("");
   const chatState = useSelector((state) => state.chat.chat);
@@ -200,6 +201,7 @@ const DashBoard = () => {
       return;
     }
     setSpinner(true);
+    setState(true);
     // Create a new FormData to send the necessary data
     const formData = new FormData();
     formData.append("id", id);
@@ -290,6 +292,7 @@ const DashBoard = () => {
             setSpinner(false);
             return;
           }
+          setState(false);
           let data = decoder.decode(value);
           res += data;
           setStreamData(res);
@@ -413,12 +416,20 @@ const DashBoard = () => {
                 name="main_scroll"
               >
                 <Scrollbar ref={messagesEndRef} name="scroll content">
-                  <ChatBox chats={chathistory} isStreamData={false} />
+                  <ChatBox
+                    chats={chathistory}
+                    isStreamData={false}
+                    isThinking={false}
+                  />
                   {spinner === true && (
-                    <ChatBox chats={[{
-                      role: "ai",
-                      content: streamData
-                    }]} isStreamData={true} />
+                    <ChatBox
+                      chats={[{
+                        role: "ai",
+                        content: streamData
+                      }]}
+                      isStreamData={true}
+                      isThinking={state}
+                    />
                   )}
                 </Scrollbar>
               </div>

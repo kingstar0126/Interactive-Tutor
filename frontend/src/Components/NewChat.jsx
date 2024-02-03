@@ -269,7 +269,6 @@ const NewChat = () => {
       await sendMessage(id, _message);
 
       event.preventDefault();
-      
     }
   };
 
@@ -296,7 +295,6 @@ const NewChat = () => {
       await sendMessage(id, _message);
 
       event.preventDefault();
-      
     }
   };
 
@@ -615,10 +613,16 @@ const NewChat = () => {
                 <Scrollbar ref={messagesEndRef} name="scroll content">
                   <ChatBox chats={chathistory} isStreamData={false} />
                   {spinner === true && (
-                    <ChatBox chats={[{
-                      role: "ai",
-                      content: streamData
-                    }]} isStreamData={true} />
+                    <ChatBox
+                      chats={[
+                        {
+                          role: "ai",
+                          content: streamData,
+                        },
+                      ]}
+                      isStreamData={true}
+                      isThinking={state}
+                    />
                   )}
                 </Scrollbar>
               </div>
