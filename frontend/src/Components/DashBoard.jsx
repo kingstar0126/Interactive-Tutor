@@ -1,25 +1,16 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { BiImageAdd } from "react-icons/bi";
-import { BsFillSendPlusFill, BsUpload, BsDownload } from "react-icons/bs";
+import { BsFillSendPlusFill, BsUpload } from "react-icons/bs";
 import { CiSquarePlus } from "react-icons/ci";
 import { AiOutlineClose } from "react-icons/ai";
 import { useSelector, useDispatch } from "react-redux";
 import { webAPI } from "../utils/constants";
-import { ThreeDots } from "react-loader-spinner";
 import { getchat, setchatbot } from "../redux/actions/chatAction";
 import axios from "axios";
 import { Scrollbar } from "react-scrollbars-custom";
-import { dracula, CopyBlock } from "react-code-blocks";
 import { getquery } from "../redux/actions/queryAction";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeMathjax from "rehype-mathjax";
-import remarkMath from "remark-math";
-import rehypeRaw from "rehype-raw";
 import {
-  Dialog,
-  DialogBody,
   Menu,
   MenuHandler,
   MenuList,
@@ -34,7 +25,6 @@ import CSV from "../assets/csv.png";
 import { useNavigate } from "react-router-dom";
 import AWS from "aws-sdk";
 import ChatBox from "../common/components/Chats/ChatBox";
-import ChatContent from "../common/components/Chats/ChatContent";
 
 const PROMPTS = [
   "Help me create the ultimate lesson plan",
@@ -59,18 +49,15 @@ const s3 = new AWS.S3({
 const DashBoard = () => {
   const [image, setImage] = useState([]);
   const [files, setFiles] = useState([]);
-  const [imagesrc, setImagesrc] = useState(null);
   const [message, setMessage] = useState("");
   const [chathistory, setChathistory] = useState([]);
   const [spinner, setSpinner] = useState(false);
-  const [state, setState] = useState(false);
   const [loading, setLoading] = useState(false);
   const [streamData, setStreamData] = useState("");
   const chatState = useSelector((state) => state.chat.chat);
   const chat = (chatState && JSON.parse(chatState)) || {};
   const chatbot = useSelector((state) => state.chat.chatbot);
   const user = JSON.parse(useSelector((state) => state.user.user));
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputHeight, setInputHeight] = useState(2 * STEP);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -84,25 +71,29 @@ const DashBoard = () => {
     }
   };
 
+  const handleGetChat = () => {
+    axios
+    .post(webAPI.getchat, {
+      id: chatbotID,
+    })
+    .then((res) => {
+      if (res.data.success) {
+        getchat(dispatch, res.data.data);
+        setchatbot(dispatch, res.data.data);
+        setChathistory([]);
+      } else {
+        notification('error', res.data.message);
+        setLoading(false);
+      }
+    });
+  }
+
   useEffect(() => {
     if (!user) {
       navigate("/login");
-    } else {
-      axios
-        .post(webAPI.getchat, {
-          id: chatbotID,
-        })
-        .then((res) => {
-          if (res.data.success) {
-            getchat(dispatch, res.data.data);
-            setchatbot(dispatch, res.data.data);
-            setChathistory([]);
-          } else {
-            notification('error', res.data.message);
-            setLoading(false);
-          }
-        });
+      return;
     }
+    handleGetChat();
   }, []);
 
   useEffect(() => {
@@ -121,10 +112,10 @@ const DashBoard = () => {
   }, [chathistory]);
 
   useEffect(() => {
-    if (chat.access && messagesEndRef.current) {
+    if (messagesEndRef.current) {
       messagesEndRef.current.scrollToBottom();
     }
-  }, [chathistory]);
+  }, [chathistory, streamData]);
 
   const handleSubmit = async (event) => {
     if (!event.shiftKey && event.keyCode === 13 && spinner === false) {
@@ -209,7 +200,6 @@ const DashBoard = () => {
       return;
     }
     setSpinner(true);
-    setState(true);
     // Create a new FormData to send the necessary data
     const formData = new FormData();
     formData.append("id", id);
@@ -300,7 +290,6 @@ const DashBoard = () => {
             setSpinner(false);
             return;
           }
-          setState(false);
           let data = decoder.decode(value);
           res += data;
           setStreamData(res);
@@ -370,20 +359,6 @@ const DashBoard = () => {
 
   const handleRemoveFile = (index) => {
     setFiles((oldFiles) => oldFiles.filter((file, idx) => idx !== index));
-  };
-
-  const handleImageClick = () => {
-    setIsModalOpen(!isModalOpen);
-  };
-
-  const downloadImage = (src) => {
-    const link = document.createElement("a");
-    link.href = src;
-    link.download = "image.jpg";
-    link.target = "_blank";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   const handleMessage = (e) => {
