@@ -91,7 +91,7 @@ def create_assistant_file(filepath):
         assistant = client.beta.assistants.create(
             name="Data Analtze",
             instructions="You are a personal data analytics instructor. Please provide detailed information about the prompt in the uploaded file.",
-            model="gpt-3.5-turbo",
+            model="gpt-4-0125-preview",
             tools=[{"type": "code_interpreter"}],
             file_ids=[_file.id]
         )
