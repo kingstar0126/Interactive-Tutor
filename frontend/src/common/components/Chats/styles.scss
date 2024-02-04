@@ -17,7 +17,7 @@
     }
   }
 
-  &:last-child > .chatbox-action {
+  &:first-child > .chatbox-action {
     display: none;
   }
 
