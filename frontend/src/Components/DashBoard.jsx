@@ -49,6 +49,7 @@ const s3 = new AWS.S3({
 const DashBoard = () => {
   const [image, setImage] = useState([]);
   const [files, setFiles] = useState([]);
+  const [isFile, setIsFile] = useState(false);
   const [message, setMessage] = useState("");
   const [chathistory, setChathistory] = useState([]);
   const [spinner, setSpinner] = useState(false);
@@ -74,20 +75,20 @@ const DashBoard = () => {
 
   const handleGetChat = () => {
     axios
-    .post(webAPI.getchat, {
-      id: chatbotID,
-    })
-    .then((res) => {
-      if (res.data.success) {
-        getchat(dispatch, res.data.data);
-        setchatbot(dispatch, res.data.data);
-        setChathistory([]);
-      } else {
-        notification('error', res.data.message);
-        setLoading(false);
-      }
-    });
-  }
+      .post(webAPI.getchat, {
+        id: chatbotID,
+      })
+      .then((res) => {
+        if (res.data.success) {
+          getchat(dispatch, res.data.data);
+          setchatbot(dispatch, res.data.data);
+          setChathistory([]);
+        } else {
+          notification("error", res.data.message);
+          setLoading(false);
+        }
+      });
+  };
 
   useEffect(() => {
     if (!user) {
@@ -113,7 +114,7 @@ const DashBoard = () => {
   }, [chathistory]);
 
   useEffect(() => {
-    if (messagesEndRef.current) {
+    if (chat.access && messagesEndRef.current) {
       messagesEndRef.current.scrollToBottom();
     }
   }, [chathistory, streamData]);
@@ -200,6 +201,7 @@ const DashBoard = () => {
     if (!id || !_message) {
       return;
     }
+    console.log("sending message...");
     setSpinner(true);
     setState(true);
     // Create a new FormData to send the necessary data
@@ -227,6 +229,8 @@ const DashBoard = () => {
           notification("error", err.message);
         });
     });
+
+    setIsFile(!!files.length || false);
 
     // Use Promise.all to wait for all file uploads to finish
     const fileUploadPromises = files.map(async (item) => {
@@ -410,25 +414,23 @@ const DashBoard = () => {
                 </div>
               </div>
             ) : (
-
               <div
                 className="w-full pt-10 text-base font-medium h-4/5"
                 name="main_scroll"
               >
                 <Scrollbar ref={messagesEndRef} name="scroll content">
-                  <ChatBox
-                    chats={chathistory}
-                    isStreamData={false}
-                    isThinking={false}
-                  />
+                  <ChatBox chats={chathistory} />
                   {spinner === true && (
                     <ChatBox
-                      chats={[{
-                        role: "ai",
-                        content: streamData
-                      }]}
+                      chats={[
+                        {
+                          role: "ai",
+                          content: streamData,
+                        },
+                      ]}
                       isStreamData={true}
                       isThinking={state}
+                      isHasFile={isFile}
                     />
                   )}
                 </Scrollbar>

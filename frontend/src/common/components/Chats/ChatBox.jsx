@@ -2,7 +2,7 @@ import "./styles.scss";
 import ChatContent from "./ChatContent";
 
 const ChatBox = (props) => {
-  const { chats, isStreamData, isThinking } = props;
+  const { chats, isStreamData, isThinking, isHasFile } = props;
 
   return (
     <div className="chatbox-constainer">
@@ -14,6 +14,7 @@ const ChatBox = (props) => {
               keys={index}
               isStreamData={isStreamData}
               isThinking={isThinking}
+              isHasFile={isHasFile}
             />
           </div>
         );

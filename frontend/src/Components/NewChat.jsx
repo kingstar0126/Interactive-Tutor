@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { BsFillSendPlusFill, BsUpload, BsDownload } from "react-icons/bs";
+import { BsFillSendPlusFill, BsUpload } from "react-icons/bs";
 import { BiImageAdd } from "react-icons/bi";
 import { AiOutlineClose } from "react-icons/ai";
 import { CiSquarePlus } from "react-icons/ci";
@@ -9,21 +9,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { setchatbot, getchat } from "../redux/actions/chatAction";
 import { useNavigate } from "react-router-dom";
 import { Scrollbar } from "react-scrollbars-custom";
-import { dracula, CopyBlock } from "react-code-blocks";
 import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { getquery } from "../redux/actions/queryAction";
 import { useLocation } from "react-router-dom";
 import ReactLoading from "react-loading";
-import { ThreeDots } from "react-loader-spinner";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeMathjax from "rehype-mathjax";
-import remarkMath from "remark-math";
-import rehypeRaw from "rehype-raw";
 import {
-  Dialog,
-  DialogBody,
   Menu,
   MenuHandler,
   MenuList,
@@ -76,22 +67,16 @@ const NewChat = () => {
   const [spinner, setSpinner] = useState(false);
   const [image, setImage] = useState([]);
   const [files, setFiles] = useState([]);
+  const [isFile, setIsFile] = useState(false);
   const [chathistory, setChathistory] = useState([]);
-  const [imagesrc, setImagesrc] = useState(null);
   const [state, setState] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputHeight, setInputHeight] = useState(2 * STEP);
-
-  const query = new URLSearchParams(location.search);
 
   const notification = (type, message) => {
     // To do in here
     if (type === "error") {
       toast.error(message);
     }
-  };
-  const handleImageClick = () => {
-    setIsModalOpen(!isModalOpen);
   };
 
   useEffect(() => {
@@ -130,7 +115,7 @@ const NewChat = () => {
     if (
       chat.conversation &&
       chat.conversation !== "" &&
-      chathistory.length == 0
+      chathistory.length === 0
     ) {
       setChathistory([
         ...chathistory,
@@ -298,6 +283,16 @@ const NewChat = () => {
     }
   };
 
+  const handleErrorMessage = () => {
+    notification(
+      "error",
+      "The response is too long for this model. Please upgrade your model or enter a different prompt!"
+    );
+    receiveMessage(
+      "This File is too large, please break it down and try again"
+    );
+  };
+
   const sendMessage = async (id, _message) => {
     let { behaviormodel, train, model } = chat;
     if (!id || !_message) {
@@ -330,6 +325,8 @@ const NewChat = () => {
           notification("error", err.message);
         });
     });
+
+    setIsFile(!!files.length || false);
 
     // Use Promise.all to wait for all file uploads to finish
     const fileUploadPromises = files.map(async (item) => {
@@ -364,24 +361,18 @@ const NewChat = () => {
       .then(async (response) => {
         let res = "";
         if (!response.ok) {
-          if (response.status === 404) {
-            // Handle 404 error (Not found)
-            notification("error", "Not found tutor!");
-          } else if (response.status === 401) {
-            // Handle 401 error (Unauthorized)
-            notification("error", "Insufficient queries remaining!");
-          } else if (response.status === 500) {
-            // Handle 500 error (Internal server error)
-            notification(
-              "error",
-              "The response is too long for this model. Please upgrade your model or enter a different prompt!"
-            );
-          } else {
-            // Handle other error cases
-            notification(
-              "error",
-              "The response is too long for this model. Please upgrade your model or enter a different prompt!"
-            );
+          switch (response.status) {
+            case 404:
+              // Handle 404 error (Not found)
+              notification("error", "Not found tutor!");
+              break;
+            case 401:
+              // Handle 401 error (Unauthorized)
+              notification("error", "Insufficient queries remaining!");
+              break;
+            case 500:
+            default:
+              handleErrorMessage();
           }
           throw new Error(`Network response was not ok - ${response.status}`);
         }
@@ -491,82 +482,6 @@ const NewChat = () => {
     setMessage(e.target.value);
   };
 
-  const VideoComponent = ({ src, platform }) => {
-    switch (platform) {
-      case "youtube":
-        return (
-          <iframe
-            width="100%"
-            height="315"
-            src={`https://www.youtube.com/embed/${src}`}
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          ></iframe>
-        );
-      case "vimeo":
-        return (
-          <iframe
-            width="100%"
-            height="315"
-            src={`https://player.vimeo.com/video/${src}`}
-            frameBorder="0"
-            allow="autoplay; fullscreen; picture-in-picture"
-            allowFullScreen
-          ></iframe>
-        );
-      case "loom":
-        return (
-          <iframe
-            width="100%"
-            height="315"
-            src={`https://www.loom.com/embed/${src}`}
-            frameBorder="0"
-            allowFullScreen
-          ></iframe>
-        );
-      // Handle other platforms or default video tag
-      default:
-        return (
-          <video controls width="100%">
-            <source src={src} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        );
-    }
-  };
-
-  const getVideoPlatform = (url) => {
-    if (url.includes("youtube.com") || url.includes("youtu.be")) {
-      return "youtube";
-    } else if (url.includes("vimeo.com")) {
-      return "vimeo";
-    } else if (url.includes("loom.com")) {
-      return "loom";
-    }
-    return "default";
-  };
-
-  const getVideoId = (url, platform) => {
-    let id = null;
-    if (platform === "youtube") {
-      // Extract the video ID from the YouTube URL
-      const match = url.match(
-        /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i
-      );
-      id = match ? match[1] : null;
-    } else if (platform === "vimeo") {
-      // Extract the video ID from the Vimeo URL
-      const match = url.match(/vimeo\.com\/(\d+)/);
-      id = match ? match[1] : null;
-    } else if (platform === "loom") {
-      // Extract the video ID from the Loom URL
-      const match = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
-      id = match ? match[1] : null;
-    }
-    return id;
-  };
-
   return (
     <div
       style={{
@@ -622,6 +537,7 @@ const NewChat = () => {
                       ]}
                       isStreamData={true}
                       isThinking={state}
+                      isHasFile={isFile}
                     />
                   )}
                 </Scrollbar>
