@@ -306,7 +306,7 @@ const ChatContent = (props) => {
           <button
             className="action-button"
             title="Copy"
-            onClick={() => handleCopyText(chat.content)}
+            onClick={() => handleCopyText(chat?.content)}
           >
             <img src={CopyIcon} alt="Copy Icon" />
           </button>
