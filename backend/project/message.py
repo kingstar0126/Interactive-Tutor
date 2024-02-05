@@ -126,13 +126,11 @@ def get_query():
     if user_id:
         user = db.session.query(User).filter_by(id=user_id).first()
     else:
-        chat = db.session.query(Chat).join(Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
-        if chat and chat.inviteId:
-            user = db.session.query(User).filter_by(id=chat.inviteId).first()
-            if user and user.role == 7:
-                return jsonify({'query': user.query, 'usage': user.usage, 'success': True})
         user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
-        Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
+                Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
+        invite_account = db.session.query(Invite).filter_by(email=user.email).first()
+        user_check = db.session.query(User).filter_by(id=invite_account.user_id).first() if invite_account else None
+        user = user_check if user_check and user_check.role == 7 else user
     if user:
         return jsonify({'query': user.query, 'usage': user.usage, 'success': True})
     else:
