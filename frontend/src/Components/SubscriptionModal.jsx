@@ -113,7 +113,7 @@ const SubscriptionModal = (props) => {
               console.error("Error:", error);
             }
           } else {
-            toast.success(res.data.message);
+            toast.error(res.data.message);
           }
         })
         .catch((err) => {
