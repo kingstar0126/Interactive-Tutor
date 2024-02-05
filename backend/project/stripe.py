@@ -202,29 +202,32 @@ def create_checkout_session_query():
 
 @payment.route('/api/create/checkout/session', methods=['POST'])
 def create_checkout_session():
-    id = request.json['id']
-    subscription_plan_id = request.json['subscriptionPlanId']
-    clientReferenceId = request.json['clientReferenceId']
-    user = db.session.query(User).filter_by(id=id).first()
-    session = stripe.checkout.Session.create(
-        payment_method_types=['card'],
-        line_items=[{
-            'price': subscription_plan_id,
-            'quantity': 1,
-        }],
-        payment_method_collection='always',
-        mode='subscription',
-        subscription_data={
-            'default_tax_rates': [os.getenv('TAX_RATE_ID')],
-        },
-        success_url= SERVER_URL + "/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url=f'{SERVER_URL}/chatbot/subscription',
-        customer=user.customer_id,
-        allow_promotion_codes=True,
-        client_reference_id=clientReferenceId,
-    )
+    try:
+        id = request.json['id']
+        subscription_plan_id = request.json['subscriptionPlanId']
+        clientReferenceId = request.json['clientReferenceId']
+        user = db.session.query(User).filter_by(id=id).first()
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price': subscription_plan_id,
+                'quantity': 1,
+            }],
+            payment_method_collection='always',
+            mode='subscription',
+            subscription_data={
+                'default_tax_rates': [os.getenv('TAX_RATE_ID')],
+            },
+            success_url= SERVER_URL + "/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url=f'{SERVER_URL}/chatbot/subscription',
+            customer=user.customer_id,
+            allow_promotion_codes=True,
+            client_reference_id=clientReferenceId,
+        )
 
-    return jsonify({'sessionId': session['id'], 'key': os.getenv('STRIPE_PUBLISHABLE_KEY')})
+        return jsonify({'success': True, 'sessionId': session['id'], 'key': os.getenv('STRIPE_PUBLISHABLE_KEY')})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
 
 
 @payment.route('/api/stripe/webhooks', methods=['POST'])
@@ -290,6 +293,8 @@ def stripe_webhook():
         user = db.session.query(User).filter_by(
             customer_id=customer_id).first()
         user.subscription_id = ''
+        user.query = 500
+        user.role = 5
         db.session.commit()
     return jsonify(message="Success"), 200
 
