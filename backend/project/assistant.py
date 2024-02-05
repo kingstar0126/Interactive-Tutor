@@ -105,10 +105,17 @@ def delete_assistant_file(assistant_id, file_id):
                 assistant_id=assistant_id,
                 file_id=file_id
             )
-    client.files.delete(file_id)
-    # assistants = client.beta.assistants.list()    
-    # delete_all_assistants(assistants)
-    client.beta.assistants.delete(assistant_id)
+    file = client.files.retrieve(file_id)
+    assistant = client.beta.assistants.retrieve(assistant_id)
+    if file is not None:
+        client.files.delete(file_id)
+    elif file is None:
+        print(f"delete_assistant_file file_id {file_id} not exist")
+
+    if assistant is not None:
+        client.beta.assistants.delete(assistant_id)
+    elif assistant is None:
+        print(f"delete_assistant_file assistant_id {assistant_id} not exist")
 
 def ask_question(assistant_id, prompt, thread, uuid):
     if thread is None:
