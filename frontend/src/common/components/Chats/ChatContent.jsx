@@ -14,7 +14,7 @@ import { CircularProgressbar } from "react-circular-progressbar";
 import { ColorRing, ThreeDots } from "react-loader-spinner";
 
 const ChatContent = (props) => {
-  const { chat, isStreamData, isThinking, isHasFile } = props;
+  const { chat, isStreamData, isThinking } = props;
 
   const percentage = 66;
 
@@ -37,8 +37,8 @@ const ChatContent = (props) => {
       const success = await navigator.clipboard.write([
         new ClipboardItem({
           "text/plain": new Blob([html.innerText], { type: "text/plain" }),
-          "text/html": new Blob([html.outerHTML], { type: "text/html" }),
-        }),
+          "text/html": new Blob([html.outerHTML], { type: "text/html" })
+        })
       ]);
       toast.success("Text Copied");
       return success;
@@ -185,7 +185,7 @@ const ChatContent = (props) => {
                     borderCollapse: "collapse",
                     width: "100%",
                     fontFamily: "Arial, sans-serif",
-                    fontSize: "14px",
+                    fontSize: "14px"
                   }}
                   {...props}
                 >
@@ -197,7 +197,7 @@ const ChatContent = (props) => {
               return (
                 <tr
                   style={{
-                    backgroundColor: "#f8f8f8",
+                    backgroundColor: "#f8f8f8"
                   }}
                   {...props}
                 >
@@ -210,7 +210,7 @@ const ChatContent = (props) => {
                 <td
                   style={{
                     padding: "8px",
-                    border: "1px solid #ddd",
+                    border: "1px solid #ddd"
                   }}
                   {...props}
                 >
@@ -225,7 +225,7 @@ const ChatContent = (props) => {
                     padding: "8px",
                     border: "1px solid #ddd",
                     fontWeight: "bold",
-                    textAlign: "left",
+                    textAlign: "left"
                   }}
                   {...props}
                 >
@@ -249,7 +249,7 @@ const ChatContent = (props) => {
                 <a
                   style={{
                     color: "#007bff",
-                    textDecoration: "none",
+                    textDecoration: "none"
                   }}
                   href={href}
                   target="_blank"
@@ -272,30 +272,20 @@ const ChatContent = (props) => {
                   </button>
                 </div>
               );
-            },
+            }
           }}
         />
-        {isThinking &&
-          (isHasFile ? (
-            <ColorRing
-              visible={true}
-              height="35"
-              width="35"
-              colors={["#12062E"]}
-              ariaLabel="color-ring-loading"
-              wrapperClass="chatbox-loader"
-            />
-          ) : (
-            <ThreeDots
-              visible={true}
-              height="30"
-              width="30"
-              color="#12062E"
-              radius="9"
-              ariaLabel="three-dots-loading"
-              wrapperClass="chatbox-loader w2"
-            />
-          ))}
+        {isThinking && (
+          <ThreeDots
+            visible={true}
+            height="30"
+            width="30"
+            color="#12062E"
+            radius="9"
+            ariaLabel="three-dots-loading"
+            wrapperClass="chatbox-loader w2"
+          />
+        )}
         {/* <div style={{ width: 25, height: 35 }}>
           <CircularProgressbar value={66} strokeWidth={12} />
         </div> */}
