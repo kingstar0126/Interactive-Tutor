@@ -15,7 +15,7 @@ import {
   MenuHandler,
   MenuList,
   MenuItem,
-  IconButton,
+  IconButton
 } from "@material-tailwind/react";
 import { Spinner } from "@material-tailwind/react";
 import PDF from "../assets/pdf.png";
@@ -30,7 +30,7 @@ const PROMPTS = [
   "Help me create the ultimate lesson plan",
   "Give me ideas for classroom activities and games",
   "Change the reading age of this text",
-  `I’d like feedback on what I have written`,
+  `I’d like feedback on what I have written`
 ];
 // const chatbotID = "9e66b93c-2801-476e-82fe-1f065c1a5797";
 const chatbotID = "5cb0f7ca-825b-40eb-b403-e6bf1555b609";
@@ -38,12 +38,12 @@ const STEP = 30;
 
 AWS.config.update({
   accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
-  secretAccessKey: process.env.REACT_APP_ACCESS_SECRET_KEY,
+  secretAccessKey: process.env.REACT_APP_ACCESS_SECRET_KEY
 });
 const S3_BUCKET = process.env.REACT_APP_S3_PRIVATE;
 const s3 = new AWS.S3({
   params: { Bucket: S3_BUCKET },
-  region: process.env.REACT_APP_REGION,
+  region: process.env.REACT_APP_REGION
 });
 
 const DashBoard = () => {
@@ -76,7 +76,7 @@ const DashBoard = () => {
   const handleGetChat = () => {
     axios
       .post(webAPI.getchat, {
-        id: chatbotID,
+        id: chatbotID
       })
       .then((res) => {
         if (res.data.success) {
@@ -132,7 +132,7 @@ const DashBoard = () => {
         const human = {
           role: "human",
           content: _message,
-          images: imagesrc,
+          images: imagesrc
         };
         setChathistory((prevHistory) => [...prevHistory, human]);
       } else {
@@ -157,7 +157,7 @@ const DashBoard = () => {
         const human = {
           role: "human",
           content: _message,
-          images: imagesrc,
+          images: imagesrc
         };
         setChathistory((prevHistory) => [...prevHistory, human]);
       } else {
@@ -179,7 +179,7 @@ const DashBoard = () => {
       const human = {
         role: "human",
         content: _message,
-        images: imagesrc,
+        images: imagesrc
       };
       setChathistory((prevHistory) => [...prevHistory, human]);
     } else {
@@ -192,7 +192,7 @@ const DashBoard = () => {
   const receiveMessage = (message) => {
     setChathistory((prevHistory) => [
       ...prevHistory,
-      { role: "ai", content: message },
+      { role: "ai", content: message }
     ]);
   };
 
@@ -217,7 +217,7 @@ const DashBoard = () => {
       const params = {
         Bucket: S3_BUCKET,
         Key: filename,
-        Body: item,
+        Body: item
       };
       return s3
         .putObject(params)
@@ -238,7 +238,7 @@ const DashBoard = () => {
       const params = {
         Bucket: S3_BUCKET,
         Key: filename,
-        Body: item,
+        Body: item
       };
       return s3
         .putObject(params)
@@ -258,7 +258,7 @@ const DashBoard = () => {
 
     fetch(webAPI.sendchat, {
       method: "POST",
-      body: formData,
+      body: formData
     })
       .then(async (response) => {
         let res = "";
@@ -425,12 +425,11 @@ const DashBoard = () => {
                       chats={[
                         {
                           role: "ai",
-                          content: streamData,
-                        },
+                          content: streamData
+                        }
                       ]}
                       isStreamData={true}
                       isThinking={state}
-                      isHasFile={isFile}
                     />
                   )}
                 </Scrollbar>
@@ -493,7 +492,7 @@ const DashBoard = () => {
                     onKeyDown={handleSubmit}
                     style={{
                       overflow: "hidden",
-                      height: `${inputHeight}px`,
+                      height: `${inputHeight}px`
                     }}
                     className="w-full text-[--site-card-icon-color] px-10 py-3 border border-gray-600 focus:outline-none rounded-md resize"
                     placeholder="Type message"

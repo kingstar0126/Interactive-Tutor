@@ -19,7 +19,7 @@ import {
   MenuHandler,
   MenuList,
   MenuItem,
-  IconButton,
+  IconButton
 } from "@material-tailwind/react";
 
 import PDF from "../assets/pdf.png";
@@ -32,12 +32,12 @@ const STEP = 30;
 
 AWS.config.update({
   accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
-  secretAccessKey: process.env.REACT_APP_ACCESS_SECRET_KEY,
+  secretAccessKey: process.env.REACT_APP_ACCESS_SECRET_KEY
 });
 const S3_BUCKET = process.env.REACT_APP_S3_PRIVATE;
 const s3 = new AWS.S3({
   params: { Bucket: S3_BUCKET },
-  region: process.env.REACT_APP_REGION,
+  region: process.env.REACT_APP_REGION
 });
 
 const NewChat = () => {
@@ -119,7 +119,7 @@ const NewChat = () => {
     ) {
       setChathistory([
         ...chathistory,
-        { role: "ai", content: chat.conversation },
+        { role: "ai", content: chat.conversation }
       ]);
       return true;
     }
@@ -244,7 +244,7 @@ const NewChat = () => {
         const human = {
           role: "human",
           content: _message,
-          images: imagesrc,
+          images: imagesrc
         };
         setChathistory((prevHistory) => [...prevHistory, human]);
       } else {
@@ -270,7 +270,7 @@ const NewChat = () => {
         const human = {
           role: "human",
           content: _message,
-          images: imagesrc,
+          images: imagesrc
         };
         setChathistory((prevHistory) => [...prevHistory, human]);
       } else {
@@ -313,7 +313,7 @@ const NewChat = () => {
       const params = {
         Bucket: S3_BUCKET,
         Key: filename,
-        Body: item,
+        Body: item
       };
       return s3
         .putObject(params)
@@ -334,7 +334,7 @@ const NewChat = () => {
       const params = {
         Bucket: S3_BUCKET,
         Key: filename,
-        Body: item,
+        Body: item
       };
       return s3
         .putObject(params)
@@ -356,7 +356,7 @@ const NewChat = () => {
     fetch(webAPI.sendchat, {
       // mode: 'no-cors',
       method: "POST",
-      body: formData,
+      body: formData
     })
       .then(async (response) => {
         let res = "";
@@ -408,7 +408,7 @@ const NewChat = () => {
   const receiveMessage = (message) => {
     setChathistory((prevHistory) => [
       ...prevHistory,
-      { role: "ai", content: message },
+      { role: "ai", content: message }
     ]);
   };
 
@@ -485,7 +485,7 @@ const NewChat = () => {
   return (
     <div
       style={{
-        background: chat?.chat_logo?.bg,
+        background: chat?.chat_logo?.bg
       }}
       className="w-full h-full rounded-xl"
     >
@@ -532,12 +532,11 @@ const NewChat = () => {
                       chats={[
                         {
                           role: "ai",
-                          content: streamData,
-                        },
+                          content: streamData
+                        }
                       ]}
                       isStreamData={true}
                       isThinking={state}
-                      isHasFile={isFile}
                     />
                   )}
                 </Scrollbar>
@@ -630,7 +629,7 @@ const NewChat = () => {
                     onKeyDown={handleSubmit}
                     style={{
                       overflow: "hidden",
-                      height: `${inputHeight}px`,
+                      height: `${inputHeight}px`
                     }}
                     className="w-full text-[--site-card-icon-color] px-10 py-3 border border-gray-600 focus:outline-none rounded-md"
                     placeholder="Type message"
