@@ -4,8 +4,8 @@
         {
             "name": "interactive-tutor-prod-backend-td",
             "image": "987025303706.dkr.ecr.eu-west-2.amazonaws.com/interactive-tutor-prod-backend:latest",
-            "cpu": 512,
-            "memory": 1024,
+            "cpu": 1024,
+            "memory": 2048,
             "portMappings": [
                 {
                     "containerPort": 5000,
@@ -33,8 +33,8 @@
     "requiresCompatibilities": [
         "FARGATE"
     ],
-    "cpu": "512",
-    "memory": "1024",
+    "cpu": "1024",
+    "memory": "2048",
     "tags": [
         {
             "key": "ApplicationEnvironment",

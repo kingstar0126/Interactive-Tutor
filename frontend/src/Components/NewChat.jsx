@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
-import { BsFillSendPlusFill, BsUpload, BsDownload } from "react-icons/bs";
+import { BsFillSendPlusFill, BsUpload } from "react-icons/bs";
 import { BiImageAdd } from "react-icons/bi";
 import { AiOutlineClose } from "react-icons/ai";
 import { CiSquarePlus } from "react-icons/ci";
@@ -9,26 +9,17 @@ import { useSelector, useDispatch } from "react-redux";
 import { setchatbot, getchat } from "../redux/actions/chatAction";
 import { useNavigate } from "react-router-dom";
 import { Scrollbar } from "react-scrollbars-custom";
-import { dracula, CopyBlock } from "react-code-blocks";
 import toast, { Toaster } from "react-hot-toast";
 import { useParams } from "react-router-dom";
 import { getquery } from "../redux/actions/queryAction";
 import { useLocation } from "react-router-dom";
 import ReactLoading from "react-loading";
-import { ThreeDots } from "react-loader-spinner";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeMathjax from "rehype-mathjax";
-import remarkMath from "remark-math";
-import rehypeRaw from "rehype-raw";
 import {
-  Dialog,
-  DialogBody,
   Menu,
   MenuHandler,
   MenuList,
   MenuItem,
-  IconButton,
+  IconButton
 } from "@material-tailwind/react";
 
 import PDF from "../assets/pdf.png";
@@ -36,16 +27,17 @@ import WORD from "../assets/word.jpg";
 import XLSX from "../assets/xlsx.png";
 import CSV from "../assets/csv.png";
 import AWS from "aws-sdk";
+import ChatBox from "../common/components/Chats/ChatBox";
 const STEP = 30;
 
 AWS.config.update({
   accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
-  secretAccessKey: process.env.REACT_APP_ACCESS_SECRET_KEY,
+  secretAccessKey: process.env.REACT_APP_ACCESS_SECRET_KEY
 });
 const S3_BUCKET = process.env.REACT_APP_S3_PRIVATE;
 const s3 = new AWS.S3({
   params: { Bucket: S3_BUCKET },
-  region: process.env.REACT_APP_REGION,
+  region: process.env.REACT_APP_REGION
 });
 
 const NewChat = () => {
@@ -75,22 +67,16 @@ const NewChat = () => {
   const [spinner, setSpinner] = useState(false);
   const [image, setImage] = useState([]);
   const [files, setFiles] = useState([]);
+  const [isFile, setIsFile] = useState(false);
   const [chathistory, setChathistory] = useState([]);
-  const [imagesrc, setImagesrc] = useState(null);
   const [state, setState] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputHeight, setInputHeight] = useState(2 * STEP);
-
-  const query = new URLSearchParams(location.search);
 
   const notification = (type, message) => {
     // To do in here
     if (type === "error") {
       toast.error(message);
     }
-  };
-  const handleImageClick = () => {
-    setIsModalOpen(!isModalOpen);
   };
 
   useEffect(() => {
@@ -129,11 +115,11 @@ const NewChat = () => {
     if (
       chat.conversation &&
       chat.conversation !== "" &&
-      chathistory.length == 0
+      chathistory.length === 0
     ) {
       setChathistory([
         ...chathistory,
-        { role: "ai", content: chat.conversation },
+        { role: "ai", content: chat.conversation }
       ]);
       return true;
     }
@@ -258,7 +244,7 @@ const NewChat = () => {
         const human = {
           role: "human",
           content: _message,
-          images: imagesrc,
+          images: imagesrc
         };
         setChathistory((prevHistory) => [...prevHistory, human]);
       } else {
@@ -268,7 +254,6 @@ const NewChat = () => {
       await sendMessage(id, _message);
 
       event.preventDefault();
-      
     }
   };
 
@@ -285,7 +270,7 @@ const NewChat = () => {
         const human = {
           role: "human",
           content: _message,
-          images: imagesrc,
+          images: imagesrc
         };
         setChathistory((prevHistory) => [...prevHistory, human]);
       } else {
@@ -295,8 +280,17 @@ const NewChat = () => {
       await sendMessage(id, _message);
 
       event.preventDefault();
-      
     }
+  };
+
+  const handleErrorMessage = () => {
+    notification(
+      "error",
+      "The response is too long for this model. Please upgrade your model or enter a different prompt!"
+    );
+    receiveMessage(
+      "This File is too large, please break it down and try again"
+    );
   };
 
   const sendMessage = async (id, _message) => {
@@ -319,7 +313,7 @@ const NewChat = () => {
       const params = {
         Bucket: S3_BUCKET,
         Key: filename,
-        Body: item,
+        Body: item
       };
       return s3
         .putObject(params)
@@ -332,13 +326,15 @@ const NewChat = () => {
         });
     });
 
+    setIsFile(!!files.length || false);
+
     // Use Promise.all to wait for all file uploads to finish
     const fileUploadPromises = files.map(async (item) => {
       const filename = chat.uuid + item.name.replaceAll(" ", "");
       const params = {
         Bucket: S3_BUCKET,
         Key: filename,
-        Body: item,
+        Body: item
       };
       return s3
         .putObject(params)
@@ -360,29 +356,23 @@ const NewChat = () => {
     fetch(webAPI.sendchat, {
       // mode: 'no-cors',
       method: "POST",
-      body: formData,
+      body: formData
     })
       .then(async (response) => {
         let res = "";
         if (!response.ok) {
-          if (response.status === 404) {
-            // Handle 404 error (Not found)
-            notification("error", "Not found tutor!");
-          } else if (response.status === 401) {
-            // Handle 401 error (Unauthorized)
-            notification("error", "Insufficient queries remaining!");
-          } else if (response.status === 500) {
-            // Handle 500 error (Internal server error)
-            notification(
-              "error",
-              "The response is too long for this model. Please upgrade your model or enter a different prompt!"
-            );
-          } else {
-            // Handle other error cases
-            notification(
-              "error",
-              "The response is too long for this model. Please upgrade your model or enter a different prompt!"
-            );
+          switch (response.status) {
+            case 404:
+              // Handle 404 error (Not found)
+              notification("error", "Not found tutor!");
+              break;
+            case 401:
+              // Handle 401 error (Unauthorized)
+              notification("error", "Insufficient queries remaining!");
+              break;
+            case 500:
+            default:
+              handleErrorMessage();
           }
           throw new Error(`Network response was not ok - ${response.status}`);
         }
@@ -418,7 +408,7 @@ const NewChat = () => {
   const receiveMessage = (message) => {
     setChathistory((prevHistory) => [
       ...prevHistory,
-      { role: "ai", content: message },
+      { role: "ai", content: message }
     ]);
   };
 
@@ -492,86 +482,10 @@ const NewChat = () => {
     setMessage(e.target.value);
   };
 
-  const VideoComponent = ({ src, platform }) => {
-    switch (platform) {
-      case "youtube":
-        return (
-          <iframe
-            width="100%"
-            height="315"
-            src={`https://www.youtube.com/embed/${src}`}
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          ></iframe>
-        );
-      case "vimeo":
-        return (
-          <iframe
-            width="100%"
-            height="315"
-            src={`https://player.vimeo.com/video/${src}`}
-            frameBorder="0"
-            allow="autoplay; fullscreen; picture-in-picture"
-            allowFullScreen
-          ></iframe>
-        );
-      case "loom":
-        return (
-          <iframe
-            width="100%"
-            height="315"
-            src={`https://www.loom.com/embed/${src}`}
-            frameBorder="0"
-            allowFullScreen
-          ></iframe>
-        );
-      // Handle other platforms or default video tag
-      default:
-        return (
-          <video controls width="100%">
-            <source src={src} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        );
-    }
-  };
-
-  const getVideoPlatform = (url) => {
-    if (url.includes("youtube.com") || url.includes("youtu.be")) {
-      return "youtube";
-    } else if (url.includes("vimeo.com")) {
-      return "vimeo";
-    } else if (url.includes("loom.com")) {
-      return "loom";
-    }
-    return "default";
-  };
-
-  const getVideoId = (url, platform) => {
-    let id = null;
-    if (platform === "youtube") {
-      // Extract the video ID from the YouTube URL
-      const match = url.match(
-        /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i
-      );
-      id = match ? match[1] : null;
-    } else if (platform === "vimeo") {
-      // Extract the video ID from the Vimeo URL
-      const match = url.match(/vimeo\.com\/(\d+)/);
-      id = match ? match[1] : null;
-    } else if (platform === "loom") {
-      // Extract the video ID from the Loom URL
-      const match = url.match(/loom\.com\/share\/([a-zA-Z0-9]+)/);
-      id = match ? match[1] : null;
-    }
-    return id;
-  };
-
   return (
     <div
       style={{
-        background: chat?.chat_logo?.bg,
+        background: chat?.chat_logo?.bg
       }}
       className="w-full h-full rounded-xl"
     >
@@ -612,370 +526,18 @@ const NewChat = () => {
                 name="main_scroll"
               >
                 <Scrollbar ref={messagesEndRef} name="scroll content">
-                  {chathistory.map((data, index) => {
-                    return data.role === "human" && data.content ? (
-                      <div
-                        ref={human_background}
-                        name="human_bg"
-                        className="flex items-center justify-start p-2 lg:justify-center"
-                        key={index}
-                      >
-                        <div className="flex justify-start lg:w-4/5">
-                          <img
-                            src={
-                              chat.chat_logo.user ||
-                              "https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_user.png"
-                            }
-                            alt="human"
-                            className="w-10 h-10 rounded-full"
-                          />
-                          <div
-                            name="human"
-                            className="flex flex-col w-full p-2 break-words whitespace-normal"
-                          >
-                            {data.images && data.images.length ? (
-                              <div className="flex flex-wrap">
-                                {data.images.map((item) => {
-                                  return (
-                                    <>
-                                      <img
-                                        src={item}
-                                        alt="image"
-                                        className="w-[100px] h-[100px]"
-                                        onClick={() => {
-                                          setImagesrc(item);
-                                          handleImageClick();
-                                        }}
-                                      />
-                                      <Dialog
-                                        size="lg"
-                                        open={isModalOpen}
-                                        handler={handleImageClick}
-                                      >
-                                        <DialogBody className="h-[30rem] flex items-center justify-center">
-                                          <img
-                                            src={imagesrc}
-                                            alt="image"
-                                            className={`${
-                                              isModalOpen
-                                                ? "max-h-[28rem] max-w-[28rem]"
-                                                : ""
-                                            }`}
-                                          />
-                                        </DialogBody>
-                                      </Dialog>
-                                    </>
-                                  );
-                                })}
-                              </div>
-                            ) : (
-                              <></>
-                            )}
-                            <span className="break-words whitespace-normal">
-                              {data.content}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ) : data.role === "ai" && data.content ? (
-                      <div
-                        ref={ai_background}
-                        name="ai_bg"
-                        className="flex items-center justify-start p-2 lg:justify-center"
-                        key={index}
-                      >
-                        <div className="flex justify-start lg:w-4/5">
-                          <img
-                            src={chat.chat_logo.ai}
-                            className="w-10 h-10 rounded-full"
-                            alt="AI"
-                          />
-                          <div
-                            name="ai"
-                            className="flex flex-col w-full p-2 break-words whitespace-normal"
-                          >
-                            <ReactMarkdown
-                              remarkPlugins={[remarkGfm, remarkMath]}
-                              rehypePlugins={[rehypeMathjax, rehypeRaw]}
-                              children={data.content}
-                              className="break-words whitespace-normal"
-                              components={{
-                                code({
-                                  inline,
-                                  className,
-                                  children,
-                                  ...props
-                                }) {
-                                  const match = /language-(\w+)/.exec(
-                                    className || ""
-                                  );
-                                  if (!inline && match) {
-                                    // remove the newline character at the end of children, if it exists
-                                    const codeString = String(children).replace(
-                                      /\n$/,
-                                      ""
-                                    );
-
-                                    return (
-                                      <CopyBlock
-                                        text={codeString}
-                                        language={match[1]}
-                                        showLineNumbers={false}
-                                        wrapLongLines
-                                        theme={dracula}
-                                        {...props}
-                                      />
-                                    );
-                                  }
-                                  return (
-                                    <code className={className} {...props}>
-                                      {children}
-                                    </code>
-                                  );
-                                },
-                                table({ children, ...props }) {
-                                  return (
-                                    <table
-                                      style={{
-                                        borderCollapse: "collapse",
-                                        width: "100%",
-                                        fontFamily: "Arial, sans-serif",
-                                        fontSize: "14px",
-                                      }}
-                                      {...props}
-                                    >
-                                      {children}
-                                    </table>
-                                  );
-                                },
-                                tr({ children, ...props }) {
-                                  return (
-                                    <tr
-                                      style={{
-                                        backgroundColor: "#f8f8f8",
-                                      }}
-                                      {...props}
-                                    >
-                                      {children}
-                                    </tr>
-                                  );
-                                },
-                                td({ children, ...props }) {
-                                  return (
-                                    <td
-                                      style={{
-                                        padding: "8px",
-                                        border: "1px solid #ddd",
-                                      }}
-                                      {...props}
-                                    >
-                                      {children}
-                                    </td>
-                                  );
-                                },
-                                th({ children, ...props }) {
-                                  return (
-                                    <th
-                                      style={{
-                                        padding: "8px",
-                                        border: "1px solid #ddd",
-                                        fontWeight: "bold",
-                                        textAlign: "left",
-                                      }}
-                                      {...props}
-                                    >
-                                      {children}
-                                    </th>
-                                  );
-                                },
-                                a({ href, children, ...props }) {
-                                  // const platform = getVideoPlatform(href);
-                                  // const videoId = getVideoId(href, platform);
-                                  // if (videoId) {
-                                  //   return (
-                                  //     <VideoComponent
-                                  //       src={videoId}
-                                  //       platform={platform}
-                                  //       {...props}
-                                  //     />
-                                  //   );
-                                  // }
-                                  return (
-                                    <a
-                                      style={{
-                                        color: "#007bff",
-                                        textDecoration: "none",
-                                      }}
-                                      href={href}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      {...props}
-                                    >
-                                      {children}
-                                    </a>
-                                  );
-                                },
-                                img({ node, src, alt }) {
-                                  return (
-                                    <div className="relative">
-                                      <img src={src} alt={alt} />
-                                      <button
-                                        onClick={() => downloadImage(src)}
-                                        className="absolute top-2 right-2 text-black bg-transparent border-none"
-                                      >
-                                        <BsDownload />
-                                      </button>
-                                    </div>
-                                  );
-                                },
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ) : null;
-                  })}
+                  <ChatBox chats={chathistory} isStreamData={false} />
                   {spinner === true && (
-                    <div
-                      ref={ai_background}
-                      name="ai_bg"
-                      className="flex items-center justify-start p-2 lg:justify-center"
-                    >
-                      <div className="flex justify-start lg:w-4/5">
-                        <img
-                          src={
-                            chat.chat_logo.ai ||
-                            "https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"
-                          }
-                          className="w-10 h-10 rounded-full"
-                          alt="AI"
-                        />
-                        <div
-                          name="ai"
-                          className="flex flex-col w-full p-2 break-words whitespace-normal"
-                        >
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm, remarkMath]}
-                            rehypePlugins={[rehypeMathjax, rehypeRaw]}
-                            children={streamData}
-                            className="break-words whitespace-normal"
-                            components={{
-                              code({ inline, className, children, ...props }) {
-                                const match = /language-(\w+)/.exec(
-                                  className || ""
-                                );
-                                if (!inline && match) {
-                                  // remove the newline character at the end of children, if it exists
-                                  const codeString = String(children).replace(
-                                    /\n$/,
-                                    ""
-                                  );
-
-                                  return (
-                                    <CopyBlock
-                                      text={codeString}
-                                      language={match[1]}
-                                      showLineNumbers={false}
-                                      wrapLongLines
-                                      theme={dracula}
-                                      {...props}
-                                    />
-                                  );
-                                }
-                                return (
-                                  <code className={className} {...props}>
-                                    {children}
-                                  </code>
-                                );
-                              },
-                              table({ children, ...props }) {
-                                return (
-                                  <table
-                                    style={{
-                                      borderCollapse: "collapse",
-                                      width: "100%",
-                                      fontFamily: "Arial, sans-serif",
-                                      fontSize: "14px",
-                                    }}
-                                    {...props}
-                                  >
-                                    {children}
-                                  </table>
-                                );
-                              },
-                              tr({ children, ...props }) {
-                                return (
-                                  <tr
-                                    style={{
-                                      backgroundColor: "#f8f8f8",
-                                    }}
-                                    {...props}
-                                  >
-                                    {children}
-                                  </tr>
-                                );
-                              },
-                              td({ children, ...props }) {
-                                return (
-                                  <td
-                                    style={{
-                                      padding: "8px",
-                                      border: "1px solid #ddd",
-                                    }}
-                                    {...props}
-                                  >
-                                    {children}
-                                  </td>
-                                );
-                              },
-                              th({ children, ...props }) {
-                                return (
-                                  <th
-                                    style={{
-                                      padding: "8px",
-                                      border: "1px solid #ddd",
-                                      fontWeight: "bold",
-                                      textAlign: "left",
-                                    }}
-                                    {...props}
-                                  >
-                                    {children}
-                                  </th>
-                                );
-                              },
-                              a({ href, children, ...props }) {
-                                return (
-                                  <a
-                                    style={{
-                                      color: "#007bff",
-                                      textDecoration: "none",
-                                    }}
-                                    href={href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    {...props}
-                                  >
-                                    {children}
-                                  </a>
-                                );
-                              },
-                            }}
-                          />
-                          {state && (
-                            <ThreeDots
-                              height="50"
-                              width="50"
-                              color="#4fa94d"
-                              ariaLabel="three-dots-loading"
-                              radius="12.5"
-                              wrapperStyle={{}}
-                              wrapperClass=""
-                              visible={true}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                    <ChatBox
+                      chats={[
+                        {
+                          role: "ai",
+                          content: streamData
+                        }
+                      ]}
+                      isStreamData={true}
+                      isThinking={state}
+                    />
                   )}
                 </Scrollbar>
               </div>
@@ -1067,7 +629,7 @@ const NewChat = () => {
                     onKeyDown={handleSubmit}
                     style={{
                       overflow: "hidden",
-                      height: `${inputHeight}px`,
+                      height: `${inputHeight}px`
                     }}
                     className="w-full text-[--site-card-icon-color] px-10 py-3 border border-gray-600 focus:outline-none rounded-md"
                     placeholder="Type message"

@@ -3,7 +3,7 @@ import { AppRoutes } from "./routes";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import { ThemeProvider } from "@material-tailwind/react";
-import "./styles/App.css";
+import "./styles/App.scss";
 
 function MainApp() {
   const pages = useRoutes(AppRoutes);

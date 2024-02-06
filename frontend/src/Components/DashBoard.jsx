@@ -1,30 +1,21 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import toast, { Toaster } from "react-hot-toast";
 import { BiImageAdd } from "react-icons/bi";
-import { BsFillSendPlusFill, BsUpload, BsDownload } from "react-icons/bs";
+import { BsFillSendPlusFill, BsUpload } from "react-icons/bs";
 import { CiSquarePlus } from "react-icons/ci";
 import { AiOutlineClose } from "react-icons/ai";
 import { useSelector, useDispatch } from "react-redux";
 import { webAPI } from "../utils/constants";
-import { ThreeDots } from "react-loader-spinner";
 import { getchat, setchatbot } from "../redux/actions/chatAction";
 import axios from "axios";
 import { Scrollbar } from "react-scrollbars-custom";
-import { dracula, CopyBlock } from "react-code-blocks";
 import { getquery } from "../redux/actions/queryAction";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeMathjax from "rehype-mathjax";
-import remarkMath from "remark-math";
-import rehypeRaw from "rehype-raw";
 import {
-  Dialog,
-  DialogBody,
   Menu,
   MenuHandler,
   MenuList,
   MenuItem,
-  IconButton,
+  IconButton
 } from "@material-tailwind/react";
 import { Spinner } from "@material-tailwind/react";
 import PDF from "../assets/pdf.png";
@@ -33,12 +24,13 @@ import XLSX from "../assets/xlsx.png";
 import CSV from "../assets/csv.png";
 import { useNavigate } from "react-router-dom";
 import AWS from "aws-sdk";
+import ChatBox from "../common/components/Chats/ChatBox";
 
 const PROMPTS = [
   "Help me create the ultimate lesson plan",
   "Give me ideas for classroom activities and games",
   "Change the reading age of this text",
-  `I’d like feedback on what I have written`,
+  `I’d like feedback on what I have written`
 ];
 // const chatbotID = "9e66b93c-2801-476e-82fe-1f065c1a5797";
 const chatbotID = "5cb0f7ca-825b-40eb-b403-e6bf1555b609";
@@ -46,18 +38,18 @@ const STEP = 30;
 
 AWS.config.update({
   accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
-  secretAccessKey: process.env.REACT_APP_ACCESS_SECRET_KEY,
+  secretAccessKey: process.env.REACT_APP_ACCESS_SECRET_KEY
 });
 const S3_BUCKET = process.env.REACT_APP_S3_PRIVATE;
 const s3 = new AWS.S3({
   params: { Bucket: S3_BUCKET },
-  region: process.env.REACT_APP_REGION,
+  region: process.env.REACT_APP_REGION
 });
 
 const DashBoard = () => {
   const [image, setImage] = useState([]);
   const [files, setFiles] = useState([]);
-  const [imagesrc, setImagesrc] = useState(null);
+  const [isFile, setIsFile] = useState(false);
   const [message, setMessage] = useState("");
   const [chathistory, setChathistory] = useState([]);
   const [spinner, setSpinner] = useState(false);
@@ -68,7 +60,6 @@ const DashBoard = () => {
   const chat = (chatState && JSON.parse(chatState)) || {};
   const chatbot = useSelector((state) => state.chat.chatbot);
   const user = JSON.parse(useSelector((state) => state.user.user));
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputHeight, setInputHeight] = useState(2 * STEP);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -82,25 +73,29 @@ const DashBoard = () => {
     }
   };
 
+  const handleGetChat = () => {
+    axios
+      .post(webAPI.getchat, {
+        id: chatbotID
+      })
+      .then((res) => {
+        if (res.data.success) {
+          getchat(dispatch, res.data.data);
+          setchatbot(dispatch, res.data.data);
+          setChathistory([]);
+        } else {
+          notification("error", res.data.message);
+          setLoading(false);
+        }
+      });
+  };
+
   useEffect(() => {
     if (!user) {
       navigate("/login");
-    } else {
-      axios
-        .post(webAPI.getchat, {
-          id: chatbotID,
-        })
-        .then((res) => {
-          if (res.data.success) {
-            getchat(dispatch, res.data.data);
-            setchatbot(dispatch, res.data.data);
-            setChathistory([]);
-          } else {
-            notification('error', res.data.message);
-            setLoading(false);
-          }
-        });
+      return;
     }
+    handleGetChat();
   }, []);
 
   useEffect(() => {
@@ -122,7 +117,7 @@ const DashBoard = () => {
     if (chat.access && messagesEndRef.current) {
       messagesEndRef.current.scrollToBottom();
     }
-  }, [chathistory]);
+  }, [chathistory, streamData]);
 
   const handleSubmit = async (event) => {
     if (!event.shiftKey && event.keyCode === 13 && spinner === false) {
@@ -137,7 +132,7 @@ const DashBoard = () => {
         const human = {
           role: "human",
           content: _message,
-          images: imagesrc,
+          images: imagesrc
         };
         setChathistory((prevHistory) => [...prevHistory, human]);
       } else {
@@ -162,7 +157,7 @@ const DashBoard = () => {
         const human = {
           role: "human",
           content: _message,
-          images: imagesrc,
+          images: imagesrc
         };
         setChathistory((prevHistory) => [...prevHistory, human]);
       } else {
@@ -184,7 +179,7 @@ const DashBoard = () => {
       const human = {
         role: "human",
         content: _message,
-        images: imagesrc,
+        images: imagesrc
       };
       setChathistory((prevHistory) => [...prevHistory, human]);
     } else {
@@ -197,8 +192,18 @@ const DashBoard = () => {
   const receiveMessage = (message) => {
     setChathistory((prevHistory) => [
       ...prevHistory,
-      { role: "ai", content: message },
+      { role: "ai", content: message }
     ]);
+  };
+
+  const handleErrorMessage = () => {
+    notification(
+      "error",
+      "The response is too long for this model. Please upgrade your model or enter a different prompt!"
+    );
+    receiveMessage(
+      "This File is too large, please break it down and try again"
+    );
   };
 
   const sendMessage = async (id, _message) => {
@@ -206,6 +211,7 @@ const DashBoard = () => {
     if (!id || !_message) {
       return;
     }
+    console.log("sending message...");
     setSpinner(true);
     setState(true);
     // Create a new FormData to send the necessary data
@@ -221,7 +227,7 @@ const DashBoard = () => {
       const params = {
         Bucket: S3_BUCKET,
         Key: filename,
-        Body: item,
+        Body: item
       };
       return s3
         .putObject(params)
@@ -234,13 +240,15 @@ const DashBoard = () => {
         });
     });
 
+    setIsFile(!!files.length || false);
+
     // Use Promise.all to wait for all file uploads to finish
     const fileUploadPromises = files.map(async (item) => {
       const filename = chat.uuid + item.name.replaceAll(" ", "");
       const params = {
         Bucket: S3_BUCKET,
         Key: filename,
-        Body: item,
+        Body: item
       };
       return s3
         .putObject(params)
@@ -260,29 +268,23 @@ const DashBoard = () => {
 
     fetch(webAPI.sendchat, {
       method: "POST",
-      body: formData,
+      body: formData
     })
       .then(async (response) => {
         let res = "";
         if (!response.ok) {
-          if (response.status === 404) {
-            // Handle 404 error (Not found)
-            notification("error", "Not found tutor!");
-          } else if (response.status === 401) {
-            // Handle 401 error (Unauthorized)
-            notification("error", "Insufficient queries remaining!");
-          } else if (response.status === 500) {
-            // Handle 500 error (Internal server error)
-            notification(
-              "error",
-              "The response is too long for this model. Please upgrade your model or enter a different prompt!"
-            );
-          } else {
-            // Handle other error cases
-            notification(
-              "error",
-              "The response is too long for this model. Please upgrade your model or enter a different prompt!"
-            );
+          switch (response.status) {
+            case 404:
+              // Handle 404 error (Not found)
+              notification("error", "Not found tutor!");
+              break;
+            case 401:
+              // Handle 401 error (Unauthorized)
+              notification("error", "Insufficient queries remaining!");
+              break;
+            case 500:
+            default:
+              handleErrorMessage();
           }
           throw new Error(`Network response was not ok - ${response.status}`);
         }
@@ -370,20 +372,6 @@ const DashBoard = () => {
     setFiles((oldFiles) => oldFiles.filter((file, idx) => idx !== index));
   };
 
-  const handleImageClick = () => {
-    setIsModalOpen(!isModalOpen);
-  };
-
-  const downloadImage = (src) => {
-    const link = document.createElement("a");
-    link.href = src;
-    link.download = "image.jpg";
-    link.target = "_blank";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   const handleMessage = (e) => {
     const lines = Math.max(e.target.value.split("\n").length, 2);
     setInputHeight(Math.min(lines * STEP, 80));
@@ -413,7 +401,7 @@ const DashBoard = () => {
                     How can I help you today?
                   </span>
                 </div>
-                <div className="h-1/3 w-full flex flex-wrap-reverse justify-between overflow-hidden lg:px-8 mb-10">
+                <div className="h-1/3 w-full flex flex-wrap-reverse justify-between overflow-hidden lg:px-8 mb-4">
                   {PROMPTS.map((item, index) => (
                     <div
                       key={index}
@@ -435,353 +423,23 @@ const DashBoard = () => {
                 name="main_scroll"
               >
                 <Scrollbar ref={messagesEndRef} name="scroll content">
-                  {chathistory.map((data, index) => {
-                    return data.role === "human" && data.content ? (
-                      <div
-                        name="human_bg"
-                        className="flex items-center justify-start p-2 lg:justify-center"
-                        key={index}
-                      >
-                        <div className="flex justify-start w-full px-10">
-                          <img
-                            src="https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_user.png"
-                            alt="human"
-                            className="w-10 h-10 rounded-full"
-                          />
-                          <div
-                            name="human"
-                            className="flex flex-col w-full p-2 break-words whitespace-normal"
-                          >
-                            {data.images && data.images.length ? (
-                              <div className="flex flex-wrap">
-                                {data.images.map((item) => {
-                                  return (
-                                    <>
-                                      <img
-                                        src={item}
-                                        alt="image"
-                                        className="w-[100px] h-[100px]"
-                                        onClick={() => {
-                                          setImagesrc(item);
-                                          handleImageClick();
-                                        }}
-                                      />
-                                      <Dialog
-                                        size="lg"
-                                        open={isModalOpen}
-                                        handler={handleImageClick}
-                                      >
-                                        <DialogBody className="h-[30rem] flex items-center justify-center">
-                                          <img
-                                            src={imagesrc}
-                                            alt="image"
-                                            className={`${
-                                              isModalOpen
-                                                ? "max-h-[28rem] max-w-[28rem]"
-                                                : ""
-                                            }`}
-                                          />
-                                        </DialogBody>
-                                      </Dialog>
-                                    </>
-                                  );
-                                })}
-                              </div>
-                            ) : (
-                              <></>
-                            )}
-                            <span className="break-words whitespace-normal">
-                              {data.content}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ) : data.role === "ai" && data.content ? (
-                      <div
-                        name="ai_bg"
-                        className="flex items-center justify-start p-2 lg:justify-center"
-                        key={index}
-                      >
-                        <div className="flex justify-start px-10 w-full">
-                          <img
-                            src="https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"
-                            className="w-10 h-10 rounded-full"
-                            alt="AI"
-                          />
-                          <div
-                            name="ai"
-                            className="flex flex-col w-full p-2 break-words whitespace-normal"
-                          >
-                            <ReactMarkdown
-                              remarkPlugins={[remarkGfm, remarkMath]}
-                              rehypePlugins={[rehypeMathjax, rehypeRaw]}
-                              children={data.content}
-                              className="break-words whitespace-normal"
-                              components={{
-                                code({
-                                  inline,
-                                  className,
-                                  children,
-                                  ...props
-                                }) {
-                                  const match = /language-(\w+)/.exec(
-                                    className || ""
-                                  );
-                                  if (!inline && match) {
-                                    // remove the newline character at the end of children, if it exists
-                                    const codeString = String(children).replace(
-                                      /\n$/,
-                                      ""
-                                    );
-
-                                    return (
-                                      <CopyBlock
-                                        text={codeString}
-                                        language={match[1]}
-                                        showLineNumbers={false}
-                                        wrapLongLines
-                                        theme={dracula}
-                                        {...props}
-                                      />
-                                    );
-                                  }
-                                  return (
-                                    <code className={className} {...props}>
-                                      {children}
-                                    </code>
-                                  );
-                                },
-                                table({ children, ...props }) {
-                                  return (
-                                    <table
-                                      style={{
-                                        borderCollapse: "collapse",
-                                        width: "100%",
-                                        fontFamily: "Arial, sans-serif",
-                                        fontSize: "14px",
-                                      }}
-                                      {...props}
-                                    >
-                                      {children}
-                                    </table>
-                                  );
-                                },
-                                tr({ children, ...props }) {
-                                  return (
-                                    <tr
-                                      style={{
-                                        backgroundColor: "#f8f8f8",
-                                      }}
-                                      {...props}
-                                    >
-                                      {children}
-                                    </tr>
-                                  );
-                                },
-                                td({ children, ...props }) {
-                                  return (
-                                    <td
-                                      style={{
-                                        padding: "8px",
-                                        border: "1px solid #ddd",
-                                      }}
-                                      {...props}
-                                    >
-                                      {children}
-                                    </td>
-                                  );
-                                },
-                                th({ children, ...props }) {
-                                  return (
-                                    <th
-                                      style={{
-                                        padding: "8px",
-                                        border: "1px solid #ddd",
-                                        fontWeight: "bold",
-                                        textAlign: "left",
-                                      }}
-                                      {...props}
-                                    >
-                                      {children}
-                                    </th>
-                                  );
-                                },
-                                a({ href, children, ...props }) {
-                                  return (
-                                    <a
-                                      style={{
-                                        color: "#007bff",
-                                        textDecoration: "none",
-                                      }}
-                                      href={href}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      {...props}
-                                    >
-                                      {children}
-                                    </a>
-                                  );
-                                },
-                                img({ node, src, alt }) {
-                                  return (
-                                    <div className="relative">
-                                      <img src={src} alt={alt} />
-                                      <button
-                                        onClick={() => downloadImage(src)}
-                                        className="absolute top-2 right-2 text-black bg-transparent border-none"
-                                      >
-                                        <BsDownload />
-                                      </button>
-                                    </div>
-                                  );
-                                },
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ) : null;
-                  })}
+                  <ChatBox chats={chathistory} />
                   {spinner === true && (
-                    <div
-                      name="ai_bg"
-                      className="flex items-center justify-start p-2 lg:justify-center"
-                    >
-                      <div className="flex justify-start px-10 w-full">
-                        <img
-                          src="https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"
-                          className="w-10 h-10 rounded-full"
-                          alt="AI"
-                        />
-                        <div
-                          name="ai"
-                          className="flex flex-col w-full p-2 break-words whitespace-normal"
-                        >
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm, remarkMath]}
-                            rehypePlugins={[rehypeMathjax, rehypeRaw]}
-                            children={streamData}
-                            className="break-words whitespace-normal"
-                            components={{
-                              code({ inline, className, children, ...props }) {
-                                const match = /language-(\w+)/.exec(
-                                  className || ""
-                                );
-                                if (!inline && match) {
-                                  // remove the newline character at the end of children, if it exists
-                                  const codeString = String(children).replace(
-                                    /\n$/,
-                                    ""
-                                  );
-
-                                  return (
-                                    <CopyBlock
-                                      text={codeString}
-                                      language={match[1]}
-                                      showLineNumbers={false}
-                                      wrapLongLines
-                                      theme={dracula}
-                                      {...props}
-                                    />
-                                  );
-                                }
-                                return (
-                                  <code className={className} {...props}>
-                                    {children}
-                                  </code>
-                                );
-                              },
-                              table({ children, ...props }) {
-                                return (
-                                  <table
-                                    style={{
-                                      borderCollapse: "collapse",
-                                      width: "100%",
-                                      fontFamily: "Arial, sans-serif",
-                                      fontSize: "14px",
-                                    }}
-                                    {...props}
-                                  >
-                                    {children}
-                                  </table>
-                                );
-                              },
-                              tr({ children, ...props }) {
-                                return (
-                                  <tr
-                                    style={{
-                                      backgroundColor: "#f8f8f8",
-                                    }}
-                                    {...props}
-                                  >
-                                    {children}
-                                  </tr>
-                                );
-                              },
-                              td({ children, ...props }) {
-                                return (
-                                  <td
-                                    style={{
-                                      padding: "8px",
-                                      border: "1px solid #ddd",
-                                    }}
-                                    {...props}
-                                  >
-                                    {children}
-                                  </td>
-                                );
-                              },
-                              th({ children, ...props }) {
-                                return (
-                                  <th
-                                    style={{
-                                      padding: "8px",
-                                      border: "1px solid #ddd",
-                                      fontWeight: "bold",
-                                      textAlign: "left",
-                                    }}
-                                    {...props}
-                                  >
-                                    {children}
-                                  </th>
-                                );
-                              },
-                              a({ href, children, ...props }) {
-                                return (
-                                  <a
-                                    style={{
-                                      color: "#007bff",
-                                      textDecoration: "none",
-                                    }}
-                                    href={href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    {...props}
-                                  >
-                                    {children}
-                                  </a>
-                                );
-                              },
-                            }}
-                          />
-                          {state && (
-                            <ThreeDots
-                              height="50"
-                              width="50"
-                              color="#4fa94d"
-                              ariaLabel="three-dots-loading"
-                              radius="12.5"
-                              visible={true}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                    <ChatBox
+                      chats={[
+                        {
+                          role: "ai",
+                          content: streamData
+                        }
+                      ]}
+                      isStreamData={true}
+                      isThinking={state}
+                    />
                   )}
                 </Scrollbar>
               </div>
             )}
-            <div className="flex flex-col items-center justify-start w-full h-1/5 lg:px-10 px-2">
+            <div className="flex flex-col items-center justify-start w-full h-1/5 lg:px-10 px-2 mt-6">
               <input
                 type="file"
                 className="hidden"
@@ -838,7 +496,7 @@ const DashBoard = () => {
                     onKeyDown={handleSubmit}
                     style={{
                       overflow: "hidden",
-                      height: `${inputHeight}px`,
+                      height: `${inputHeight}px`
                     }}
                     className="w-full text-[--site-card-icon-color] px-10 py-3 border border-gray-600 focus:outline-none rounded-md resize"
                     placeholder="Type message"

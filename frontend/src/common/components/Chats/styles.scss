@@ -1,0 +1,59 @@
+@import "../../../styles/variables";
+
+.chatbox-constainer {
+  position: relative;
+  width: 100%;
+  padding: 0 2rem;
+}
+
+.chatbox-wrapper {
+  position: relative;
+  display: flex;
+
+  &:last-child,
+  &:hover {
+    > .chatbox-action {
+      display: block;
+    }
+  }
+
+  &:first-child > .chatbox-action {
+    display: none;
+  }
+
+  > .chatbox-img {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+  }
+
+  > .chatbox-message {
+    position: relative;
+    font-family: $roboto-font;
+    color: $text-color;
+    font-size: 16px;
+    padding: 8px 10px 25px;
+    margin: 0;
+
+    > .chatbox-loader {
+      position: relative;
+      top: -5px;
+
+      &.w2 {
+        top: -2px;
+      }
+    }
+  }
+
+  > .chatbox-action {
+    display: none;
+    position: absolute;
+    left: 65px;
+    bottom: 5px;
+
+    > .action-button img {
+      width: 16px;
+      opacity: 0.5;
+    }
+  }
+}

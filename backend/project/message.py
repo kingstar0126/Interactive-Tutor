@@ -126,13 +126,11 @@ def get_query():
     if user_id:
         user = db.session.query(User).filter_by(id=user_id).first()
     else:
-        chat = db.session.query(Chat).join(Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
-        if chat and chat.inviteId:
-            user = db.session.query(User).filter_by(id=chat.inviteId).first()
-            if user and user.role == 7:
-                return jsonify({'query': user.query, 'usage': user.usage, 'success': True})
         user = db.session.query(User).join(Chat, User.id == Chat.user_id).join(
-        Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
+                Message, Chat.id == Message.chat_id).filter(Message.uuid == uuid).first()
+        invite_account = db.session.query(Invite).filter_by(email=user.email).first()
+        user_check = db.session.query(User).filter_by(id=invite_account.user_id).first() if invite_account else None
+        user = user_check if user_check and user_check.role == 7 else user
     if user:
         return jsonify({'query': user.query, 'usage': user.usage, 'success': True})
     else:
@@ -329,8 +327,10 @@ def send_message():
                 current_message.message = json.dumps(history)
                 current_message.update_date = datetime.datetime.now()
                 db.session.commit()
+                print(f"current_message successfull: {str(current_message.query)}, {str(current_message.uuid)}")
         except Exception as e:
-            print(f"generate function error: {e}")
+            ## need to check issue generate function error: UPDATE statement on table 'message' expected to update 
+            print(f"generate function error current_message uuid: {str(current_message.uuid)}")
             yield f"Error in generate function: {str(e)}".encode('utf-8')
     try:
         return Response(stream_with_context(generate()), mimetype="text/event-stream", direct_passthrough=True, headers={'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', 'X-Accel-Buffering': 'no'})

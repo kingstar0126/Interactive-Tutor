@@ -143,12 +143,12 @@ const Chatmodal = (props) => {
     if (!props.chat) {
       setSelected(null);
       SetLabel("");
-      SetChatdescription('');
+      SetChatdescription("");
       setOpen(0);
       SetCreativity(0.3);
       SetBehaviormodel(behaviorModelTheme[0].label);
       SetBehavior("You are a helpful assistant.");
-      SetConversation('Hello')
+      SetConversation("Hello");
       setType(false);
     }
     if (props.chat && props.chat.label) {

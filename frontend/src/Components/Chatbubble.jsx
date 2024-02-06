@@ -65,6 +65,16 @@ const Chatbubble = () => {
     }
   }, [click]);
 
+  const handleErrorMessage = () => {
+    notification(
+      "error",
+      "The response is too long for this model. Please upgrade your model or enter a different prompt!"
+    );
+    receiveMessage(
+      "This File is too large, please break it down and try again"
+    );
+  };
+
   const sendMessage = async (_message) => {
     if (!_message) {
       return;
@@ -78,29 +88,23 @@ const Chatbubble = () => {
     // Send the formData to the streaming API
     fetch(webAPI.send_bubble_chat, {
       method: "POST",
-      body: formData,
+      body: formData
     })
       .then(async (response) => {
         let res = "";
         if (!response.ok) {
-          if (response.status === 404) {
-            // Handle 404 error (Not found)
-            notification("error", "Not found tutor!");
-          } else if (response.status === 401) {
-            // Handle 401 error (Unauthorized)
-            notification("error", "Insufficient queries remaining!");
-          } else if (response.status === 500) {
-            // Handle 500 error (Internal server error)
-            notification(
-              "error",
-              "The response is too long for this model. Please upgrade your model or enter a different prompt!"
-            );
-          } else {
-            // Handle other error cases
-            notification(
-              "error",
-              "The response is too long for this model. Please upgrade your model or enter a different prompt!"
-            );
+          switch (response.status) {
+            case 404:
+              // Handle 404 error (Not found)
+              notification("error", "Not found tutor!");
+              break;
+            case 401:
+              // Handle 401 error (Unauthorized)
+              notification("error", "Insufficient queries remaining!");
+              break;
+            case 500:
+            default:
+              handleErrorMessage();
           }
           throw new Error(`Network response was not ok - ${response.status}`);
         }
@@ -141,7 +145,7 @@ const Chatbubble = () => {
   const receiveMessage = (message) => {
     setChathistory((prevHistory) => [
       ...prevHistory,
-      { role: "ai", content: message },
+      { role: "ai", content: message }
     ]);
   };
 

@@ -1,3 +1,6 @@
+@import "./variables";
+@import "./react-circular-progressbar";
+
 .App {
   text-align: center;
 }
@@ -35,4 +38,8 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.check-circle-icon {
+  color: $theme-color-secondary;
 }

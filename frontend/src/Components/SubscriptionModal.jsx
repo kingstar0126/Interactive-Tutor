@@ -102,14 +102,18 @@ const SubscriptionModal = (props) => {
           clientReferenceId: getClientReferenceId(),
         })
         .then(async (res) => {
-          // Load Stripe and redirect to the Checkout page
-          const stripe = await loadStripe(res.data.key);
+          if (res.data.success) {
+            // Load Stripe and redirect to the Checkout page
+            const stripe = await loadStripe(res.data.key);
 
-          const { error } = stripe.redirectToCheckout({
-            sessionId: res.data.sessionId,
-          });
-          if (error) {
-            console.error("Error:", error);
+            const { error } = stripe.redirectToCheckout({
+              sessionId: res.data.sessionId,
+            });
+            if (error) {
+              console.error("Error:", error);
+            }
+          } else {
+            toast.error(res.data.message);
           }
         })
         .catch((err) => {
@@ -165,10 +169,6 @@ const SubscriptionModal = (props) => {
         }
       })
       .catch((err) => console.error(err));
-  };
-  const handleInvite = (type, message) => {
-    notification(type, message);
-    getInviteEmails();
   };
 
   const handleUpdateProduct = () => {
