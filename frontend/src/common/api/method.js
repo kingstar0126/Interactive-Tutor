@@ -1,6 +1,6 @@
 export const HttpMethod = {
   GET: "get",
   POST: "post",
-  PUT: "pu",
+  PUT: "put",
   DELETE: "delete"
 };
