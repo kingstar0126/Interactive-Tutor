@@ -3,3 +3,4 @@
 /frontend/.env.prod
 /frontend/.env.staging
 /readme.eljie.md
+/.vscode/launch.json
