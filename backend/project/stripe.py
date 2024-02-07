@@ -300,7 +300,7 @@ def stripe_webhook():
             db.session.commit()
         return jsonify(message="Success"), 200
     except Exception as e:
-        print(e)
+        print(f"stripe_webhook function error: {e}")
         return jsonify(message=str(e)), 500
 
 
