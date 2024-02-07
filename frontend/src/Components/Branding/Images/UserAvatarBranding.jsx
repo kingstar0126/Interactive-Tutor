@@ -2,18 +2,8 @@ import Dropzone from "react-dropzone";
 import toast from "react-hot-toast";
 import { useState, useEffect } from "react";
 import { Button } from "@material-tailwind/react";
-
-import AWS from "aws-sdk";
-
-AWS.config.update({
-  accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
-  secretAccessKey: process.env.REACT_APP_ACCESS_SECRET_KEY,
-});
-const S3_BUCKET = process.env.REACT_APP_S3_PUBLIC;
-const s3 = new AWS.S3({
-  params: { Bucket: S3_BUCKET },
-  region: process.env.REACT_APP_REGION,
-});
+import { chatLogoPath } from "../../../utils/logoPath";
+import { uploadImage } from "../../../utils/uploadImage";
 
 const UserAvatarBranding = (props) => {
   const [selectedLogo, setSelectedLogo] = useState(null);
@@ -29,43 +19,30 @@ const UserAvatarBranding = (props) => {
     }
   };
 
-  const handleFileChange = (files) => {
-    if (files[0].size > 1024 * 1024) {
-      notification("error", "Maximum image size allowed is 1MB.");
-      return;
-    }
-    setFlag(true);
-    const imageURL = URL.createObjectURL(files[0]);
-    setFile(files[0]);
-    setSelectedLogo(imageURL);
-  };
-
   useEffect(() => {
     if (props.data.user) {
       setSelectedLogo(props.data.user);
     }
   }, [props.data]);
 
-  const handleUpload = async () => {
-    if (file && flag) {
-      const filename = new Date().getTime() + file.name.replaceAll(" ", "");
-      const params = {
-        Bucket: S3_BUCKET,
-        Key: filename,
-        Body: file,
-      };
-      try {
-        await s3.putObject(params).promise();
-        const fileUrl = `https://${S3_BUCKET}.s3.${process.env.REACT_APP_REGION}.amazonaws.com/${filename}`;
+  const handleFileChange = (files) => {
+    if (files[0].size > 1024 * 1024) {
+      notification("error", "Maximum image size allowed is 1MB.");
+      return;
+    }
+    handleUpload(files[0]);
+    const imageURL = URL.createObjectURL(files[0]);
+    setFile(files[0]);
+    setSelectedLogo(imageURL);
+  };
+
+  const handleUpload = (file) => {
+    if (file) {
+      uploadImage(chatLogoPath.USER_AVATAR_PATH, file).then((fileUrl) => {
         setSelectedLogo(fileUrl);
         handleLogo(fileUrl);
         notification("success", "Uploaded successfully!");
-        setFlag(false);
-      } catch (error) {
-        console.error("Error uploading file:", error);
-        setFlag(false);
-        throw error;
-      }
+      });
     }
   };
 

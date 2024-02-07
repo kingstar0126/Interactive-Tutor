@@ -14,9 +14,7 @@ import { CircularProgressbar } from "react-circular-progressbar";
 import { ColorRing, ThreeDots } from "react-loader-spinner";
 
 const ChatContent = (props) => {
-  const { chat, isStreamData, isThinking } = props;
-
-  const percentage = 66;
+  const { chat, chatLogo, isStreamData, isThinking } = props;
 
   const chatRef = useRef(null);
 
@@ -136,7 +134,10 @@ const ChatContent = (props) => {
     <React.Fragment>
       <img
         className="chatbox-img"
-        src="https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_user.png"
+        src={
+          chatLogo?.user ||
+          "https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_user.png"
+        }
         alt="User Image"
       />
       <div className="chatbox-message">{chat.content}</div>
@@ -145,7 +146,10 @@ const ChatContent = (props) => {
     <React.Fragment>
       <img
         className="chatbox-img"
-        src="https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"
+        src={
+          chatLogo?.ai ||
+          "https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"
+        }
         alt="AI Image"
       />
       <div className="chatbox-message" ref={chatRef}>

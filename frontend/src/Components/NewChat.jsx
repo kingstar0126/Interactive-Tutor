@@ -526,7 +526,11 @@ const NewChat = () => {
                 name="main_scroll"
               >
                 <Scrollbar ref={messagesEndRef} name="scroll content">
-                  <ChatBox chats={chathistory} isStreamData={false} />
+                  <ChatBox
+                    chats={chathistory}
+                    chatLogo={chat.chat_logo}
+                    isStreamData={false}
+                  />
                   {spinner === true && (
                     <ChatBox
                       chats={[
@@ -535,6 +539,7 @@ const NewChat = () => {
                           content: streamData
                         }
                       ]}
+                      chatLogo={chat.chat_logo}
                       isStreamData={true}
                       isThinking={state}
                     />

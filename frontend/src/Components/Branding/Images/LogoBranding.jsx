@@ -3,18 +3,8 @@ import Switch from "../../Switch";
 import Dropzone from "react-dropzone";
 import toast from "react-hot-toast";
 import { Button } from "@material-tailwind/react";
-
-import AWS from "aws-sdk";
-
-AWS.config.update({
-  accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
-  secretAccessKey: process.env.REACT_APP_ACCESS_SECRET_KEY,
-});
-const S3_BUCKET = process.env.REACT_APP_S3_PUBLIC;
-const s3 = new AWS.S3({
-  params: { Bucket: S3_BUCKET },
-  region: process.env.REACT_APP_REGION,
-});
+import { chatLogoPath } from "../../../utils/logoPath";
+import { uploadImage } from "../../../utils/uploadImage";
 
 const LogoBranding = (props) => {
   const [text, setText] = useState("Disable");
@@ -33,6 +23,7 @@ const LogoBranding = (props) => {
       toast.success(message);
     }
   };
+
   useEffect(() => {
     if (props.data.url) {
       setSelectedLogo(props.data.url);
@@ -44,32 +35,19 @@ const LogoBranding = (props) => {
       notification("error", "Maximum image size allowed is 1MB.");
       return;
     }
-    setFlag(true);
+    handleUpload(files[0]);
     const imageURL = URL.createObjectURL(files[0]);
     setFile(files[0]);
     setSelectedLogo(imageURL);
   };
 
-  const handleUpload = async () => {
-    if (file && flag) {
-      const filename = new Date().getTime() + file.name.replaceAll(" ", "");
-      const params = {
-        Bucket: S3_BUCKET,
-        Key: filename,
-        Body: file,
-      };
-      try {
-        await s3.putObject(params).promise();
-        const fileUrl = `https://${S3_BUCKET}.s3.${process.env.REACT_APP_REGION}.amazonaws.com/${filename}`;
+  const handleUpload = (file) => {
+    if (file) {
+      uploadImage(chatLogoPath.CHAT_AVATAR_PATH, file).then((fileUrl) => {
         setSelectedLogo(fileUrl);
         handleLogo(fileUrl);
         notification("success", "Uploaded successfully!");
-        setFlag(false);
-      } catch (error) {
-        console.error("Error uploading file:", error);
-        setFlag(false);
-        throw error;
-      }
+      });
     }
   };
 
@@ -103,41 +81,47 @@ const LogoBranding = (props) => {
         </div>
         <div name="input" className="flex flex-col w-full gap-3 p-2">
           <div className="w-full">
-            <span>Select your Logo</span>
-            <div className="mt-2">
-              <div className="border rounded-md border-[--site-chat-header-border] w-1/3 h-auto">
-                <Dropzone onDrop={handleFileChange} multiple={false}>
-                  {({ getRootProps, getInputProps }) => (
-                    <div
-                      className="flex items-center justify-center w-full h-full dropzone"
-                      {...getRootProps()}
-                    >
-                      <input {...getInputProps()} />
-                      {selectedLogo ? (
-                        <div className="m-1">
-                          <img
-                            src={selectedLogo}
-                            alt="Selected"
-                            className="rounded-md"
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-[50px] h-[50px]">
-                          <p>Image</p>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </Dropzone>
+            <span>Your Logo</span>
+            {selectedLogo && (
+              <div className="mt-2 mb-3">
+                <div className="border rounded-md border-[--site-chat-header-border] w-1/3 h-auto">
+                  <Dropzone onDrop={handleFileChange} multiple={false}>
+                    {({ getRootProps, getInputProps }) => (
+                      <div
+                        className="flex items-center justify-center w-full h-full dropzone"
+                        {...getRootProps()}
+                      >
+                        <input {...getInputProps()} />
+                        {selectedLogo ? (
+                          <div className="m-1">
+                            <img
+                              src={selectedLogo}
+                              alt="Selected"
+                              className="rounded-md"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-[50px] h-[50px]">
+                            <p>Image</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </Dropzone>
+                </div>
               </div>
-              <Button
-                onClick={(e) => {
-                  handleUpload();
+            )}
+
+            <div className="upload-image-btn">
+              <input
+                type="file"
+                id="upload"
+                hidden
+                onChange={(e) => {
+                  handleFileChange(e.target.files);
                 }}
-                className="normal-case p-2 rounded-md bg-[--site-logo-text-color] my-2 border border-[--site-chat-header-border] text-black text-base"
-              >
-                Upload
-              </Button>
+              />
+              <label htmlFor="upload">Upload</label>
             </div>
           </div>
           <div className="flex w-full gap-3">
