@@ -8,17 +8,12 @@ import { Toaster } from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { setOpenSidebar } from "../redux/actions/locationAction";
 import { Button } from "@material-tailwind/react";
-import { login } from "../common/api/login";
-import notification from "../utils/notification";
-import { stringConstant } from "../utils/constants";
 
 const Login = () => {
   const statedata = JSON.parse(useSelector((state) => state.user.user));
   const isOpenSidebar = useSelector((state) => state.location.openSidebar);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  const [isLoading, setIsLoading] = useState(false);
   const [status, Setstatus] = useState(1);
   const {
     register,
@@ -28,20 +23,6 @@ const Login = () => {
 
   const handleOpenSidebar = () => {
     // dispatch(setOpenSidebar());
-  };
-
-  const handleLogin = (data) => {
-    setIsLoading(true);
-    login(data)
-      .then((res) => {
-        if (res.success) {
-          getUser(dispatch, res.data);
-        } else {
-          notification("error", res.message);
-        }
-      })
-      .catch(() => notification("error", stringConstant.FAILED_GET_DATA))
-      .finally(() => setIsLoading(false));
   };
 
   useEffect(() => {
@@ -59,7 +40,9 @@ const Login = () => {
       Setstatus(1);
     }
   }, [status]);
-
+  const onSubmit = async (data) => {
+    getUser(dispatch, data);
+  };
   return (
     <div className="font-logo pb-10 px-2 flex flex-col">
       <Header />
@@ -73,7 +56,7 @@ const Login = () => {
             <span className="text-start">Log in to your account</span>
           </div>
           <form
-            onSubmit={handleSubmit(handleLogin)}
+            onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-3 py-3"
           >
             <div className="gap-2 flex flex-col">
@@ -143,10 +126,9 @@ const Login = () => {
             <div className="mt-8">
               <Button
                 type="submit"
-                disabled={isLoading}
                 className="normal-case w-full p-4 text-md rounded-md bg-[--site-main-Login1] text-[--site-file-upload]"
               >
-                {isLoading ? "Please wait..." : "Login"}
+                Login
               </Button>
             </div>
           </form>

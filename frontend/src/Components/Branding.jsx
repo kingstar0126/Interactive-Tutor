@@ -39,9 +39,9 @@ const Branding = () => {
     axios
       .post(webAPI.send_branding, current_chat)
       .then((res) => {
+        notification("success", res.message);
         getchat(dispatch, current_chat);
         updatechatbot(dispatch, true);
-        notification("success", res.data.message);
       })
       .catch((err) => console.log(err));
   };
