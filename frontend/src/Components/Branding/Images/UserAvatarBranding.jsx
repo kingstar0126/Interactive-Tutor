@@ -2,18 +2,8 @@ import Dropzone from "react-dropzone";
 import toast from "react-hot-toast";
 import { useState, useEffect } from "react";
 import { Button } from "@material-tailwind/react";
-
-import AWS from "aws-sdk";
-
-AWS.config.update({
-  accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
-  secretAccessKey: process.env.REACT_APP_ACCESS_SECRET_KEY,
-});
-const S3_BUCKET = process.env.REACT_APP_S3_PUBLIC;
-const s3 = new AWS.S3({
-  params: { Bucket: S3_BUCKET },
-  region: process.env.REACT_APP_REGION,
-});
+import { chatLogoPath } from "../../../utils/logoPath";
+import { uploadImage } from "../../../utils/uploadImage";
 
 const UserAvatarBranding = (props) => {
   const [selectedLogo, setSelectedLogo] = useState(null);
@@ -48,24 +38,13 @@ const UserAvatarBranding = (props) => {
 
   const handleUpload = async () => {
     if (file && flag) {
-      const filename = new Date().getTime() + file.name.replaceAll(" ", "");
-      const params = {
-        Bucket: S3_BUCKET,
-        Key: filename,
-        Body: file,
-      };
-      try {
-        await s3.putObject(params).promise();
-        const fileUrl = `https://${S3_BUCKET}.s3.${process.env.REACT_APP_REGION}.amazonaws.com/${filename}`;
-        setSelectedLogo(fileUrl);
-        handleLogo(fileUrl);
-        notification("success", "Uploaded successfully!");
-        setFlag(false);
-      } catch (error) {
-        console.error("Error uploading file:", error);
-        setFlag(false);
-        throw error;
-      }
+      uploadImage(chatLogoPath.USER_AVATAR_PATH, file)
+        .then((fileUrl) => {
+          setSelectedLogo(fileUrl);
+          handleLogo(fileUrl);
+          notification("success", "Uploaded successfully!");
+        })
+        .finally(() => setFlag(false));
     }
   };
 
