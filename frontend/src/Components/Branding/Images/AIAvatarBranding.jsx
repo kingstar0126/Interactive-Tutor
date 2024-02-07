@@ -30,21 +30,19 @@ const UserAvatarBranding = (props) => {
       notification("error", "Maximum image size allowed is 1MB.");
       return;
     }
-    setFlag(true);
+    handleUpload(files[0]);
     const imageURL = URL.createObjectURL(files[0]);
     setFile(files[0]);
     setSelectedLogo(imageURL);
   };
 
-  const handleUpload = async () => {
-    if (file && flag) {
-      uploadImage(chatLogoPath.AI_AVATAR_PATH, file)
-        .then((fileUrl) => {
-          setSelectedLogo(fileUrl);
-          handleLogo(fileUrl);
-          notification("success", "Uploaded successfully!");
-        })
-        .finally(() => setFlag(false));
+  const handleUpload = (file) => {
+    if (file) {
+      uploadImage(chatLogoPath.AI_AVATAR_PATH, file).then((fileUrl) => {
+        setSelectedLogo(fileUrl);
+        handleLogo(fileUrl);
+        notification("success", "Uploaded successfully!");
+      });
     }
   };
 
@@ -60,7 +58,7 @@ const UserAvatarBranding = (props) => {
         </h1>
         <div className="flex flex-col gap-2">
           <span>AI avatar URL</span>
-          <div>
+          <div className="mb-1">
             <div className="border-[1px] rounded-xl border-[--site-chat-header-border] w-1/3 h-auto">
               <Dropzone onDrop={handleFileChange} multiple={false}>
                 {({ getRootProps, getInputProps }) => (
@@ -86,14 +84,18 @@ const UserAvatarBranding = (props) => {
                 )}
               </Dropzone>
             </div>
-            <Button
-              onClick={(e) => {
-                handleUpload();
+          </div>
+
+          <div className="upload-image-btn">
+            <input
+              type="file"
+              id="upload"
+              hidden
+              onChange={(e) => {
+                handleFileChange(e.target.files);
               }}
-              className="normal-case p-2 rounded-md bg-[--site-logo-text-color] my-2 border border-[--site-chat-header-border] text-black text-base"
-            >
-              Upload
-            </Button>
+            />
+            <label htmlFor="upload">Upload</label>
           </div>
         </div>
       </div>

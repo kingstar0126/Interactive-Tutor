@@ -19,32 +19,30 @@ const UserAvatarBranding = (props) => {
     }
   };
 
-  const handleFileChange = (files) => {
-    if (files[0].size > 1024 * 1024) {
-      notification("error", "Maximum image size allowed is 1MB.");
-      return;
-    }
-    setFlag(true);
-    const imageURL = URL.createObjectURL(files[0]);
-    setFile(files[0]);
-    setSelectedLogo(imageURL);
-  };
-
   useEffect(() => {
     if (props.data.user) {
       setSelectedLogo(props.data.user);
     }
   }, [props.data]);
 
-  const handleUpload = async () => {
-    if (file && flag) {
-      uploadImage(chatLogoPath.USER_AVATAR_PATH, file)
-        .then((fileUrl) => {
-          setSelectedLogo(fileUrl);
-          handleLogo(fileUrl);
-          notification("success", "Uploaded successfully!");
-        })
-        .finally(() => setFlag(false));
+  const handleFileChange = (files) => {
+    if (files[0].size > 1024 * 1024) {
+      notification("error", "Maximum image size allowed is 1MB.");
+      return;
+    }
+    handleUpload(files[0]);
+    const imageURL = URL.createObjectURL(files[0]);
+    setFile(files[0]);
+    setSelectedLogo(imageURL);
+  };
+
+  const handleUpload = (file) => {
+    if (file) {
+      uploadImage(chatLogoPath.USER_AVATAR_PATH, file).then((fileUrl) => {
+        setSelectedLogo(fileUrl);
+        handleLogo(fileUrl);
+        notification("success", "Uploaded successfully!");
+      });
     }
   };
 

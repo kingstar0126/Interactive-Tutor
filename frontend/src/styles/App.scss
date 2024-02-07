@@ -43,3 +43,26 @@
 .check-circle-icon {
   color: $theme-color-secondary;
 }
+
+.upload-image-btn {
+  position: relative;
+
+  label {
+    display: inline-block;
+    font-size: $font-size-normal;
+    font-weight: $font-bold;
+    background-color: $theme-color-secondary;
+    color: #000000;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #cfdce9;
+    cursor: pointer;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 20px 25px -5px,
+      rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
+
+    &:hover {
+      box-shadow: rgb(33 150 243 / 0.4) 0px 10px 25px -5px,
+        rgba(0, 0, 0, 0.04) 0px 10px 10px -5px;
+    }
+  }
+}
