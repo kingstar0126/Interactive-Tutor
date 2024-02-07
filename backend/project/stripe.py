@@ -234,12 +234,11 @@ def create_checkout_session():
 def stripe_webhook():
     try:
         payload = json.loads(request.get_data(as_text=True))
-        print('This is payload: ', payload, '\n')
         if payload["type"] == "checkout.session.completed":
             session = payload["data"]["object"]
-            customer_id = payload["data"]["object"]["customer"]
+            customer_email = payload["data"]["object"]["customer_details"]["email"]
             user = db.session.query(User).filter_by(
-                customer_id=customer_id).first()
+                email=customer_email).first()
             if session["mode"] == "subscription":
                 _subscription_id = payload["data"]["object"]["subscription"]
                 price_id = stripe.Subscription.retrieve(
