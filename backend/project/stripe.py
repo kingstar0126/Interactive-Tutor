@@ -232,71 +232,75 @@ def create_checkout_session():
 
 @payment.route('/api/stripe/webhooks', methods=['POST'])
 def stripe_webhook():
-    payload = json.loads(request.get_data(as_text=True))
-    if payload["type"] == "checkout.session.completed":
-        session = payload["data"]["object"]
-        customer_id = payload["data"]["object"]["customer"]
-        user = db.session.query(User).filter_by(
-            customer_id=customer_id).first()
-        if session["mode"] == "subscription":
-            _subscription_id = payload["data"]["object"]["subscription"]
-            price_id = stripe.Subscription.retrieve(
-                _subscription_id)['items']['data'][0]['price']['id']
-            
-            user.subscription_id = _subscription_id
-            price_item = db.session.query(Production).filter_by(
-                price_id=price_id).first()
-            user.role = price_item.role
-            query = user.query
+    try:
+        payload = json.loads(request.get_data(as_text=True))
+        if payload["type"] == "checkout.session.completed":
+            session = payload["data"]["object"]
+            customer_email = payload["data"]["object"]["customer_details"]["email"]
+            user = db.session.query(User).filter_by(
+                email=customer_email).first()
+            if session["mode"] == "subscription":
+                _subscription_id = payload["data"]["object"]["subscription"]
+                price_id = stripe.Subscription.retrieve(
+                    _subscription_id)['items']['data'][0]['price']['id']
+                
+                user.subscription_id = _subscription_id
+                price_item = db.session.query(Production).filter_by(
+                    price_id=price_id).first()
+                user.role = price_item.role
+                query = user.query
 
-            delete_email_to_sendgrid_marketing(os.getenv('SENDGRID_FREE_TRIAL_LIST_ID'), user.email)
-            add_email_to_sendgrid_marketing(os.getenv('SENDGRID_SUBSCRIPTION_USERS_LIST_ID'), user.username, user.email)
-            
-            if price_item.role == 2:
-                query = 500
-                tutors = 1
-                training_datas = 1
-                training_words = 100000
-            elif price_item.role== 3:
-                query = 3000
-                tutors = 5
-                training_datas = 3
-                training_words = 10000000
-            elif price_item.role == 4:
-                query = 10000
-                tutors = 10
-                training_datas = 10
-                training_words = 20000000
-            elif price_item.role == 7:
-                query = 30000
-                tutors = 10000
-                training_datas = 100000
-                training_words = 20000000
-            user.query = query
-            user.tutors = tutors
-            user.training_datas = training_datas
-            user.training_words = training_words
-            invite_user = db.session.query(Invite).filter_by(email=user.email).first()
-            if invite_user:
-                invite_user.status = True
-        elif session["mode"] == "payment":
-            stripe_session = stripe.checkout.Session.retrieve(session["id"], expand=['line_items'])
-            for item in stripe_session.line_items.data:
-                price_id = item.price.id
-                if price_id == os.getenv('TOP_UP_QUERY_PRICE'):
-                    current_query = user.query
-                    user.query = current_query + 500
+                delete_email_to_sendgrid_marketing(os.getenv('SENDGRID_FREE_TRIAL_LIST_ID'), user.email)
+                add_email_to_sendgrid_marketing(os.getenv('SENDGRID_SUBSCRIPTION_USERS_LIST_ID'), user.username, user.email)
+                
+                if price_item.role == 2:
+                    query = 500
+                    tutors = 1
+                    training_datas = 1
+                    training_words = 100000
+                elif price_item.role== 3:
+                    query = 3000
+                    tutors = 5
+                    training_datas = 3
+                    training_words = 10000000
+                elif price_item.role == 4:
+                    query = 10000
+                    tutors = 10
+                    training_datas = 10
+                    training_words = 20000000
+                elif price_item.role == 7:
+                    query = 30000
+                    tutors = 10000
+                    training_datas = 100000
+                    training_words = 20000000
+                user.query = query
+                user.tutors = tutors
+                user.training_datas = training_datas
+                user.training_words = training_words
+                invite_user = db.session.query(Invite).filter_by(email=user.email).first()
+                if invite_user:
+                    invite_user.status = True
+            elif session["mode"] == "payment":
+                stripe_session = stripe.checkout.Session.retrieve(session["id"], expand=['line_items'])
+                for item in stripe_session.line_items.data:
+                    price_id = item.price.id
+                    if price_id == os.getenv('TOP_UP_QUERY_PRICE'):
+                        current_query = user.query
+                        user.query = current_query + 500
 
-        db.session.commit()
-    elif payload["type"] == "customer.subscription.deleted":
-        customer_id = payload["data"]["object"]["customer"]
-        user = db.session.query(User).filter_by(
-            customer_id=customer_id).first()
-        user.subscription_id = ''
-        user.query = 500
-        user.role = 5
-        db.session.commit()
-    return jsonify(message="Success"), 200
+            db.session.commit()
+        elif payload["type"] == "customer.subscription.deleted":
+            customer_id = payload["data"]["object"]["customer"]
+            user = db.session.query(User).filter_by(
+                customer_id=customer_id).first()
+            user.subscription_id = ''
+            user.query = 500
+            user.role = 5
+            db.session.commit()
+        return jsonify(message="Success"), 200
+    except Exception as e:
+        print(f"stripe_webhook function error: {e}")
+        return jsonify(message=str(e)), 500
 
 
 @payment.route('/api/cancel/subscription', methods=['POST'])
