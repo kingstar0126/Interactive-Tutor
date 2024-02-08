@@ -502,98 +502,98 @@ const NewChat = () => {
         </div>
       )}
       <Toaster className="z-30" />
-      {chat.access && loading === false && (
-        <div className="w-full h-screen lg:py-2">
-          <div className="flex flex-col justify-center w-full h-full p-2 lg:items-center lg:px-10 lg:py-0 min-h-max">
-            {chatbot_start ? (
-              <div className="flex flex-col items-center justify-center h-full gap-5">
-                <img
-                  src={
-                    chat.chat_logo.url ||
-                    "https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"
-                  }
-                  ref={chatbot_logo}
-                  alt="Logo"
-                />
-                <h1 ref={chatbot_title}>{chat.chat_title.description}</h1>
-                <span ref={chatbot_description}>
-                  {chat.chat_description.description}
-                </span>
-              </div>
-            ) : (
-              <div
-                className="w-full pt-10 text-base font-medium h-4/5"
-                name="main_scroll"
-              >
-                <Scrollbar ref={messagesEndRef} name="scroll content">
-                  <ChatBox
-                    chats={chathistory}
-                    chatLogo={chat.chat_logo}
-                    isStreamData={false}
-                  />
-                  {spinner === true && (
-                    <ChatBox
-                      chats={[
-                        {
-                          role: "ai",
-                          content: streamData
-                        }
-                      ]}
-                      chatLogo={chat.chat_logo}
-                      isStreamData={true}
-                      isThinking={state}
+      <div className="flex flex-col items-center justify-center w-full">
+        <div className="flex flex-col items-center w-full divide-x-2 sm:w-4/5 md:gap-2 gap-1">
+          {chat.access && loading === false && (
+            <div className="w-full h-screen lg:py-2">
+              <div className="flex flex-col justify-center w-full h-full p-2 lg:items-center lg:px-10 lg:py-0 min-h-max">
+                {chatbot_start ? (
+                  <div className="flex flex-col items-center justify-center h-full gap-5">
+                    <img
+                      src={
+                        chat.chat_logo.url ||
+                        "https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"
+                      }
+                      ref={chatbot_logo}
+                      alt="Logo"
                     />
-                  )}
-                </Scrollbar>
-              </div>
-            )}
+                    <h1 ref={chatbot_title}>{chat.chat_title.description}</h1>
+                    <span ref={chatbot_description}>
+                      {chat.chat_description.description}
+                    </span>
+                  </div>
+                ) : (
+                  <div
+                    className="w-full pt-10 text-base font-medium h-4/5"
+                    name="main_scroll"
+                  >
+                    <Scrollbar ref={messagesEndRef} name="scroll content">
+                      <ChatBox
+                        chats={chathistory}
+                        chatLogo={chat.chat_logo}
+                        isStreamData={false}
+                      />
+                      {spinner === true && (
+                        <ChatBox
+                          chats={[
+                            {
+                              role: "ai",
+                              content: streamData
+                            }
+                          ]}
+                          chatLogo={chat.chat_logo}
+                          isStreamData={true}
+                          isThinking={state}
+                        />
+                      )}
+                    </Scrollbar>
+                  </div>
+                )}
 
-            <div className="flex flex-col items-center justify-center w-full">
-              <div className="flex items-end justify-center w-full gap-5 p-2 sm:w-3/5">
-                <a
-                  href={chat.chat_button.button1_url}
-                  ref={chatbot_button1}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="normal-case"
-                >
-                  {chat.chat_button.button1_text}
-                </a>
-                <a
-                  ref={chatbot_button2}
-                  href={chat.chat_button.button2_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="normal-case"
-                >
-                  {chat.chat_button.button2_text}
-                </a>
-                <a
-                  ref={chatbot_button3}
-                  href={chat.chat_button.button3_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="normal-case"
-                >
-                  {chat.chat_button.button3_text}
-                </a>
-              </div>
-              <input
-                type="file"
-                className="hidden"
-                multiple
-                ref={imageInput}
-                onChange={handleUploadImage}
-                accept=".jpg,.jpeg,.png"
-              />
-              <input
-                type="file"
-                className="hidden"
-                ref={fileInput}
-                onChange={handleUploadFile}
-                accept=".pdf,.docx,.doc,.csv"
-              />
-              <div className="flex flex-col items-center w-full divide-x-2 sm:w-4/5 md:gap-2 gap-1">
+                <div className="flex items-end justify-center w-full gap-5 p-2 sm:w-3/5">
+                  <a
+                    href={chat.chat_button.button1_url}
+                    ref={chatbot_button1}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="normal-case"
+                  >
+                    {chat.chat_button.button1_text}
+                  </a>
+                  <a
+                    ref={chatbot_button2}
+                    href={chat.chat_button.button2_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="normal-case"
+                  >
+                    {chat.chat_button.button2_text}
+                  </a>
+                  <a
+                    ref={chatbot_button3}
+                    href={chat.chat_button.button3_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="normal-case"
+                  >
+                    {chat.chat_button.button3_text}
+                  </a>
+                </div>
+                <input
+                  type="file"
+                  className="hidden"
+                  multiple
+                  ref={imageInput}
+                  onChange={handleUploadImage}
+                  accept=".jpg,.jpeg,.png"
+                />
+                <input
+                  type="file"
+                  className="hidden"
+                  ref={fileInput}
+                  onChange={handleUploadFile}
+                  accept=".pdf,.docx,.doc,.csv"
+                />
                 <div className="flex w-full flex-col py-2.5 relative">
                   <div className="flex p-3 absolute left-0 top-1/2 -translate-y-1/2">
                     <Menu placement="top">
@@ -721,20 +721,20 @@ const NewChat = () => {
                       );
                     })}
                 </div>
-              </div>
 
-              <div className="flex justify-center py-2">
-                <span
-                  ref={chatbot_copyright}
-                  className="text-[--site-file-upload]"
-                >
-                  {chat.chat_copyright.description}
-                </span>
+                <div className="flex justify-center py-2">
+                  <span
+                    ref={chatbot_copyright}
+                    className="text-[--site-file-upload]"
+                  >
+                    {chat.chat_copyright.description}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
