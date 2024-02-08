@@ -63,6 +63,7 @@ const Subscription = () => {
         } else {
           setIndex_length(0);
         }
+        console.log("datasets", datasets);
         setDatas(datasets);
       })
       .catch((err) => console.error(err));
@@ -86,6 +87,10 @@ const Subscription = () => {
         })
         .catch((error) => console.log(error));
     }
+  };
+
+  const getTutorsData = (tutorsData) => {
+    return tutorsData > 100 ? 100 : tutorsData;
   };
 
   return (
@@ -152,7 +157,7 @@ const Subscription = () => {
                   <Slider
                     size="md"
                     id="tutors"
-                    value={datas.length / user.tutors}
+                    value={getTutorsData((datas.length / user.tutors) * 100)}
                     className="text-[--site-success-text-color]"
                     trackClassName="[&::-webkit-slider-runnable-track]:bg-gray-300 [&::-moz-range-track]:bg-[--site-success-text-color] rounded-full !bg---site-success-text-color] pointer-events-none"
                   />
