@@ -166,7 +166,7 @@ const NewChat = () => {
       chatbot_copyright.current.style.color = chat.chat_copyright.color;
       chatbot_copyright.current.style["font-size"] = chat.chat_copyright.size;
 
-      if (!chat.chat_button.button1_status) {
+      if (!chat.chat_button.button1_status && chat.chat_button.button1_text) {
         chatbot_button1.current.style.display = "block";
       } else {
         chatbot_button1.current.style.display = "none";
@@ -181,7 +181,7 @@ const NewChat = () => {
       chatbot_button1.current.style.padding = "10px";
       chatbot_button1.current.style["border-radius"] = "0.75rem";
 
-      if (!chat.chat_button.button2_status) {
+      if (!chat.chat_button.button2_status && chat.chat_button.button2_text) {
         chatbot_button2.current.style.display = "block";
       } else {
         chatbot_button2.current.style.display = "none";
@@ -196,7 +196,7 @@ const NewChat = () => {
       chatbot_button2.current.style.padding = "10px";
       chatbot_button2.current.style["border-radius"] = "0.75rem";
 
-      if (!chat.chat_button.button3_status) {
+      if (!chat.chat_button.button3_status && chat.chat_button.button1_text) {
         chatbot_button3.current.style.display = "block";
       } else {
         chatbot_button3.current.style.display = "none";
