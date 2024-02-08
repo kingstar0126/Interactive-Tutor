@@ -179,26 +179,28 @@ def delete_all_products():
 
 @payment.route('/api/create/checkout/session/query', methods=['POST'])
 def create_checkout_session_query():
-    id = request.json['id']
-    clientReferenceId = request.json['clientReferenceId']
-    user = db.session.query(User).filter_by(id=id).first()
-    session = stripe.checkout.Session.create(
-        payment_method_types=['card'],
-        line_items=[{
-            'price': os.getenv('TOP_UP_QUERY_PRICE'),
-            'quantity': 1,
-            'tax_rates': [os.getenv('TAX_RATE_ID')],
-        }],
-        mode='payment',
-        success_url= SERVER_URL + "/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
-        cancel_url=f'{SERVER_URL}/chatbot/subscription',
-        customer=user.customer_id,
-        allow_promotion_codes=True,
-        client_reference_id=clientReferenceId,
-    )
+    try:
+        id = request.json['id']
+        clientReferenceId = request.json['clientReferenceId']
+        user = db.session.query(User).filter_by(id=id).first()
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price': os.getenv('TOP_UP_QUERY_PRICE'),
+                'quantity': 1,
+                'tax_rates': [os.getenv('TAX_RATE_ID')],
+            }],
+            mode='payment',
+            success_url= SERVER_URL + "/chatbot/subscription?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url=f'{SERVER_URL}/chatbot/subscription',
+            customer=user.customer_id,
+            allow_promotion_codes=True,
+            client_reference_id=clientReferenceId,
+        )
 
-    return jsonify({'sessionId': session['id'], 'key': os.getenv('STRIPE_PUBLISHABLE_KEY')})
-
+        return jsonify({'sessionId': session['id'], 'key': os.getenv('STRIPE_PUBLISHABLE_KEY')})
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
 
 @payment.route('/api/create/checkout/session', methods=['POST'])
 def create_checkout_session():

@@ -699,16 +699,16 @@ def removeUserInvite():
 def setTutors():
     id = request.json['id']
     email = request.json['email']
-    email = email.lower()
     chats = request.json['chats']
     user = db.session.query(User).filter_by(id=id).first()
     invite_user = db.session.query(User).filter_by(email=email).first()
     if user is None and user.role == 7:
         return jsonify({ 'success': False, 'message': 'User Not Found or Not Authorized' })
     originalChats = db.session.query(Chat).filter_by(user_id=invite_user.id, inviteId=id).all()
-    if originalChats:
-        for chat in originalChats:
+    for chat in originalChats:
+        if chat is not None:
             db.session.delete(chat)
+    db.session.commit()
     for chat in chats:
         user_id = invite_user.id
         inviteId = id
