@@ -16,15 +16,12 @@ const Chat = () => {
   const getChats = async () => {
     setIsLoading(true);
     let data = {
-      user_id: user.id,
+      user_id: user.id
     };
     await axios.post(webAPI.getchats, data).then((res) => {
       setIsLoading(false);
       if (res.data.success) {
-        const count = res.data.data.filter(
-          (item) => item.islibrary !== true
-        ).length;
-        if (user.role === 5 || user.role === 0 || count == 0) {
+        if (user.role === 5 || user.role === 0) {
           navigate("onboarding");
         } else if (!location.pathname.includes("newchat")) {
           navigate("dashboard");
