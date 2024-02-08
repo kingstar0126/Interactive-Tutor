@@ -419,7 +419,7 @@ const DashBoard = () => {
               </div>
             ) : (
               <div
-                className="w-full pt-10 text-base font-medium h-4/5"
+                className="w-full pt-10 text-base font-medium h-4/5 lg:px-10"
                 name="main_scroll"
               >
                 <Scrollbar ref={messagesEndRef} name="scroll content">
