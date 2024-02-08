@@ -35,6 +35,7 @@ import { getUseraccount } from "../redux/actions/userAction";
 import Share from "../assets/noun-books.svg";
 import Publish from "../assets/noun-publish.svg";
 import Subscription from "../assets/Icons.svg";
+import SubscriptionModal from "../Components/SubscriptionModal";
 
 import { GiSpookyHouse } from "react-icons/gi";
 
@@ -59,6 +60,7 @@ const Sidebar = () => {
   const query = useSelector((state) => state.query.query);
   const [chats, setChats] = useState([]);
   const [currentChat, setCurrentChat] = useState(null);
+  const [isopenModal, setIsOpenModal] = useState(false);
 
   const notification = (type, message) => {
     // To do in here
@@ -169,25 +171,29 @@ const Sidebar = () => {
   }, [isUpdate]);
 
   const handleMoreQuery = () => {
-    axios
-      .post(webAPI.create_checkout_query, {
-        id: user.id,
-        clientReferenceId: getClientReferenceId(),
-      })
-      .then(async (res) => {
-        // Load Stripe and redirect to the Checkout page
-        const stripe = await loadStripe(res.data.key);
+    if (user.role === 0 || user.role === 5) {
+      handleOpenModel();
+    } else {
+      axios
+        .post(webAPI.create_checkout_query, {
+          id: user.id,
+          clientReferenceId: getClientReferenceId(),
+        })
+        .then(async (res) => {
+          // Load Stripe and redirect to the Checkout page
+          const stripe = await loadStripe(res.data.key);
 
-        const { error } = stripe.redirectToCheckout({
-          sessionId: res.data.sessionId,
+          const { error } = stripe.redirectToCheckout({
+            sessionId: res.data.sessionId,
+          });
+          if (error) {
+            console.error("Error:", error);
+          }
+        })
+        .catch((err) => {
+          console.error(err);
         });
-        if (error) {
-          console.error("Error:", error);
-        }
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    }
   };
 
   const getClientReferenceId = () => {
@@ -204,6 +210,10 @@ const Sidebar = () => {
       navigate(`chat/newchat/${chat.uuid}`);
       setCurrentChat(chat);
     }
+  };
+
+  const handleOpenModel = () => {
+    setIsOpenModal(!isopenModal);
   };
 
   useEffect(() => {
@@ -281,7 +291,9 @@ const Sidebar = () => {
           onClick={() => navigate("chat/dashboard")}
         >
           <img
-            src={"https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"}
+            src={
+              "https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"
+            }
             alt="logo"
             className="w-full h-full"
           />
@@ -354,7 +366,8 @@ const Sidebar = () => {
                               src={
                                 chat.chat_logo.url
                                   ? chat.chat_logo.url
-                                  : chat.chat_logo.ai || 'https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png'
+                                  : chat.chat_logo.ai ||
+                                    "https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"
                               }
                               alt="logo"
                               className="w-8 h-8 p-1"
@@ -462,7 +475,8 @@ const Sidebar = () => {
                               src={
                                 chat.chat_logo.url
                                   ? chat.chat_logo.url
-                                  : chat.chat_logo.ai || "https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"
+                                  : chat.chat_logo.ai ||
+                                    "https://interactive-tutor-staging-public-asset.s3.eu-west-2.amazonaws.com/default_ai.png"
                               }
                               alt="logo"
                               className="w-8 h-8 p-1"
@@ -660,6 +674,10 @@ const Sidebar = () => {
         handleOk={handlePublishOk}
         handleCancel={handleCancel}
         chat={currentChat}
+      />
+      <SubscriptionModal
+        open={isopenModal}
+        handleCancel={() => handleOpenModel()}
       />
     </div>
   );
