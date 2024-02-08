@@ -59,6 +59,7 @@ const DashBoard = () => {
   const chatState = useSelector((state) => state.chat.chat);
   const chat = (chatState && JSON.parse(chatState)) || {};
   const chatbot = useSelector((state) => state.chat.chatbot);
+  const [chatDisable, setChatDisable] = useState(false);
   const user = JSON.parse(useSelector((state) => state.user.user));
   const [inputHeight, setInputHeight] = useState(2 * STEP);
   const dispatch = useDispatch();
@@ -66,6 +67,7 @@ const DashBoard = () => {
   const messagesEndRef = useRef(null);
   const imageInput = useRef(null);
   const fileInput = useRef(null);
+  const query = useSelector((state) => state.query.query);
   const notification = (type, message) => {
     // To do in here
     if (type === "error") {
@@ -99,6 +101,11 @@ const DashBoard = () => {
   }, []);
 
   useEffect(() => {
+    console.log(`query ${String(query) === "0"}`, query);
+    handleChatDisable(query);
+  }, [query]);
+
+  useEffect(() => {
     if (chatbot === "") {
       setLoading(true);
     } else {
@@ -118,6 +125,10 @@ const DashBoard = () => {
       messagesEndRef.current.scrollToBottom();
     }
   }, [chathistory, streamData]);
+
+  const handleChatDisable = (query) => {
+    setChatDisable(String(query) === "0");
+  };
 
   const handleSubmit = async (event) => {
     if (!event.shiftKey && event.keyCode === 13 && spinner === false) {
@@ -171,6 +182,7 @@ const DashBoard = () => {
   };
 
   const handlePromptClick = async (item) => {
+    if (chatDisable) return;
     let id = chatbot;
     let _message = item.trim();
     let human = { role: "human", content: _message };
@@ -307,7 +319,9 @@ const DashBoard = () => {
 
           return reader.read().then(process);
         });
-        getquery(dispatch, { id: chatbot, user_id: user.id });
+        getquery(dispatch, { id: chatbot, user_id: user.id }).then((res) => {
+          console.log("res getquery", res);
+        });
       })
       .catch((error) => {
         console.error(
@@ -405,7 +419,10 @@ const DashBoard = () => {
                   {PROMPTS.map((item, index) => (
                     <div
                       key={index}
-                      className="cursor-pointer md:w-1/2 md:h-1/2 w-full p-2 h-1/2"
+                      className={
+                        "cursor-pointer md:w-1/2 md:h-1/2 w-full p-2 h-1/2 " +
+                        (chatDisable ? "disabled" : "")
+                      }
                     >
                       <span
                         className="border-gray-400 border rounded-md text-lg px-5 overflow-hidden w-full h-full items-center justify-start flex"
@@ -457,34 +474,41 @@ const DashBoard = () => {
               />
               <div className="flex items-center w-full divide-x-2 flex-col md:gap-2 gap-1">
                 <div className="flex w-full flex-col py-2.5 relative">
-                  <div className="flex p-3 absolute left-0 top-1/2 -translate-y-1/2">
+                  <div
+                    className={
+                      "flex p-3 absolute left-0 top-1/2 -translate-y-1/2 " +
+                      (chatDisable ? "disabled" : "")
+                    }
+                  >
                     <Menu placement="top">
                       <MenuHandler>
                         <span>
                           <CiSquarePlus className="w-6 h-6 hover:scale-125 transition-transform duration-200" />
                         </span>
                       </MenuHandler>
-                      <MenuList>
-                        <MenuItem>
-                          <div
-                            className="flex h-full w-full items-center justify-start gap-2"
-                            onClick={handleImageUploadClick}
-                          >
-                            <BiImageAdd className="w-6 h-6 hover:scale-125 transition-transform duration-200" />
-                            <span>Photo Library</span>
-                          </div>
-                        </MenuItem>
+                      {false && (
+                        <MenuList>
+                          <MenuItem>
+                            <div
+                              className="flex h-full w-full items-center justify-start gap-2"
+                              onClick={handleImageUploadClick}
+                            >
+                              <BiImageAdd className="w-6 h-6 hover:scale-125 transition-transform duration-200" />
+                              <span>Photo Library</span>
+                            </div>
+                          </MenuItem>
 
-                        <MenuItem>
-                          <div
-                            className="flex h-full w-full items-center justify-start gap-2"
-                            onClick={handleFileUploadClick}
-                          >
-                            <BsUpload className="w-6 h-6 hover:scale-125 transition-transform duration-200" />
-                            <span>Choose file</span>
-                          </div>
-                        </MenuItem>
-                      </MenuList>
+                          <MenuItem>
+                            <div
+                              className="flex h-full w-full items-center justify-start gap-2"
+                              onClick={handleFileUploadClick}
+                            >
+                              <BsUpload className="w-6 h-6 hover:scale-125 transition-transform duration-200" />
+                              <span>Choose file</span>
+                            </div>
+                          </MenuItem>
+                        </MenuList>
+                      )}
                     </Menu>
                   </div>
                   <textarea
@@ -494,6 +518,7 @@ const DashBoard = () => {
                     value={message}
                     onChange={handleMessage}
                     onKeyDown={handleSubmit}
+                    disabled={chatDisable}
                     style={{
                       overflow: "hidden",
                       height: `${inputHeight}px`
@@ -503,7 +528,10 @@ const DashBoard = () => {
                   ></textarea>
                   <span
                     onClick={handleClickSubmitIcon}
-                    className="flex p-3 absolute right-0 top-1/2 -translate-y-1/2"
+                    className={
+                      "flex p-3 absolute right-0 top-1/2 -translate-y-1/2 " +
+                      (chatDisable ? "disabled" : "")
+                    }
                   >
                     <IconButton className=" bg-black w-8 h-8 rounded-md">
                       <BsFillSendPlusFill className="w-5 h-5" />

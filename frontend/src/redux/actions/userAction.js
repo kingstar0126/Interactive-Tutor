@@ -31,7 +31,11 @@ export const getUseraccount = (dispatch, data) => {
         notification("error", stringConstant.FAILED_GET_DATA);
       }
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      console.log(err);
+      window.sessionStorage.clear();
+      window.location.replace(window.location.origin + "/login");
+    });
 };
 
 export const changeuser = (dispatch, data) => {

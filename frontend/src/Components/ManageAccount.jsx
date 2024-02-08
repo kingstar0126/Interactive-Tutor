@@ -51,7 +51,7 @@ const ManageAccount = () => {
         phone: phone,
         state,
         country,
-        city,
+        city
       };
       axios
         .post(webAPI.changeuser, data)
@@ -100,6 +100,8 @@ const ManageAccount = () => {
       })
       .catch((err) => {
         console.error(err);
+        window.sessionStorage.clear();
+        window.location.replace(window.location.origin + "/login");
       });
   }, []);
 

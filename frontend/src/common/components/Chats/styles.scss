@@ -42,6 +42,18 @@
       &.w2 {
         top: -2px;
       }
+
+      > svg > circle {
+        fill: #9dc0e0;
+
+        &:first-child {
+          fill: #c9ddee;
+        }
+
+        &:last-child {
+          fill: #c1ff72;
+        }
+      }
     }
   }
 
