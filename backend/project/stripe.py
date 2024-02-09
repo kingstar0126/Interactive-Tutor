@@ -13,7 +13,7 @@ load_dotenv()
 
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 payment = Blueprint('payment', __name__)
-SERVER_URL = 'https://app.interactive-tutor.com'
+SERVER_URL = os.getenv('SERVER_URL')
 
 @payment.route('/api/create-customer', methods=['POST'])
 def create_customer():

@@ -14,7 +14,6 @@ import datetime
 from io import BytesIO
 
 load_dotenv()
-
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 S3_CLIENT = boto3.client(

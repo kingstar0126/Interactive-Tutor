@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - staging
+      - test-deploy
 env:
   BUILD_RUN_ID: ${{github.run_number}}
 
@@ -95,18 +96,18 @@ jobs:
         echo "S3_PUBLIC=${{env.S3_PUBLIC}}" >> .env
         echo "S3_PRIVATE=${{env.S3_PRIVATE}}" >> .env
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
+  #   - name: Configure AWS credentials
+  #     uses: aws-actions/configure-aws-credentials@v1
+  #     with:
+  #       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #       aws-region: ${{ env.AWS_REGION }}
 
-    # - name: Upload .env file as artifact
-    #   uses: actions/upload-artifact@v2
-    #   with:
-    #     name: env-file
-    #     path: ./backend/project/.env
+    - name: Upload .env file as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: env-file
+        path: ./backend/project/.env
 
     - name: Login to Amazon ECR
       id: login-ecr
